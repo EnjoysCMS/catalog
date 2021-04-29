@@ -5,13 +5,14 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class Category
  * @package EnjoysCMS\Module\Catalog\Entities
  * @ORM\Entity
- * @ORM\Table
+ * @ORM\Table(name="categories")
  */
 final class Category
 {
@@ -29,6 +30,22 @@ final class Category
      * @ORM\Column(type="string")
      */
     private string $url;
+
+    /**
+     * One Category has Many Categories.
+     * @ORM\OneToMany(targetEntity="Category", mappedBy="parent")
+     */
+    private $children;
+
+    /**
+     * Many Categories have One Category.
+     * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
+     */
+    private $parent;
+
+    public function __construct() {
+        $this->children = new ArrayCollection();
+    }
 
     /**
      * @return int

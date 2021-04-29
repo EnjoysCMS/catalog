@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class Product
  * @package EnjoysCMS\Module\Catalog\Entities
  * @ORM\Entity
- * @ORM\Table
+ * @ORM\Table(name="products")
  */
 final class Product
 {
