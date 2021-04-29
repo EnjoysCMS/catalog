@@ -1,0 +1,18 @@
+{
+  "name": "enjoyscms/{module_name}",
+  "description": "Module {MODULE_NAME} for EnjoysCMS",
+  "type": "enjoyscms-module",
+  "require": {
+    "oomphinc/composer-installers-extender": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Enjoyscms\\Module\\{MODULE_NAME}\\": "src/"
+    }
+  },
+  "extra": {
+    "module-name": "{MODULE_NAME}",
+    "use-migrations": true,
+    "admin-links": {}
+  }
+}
