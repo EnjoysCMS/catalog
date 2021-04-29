@@ -1,17 +1,17 @@
 {
-  "name": "enjoyscms/{module_name}",
-  "description": "Module {MODULE_NAME} for EnjoysCMS",
+  "name": "enjoyscms/catalog",
+  "description": "Module Catalog for EnjoysCMS",
   "type": "enjoyscms-module",
   "require": {
     "oomphinc/composer-installers-extender": "^2.0"
   },
   "autoload": {
     "psr-4": {
-      "Enjoyscms\\Module\\{MODULE_NAME}\\": "src/"
+      "Enjoyscms\\Module\\Catalog\\": "src/"
     }
   },
   "extra": {
-    "module-name": "{MODULE_NAME}",
+    "module-name": "Каталог",
     "use-migrations": true,
     "admin-links": {}
   }
