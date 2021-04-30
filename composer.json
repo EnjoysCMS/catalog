@@ -3,7 +3,8 @@
   "description": "Module Catalog for EnjoysCMS",
   "type": "enjoyscms-module",
   "require": {
-    "oomphinc/composer-installers-extender": "^2.0"
+    "oomphinc/composer-installers-extender": "^2.0",
+    "gedmo/doctrine-extensions": "^3.0"
   },
   "autoload": {
     "psr-4": {
