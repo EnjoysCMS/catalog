@@ -1,0 +1,24 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{{ title }}<br><small>{{ subtitle }}</small></h2>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                {{ form.render|raw }}
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    {{ wysiwyg|raw }}
+{% endblock %}

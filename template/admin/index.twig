@@ -1,0 +1,23 @@
+{% extends '@a/layout.twig' %}
+
+{% block content %}
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Категории</h2>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <a href="{{ url('catalog/admin/category/add') }}" class="btn btn-primary btn-sm mb-3">Добавить категорию</a>
+
+                    {{ dump(categories) }}
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+{% endblock %}

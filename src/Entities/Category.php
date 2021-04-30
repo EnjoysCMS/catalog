@@ -9,12 +9,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class Category
- * @package EnjoysCMS\Module\Catalog\Entities
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
  * @ORM\Table(name="categories")
  */
-final class Category
+class Category
 {
     /**
      * @ORM\Id
@@ -85,5 +83,37 @@ final class Category
     public function setUrl(string $url): void
     {
         $this->url = $url;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param Category $children
+     */
+    public function setChildren(Category $children): void
+    {
+        $this->children = $children;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent): void
+    {
+        $this->parent = $parent;
     }
 }
