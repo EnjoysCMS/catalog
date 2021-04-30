@@ -5,115 +5,86 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
- * @ORM\Table(name="categories")
+ * @Gedmo\Tree(type="closure")
+ * @Gedmo\TreeClosure(class="EnjoysCMS\Module\Catalog\Entities\CategoryClosure")
+ * @ORM\Entity(repositoryClass="Gedmo\Tree\Entity\Repository\ClosureTreeRepository")
  */
 class Category
 {
     /**
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
      */
-    private int $id;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $name;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $url;
+    private $id;
 
     /**
-     * One Category has Many Categories.
-     * @ORM\OneToMany(targetEntity="Category", mappedBy="parent")
+     * @ORM\Column(name="title", type="string", length=64)
      */
-    private $children;
+    private $title;
 
     /**
-     * Many Categories have One Category.
+     * This parameter is optional for the closure strategy
+     *
+     * @ORM\Column(name="level", type="integer", nullable=true)
+     * @Gedmo\TreeLevel
+     */
+    private $level;
+
+    /**
+     * @Gedmo\TreeParent
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
      */
     private $parent;
 
-    public function __construct() {
-        $this->children = new ArrayCollection();
-    }
-
     /**
-     * @return int
+     * @ORM\OneToMany(targetEntity="Category", mappedBy="parent")
      */
-    public function getId(): int
+    private $children;
+
+    public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getName(): string
+    public function setTitle($title)
     {
-        return $this->name;
+        $this->title = $title;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): void
+    public function getTitle()
     {
-        $this->name = $name;
+        return $this->title;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl(): string
+    public function setParent(Category $parent = null)
     {
-        return $this->url;
+        $this->parent = $parent;
     }
 
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getChildren()
-    {
-        return $this->children;
-    }
-
-    /**
-     * @param Category $children
-     */
-    public function setChildren(Category $children): void
-    {
-        $this->children = $children;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getParent()
     {
         return $this->parent;
     }
 
-    /**
-     * @param mixed $parent
-     */
-    public function setParent($parent): void
+    public function addClosure(CategoryClosure $closure)
     {
-        $this->parent = $parent;
+        $this->closures[] = $closure;
+    }
+
+    public function setLevel($level)
+    {
+        $this->level = $level;
+    }
+
+    public function getLevel()
+    {
+        return $this->level;
     }
 }
