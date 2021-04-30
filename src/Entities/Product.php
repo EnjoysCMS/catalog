@@ -30,19 +30,19 @@ final class Product
      */
     private string $description;
     /**
-     * @ORM\Column(type="string", nullable=true, options={"default: null"})
+     * @ORM\Column(type="string", nullable=true, options={"default": null})
      */
-    private ?string $articul = null;
+    private ?string $article = null;
     /**
      * @ORM\Column(type="string")
      */
     private string $url;
     /**
-     * @ORM\Column(type="boolean", options={"default: false"})
+     * @ORM\Column(type="boolean", options={"default": false})
      */
     private bool $hide = false;
     /**
-     * @ORM\Column(type="boolean", options={"default: true"})
+     * @ORM\Column(type="boolean", options={"default": true})
      */
     private bool $active = true;
 
@@ -94,17 +94,17 @@ final class Product
     /**
      * @return string|null
      */
-    public function getArticul(): ?string
+    public function getArticle(): ?string
     {
-        return $this->articul;
+        return $this->article;
     }
 
     /**
-     * @param string|null $articul
+     * @param string|null $article
      */
-    public function setArticul(?string $articul): void
+    public function setArticle(?string $article): void
     {
-        $this->articul = $articul;
+        $this->article = $article;
     }
 
     /**
