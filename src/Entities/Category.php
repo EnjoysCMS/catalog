@@ -5,21 +5,23 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
-use Gedmo\Mapping\Annotation as Gedmo;
+
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 
 /**
  * @Gedmo\Tree(type="closure")
  * @Gedmo\TreeClosure(class="EnjoysCMS\Module\Catalog\Entities\CategoryClosure")
- * @ORM\Entity(repositoryClass="Gedmo\Tree\Entity\Repository\ClosureTreeRepository")
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
  */
 class Category
 {
+
     /**
-     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
-     * @ORM\GeneratedValue
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
 
@@ -35,6 +37,17 @@ class Category
      * @Gedmo\TreeLevel
      */
     private $level;
+
+
+    /**
+     * @ORM\Column(name="sort", type="integer", options={"default": 0})
+     */
+    private int $sort;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private string $url;
 
     /**
      * @Gedmo\TreeParent
@@ -86,5 +99,37 @@ class Category
     public function getLevel()
     {
         return $this->level;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSort(): int
+    {
+        return $this->sort;
+    }
+
+    /**
+     * @param int $sort
+     */
+    public function setSort(int $sort): void
+    {
+        $this->sort = $sort;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param string $url
+     */
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
     }
 }

@@ -5,17 +5,43 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Repositories;
 
-use Doctrine\ORM\EntityRepository;
 
-/**
- * Class Category
- * @package EnjoysCMS\Module\Catalog\Repositories
- */
-class Category extends EntityRepository
+use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
+
+class Category extends ClosureTreeRepository
 {
 
-    public function getRootNodes()
+    public function getTree($node = null)
     {
-        return $this->findBy(['parent' => null]);
+        return  $this->childrenHierarchy(
+            $node,
+            false,
+            [
+                'childSort' => [
+                    'field' => 'sort',
+                    'dir' => 'asc'
+                ]
+            ]
+        );
     }
+
+    public function getFormFillArray(): array
+    {
+        return $this->_build($this->getTree());
+    }
+
+    private function _build($tree, $level = 1): array
+    {
+        $level = ($level-1) * 3;
+        $ret = [];
+
+        foreach ($tree as $items) {
+            $ret[$items['id']] = str_repeat("&nbsp;", $level) . $items['title'];
+            if (isset($items['__children'])) {
+                $ret += $this->_build($items['__children'], $items['level']);
+            }
+        }
+        return $ret;
+    }
+
 }

@@ -79,7 +79,7 @@ final class Category extends BaseController
     public function edit(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/index.twig',
+            $this->getTemplatePath() . '/admin/form.twig',
             $this->getContext($container->get(Edit::class))
         );
     }
@@ -99,7 +99,7 @@ final class Category extends BaseController
     public function delete(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/index.twig',
+            $this->getTemplatePath() . '/admin/form.twig',
             $this->getContext($container->get(Delete::class))
         );
     }

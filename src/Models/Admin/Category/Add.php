@@ -54,17 +54,34 @@ final class Add implements ModelInterface
     {
         $form = new Form(['method' => 'post']);
 
+        $form->setDefaults(
+            [
+                'parent' => $this->serverRequest->get('parent_id')
+            ]
+        );
+
+
+        $form->select('parent', 'Родительская категория')->fill(
+            ['0' => '_без родительской категории_'] + $this->entityManager->getRepository(
+                Category::class
+            )->getFormFillArray()
+        )
+        ;
         $form->text('name', 'Наименование');
 
         $form->submit('add');
         return $form;
     }
+
     private function doAction()
     {
-
+        $parent = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('parent'));
         $category = new Category();
-        $category->setName($this->serverRequest->post('name'));
-        $category->setUrl(uniqid());
+
+        $category->setParent($parent);
+        $category->setSort(0);
+        $category->setTitle($this->serverRequest->post('name'));
+        $category->setUrl(\URLify::slug($category->getTitle()));
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();
