@@ -5,8 +5,6 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
-
-use App\Entities\Amperage;
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
@@ -23,18 +21,26 @@ final class Delete implements ModelInterface
     private RendererInterface $renderer;
     private ServerRequest $serverRequest;
     private ?Category $category;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
+     */
+    private $categoryRepository;
 
-    public function __construct(EntityManager $entityManager, UrlGeneratorInterface $urlGenerator, RendererInterface $renderer, ServerRequest $serverRequest)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        UrlGeneratorInterface $urlGenerator,
+        RendererInterface $renderer,
+        ServerRequest $serverRequest
+    ) {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
         $this->renderer = $renderer;
         $this->serverRequest = $serverRequest;
 
-        $this->category = $this->entityManager->getRepository(Category::class)->find(
+        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->category = $this->categoryRepository->find(
             $this->serverRequest->get('id', 0)
         );
-
     }
 
     public function getContext(): array
@@ -58,14 +64,21 @@ final class Delete implements ModelInterface
     {
         $form = new Form(['method' => 'post']);
         $form->header('Подтвердите удаление!');
+        $form->checkbox('remove_childs')->fill(['+ Удаление дочерних категорий']);
         $form->submit('delete', 'Удалить')->addClass('btn btn-danger');
         return $form;
     }
 
     private function doAction()
     {
-        $this->entityManager->remove($this->category);
-        $this->entityManager->flush();
+        if ($this->serverRequest->post('remove_childs') !== null) {
+            $this->entityManager->remove($this->category);
+            $this->entityManager->flush();
+        }else{
+            $this->categoryRepository->removeFromTree($this->category);
+            $this->categoryRepository->updateLevelValues();
+            $this->entityManager->clear();
+        }
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
 }
