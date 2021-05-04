@@ -14,6 +14,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use URLify;
 
 final class Add implements ModelInterface
 {
@@ -75,13 +76,13 @@ final class Add implements ModelInterface
 
     private function doAction()
     {
+        /** @var Category|null $parent */
         $parent = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('parent'));
         $category = new Category();
-
         $category->setParent($parent);
         $category->setSort(0);
         $category->setTitle($this->serverRequest->post('name'));
-        $category->setUrl(\URLify::slug($category->getTitle()));
+        $category->setUrl(URLify::slug($category->getTitle()));
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();
