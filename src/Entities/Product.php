@@ -154,4 +154,20 @@ final class Product
     {
         $this->active = $active;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCategory()
+    {
+        return $this->category;
+    }
+
+    /**
+     * @param Category $category
+     */
+    public function setCategory(Category $category): void
+    {
+        $this->category = $category;
+    }
 }
