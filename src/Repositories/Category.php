@@ -32,13 +32,13 @@ class Category extends ClosureTreeRepository
 
     private function _build($tree, $level = 1): array
     {
-        $level = ($level-1) * 3;
+
         $ret = [];
 
         foreach ($tree as $items) {
-            $ret[$items['id']] = str_repeat("&nbsp;", $level) . $items['title'];
+            $ret[$items['id']] = str_repeat("&nbsp;", ($level-1)*3). $items['title'];
             if (isset($items['__children'])) {
-                $ret += $this->_build($items['__children'], $items['level']);
+                $ret += $this->_build($items['__children'], $items['level'] + 1);
             }
         }
         return $ret;
