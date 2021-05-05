@@ -12,8 +12,8 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use URLify;
 
 final class Add implements ModelInterface
 {
