@@ -11,9 +11,13 @@ use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 class Category extends ClosureTreeRepository
 {
 
+    public function findBySlug($slug)
+    {
+    }
+
     public function getTree($node = null)
     {
-        return  $this->childrenHierarchy(
+        return $this->childrenHierarchy(
             $node,
             false,
             [
@@ -32,11 +36,10 @@ class Category extends ClosureTreeRepository
 
     private function _build($tree, $level = 1): array
     {
-
         $ret = [];
 
         foreach ($tree as $items) {
-            $ret[$items['id']] = str_repeat("&nbsp;", ($level-1)*3). $items['title'];
+            $ret[$items['id']] = str_repeat("&nbsp;", ($level - 1) * 3) . $items['title'];
             if (isset($items['__children'])) {
                 $ret += $this->_build($items['__children'], $items['level'] + 1);
             }

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class Product
  * @package EnjoysCMS\Module\Catalog\Entities
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
  * @ORM\Table(name="products")
  */
 final class Product
@@ -170,4 +170,11 @@ final class Product
     {
         $this->category = $category;
     }
+
+    public function getSlug(): string
+    {
+        return $this->getCategory()->getSlug().'/'.$this->getUrl();
+    }
+
+
 }

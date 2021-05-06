@@ -132,4 +132,29 @@ class Category
     {
         $this->url = $url;
     }
+
+    public function getSlug(): string
+    {
+        $parent = $this->getParent();
+        if($parent === null){
+            return $this->getUrl();
+        }
+        return $parent->getSlug() . '/' . $this->getUrl();
+    }
+
+    public function checkSlugs(array $slugs)
+    {
+        if(empty($slugs)){
+            return true;
+        }
+        $slug = array_shift($slugs);
+        if($slug !== $this->getUrl()){
+            return false;
+        }
+        $parent = $this->getParent();
+        if($parent === null){
+            return true;
+        }
+        return $parent->checkSlugs($slugs);
+    }
 }

@@ -11,6 +11,27 @@
             <div class="card-body">
                 <a href="{{ url('catalog/admin/product/add') }}" class="btn btn-primary btn-sm mb-3">Добавить
                     продукт</a>
+
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Category URL slug</th>
+                        <th>Product URL slug</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for product in products %}
+
+                    <tr>
+                        <td>{{ product.getName }}</td>
+                        <td> {{ product.getCategory.getUrl }}</td>
+                        <td><a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <!-- /.card-body -->
         </div>
