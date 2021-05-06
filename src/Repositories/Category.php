@@ -11,8 +11,21 @@ use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 class Category extends ClosureTreeRepository
 {
 
-    public function findBySlug($slug)
+    public function findBySlug(array $slugs)
     {
+        $slug = array_shift($slugs);
+        $category = $this->findOneBy(['url' => $slug]);
+
+        if ($category === null) {
+            return null;
+        }
+
+        $parent = $category->getParent();
+        if ($parent !== null && !$parent->checkSlugs($slugs)) {
+            return null;
+        }
+
+        return $category;
     }
 
     public function getTree($node = null)
@@ -27,6 +40,13 @@ class Category extends ClosureTreeRepository
                 ]
             ]
         );
+    }
+
+    public function getNodes($node = null, $orderBy = 'sort', $direction = 'asc')
+    {
+        $dql = $this->childrenQueryBuilder($node, true, $orderBy, $direction);
+        $dql->leftJoin('node.parent', 'tree_parent');
+        return $dql->getQuery()->getResult();
     }
 
     public function getFormFillArray(): array

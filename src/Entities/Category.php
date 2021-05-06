@@ -157,4 +157,12 @@ class Category
         }
         return $parent->checkSlugs($slugs);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
 }

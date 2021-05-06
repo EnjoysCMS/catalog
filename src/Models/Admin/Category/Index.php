@@ -71,7 +71,7 @@ final class Index implements ModelInterface
 
         return [
             'form' => $renderer->render(),
-            'categories' => $this->categoryRepository->getTree()
+            'categories' => $this->categoryRepository->getNodes()
         ];
     }
 

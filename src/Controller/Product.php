@@ -35,7 +35,7 @@ final class Product
      * @Route(
      *     name="catalog/product",
      *     path="catalog/{slug}.html",
-     *     requirements={"slug": ".+"},
+     *     requirements={"slug": "[^.]+"},
      *     options={
      *      "aclComment": "[public] Просмотр продуктов (товаров)"
      *     }
