@@ -51,7 +51,8 @@ class Category extends ClosureTreeRepository
     public function getNodes($node = null, $orderBy = 'sort', $direction = 'asc')
     {
         $dql = $this->childrenQueryBuilder($node, true, $orderBy, $direction);
-        $dql->leftJoin('node.parent', 'tree_parent');
+       // $dql->leftJoin('node.children', 'child');
+      //  var_dump($dql->getQuery());
         return $dql->getQuery()->getResult();
     }
 

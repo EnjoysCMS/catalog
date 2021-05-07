@@ -29,7 +29,7 @@ final class Index
 
     /**
      * @Route(
-     *     name="catalog/category/index",
+     *     name="catalog/index",
      *     path="catalog",
      *     options={
      *      "aclComment": "[public] Просмотр категорий (индекс)"
