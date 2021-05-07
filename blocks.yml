@@ -1,1 +1,7 @@
-# Описание блоков модуля
+EnjoysCMS\Module\Catalog\Blocks\CategoryTree: #Класс блока полностью
+  name: Категории (tree)
+  options:
+    template:
+      value:
+      name: Путь до template
+      description:
