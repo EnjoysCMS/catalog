@@ -144,6 +144,7 @@ class Category
 
     public function checkSlugs(array $slugs)
     {
+
         if(empty($slugs)){
             return true;
         }
@@ -152,6 +153,11 @@ class Category
             return false;
         }
         $parent = $this->getParent();
+
+        if ($parent === null && !empty($slugs)) {
+            return false;
+        }
+
         if($parent === null){
             return true;
         }

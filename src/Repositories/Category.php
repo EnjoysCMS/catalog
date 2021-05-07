@@ -20,8 +20,14 @@ class Category extends ClosureTreeRepository
             return null;
         }
 
+
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $parent */
         $parent = $category->getParent();
         if ($parent !== null && !$parent->checkSlugs($slugs)) {
+            return null;
+        }
+
+        if ($parent === null && !empty($slugs)) {
             return null;
         }
 

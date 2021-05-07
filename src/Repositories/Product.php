@@ -15,6 +15,7 @@ final class Product extends EntityRepository
     {
         $slug = array_shift($slugs);
         $category = $this->getEntityManager()->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)->findBySlug($slugs);
+
         /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
         $product = $this->findOneBy(['url' => $slug, 'category' => $category]);
         if($product === null){
