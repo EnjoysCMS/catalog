@@ -51,17 +51,17 @@ class Category extends ClosureTreeRepository
 
     public function getFormFillArray(): array
     {
-        return $this->_build($this->getTree());
+        return $this->_build($this->getNodes());
     }
 
     private function _build($tree, $level = 1): array
     {
         $ret = [];
 
-        foreach ($tree as $items) {
-            $ret[$items['id']] = str_repeat("&nbsp;", ($level - 1) * 3) . $items['title'];
-            if (isset($items['__children'])) {
-                $ret += $this->_build($items['__children'], $items['level'] + 1);
+        foreach ($tree as $item) {
+            $ret[$item->getId()] = str_repeat("&nbsp;", ($level - 1) * 3) . $item->getTitle();
+            if (count($item->getChildren()) > 0) {
+                $ret += $this->_build($item->getChildren(), $item->getLevel() + 1);
             }
         }
         return $ret;
