@@ -12,7 +12,7 @@ final class URLify
         string $string,
         int $maxLength = 200,
         string $separator = '-',
-        string $language = 'en'
+        string $language = 'ru'
     ) {
         return \URLify::slug($string, $maxLength, $separator, $language);
     }
