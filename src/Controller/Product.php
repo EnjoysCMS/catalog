@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Module\Catalog\Entities\Image;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
@@ -22,13 +23,15 @@ final class Product
     private $repository;
     private ServerRequestInterface $serverRequest;
     private Environment $twig;
+    private EntityManager $entityManager;
 
     public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager, Environment $twig)
     {
-        $this->repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class);
-
+        $this->entityManager = $entityManager;
+        $this->repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class);
         $this->serverRequest = $serverRequest;
         $this->twig = $twig;
+
     }
 
     /**
@@ -59,7 +62,8 @@ final class Product
         return $this->twig->render(
             $template_path,
             [
-                'product' => $product
+                'product' => $product,
+                'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
             ]
         );
     }

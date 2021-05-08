@@ -10,9 +10,15 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <a href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId}) }}">Загрузить изображение</a>
+                <a class="btn btn-primary" href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId}) }}">Загрузить изображение</a>
 
-                {{ dump(images) }}
+                {% for image in images %}
+                    <ul class="list-inline">
+                        <li class="list-inline-item">
+                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}" />
+                        </li>
+                    </ul>
+                {% endfor %}
             </div>
         </div>
     </section>
