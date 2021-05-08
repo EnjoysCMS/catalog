@@ -28,7 +28,7 @@
                         <td>{{ product.getName }}</td>
                         <td> {{ product.getCategory.getUrl }}</td>
                         <td><a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a></td>
-                        <td><a href="{{ path('catalog/admin/product/images') }}">Управление изображениями</a> </td>
+                        <td><a href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}">Управление изображениями</a> </td>
                     </tr>
                     {% endfor %}
                     </tbody>

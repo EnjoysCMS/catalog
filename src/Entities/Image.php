@@ -33,7 +33,7 @@ class Image
     /**
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="images")
      */
-    private $product;
+    private Product $product;
 
     /**
      * @return int
@@ -73,6 +73,22 @@ class Image
     public function setExtension(string $extension): void
     {
         $this->extension = $extension;
+    }
+
+    /**
+     * @return Product
+     */
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param Product $product
+     */
+    public function setProduct(Product $product): void
+    {
+        $this->product = $product;
     }
 
 }
