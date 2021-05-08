@@ -79,7 +79,6 @@ final class Add implements ModelInterface
         $newName = md5((string)microtime(true));
         $file->setName($newName[0] . '/' . $newName[1] . '/' . $newName);
         try {
-
             $file->upload();
 
             $image = new Image();
@@ -89,6 +88,19 @@ final class Add implements ModelInterface
 
             $this->entityManager->persist($image);
             $this->entityManager->flush();
+
+            $img = \Intervention\Image\ImageManagerStatic::make($storage->getFullPathFileNameWithExtension());
+            $img->resize(300, 300, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            $img->save(
+                str_replace(
+                    $file->getName(),
+                    $file->getName() . '_small',
+                    $storage->getFullPathFileNameWithExtension()
+                )
+            );
 
             Redirect::http(
                 $this->urlGenerator->generate(

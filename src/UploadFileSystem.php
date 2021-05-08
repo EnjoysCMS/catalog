@@ -17,6 +17,8 @@ class UploadFileSystem extends Base
      */
     protected $directory;
 
+    private string $fullPathFileNameWithExtension;
+
     /**
      * Overwrite existing files?
      * @var bool
@@ -63,6 +65,8 @@ class UploadFileSystem extends Base
             $file->addError('File already exists');
             throw new UploadException('File already exists');
         }
+
+        $this->setFullPathFileNameWithExtension($newFile);
 
         $directory = pathinfo($newFile, PATHINFO_DIRNAME);
         $this->makeDirectory($directory);
@@ -116,5 +120,21 @@ class UploadFileSystem extends Base
             }
 
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getFullPathFileNameWithExtension(): string
+    {
+        return $this->fullPathFileNameWithExtension;
+    }
+
+    /**
+     * @param string $fullPathFileNameWithExtension
+     */
+    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
+    {
+        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
     }
 }
