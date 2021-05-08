@@ -52,6 +52,11 @@ final class Product
     private $category;
 
     /**
+     * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
+     */
+    private $images;
+
+    /**
      * @return int
      */
     public function getId(): int
