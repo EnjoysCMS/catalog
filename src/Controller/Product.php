@@ -63,7 +63,7 @@ final class Product
             $template_path,
             [
                 'product' => $product,
-                'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
+              //  'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
             ]
         );
     }

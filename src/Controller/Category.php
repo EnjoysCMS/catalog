@@ -55,11 +55,7 @@ final class Category
             Error::code(404);
         }
 
-        $products = $this->productRepository->findBy(
-            [
-                'category' => $category
-            ]
-        );
+        $products = $this->productRepository->findByCategory($category);
 
 
         $template_path = '@m/catalog/category.twig';
