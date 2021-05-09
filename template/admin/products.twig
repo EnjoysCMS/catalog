@@ -23,8 +23,13 @@
                     </thead>
                     <tbody>
                     {% for product in products %}
-
+                    {% set image = product.getImages.first %}
                     <tr>
+                        <td>
+                            {% if image %}
+                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}" >
+                            {% endif %}
+                        </td>
                         <td>{{ product.getName }}</td>
                         <td> {{ product.getCategory.getUrl }}</td>
                         <td><a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a></td>

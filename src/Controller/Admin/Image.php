@@ -7,7 +7,8 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
-use EnjoysCMS\Core\Components\Helpers\Assets;
+use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Index;
 use Psr\Container\ContainerInterface;
@@ -63,6 +64,36 @@ final class Image extends BaseController
         return $this->view(
             $this->getTemplatePath() . '/admin/form.twig',
             $this->getContext($container->get(Add::class))
+        );
+    }
+
+    /**
+     * @Route(
+     *     path="catalog/admin/product/images/make_general",
+     *     name="catalog/admin/product/images/make_general",
+     *     options={
+     *      "aclComment": "Переключение основного изображения"
+     *     }
+     * )
+     */
+    public function makeGeneral(): void
+    {
+        $repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
+        $image = $repository->find($this->serverRequest->get('id'));
+        if($image === null){
+            Error::code(404);
+        }
+        $images = $repository->findBy(['product' => $image->getProduct()]);
+        foreach ($images as $item) {
+            $item->setGeneral(false);
+        }
+        $image->setGeneral(true);
+        $this->entityManager->flush();
+        Redirect::http(
+            $this->urlGenerator->generate(
+                'catalog/admin/product/images',
+                ['product_id' => $image->getProduct()->getId()]
+            )
         );
     }
 }

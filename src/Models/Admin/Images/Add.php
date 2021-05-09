@@ -33,6 +33,10 @@ final class Add implements ModelInterface
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
     private ?Product $product;
+    /**
+     * @var mixed[]|object[]
+     */
+    private array $productImages;
 
     public function __construct(
         EntityManager $entityManager,
@@ -49,6 +53,9 @@ final class Add implements ModelInterface
         if ($this->product === null) {
             Error::code(404);
         }
+
+        $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
+        //var_dump($this->productImages);
     }
 
     public function getContext(): array
@@ -114,6 +121,7 @@ final class Add implements ModelInterface
             $image->setProduct($this->product);
             $image->setFilename($file->getName());
             $image->setExtension($file->getExtension());
+            $image->setGeneral(empty($this->productImages));
 
             $this->entityManager->persist($image);
             $this->entityManager->flush();

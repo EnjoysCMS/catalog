@@ -2,24 +2,38 @@
 {% block content %}
 
     <section class="content">
+        <a class="btn btn-primary my-3"
+           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId}) }}">Загрузить
+            изображение</a>
+        <div class="row">
+            {% for image in images %}
+                <div class="col-md-3">
+                    <div class="card">
 
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title"></h2>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-                <a class="btn btn-primary" href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId}) }}">Загрузить изображение</a>
+                        {% if image.isGeneral %}
+                            <div class="card-header  bg-success">
+                                <div class="card-title">Основное изображение</div>
+                            </div>
+                        {% else %}
+                            <div class="card-header">
+                                <div class="card-title"><a href="{{ path("catalog/admin/product/images/make_general", {"id": image.getId}) }}" >Сделать основным</a></div>
+                            </div>
+                        {% endif %}
 
-                {% for image in images %}
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}" />
-                        </li>
-                    </ul>
-                {% endfor %}
-            </div>
+
+                        <!-- /.box-header -->
+                        <div class="card-body">
+                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}"/>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- ./col -->
+            {% endfor %}
+
         </div>
+
     </section>
 {% endblock %}

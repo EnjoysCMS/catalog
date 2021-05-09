@@ -31,6 +31,11 @@ class Image
     private string $extension;
 
     /**
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private bool $general = false;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="images")
      */
     private Product $product;
@@ -89,6 +94,22 @@ class Image
     public function setProduct(Product $product): void
     {
         $this->product = $product;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGeneral(): bool
+    {
+        return $this->general;
+    }
+
+    /**
+     * @param bool $general
+     */
+    public function setGeneral(bool $general): void
+    {
+        $this->general = $general;
     }
 
 }

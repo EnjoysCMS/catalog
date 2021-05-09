@@ -5,7 +5,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
 
 /**
  * Class Product
@@ -13,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
  * @ORM\Table(name="products")
  */
-final class Product
+class Product
 {
     /**
      * @ORM\Id
@@ -55,6 +57,8 @@ final class Product
      * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
      */
     private $images;
+
+
 
     /**
      * @return int
@@ -179,6 +183,15 @@ final class Product
     public function getSlug(): string
     {
         return $this->getCategory()->getSlug().'/'.$this->getUrl();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImages()
+    {
+
+        return $this->images;
     }
 
 
