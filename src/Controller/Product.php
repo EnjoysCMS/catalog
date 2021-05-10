@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,7 +32,6 @@ final class Product
         $this->repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class);
         $this->serverRequest = $serverRequest;
         $this->twig = $twig;
-
     }
 
     /**
@@ -49,21 +49,35 @@ final class Product
         $slug = array_reverse(explode('/', $this->serverRequest->get('slug')));
         $product = $this->repository->findBySlug($slug);
 
-        if($product === null){
+        if ($product === null) {
             Error::code(404);
         }
 
         $template_path = '@m/catalog/product.twig';
 
         if (!$this->twig->getLoader()->exists($template_path)) {
-            $template_path =  __DIR__ . '/../../template/product.twig.sample';
+            $template_path = __DIR__ . '/../../template/product.twig.sample';
         }
+
+        Assets::css(
+            [
+                'template/modules/catalog/assets/style.css',
+                'template/modules/catalog/assets/magnific-popup.css',
+            ]
+        );
+
+
+        Assets::js(
+            [
+                'template/modules/catalog/assets/jquery.magnific-popup.min.js',
+            ]
+        );
 
         return $this->twig->render(
             $template_path,
             [
                 'product' => $product,
-              //  'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
+                //  'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
             ]
         );
     }
