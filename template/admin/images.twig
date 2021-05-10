@@ -3,8 +3,9 @@
 
     <section class="content">
         <a class="btn btn-primary my-3"
-           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId}) }}">Загрузить
-            изображение</a>
+           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить с компьютера</a>
+        <a class="btn btn-primary my-3"
+           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "download"}) }}">Скачать из интернета</a>
         <div class="row">
             {% for image in images %}
                 <div class="col-md-3">

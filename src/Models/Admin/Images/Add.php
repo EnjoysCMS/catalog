@@ -37,6 +37,10 @@ final class Add implements ModelInterface
      * @var mixed[]|object[]
      */
     private array $productImages;
+    /**
+     * @var mixed|string
+     */
+    private $uploadMethod;
 
     public function __construct(
         EntityManager $entityManager,
@@ -55,12 +59,21 @@ final class Add implements ModelInterface
         }
 
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
-        //var_dump($this->productImages);
+
+        $method = $serverRequest->get('method');
+
+        if (!in_array($method, ['upload', 'download'], true)) {
+            $method = 'upload';
+        }
+
+        $method = '\EnjoysCMS\Module\Catalog\Models\Admin\Images\\'.ucfirst($method);
+
+        $this->uploadMethod = new $method();
     }
 
     public function getContext(): array
     {
-        $form = $this->getForm();
+        $form = $this->uploadMethod->getForm();
 
         $this->renderer->setForm($form);
 
@@ -73,34 +86,53 @@ final class Add implements ModelInterface
         ];
     }
 
-    private function getForm(): Form
-    {
-        $form = new Form(['method' => 'post']);
-
-        $form->file('image', 'Изображение')
-            ->addRule(
-                Rules::UPLOAD,
-                null,
-                [
-                    'required',
-                    'maxsize' => 1024 * 1024 * 2,
-                    'extensions' => 'jpg, png, jpeg',
-                ]
-            )
-            ->setAttribute('accept', '.png, .jpg, .jpeg')
-        ;
-
-        $form->submit('upload');
-        return $form;
-    }
 
     private function doAction()
     {
+        $this->uploadMethod->upload($this->serverRequest);
 
-        $storage = new UploadFileSystem($_ENV['UPLOAD_DIR']);
-        $file = new File('image', $storage);
-        $this->upload($file, $storage);
+        $image = new Image();
+        $image->setProduct($this->product);
+        $image->setFilename($this->uploadMethod->getName());
+        $image->setExtension($this->uploadMethod->getExtension());
+        $image->setGeneral(empty($this->productImages));
 
+        $this->entityManager->persist($image);
+        $this->entityManager->flush();
+
+        $imgSmall = ImageManagerStatic::make($this->uploadMethod->getFullPathFileNameWithExtension());
+        $imgSmall->resize(
+            300,
+            300,
+            function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            }
+        );
+        $imgSmall->save(
+            str_replace(
+                $this->uploadMethod->getName(),
+                $this->uploadMethod->getName() . '_small',
+                $this->uploadMethod->getFullPathFileNameWithExtension()
+            )
+        );
+
+        $imgLarge = ImageManagerStatic::make($this->uploadMethod->getFullPathFileNameWithExtension());
+        $imgLarge->resize(
+            900,
+            900,
+            function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            }
+        );
+        $imgLarge->save(
+            str_replace(
+                $this->uploadMethod->getName(),
+                $this->uploadMethod->getName() . '_large',
+                $this->uploadMethod->getFullPathFileNameWithExtension()
+            )
+        );
 
         Redirect::http(
             $this->urlGenerator->generate(
@@ -110,57 +142,4 @@ final class Add implements ModelInterface
         );
     }
 
-    private function upload(File $file, Base $storage)
-    {
-        $newName = md5((string)microtime(true));
-        $file->setName($newName[0] . '/' . $newName[1] . '/' . $newName);
-        try {
-            $file->upload();
-
-            $image = new Image();
-            $image->setProduct($this->product);
-            $image->setFilename($file->getName());
-            $image->setExtension($file->getExtension());
-            $image->setGeneral(empty($this->productImages));
-
-            $this->entityManager->persist($image);
-            $this->entityManager->flush();
-
-            $imgSmall = ImageManagerStatic::make($storage->getFullPathFileNameWithExtension());
-            $imgSmall->resize(
-                300,
-                300,
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                }
-            );
-            $imgSmall->save(
-                str_replace(
-                    $file->getName(),
-                    $file->getName() . '_small',
-                    $storage->getFullPathFileNameWithExtension()
-                )
-            );
-
-            $imgLarge = ImageManagerStatic::make($storage->getFullPathFileNameWithExtension());
-            $imgLarge->resize(
-                900,
-                900,
-                function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                }
-            );
-            $imgLarge->save(
-                str_replace(
-                    $file->getName(),
-                    $file->getName() . '_large',
-                    $storage->getFullPathFileNameWithExtension()
-                )
-            );
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage() . ' ' . implode(", ", $file->getErrors()));
-        }
-    }
 }
