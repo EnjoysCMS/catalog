@@ -38,6 +38,7 @@
                         <td>
                             <a href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}">Управление изображениями</a>
                             <a href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Редактирование</a>
+                            <a href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}">Удаление</a>
                         </td>
                     </tr>
                     {% endfor %}

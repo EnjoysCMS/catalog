@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use App\Module\Admin\BaseController;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Add;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Index;
 use Psr\Container\ContainerInterface;
@@ -82,6 +83,25 @@ final class Product extends BaseController
         return $this->view(
             $this->getTemplatePath() . '/admin/form.twig',
             $this->getContext($container->get(Edit::class))
+        );
+    }
+
+    /**
+     * @Route(
+     *     path="catalog/admin/product/delete",
+     *     name="catalog/admin/product/delete",
+     *     options={
+     *      "aclComment": "Удаление товара"
+     *     }
+     * )
+     * @param ContainerInterface $container
+     * @return string
+     */
+    public function delete(ContainerInterface $container): string
+    {
+        return $this->view(
+            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getContext($container->get(Delete::class))
         );
     }
 

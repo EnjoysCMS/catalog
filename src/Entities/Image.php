@@ -112,4 +112,19 @@ class Image
         $this->general = $general;
     }
 
+    public function getInfo()
+    {
+        return [
+            'path' => $_ENV['UPLOAD_DIR'] . '/' . $this->getFilename() . '.' . $this->getExtension(),
+            'glob_pattern' => $this->getGlobPattern(),
+            'filename' => $this->getFilename(),
+            'extension' => $this->getExtension()
+        ];
+    }
+
+    public function getGlobPattern()
+    {
+        return $_ENV['UPLOAD_DIR'] . '/' . $this->getFilename() . '*.' . $this->getExtension();
+    }
+
 }
