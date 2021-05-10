@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -18,7 +19,7 @@ use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
-final class Add implements ModelInterface
+final class Edit implements ModelInterface
 {
 
     private EntityManager $entityManager;
@@ -26,6 +27,7 @@ final class Add implements ModelInterface
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
     private Environment $twig;
+    private ?Product $product;
 
     public function __construct(
         EntityManager $entityManager,
@@ -39,6 +41,15 @@ final class Add implements ModelInterface
         $this->renderer = $renderer;
         $this->urlGenerator = $urlGenerator;
         $this->twig = $twig;
+
+
+        $this->product = $this->entityManager->getRepository(Product::class)->find(
+            $this->serverRequest->get('id', 0)
+        )
+        ;
+        if ($this->product === null) {
+            Error::code(404);
+        }
     }
 
     public function getContext(): array
@@ -67,7 +78,10 @@ final class Add implements ModelInterface
 
         $form->setDefaults(
             [
-                'category' => $this->serverRequest->get('category_id')
+                'category' => $this->product->getCategory()->getId(),
+                'name' => $this->product->getName(),
+                'url' => $this->product->getUrl(),
+                'description' => $this->product->getDescription(),
             ]
         );
 
@@ -90,20 +104,14 @@ final class Add implements ModelInterface
     {
         /** @var Category|null $category */
         $category = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('category'));
-        $product = new Product();
-        $product->setName($this->serverRequest->post('name'));
-        $product->setDescription($this->serverRequest->post('description'));
-        $product->setCategory($category);
-        $product->setUrl(
-            (empty($this->serverRequest->post('url'))) ? URLify::slug($product->getName()) : URLify::slug(
-                $this->serverRequest->post('url')
-            )
-        );
-        $product->setArticle(null);
-        $product->setHide(false);
-        $product->setActive(true);
 
-        $this->entityManager->persist($product);
+        $this->product->setName($this->serverRequest->post('name'));
+        $this->product->setDescription($this->serverRequest->post('description'));
+        $this->product->setCategory($category);
+        $this->product->setUrl(
+            (empty($this->serverRequest->post('url'))) ? URLify::slug($this->product->getName()) : $this->serverRequest->post('url')
+        );
+
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }
