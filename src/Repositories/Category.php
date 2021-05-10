@@ -74,4 +74,14 @@ class Category extends ClosureTreeRepository
         return $ret;
     }
 
+    public function getAllIds($node = null)
+    {
+        $nodes = $this->getChildren($node);
+        $ids = array_map(function ($node){
+            return $node->getId();
+        }, $nodes);
+        $ids[] = $node->getId();
+        return $ids;
+    }
+
 }

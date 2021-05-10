@@ -59,7 +59,6 @@ class Product
     private $images;
 
 
-
     /**
      * @return int
      */
@@ -175,14 +174,19 @@ class Product
     /**
      * @param Category $category
      */
-    public function setCategory(Category $category): void
+    public function setCategory(?Category $category): void
     {
         $this->category = $category;
     }
 
     public function getSlug(): string
     {
-        return $this->getCategory()->getSlug().'/'.$this->getUrl();
+        $category = $this->getCategory();
+        $slug = '{CATEGORY_NOT_ISSET}';
+        if ($category instanceof Category) {
+            $slug = $category->getSlug();
+        }
+        return $slug . '/' . $this->getUrl();
     }
 
     /**
@@ -190,7 +194,6 @@ class Product
      */
     public function getImages()
     {
-
         return $this->images;
     }
 

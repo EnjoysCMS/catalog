@@ -12,6 +12,7 @@ use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequest;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entities\Product;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -71,14 +72,32 @@ final class Delete implements ModelInterface
 
     private function doAction()
     {
+
+
+
         if ($this->serverRequest->post('remove_childs') !== null) {
+            $allCategoryIds = $this->entityManager->getRepository(Category::class)->getAllIds($this->category);
+            $products = $this->entityManager->getRepository(Product::class)->findByCategorysIds($allCategoryIds);
+            $this->setNullCategory($products);
+
             $this->entityManager->remove($this->category);
             $this->entityManager->flush();
-        }else{
+        } else {
+            $products = $this->entityManager->getRepository(Product::class)->findByCategory($this->category);
+            $this->setNullCategory($products);
+
             $this->categoryRepository->removeFromTree($this->category);
             $this->categoryRepository->updateLevelValues();
             $this->entityManager->clear();
         }
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
+    }
+
+    private function setNullCategory($products)
+    {
+        foreach ($products as $product) {
+            $product->setCategory(null);
+        }
+        $this->entityManager->flush();
     }
 }
