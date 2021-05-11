@@ -10,6 +10,7 @@ use App\Module\Admin\BaseController;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Add;
+use EnjoysCMS\Module\Catalog\Models\Admin\Images\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Index;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -94,6 +95,27 @@ final class Image extends BaseController
                 'catalog/admin/product/images',
                 ['product_id' => $image->getProduct()->getId()]
             )
+        );
+    }
+
+
+    /**
+     * @Route(
+     *     path="catalog/admin/product/images/delete",
+     *     name="catalog/admin/product/images/delete",
+     *     options={
+     *      "aclComment": "Удаление изображения к товару"
+     *     }
+     * )
+     * @param ContainerInterface $container
+     * @return string
+     */
+    public function delete(ContainerInterface $container): string
+    {
+
+        return $this->view(
+            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getContext($container->get(Delete::class))
         );
     }
 }

@@ -3,24 +3,28 @@
 
     <section class="content">
         <a class="btn btn-primary my-3"
-           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить с компьютера</a>
+           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить
+            с компьютера</a>
         <a class="btn btn-primary my-3"
-           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "download"}) }}">Скачать из интернета</a>
+           href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "download"}) }}">Скачать
+            из интернета</a>
         <div class="row">
             {% for image in images %}
                 <div class="col-md-3">
                     <div class="card">
 
 
-                        {% if image.isGeneral %}
-                            <div class="card-header  bg-success">
-                                <div class="card-title">Основное изображение</div>
+                        <div class="card-header{% if image.isGeneral %} bg-warning{% endif %}">
+                            <div class="card-title">
+                                {% if image.isGeneral %}
+                                    Основное изображение
+                                {% else %}
+                                    <a href="{{ path("catalog/admin/product/images/make_general", {"id": image.getId}) }}">Сделать
+                                        основным</a>
+                                {% endif %}
+                                <a href="{{ path("catalog/admin/product/images/delete", {"id": image.getId}) }}">Удалить</a>
                             </div>
-                        {% else %}
-                            <div class="card-header">
-                                <div class="card-title"><a href="{{ path("catalog/admin/product/images/make_general", {"id": image.getId}) }}" >Сделать основным</a></div>
-                            </div>
-                        {% endif %}
+                        </div>
 
 
                         <!-- /.box-header -->

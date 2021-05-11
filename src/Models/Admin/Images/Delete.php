@@ -11,14 +11,9 @@ use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
 
 final class Delete implements ModelInterface
 {
@@ -27,7 +22,7 @@ final class Delete implements ModelInterface
     private ServerRequestInterface $serverRequest;
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
-    private ?Product $image;
+    private ?Image $image;
 
     public function __construct(
         EntityManager $entityManager,
@@ -43,8 +38,10 @@ final class Delete implements ModelInterface
 
         $this->image = $this->entityManager->getRepository(Image::class)->find(
             $this->serverRequest->get('id', 0)
-        )
-        ;
+        );
+
+
+
         if ($this->image === null) {
             Error::code(404);
         }
@@ -59,8 +56,6 @@ final class Delete implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
         }
-
-
 
 
         return [
@@ -79,8 +74,21 @@ final class Delete implements ModelInterface
 
     private function doAction()
     {
+        $product = $this->image->getProduct();
+        foreach (glob($this->image->getGlobPattern()) as $item) {
+            @unlink($item);
+        }
         $this->entityManager->remove($this->image);
         $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+
+        if($this->image->isGeneral()){
+            $nextImage = $product->getImages()->first();
+            if($nextImage instanceof Image){
+                $nextImage->setGeneral(true);
+            }
+            $this->entityManager->flush();
+        }
+
+        Redirect::http($this->urlGenerator->generate('catalog/admin/product/images', ['product_id' => $product->getId()]));
     }
 }

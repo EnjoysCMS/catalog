@@ -190,7 +190,7 @@ class Product
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection
      */
     public function getImages()
     {
