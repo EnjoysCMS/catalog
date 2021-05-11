@@ -10,6 +10,7 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -27,6 +28,10 @@ final class Edit implements ModelInterface
     private UrlGeneratorInterface $urlGenerator;
     private ?Category $category;
     private Environment $twig;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     */
+    private $categoryRepository;
 
     public function __construct(
         RendererInterface $renderer,
@@ -40,9 +45,12 @@ final class Edit implements ModelInterface
         $this->serverRequest = $serverRequest;
         $this->urlGenerator = $urlGenerator;
 
-        $this->category = $this->entityManager->getRepository(Category::class)->find(
+        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+
+        $this->category = $this->categoryRepository->find(
             $this->serverRequest->get('id', 0)
-        );
+        )
+        ;
         if ($this->category === null) {
             Error::code(404);
         }
@@ -78,9 +86,35 @@ final class Edit implements ModelInterface
             [
                 'title' => $this->category->getTitle(),
                 'description' => $this->category->getDescription(),
+                'url' => $this->category->getUrl(),
             ]
         );
-        $form->text('title', 'Наименование');
+        $form->text('title', 'Наименование')
+            ->addRule(Rules::REQUIRED)
+        ;
+
+        $form->text('url', 'URL')
+            ->addRule(Rules::REQUIRED)
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, такой url уже существует',
+                function () {
+                    $url = $this->serverRequest->post('url');
+
+                    if($url === $this->category->getUrl()){
+                        return true;
+                    }
+
+                    $check = $this->categoryRepository->findOneBy(
+                        [
+                            'url' => $url,
+                            'parent' => $this->category->getParent()
+                        ]
+                    );
+                    return is_null($check);
+                }
+            )
+        ;
         $form->textarea('description', 'Описание');
         $form->submit('add');
         return $form;
@@ -90,6 +124,7 @@ final class Edit implements ModelInterface
     {
         $this->category->setTitle($this->serverRequest->post('title'));
         $this->category->setDescription($this->serverRequest->post('description'));
+        $this->category->setUrl($this->serverRequest->post('url'));
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }

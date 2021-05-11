@@ -10,6 +10,7 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
@@ -27,6 +28,10 @@ final class Add implements ModelInterface
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
     private Environment $twig;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     */
+    private $categoryRepository;
 
     public function __construct(
         EntityManager $entityManager,
@@ -40,6 +45,8 @@ final class Add implements ModelInterface
         $this->renderer = $renderer;
         $this->urlGenerator = $urlGenerator;
         $this->twig = $twig;
+
+        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
     }
 
     public function getContext(): array
@@ -56,6 +63,7 @@ final class Add implements ModelInterface
         $wysiwyg->setTwig($this->twig);
 
         return [
+            'subtitle' => 'Добавление категории',
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#description'),
         ];
@@ -72,13 +80,35 @@ final class Add implements ModelInterface
         );
 
 
-        $form->select('parent', 'Родительская категория')->fill(
-            ['0' => '_без родительской категории_'] + $this->entityManager->getRepository(
-                Category::class
-            )->getFormFillArray()
-        )
+        $form->select('parent', 'Родительская категория')
+            ->fill(
+                ['0' => '_без родительской категории_'] + $this->entityManager->getRepository(
+                    Category::class
+                )->getFormFillArray()
+            )
+            ->addRule(Rules::REQUIRED)
         ;
-        $form->text('name', 'Наименование');
+        $form->text('name', 'Наименование')
+            ->addRule(Rules::REQUIRED)
+        ;
+
+        $form->text('url', 'URL')
+            ->addRule(Rules::REQUIRED)
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, такой url уже существует',
+                function () {
+                    $check = $this->categoryRepository->findOneBy(
+                        [
+                            'url' => $this->serverRequest->post('url'),
+                            'parent' => $this->categoryRepository->find($this->serverRequest->post('parent'))
+                        ]
+                    );
+                    return is_null($check);
+                }
+            )
+        ;
+
         $form->textarea('description', 'Описание');
 
         $form->submit('add');
@@ -88,13 +118,13 @@ final class Add implements ModelInterface
     private function doAction()
     {
         /** @var Category|null $parent */
-        $parent = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('parent'));
+        $parent = $this->categoryRepository->find($this->serverRequest->post('parent'));
         $category = new Category();
         $category->setParent($parent);
         $category->setSort(0);
         $category->setTitle($this->serverRequest->post('name'));
         $category->setDescription($this->serverRequest->post('description'));
-        $category->setUrl(URLify::slug($category->getTitle()));
+        $category->setUrl($this->serverRequest->post('url'));
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();

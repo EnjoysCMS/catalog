@@ -59,7 +59,7 @@ final class Category extends BaseController
     public function add(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getTemplatePath() . '/admin/addcategory.twig',
             $this->getContext($container->get(Add::class))
         );
     }
