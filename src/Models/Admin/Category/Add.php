@@ -12,9 +12,12 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
+use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
 final class Add implements ModelInterface
 {
@@ -23,17 +26,20 @@ final class Add implements ModelInterface
     private ServerRequestInterface $serverRequest;
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
+    private Environment $twig;
 
     public function __construct(
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
         RendererInterface $renderer,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        Environment $twig
     ) {
         $this->entityManager = $entityManager;
         $this->serverRequest = $serverRequest;
         $this->renderer = $renderer;
         $this->urlGenerator = $urlGenerator;
+        $this->twig = $twig;
     }
 
     public function getContext(): array
@@ -46,8 +52,12 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
+        $wysiwyg = new WYSIWYG(new Summernote());
+        $wysiwyg->setTwig($this->twig);
+
         return [
-            'form' => $this->renderer
+            'form' => $this->renderer,
+            'wysiwyg' => $wysiwyg->selector('#description'),
         ];
     }
 
@@ -69,6 +79,7 @@ final class Add implements ModelInterface
         )
         ;
         $form->text('name', 'Наименование');
+        $form->textarea('description', 'Описание');
 
         $form->submit('add');
         return $form;
@@ -82,6 +93,7 @@ final class Add implements ModelInterface
         $category->setParent($parent);
         $category->setSort(0);
         $category->setTitle($this->serverRequest->post('name'));
+        $category->setDescription($this->serverRequest->post('description'));
         $category->setUrl(URLify::slug($category->getTitle()));
 
         $this->entityManager->persist($category);

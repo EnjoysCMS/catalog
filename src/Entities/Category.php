@@ -50,6 +50,23 @@ class Category
     private string $url;
 
     /**
+     * @var string|null
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $description = null;
+
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
      * @Gedmo\TreeParent
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
@@ -136,7 +153,7 @@ class Category
     public function getSlug(): string
     {
         $parent = $this->getParent();
-        if($parent === null){
+        if ($parent === null) {
             return $this->getUrl();
         }
         return $parent->getSlug() . '/' . $this->getUrl();
@@ -144,12 +161,11 @@ class Category
 
     public function checkSlugs(array $slugs)
     {
-
-        if(empty($slugs)){
+        if (empty($slugs)) {
             return true;
         }
         $slug = array_shift($slugs);
-        if($slug !== $this->getUrl()){
+        if ($slug !== $this->getUrl()) {
             return false;
         }
         $parent = $this->getParent();
@@ -158,7 +174,7 @@ class Category
             return false;
         }
 
-        if($parent === null){
+        if ($parent === null) {
             return true;
         }
         return $parent->checkSlugs($slugs);

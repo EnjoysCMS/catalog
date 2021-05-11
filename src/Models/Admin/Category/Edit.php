@@ -13,8 +13,11 @@ use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
 final class Edit implements ModelInterface
 {
@@ -23,12 +26,14 @@ final class Edit implements ModelInterface
     private ServerRequestInterface $serverRequest;
     private UrlGeneratorInterface $urlGenerator;
     private ?Category $category;
+    private Environment $twig;
 
     public function __construct(
         RendererInterface $renderer,
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        Environment $twig
     ) {
         $this->renderer = $renderer;
         $this->entityManager = $entityManager;
@@ -37,11 +42,11 @@ final class Edit implements ModelInterface
 
         $this->category = $this->entityManager->getRepository(Category::class)->find(
             $this->serverRequest->get('id', 0)
-        )
-        ;
+        );
         if ($this->category === null) {
             Error::code(404);
         }
+        $this->twig = $twig;
     }
 
     public function getContext(): array
@@ -53,11 +58,15 @@ final class Edit implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
         }
+        $wysiwyg = new WYSIWYG(new Summernote());
+        $wysiwyg->setTwig($this->twig);
+
 
         return [
             'title' => $this->category->getTitle(),
             'subtitle' => 'Изменение категории',
-            'form' => $this->renderer
+            'form' => $this->renderer,
+            'wysiwyg' => $wysiwyg->selector('#description'),
         ];
     }
 
@@ -68,9 +77,11 @@ final class Edit implements ModelInterface
         $form->setDefaults(
             [
                 'title' => $this->category->getTitle(),
+                'description' => $this->category->getDescription(),
             ]
         );
         $form->text('title', 'Наименование');
+        $form->textarea('description', 'Описание');
         $form->submit('add');
         return $form;
     }
@@ -78,6 +89,7 @@ final class Edit implements ModelInterface
     private function doAction()
     {
         $this->category->setTitle($this->serverRequest->post('title'));
+        $this->category->setDescription($this->serverRequest->post('description'));
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }

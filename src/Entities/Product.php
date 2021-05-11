@@ -189,9 +189,6 @@ class Product
         return $slug . '/' . $this->getUrl();
     }
 
-    /**
-     * @return ArrayCollection
-     */
     public function getImages()
     {
         return $this->images;
