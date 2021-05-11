@@ -46,8 +46,9 @@ final class Product
      */
     public function view()
     {
-        $slug = array_reverse(explode('/', $this->serverRequest->get('slug')));
-        $product = $this->repository->findBySlug($slug);
+      //  $slug = array_reverse(explode('/', $this->serverRequest->get('slug')));
+        $product = $this->repository->findBySlug($this->serverRequest->get('slug'));
+//        $product = $this->repository->findByPath($this->serverRequest->get('slug'));
 
         if ($product === null) {
             Error::code(404);

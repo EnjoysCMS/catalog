@@ -12,20 +12,23 @@ class CategoryTest extends TestCase
     /**
      * @dataProvider dataUrlsForCheckSlugs
      */
-    public function testCheckSlugs($expect, $path)
+    public function testCheckSlugs($expect, $path, $urls)
     {
         $slugs = array_reverse(explode('/', $path));
 
-        $parentRoot = new Category();
-        $parentRoot->setUrl('root');
-
-        $subParent = new Category();
-        $subParent->setUrl('1');
-        $subParent->setParent($parentRoot);
+        $first = array_shift($urls);
 
         $category = new Category();
-        $category->setParent($subParent);
-        $category->setUrl('2');
+        $category->setUrl($first);
+        $category->setParent(null);
+
+        foreach ($urls as $url) {
+            $subcategory = new Category();
+            $subcategory->setUrl($url);
+            $subcategory->setParent($category);
+            $category = $subcategory;
+        }
+
 
         $this->assertSame($expect, $category->checkSlugs($slugs));
     }
@@ -33,11 +36,14 @@ class CategoryTest extends TestCase
     public function dataUrlsForCheckSlugs()
     {
         return [
-            [true, 'root/1/2'],
-            [false, 'same/root/1/2'],
-            [false, 'root/invalid/2'],
-            [false, 'root/1/0/2'],
-            [false, ''],
+            [true, 'root/1/2', ['root', '1', '2']],
+            [false, 'same/root/1/2', ['root', '1', '2']],
+            [false, 'root/invalid/2', ['root', '1', '2']],
+            [false, 'root/1/0/2', ['root', '1', '2']],
+            [false, '', ['root', '1', '2']],
+            [true, '1/1/1', ['1', '1', '1']],
         ];
     }
+
+
 }

@@ -13,13 +13,16 @@ use EnjoysCMS\Module\Catalog\Entities\Image;
 final class Product extends EntityRepository
 {
 
-    public function findBySlug(array $slugs)
+    public function findBySlug(string $slugs)
     {
-        $slug = array_shift($slugs);
-        $category = $this->getEntityManager()->getRepository(
+        $slugs = explode('/', $slugs);
+        $slug = array_pop($slugs);
+        /** @var Category $categoryRepository */
+        $categoryRepository = $this->getEntityManager()->getRepository(
             \EnjoysCMS\Module\Catalog\Entities\Category::class
-        )->findBySlug($slugs)
+        )
         ;
+        $category = $categoryRepository->findByPath(implode("/", $slugs));
 
         /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
 //        $product = $this->findOneBy(['url' => $slug, 'category' => $category]);
@@ -67,7 +70,6 @@ final class Product extends EntityRepository
         ;
         return $dql->getQuery()->getResult();
     }
-
 
 
     public function findAll(): array

@@ -6,13 +6,60 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
+use Doctrine\ORM\Query\Expr;
 use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 
 class Category extends ClosureTreeRepository
 {
 
-    public function findBySlug(array $slugs)
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function findByPath(string $path)
     {
+        $slugs = explode('/', $path);
+        $first = array_shift($slugs);
+        $alias = 'c';
+        $dql = $this->createQueryBuilder($alias);
+
+        $parameters = ['url' => $first];
+
+        $dql->where("{$alias}.parent IS NULL AND {$alias}.url = :url");
+        $parentJoin = "{$alias}.id";
+
+        foreach ($slugs as $k => $slug) {
+            $alias = $alias . $k;
+            //
+            $dql->leftJoin(
+                \EnjoysCMS\Module\Catalog\Entities\Category::class,
+                $alias,
+                Expr\Join::WITH,
+                "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k}"
+            );
+
+            $parameters['url' . $k] = $slug;
+
+            $parentJoin = $alias . '.id';
+        }
+
+        $dql->select($alias);
+
+        $dql->setParameters($parameters);
+
+        $query = $dql->getQuery();
+
+        return $query->getSingleResult();
+    }
+
+    /**
+     * @param string $slugs
+     * @return object|null
+     * @deprecated use findByPath
+     */
+    public function findBySlug(string $slugs)
+    {
+        $slugs = array_reverse(explode('/', $slugs));
         $slug = array_shift($slugs);
         $category = $this->findOneBy(['url' => $slug]);
 
@@ -51,8 +98,8 @@ class Category extends ClosureTreeRepository
     public function getNodes($node = null, $orderBy = 'sort', $direction = 'asc')
     {
         $dql = $this->childrenQueryBuilder($node, true, $orderBy, $direction);
-       // $dql->leftJoin('node.children', 'child');
-      //  var_dump($dql->getQuery());
+        // $dql->leftJoin('node.children', 'child');
+        //  var_dump($dql->getQuery());
         return $dql->getQuery()->getResult();
     }
 
@@ -77,9 +124,12 @@ class Category extends ClosureTreeRepository
     public function getAllIds($node = null)
     {
         $nodes = $this->getChildren($node);
-        $ids = array_map(function ($node){
-            return $node->getId();
-        }, $nodes);
+        $ids = array_map(
+            function ($node) {
+                return $node->getId();
+            },
+            $nodes
+        );
         $ids[] = $node->getId();
         return $ids;
     }

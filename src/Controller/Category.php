@@ -47,16 +47,12 @@ final class Category
      */
     public function view()
     {
-        $slugs = array_reverse(explode('/', $this->serverRequest->get('slug')));
-
-        $category = $this->categoryRepository->findBySlug($slugs);
-
+        $category = $this->categoryRepository->findByPath($this->serverRequest->get('slug'));
         if ($category === null) {
             Error::code(404);
         }
 
         $products = $this->productRepository->findByCategory($category);
-
 
         $template_path = '@m/catalog/category.twig';
 

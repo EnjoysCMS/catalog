@@ -159,6 +159,11 @@ class Category
         return $parent->getSlug() . '/' . $this->getUrl();
     }
 
+    /**
+     * @param array $slugs
+     * @return bool
+     * @deprecated
+     */
     public function checkSlugs(array $slugs)
     {
         if (empty($slugs)) {
