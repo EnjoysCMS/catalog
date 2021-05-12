@@ -25,7 +25,7 @@ class Category extends ClosureTreeRepository
 
         $parameters = ['url' => $first];
 
-        $dql->where("{$alias}.parent IS NULL AND {$alias}.url = :url");
+        $dql->where("{$alias}.parent IS NULL AND {$alias}.url = :url  AND {$alias}.status = true");
         $parentJoin = "{$alias}.id";
 
         foreach ($slugs as $k => $slug) {
@@ -35,21 +35,21 @@ class Category extends ClosureTreeRepository
                 \EnjoysCMS\Module\Catalog\Entities\Category::class,
                 $alias,
                 Expr\Join::WITH,
-                "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k}"
+                "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k} AND {$alias}.status = true"
             );
 
             $parameters['url' . $k] = $slug;
 
             $parentJoin = $alias . '.id';
         }
-
+        //$dql->andWhere("{$alias}.status = true");
         $dql->select($alias);
 
         $dql->setParameters($parameters);
 
         $query = $dql->getQuery();
 
-        return $query->getSingleResult();
+        return $query->getOneOrNullResult();
     }
 
     /**

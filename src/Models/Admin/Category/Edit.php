@@ -87,8 +87,15 @@ final class Edit implements ModelInterface
                 'title' => $this->category->getTitle(),
                 'description' => $this->category->getDescription(),
                 'url' => $this->category->getUrl(),
+                'status' => [(int) $this->category->isStatus()],
             ]
         );
+
+        $form->checkbox('status', null)
+            ->addClass('custom-switch custom-switch-off-danger custom-switch-on-success', Form::ATTRIBUTES_FILLABLE_BASE)
+            ->fill([1 => 'Статус категории'])
+        ;
+
         $form->text('title', 'Наименование')
             ->addRule(Rules::REQUIRED)
         ;
@@ -125,6 +132,7 @@ final class Edit implements ModelInterface
         $this->category->setTitle($this->serverRequest->post('title'));
         $this->category->setDescription($this->serverRequest->post('description'));
         $this->category->setUrl($this->serverRequest->post('url'));
+        $this->category->setStatus((bool)$this->serverRequest->post('status', false));
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }

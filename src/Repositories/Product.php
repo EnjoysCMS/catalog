@@ -24,8 +24,7 @@ final class Product extends EntityRepository
         ;
         $category = $categoryRepository->findByPath(implode("/", $slugs));
 
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
-//        $product = $this->findOneBy(['url' => $slug, 'category' => $category]);
+
         $dql = $this->createQueryBuilder('p')
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
@@ -37,7 +36,7 @@ final class Product extends EntityRepository
             ->setParameter('url', $slug)
         ;
 
-        $product = $dql->getQuery()->getSingleResult();
+        $product = $dql->getQuery()->getOneOrNullResult();
 
         if ($product === null) {
             return null;

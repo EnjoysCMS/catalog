@@ -74,16 +74,20 @@ final class Edit implements ModelInterface
 
     private function getForm(): Form
     {
+        $defaults = [
+            'name' => $this->product->getName(),
+            'url' => $this->product->getUrl(),
+            'description' => $this->product->getDescription(),
+        ];
+
+        $category = $this->product->getCategory();
+        if ($category instanceof Category) {
+            $defaults['category'] = $category->getId();
+        }
+
         $form = new Form(['method' => 'post']);
 
-        $form->setDefaults(
-            [
-                'category' => $this->product->getCategory()->getId(),
-                'name' => $this->product->getName(),
-                'url' => $this->product->getUrl(),
-                'description' => $this->product->getDescription(),
-            ]
-        );
+        $form->setDefaults($defaults);
 
 
         $form->select('category', 'Категория')->fill(
@@ -109,7 +113,9 @@ final class Edit implements ModelInterface
         $this->product->setDescription($this->serverRequest->post('description'));
         $this->product->setCategory($category);
         $this->product->setUrl(
-            (empty($this->serverRequest->post('url'))) ? URLify::slug($this->product->getName()) : $this->serverRequest->post('url')
+            (empty($this->serverRequest->post('url'))) ? URLify::slug(
+                $this->product->getName()
+            ) : $this->serverRequest->post('url')
         );
 
         $this->entityManager->flush();

@@ -8,16 +8,18 @@
         {% import _self as self %}
 
         <li class="dd-item dd3-item" data-id="{{ category.getId }}">
-            <div class="dd-handle dd3-handle"></div>
-            <div class="dd3-content">{{ category.getTitle }}
-                <br/>
-                <a href="{{ path('catalog/admin/category/delete', {"id": category.getId}) }}" class="small">удалить</a>
-                <a href="{{ path('catalog/admin/category/edit', {"id": category.getId}) }}" class="small">редактировать</a>
-                <a href="{{ path('catalog/admin/category/add', {"parent_id": category.getId}) }}"
-                   class="small">добавить</a>
-                <a href="{{ path('catalog/category', {"slug": category.getSlug}) }}" class="small"><i class="fa fa-globe"></i></a>
-                <br/>
-                <small><?=$item['seo']?></small>
+            <div class="dd-handle dd3-handle{% if not category.isStatus %} bg-danger{% endif %}"></div>
+            <div class="dd3-content{% if not category.isStatus %} bg-danger{% endif %}">
+                {{ category.getTitle }}
+                <div class="small">
+                    <a href="{{ path('catalog/admin/category/delete', {"id": category.getId}) }}">[удалить]</a>
+                    <a href="{{ path('catalog/admin/category/edit', {"id": category.getId}) }}">[редактировать]</a>
+                    <a href="{{ path('catalog/admin/category/add', {"parent_id": category.getId}) }}">[добавить]</a>
+                    <a href="{{ path('catalog/category', {"slug": category.getSlug}) }}">[ссылка]</a>
+                </div>
+                <div class="small">
+                    {{ path('catalog/category', {"slug": category.getSlug}) }}
+                </div>
             </div>
             {% if category.getChildren|length %}
                 <ol class="dd-list">

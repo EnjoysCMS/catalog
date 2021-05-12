@@ -39,7 +39,7 @@ final class Category extends BaseController
     public function index(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/index.twig',
+            $this->getTemplatePath() . '/admin/category.twig',
             $this->getContext($container->get(Index::class))
         );
     }
