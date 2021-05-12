@@ -38,7 +38,7 @@ final class CategoryTree  extends AbstractBlock
     {
 
         return $this->twig->render($this->templatePath, [
-             'tree' => $this->categoryRepository->getTree()
+             'tree' => $this->categoryRepository->getNodes(null, ['status' => true]),
         ]);
     }
 

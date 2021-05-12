@@ -1,0 +1,21 @@
+{% macro recursiveCategory(category) %}
+    {% import _self as self %}
+
+    <li><a href="{{ path('catalog/category', {"slug": category.getSlug}) }}">{{ category.getTitle }}</a>
+        {% if category.getChildren|length %}
+            <ul>
+                {% for child in category.getChildren %}
+                    {{ self.recursiveCategory(child) }}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </li>
+{% endmacro %}
+
+{% from _self import recursiveCategory %}
+
+<ul>
+    {% for category in tree %}
+        {{ recursiveCategory(category) }}
+    {% endfor %}
+</ul>
