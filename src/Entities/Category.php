@@ -14,6 +14,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @Gedmo\Tree(type="closure")
  * @Gedmo\TreeClosure(class="EnjoysCMS\Module\Catalog\Entities\CategoryClosure")
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
+ * @ORM\Table(name="categories")
  */
 class Category
 {
