@@ -179,32 +179,6 @@ class Category
     }
 
     /**
-     * @param array $slugs
-     * @return bool
-     * @deprecated
-     */
-    public function checkSlugs(array $slugs)
-    {
-        if (empty($slugs)) {
-            return true;
-        }
-        $slug = array_shift($slugs);
-        if ($slug !== $this->getUrl()) {
-            return false;
-        }
-        $parent = $this->getParent();
-
-        if ($parent === null && !empty($slugs)) {
-            return false;
-        }
-
-        if ($parent === null) {
-            return true;
-        }
-        return $parent->checkSlugs($slugs);
-    }
-
-    /**
      * @return mixed
      */
     public function getChildren()

@@ -53,54 +53,6 @@ class Category extends ClosureTreeRepository
         return $query->getOneOrNullResult();
     }
 
-    /**
-     * @param string $slugs
-     * @return object|null
-     * @deprecated use findByPath
-     */
-    public function findBySlug(string $slugs)
-    {
-        $slugs = array_reverse(explode('/', $slugs));
-        $slug = array_shift($slugs);
-        $category = $this->findOneBy(['url' => $slug]);
-
-        if ($category === null) {
-            return null;
-        }
-
-
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $parent */
-        $parent = $category->getParent();
-        if ($parent !== null && !$parent->checkSlugs($slugs)) {
-            return null;
-        }
-
-        if ($parent === null && !empty($slugs)) {
-            return null;
-        }
-
-        return $category;
-    }
-
-    /**
-     * @param null $node
-     * @return array|string
-     * @deprecated
-     */
-    public function getTree($node = null)
-    {
-        return $this->childrenHierarchy(
-            $node,
-            false,
-            [
-                'childSort' => [
-                    'field' => 'sort',
-                    'dir' => 'asc'
-                ]
-            ]
-        );
-    }
-
     public function getNodes($node = null, $criteria = [], $orderBy = 'sort', $direction = 'asc')
     {
         //$parameters = [];

@@ -8,7 +8,6 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
-use EnjoysCMS\Module\Catalog\Entities\Image;
 
 final class Product extends EntityRepository
 {
