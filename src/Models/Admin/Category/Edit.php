@@ -89,6 +89,13 @@ final class Edit implements ModelInterface
                 'url' => $this->category->getUrl(),
             ]
         );
+
+        $form->checkbox('status', null)
+            ->addClass('custom-switch custom-switch-off-danger custom-switch-on-success')
+            ->fill([1 => ['Статус категории', ['disabled']]])
+
+        ;
+
         $form->text('title', 'Наименование')
             ->addRule(Rules::REQUIRED)
         ;

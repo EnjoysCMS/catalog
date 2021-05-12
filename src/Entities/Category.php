@@ -67,6 +67,24 @@ class Category
     }
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default": true})
+     */
+    private bool $status = true;
+
+
+
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): void
+    {
+        $this->status = $status;
+    }
+
+    /**
      * @Gedmo\TreeParent
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
