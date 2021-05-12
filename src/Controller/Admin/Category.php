@@ -79,7 +79,7 @@ final class Category extends BaseController
     public function edit(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getTemplatePath() . '/admin/editcategory.twig',
             $this->getContext($container->get(Edit::class))
         );
     }

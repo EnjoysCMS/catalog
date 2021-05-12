@@ -88,7 +88,7 @@ final class Add implements ModelInterface
             )
             ->addRule(Rules::REQUIRED)
         ;
-        $form->text('name', 'Наименование')
+        $form->text('title', 'Наименование')
             ->addRule(Rules::REQUIRED)
         ;
 
@@ -122,7 +122,7 @@ final class Add implements ModelInterface
         $category = new Category();
         $category->setParent($parent);
         $category->setSort(0);
-        $category->setTitle($this->serverRequest->post('name'));
+        $category->setTitle($this->serverRequest->post('title'));
         $category->setDescription($this->serverRequest->post('description'));
         $category->setUrl($this->serverRequest->post('url'));
 
