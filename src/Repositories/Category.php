@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Query\Expr;
 use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 
@@ -81,6 +82,11 @@ class Category extends ClosureTreeRepository
         return $category;
     }
 
+    /**
+     * @param null $node
+     * @return array|string
+     * @deprecated
+     */
     public function getTree($node = null)
     {
         return $this->childrenHierarchy(
@@ -95,11 +101,34 @@ class Category extends ClosureTreeRepository
         );
     }
 
-    public function getNodes($node = null, $orderBy = 'sort', $direction = 'asc')
+    public function getNodes($node = null, $criteria = [], $orderBy = 'sort', $direction = 'asc')
     {
+        //$parameters = [];
+        $maxLevel = $this->createQueryBuilder('c')->select('max(c.level)')->getQuery()->getSingleScalarResult();
         $dql = $this->childrenQueryBuilder($node, true, $orderBy, $direction);
-        // $dql->leftJoin('node.children', 'child');
-        //  var_dump($dql->getQuery());
+
+        foreach ($criteria as $field => $value) {
+            $dql->addCriteria(Criteria::create()->where(Criteria::expr()->eq($field, $value)));
+        }
+
+        $parentAlias = 'node';
+        for ($i = 2; $i <= $maxLevel; $i++) {
+            $condition = "c{$i}.level = $i and c{$i}.parent = {$parentAlias}.id";
+            foreach ($criteria as $field => $value) {
+                $condition .= " AND c{$i}.{$field} = :{$field}";
+              //  $parameters[$field] = $value;
+            }
+            $dql->leftJoin(
+                "{$parentAlias}.children",
+                "c{$i}",
+                Expr\Join::WITH,
+                $condition
+            );
+
+            $parentAlias = "c{$i}";
+            $dql->addSelect("c{$i}");
+        }
+       // $dql->setParameters($parameters); //параметры биндятся автоматически, чудеса )
         return $dql->getQuery()->getResult();
     }
 
