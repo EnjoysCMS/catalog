@@ -132,6 +132,7 @@ final class Edit implements ModelInterface
         $this->category->setTitle($this->serverRequest->post('title'));
         $this->category->setDescription($this->serverRequest->post('description'));
         $this->category->setUrl($this->serverRequest->post('url'));
+        $this->category->setStatus((bool)$this->serverRequest->post('status', false));
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
