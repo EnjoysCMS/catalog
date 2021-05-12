@@ -8,6 +8,7 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -28,6 +29,10 @@ final class Edit implements ModelInterface
     private UrlGeneratorInterface $urlGenerator;
     private Environment $twig;
     private ?Product $product;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     */
+    private $productRepository;
 
     public function __construct(
         EntityManager $entityManager,
@@ -42,11 +47,10 @@ final class Edit implements ModelInterface
         $this->urlGenerator = $urlGenerator;
         $this->twig = $twig;
 
-
-        $this->product = $this->entityManager->getRepository(Product::class)->find(
+        $this->productRepository = $entityManager->getRepository(Product::class);
+        $this->product = $this->productRepository->find(
             $this->serverRequest->get('id', 0)
-        )
-        ;
+        );
         if ($this->product === null) {
             Error::code(404);
         }
@@ -90,14 +94,37 @@ final class Edit implements ModelInterface
         $form->setDefaults($defaults);
 
 
-        $form->select('category', 'Категория')->fill(
-            $this->entityManager->getRepository(
-                Category::class
-            )->getFormFillArray()
-        )
+        $form->select('category', 'Категория')
+            ->fill(
+                $this->entityManager->getRepository(
+                    Category::class
+                )->getFormFillArray()
+            )
+            ->addRule(Rules::REQUIRED)
         ;
-        $form->text('name', 'Наименование');
-        $form->text('url', 'URL');
+        $form->text('name', 'Наименование')
+            ->addRule(Rules::REQUIRED)
+        ;
+        $form->text('url', 'URL')
+            ->addRule(Rules::REQUIRED)
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, такой url уже существует',
+                function () {
+                    $url = $this->serverRequest->post('url');
+                    if ($url === $this->product->getUrl()) {
+                        return true;
+                    }
+                    $check = $this->productRepository->findOneBy(
+                        [
+                            'url' => $url,
+                            'category' => $this->product->getCategory()
+                        ]
+                    );
+                    return is_null($check);
+                }
+            )
+        ;
         $form->textarea('description', 'Описание');
 
         $form->submit('add');
@@ -107,15 +134,18 @@ final class Edit implements ModelInterface
     private function doAction()
     {
         /** @var Category|null $category */
-        $category = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('category'));
+        $category = $this->entityManager->getRepository(Category::class)->find(
+            $this->serverRequest->post('category', 0)
+        )
+        ;
 
         $this->product->setName($this->serverRequest->post('name'));
         $this->product->setDescription($this->serverRequest->post('description'));
         $this->product->setCategory($category);
         $this->product->setUrl(
-            (empty($this->serverRequest->post('url'))) ? URLify::slug(
-                $this->product->getName()
-            ) : $this->serverRequest->post('url')
+            (empty($this->serverRequest->post('url')))
+                ? URLify::slug($this->product->getName())
+                : $this->serverRequest->post('url')
         );
 
         $this->entityManager->flush();

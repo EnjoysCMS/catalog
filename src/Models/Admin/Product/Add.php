@@ -8,6 +8,7 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
@@ -26,6 +27,14 @@ final class Add implements ModelInterface
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
     private Environment $twig;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     */
+    private $productRepository;
+    /**
+     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     */
+    private $categoryRepository;
 
     public function __construct(
         EntityManager $entityManager,
@@ -39,6 +48,9 @@ final class Add implements ModelInterface
         $this->renderer = $renderer;
         $this->urlGenerator = $urlGenerator;
         $this->twig = $twig;
+
+        $this->productRepository = $entityManager->getRepository(Product::class);
+        $this->categoryRepository = $entityManager->getRepository(Category::class);
     }
 
     public function getContext(): array
@@ -61,6 +73,9 @@ final class Add implements ModelInterface
         ];
     }
 
+    /**
+     * @throws \Enjoys\Forms\Exception\ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form(['method' => 'post']);
@@ -72,38 +87,63 @@ final class Add implements ModelInterface
         );
 
 
-        $form->select('category', 'Категория')->fill(
-            $this->entityManager->getRepository(
-                Category::class
-            )->getFormFillArray()
-        )
+        $form->select('category', 'Категория')
+            ->fill(
+                $this->entityManager->getRepository(
+                    Category::class
+                )->getFormFillArray()
+            )
+            ->addRule(Rules::REQUIRED)
         ;
-        $form->text('name', 'Наименование');
-        $form->text('url', 'URL');
+        $form->text('name', 'Наименование')
+            ->addRule(Rules::REQUIRED)
+        ;
+        $form->text('url', 'URL')
+            ->addRule(Rules::REQUIRED)
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, такой url уже существует',
+                function () {
+                    $check = $this->productRepository->findOneBy(
+                        [
+                            'url' => $this->serverRequest->post('url'),
+                            'category' => $this->categoryRepository->find($this->serverRequest->post('category'))
+                        ]
+                    );
+                    return is_null($check);
+                }
+            )
+        ;
         $form->textarea('description', 'Описание');
 
         $form->submit('add');
         return $form;
     }
 
+    /**
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
+     */
     private function doAction()
     {
-        /** @var Category|null $category */
-        $category = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('category'));
+        $category = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('category', 0));
+
         $product = new Product();
         $product->setName($this->serverRequest->post('name'));
         $product->setDescription($this->serverRequest->post('description'));
+        /** @var Category $category */
         $product->setCategory($category);
         $product->setUrl(
-            (empty($this->serverRequest->post('url'))) ? URLify::slug($product->getName()) : URLify::slug(
-                $this->serverRequest->post('url')
-            )
+            (empty($this->serverRequest->post('url')))
+                ? URLify::slug($product->getName())
+                : $this->serverRequest->post('url')
         );
         $product->setArticle(null);
         $product->setHide(false);
         $product->setActive(true);
 
         $this->entityManager->persist($product);
+
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }

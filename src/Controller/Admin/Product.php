@@ -61,7 +61,7 @@ final class Product extends BaseController
     public function add(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getTemplatePath() . '/admin/addproduct.twig',
             $this->getContext($container->get(Add::class))
         );
     }
@@ -81,7 +81,7 @@ final class Product extends BaseController
     public function edit(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->getTemplatePath() . '/admin/editproduct.twig',
             $this->getContext($container->get(Edit::class))
         );
     }
