@@ -6,9 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
@@ -56,6 +56,7 @@ final class Category
      *      "aclComment": "[public] Просмотр категорий"
      *     }
      * )
+     * @throws \Exception
      */
     public function view(ContainerInterface $container): string
     {
@@ -74,7 +75,16 @@ final class Category
             );
         }
 
-        $products = $this->productRepository->findByCategory($category);
+//        $products = $this->productRepository->findByCategory($category);
+        $limit = 2;
+        $page = 1;
+        $qb = $this->productRepository
+            ->getQueryFindByCategory($category)
+            ->setFirstResult($limit * ($page - 1))
+            ->setMaxResults($limit)
+        ;
+        $paginator = new Paginator($qb);
+
 
         $template_path = '@m/catalog/category.twig';
 
@@ -86,7 +96,13 @@ final class Category
             $template_path,
             [
                 'category' => $category,
-                'products' => $products,
+                'pagination' => true,
+                'paginationTotalCount' => $paginator->count(),
+                'paginationTotalPages' => floor($paginator->count() / $limit),
+                'paginationCurrentPage' => $page,
+                'paginationPrevPage' => $page - 1,
+                'paginationNextPage' => $page + 1,
+                'products' => $paginator->getIterator()->getArrayCopy(),
                 'breadcrumbs' => $breadcrumbs->get(),
             ]
         );

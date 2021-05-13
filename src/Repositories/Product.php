@@ -58,17 +58,17 @@ final class Product extends EntityRepository
 
     public function getQueryBuilderFindByCategory(Category $category): QueryBuilder
     {
-        $dql = $this->createQueryBuilder('p')
+        return $this->createQueryBuilder('p')
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
             ->where('p.category = :category')
             ->setParameter('category', $category)
-        ;
-
-        return $dql;
+            ;
     }
+
+
 
     public function findByCategorysIds($categoryIds)
     {
