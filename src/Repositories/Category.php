@@ -58,16 +58,31 @@ class Category extends ClosureTreeRepository
     }
 
     /**
-     * @param null $node
-     * @param array $criteria
-     * @param string $orderBy
-     * @param string $direction
-     * @return int|mixed|string
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     public function getChildNodes($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc')
+    {
+        return $this->getChildNodesQuery($node, $criteria, $orderBy, $direction)->getResult();
+    }
+
+    /**
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getChildNodesQuery($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc'): \Doctrine\ORM\Query
+    {
+        return $this->getChildNodesQueryBuilder($node, $criteria, $orderBy, $direction)->getQuery();
+    }
+
+    /**
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getChildNodesQueryBuilder($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc'): \Doctrine\ORM\QueryBuilder
     {
         $currentLevel = 0;
         $maxLevel = $this->createQueryBuilder('c')
@@ -135,9 +150,14 @@ class Category extends ClosureTreeRepository
             $dql->addSelect("c{$i}");
         }
 
-        return $dql->getQuery()->getResult();
+        return $dql;
     }
 
+    /**
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getFormFillArray(): array
     {
         return $this->_build($this->getChildNodes());
@@ -156,7 +176,7 @@ class Category extends ClosureTreeRepository
         return $ret;
     }
 
-    public function getAllIds($node = null)
+    public function getAllIds($node = null): array
     {
         $nodes = $this->getChildren($node);
         $ids = array_map(

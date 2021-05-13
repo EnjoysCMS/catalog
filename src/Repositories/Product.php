@@ -7,7 +7,10 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
+use EnjoysCMS\Module\Catalog\Entities\Category;
 
 final class Product extends EntityRepository
 {
@@ -43,7 +46,17 @@ final class Product extends EntityRepository
         return $product;
     }
 
-    public function findByCategory($category)
+    public function findByCategory(Category $category)
+    {
+        return $this->getQueryFindByCategory($category)->getResult();
+    }
+
+    public function getQueryFindByCategory(Category $category): Query
+    {
+        return $this->getQueryBuilderFindByCategory($category)->getQuery();
+    }
+
+    public function getQueryBuilderFindByCategory(Category $category): QueryBuilder
     {
         $dql = $this->createQueryBuilder('p')
             ->select('p', 'c', 't', 'i')
@@ -53,7 +66,8 @@ final class Product extends EntityRepository
             ->where('p.category = :category')
             ->setParameter('category', $category)
         ;
-        return $dql->getQuery()->getResult();
+
+        return $dql;
     }
 
     public function findByCategorysIds($categoryIds)
