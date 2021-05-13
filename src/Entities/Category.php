@@ -178,6 +178,26 @@ class Category
         return $parent->getSlug() . '/' . $this->getUrl();
     }
 
+    public function getFullTitle($separator = " / "): string
+    {
+        $parent = $this->getParent();
+        if ($parent === null) {
+            return $this->getTitle();
+        }
+        return $parent->getFullTitle($separator) . $separator . $this->getTitle();
+    }
+
+    public function getOnlyParentFullTitle($separator = " / "): string
+    {
+        $parent = $this->getParent();
+
+        if ($parent === null) {
+            return '';
+        }
+
+        return $parent->getFullTitle($separator);
+    }
+
     /**
      * @return mixed
      */
