@@ -62,7 +62,7 @@ final class Product
         }
 
         $breadcrumbs = new Breadcrumbs($container);
-
+        $breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
         foreach ($product->getCategory()->getBreadcrumbs() as $breadcrumb) {
             $breadcrumbs->add(
                 $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),

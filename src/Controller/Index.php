@@ -6,8 +6,10 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
+use App\Components\Breadcrumbs;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
@@ -36,7 +38,7 @@ final class Index
      *     }
      * )
      */
-    public function view()
+    public function view(ContainerInterface $container)
     {
 
         $categories = $this->categoryRepository->getRootNodes();
@@ -48,10 +50,14 @@ final class Index
             $template_path =  __DIR__ . '/../../template/category_index.twig.sample';
         }
 
+        $breadcrumbs = new Breadcrumbs($container);
+        $breadcrumbs->add(null, 'Каталог');
+
         return $this->twig->render(
             $template_path,
             [
                 'categories' => $categories,
+                'breadcrumbs' => $breadcrumbs->get(),
             ]
         );
     }
