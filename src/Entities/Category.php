@@ -198,6 +198,20 @@ class Category
         return $parent->getFullTitle($separator);
     }
 
+    public function getBreadcrumbs(): array
+    {
+        $parent = $this->getParent();
+        $data = [[
+            'slug' => $this->getSlug(),
+            'title' => $this->getTitle(),
+        ]];
+        if ($parent === null) {
+            return $data;
+        }
+
+        return array_merge($parent->getBreadcrumbs(),  $data);
+    }
+
     /**
      * @return mixed
      */

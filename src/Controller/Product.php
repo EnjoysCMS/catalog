@@ -6,13 +6,16 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
+use App\Components\Breadcrumbs;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Module\Catalog\Entities\Image;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 final class Product
@@ -25,13 +28,19 @@ final class Product
     private ServerRequestInterface $serverRequest;
     private Environment $twig;
     private EntityManager $entityManager;
+    private UrlGeneratorInterface $urlGenerator;
 
-    public function __construct(ServerRequestInterface $serverRequest, EntityManager $entityManager, Environment $twig)
-    {
+    public function __construct(
+        ServerRequestInterface $serverRequest,
+        EntityManager $entityManager,
+        Environment $twig,
+        UrlGeneratorInterface $urlGenerator
+    ) {
         $this->entityManager = $entityManager;
         $this->repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class);
         $this->serverRequest = $serverRequest;
         $this->twig = $twig;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
@@ -44,15 +53,24 @@ final class Product
      *     }
      * )
      */
-    public function view()
+    public function view(ContainerInterface $container)
     {
-      //  $slug = array_reverse(explode('/', $this->serverRequest->get('slug')));
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
         $product = $this->repository->findBySlug($this->serverRequest->get('slug'));
-//        $product = $this->repository->findByPath($this->serverRequest->get('slug'));
-
         if ($product === null) {
             Error::code(404);
         }
+
+        $breadcrumbs = new Breadcrumbs($container);
+
+        foreach ($product->getCategory()->getBreadcrumbs() as $breadcrumb) {
+            $breadcrumbs->add(
+                $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
+                $breadcrumb['title']
+            );
+        }
+        $breadcrumbs->add(null, $product->getName());
+
 
         $template_path = '@m/catalog/product.twig';
 
@@ -78,7 +96,7 @@ final class Product
             $template_path,
             [
                 'product' => $product,
-                //  'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $product])
+                'breadcrumbs' => $breadcrumbs->get(),
             ]
         );
     }
