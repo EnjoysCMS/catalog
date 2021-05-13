@@ -6,13 +6,11 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use App\Components\Breadcrumbs;
 use Doctrine\ORM\EntityManager;
-use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Error;
-use EnjoysCMS\Module\Catalog\Entities\Image;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -61,7 +59,7 @@ final class Product
             Error::code(404);
         }
 
-        $breadcrumbs = new Breadcrumbs($container);
+        $breadcrumbs = $container->get(BreadcrumbsInterface::class);
         $breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
         foreach ($product->getCategory()->getBreadcrumbs() as $breadcrumb) {
             $breadcrumbs->add(

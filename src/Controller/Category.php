@@ -6,12 +6,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use App\Components\Breadcrumbs;
+
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -64,7 +65,7 @@ final class Category
             Error::code(404);
         }
 
-        $breadcrumbs = new Breadcrumbs($container);
+        $breadcrumbs = $container->get(BreadcrumbsInterface::class);
         $breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
         foreach ($category->getBreadcrumbs() as $breadcrumb) {
             $breadcrumbs->add(
