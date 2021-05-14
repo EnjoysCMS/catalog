@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
+use App\Helper\Pagination;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -76,15 +77,16 @@ final class Category
         }
 
 //        $products = $this->productRepository->findByCategory($category);
-        $limit = 2;
-        $page = 1;
+        $pagination = new Pagination($this->serverRequest->get('page', 1), 1);
+
         $qb = $this->productRepository
             ->getQueryFindByCategory($category)
-            ->setFirstResult($limit * ($page - 1))
-            ->setMaxResults($limit)
+            ->setFirstResult($pagination->getOffset())
+            ->setMaxResults($pagination->getLimitItems())
         ;
-        $paginator = new Paginator($qb);
+        $result = new Paginator($qb);
 
+        $pagination->setTotalItems($result->count());
 
         $template_path = '@m/catalog/category.twig';
 
@@ -96,13 +98,8 @@ final class Category
             $template_path,
             [
                 'category' => $category,
-                'pagination' => true,
-                'paginationTotalCount' => $paginator->count(),
-                'paginationTotalPages' => floor($paginator->count() / $limit),
-                'paginationCurrentPage' => $page,
-                'paginationPrevPage' => $page - 1,
-                'paginationNextPage' => $page + 1,
-                'products' => $paginator->getIterator()->getArrayCopy(),
+                'pagination' => $pagination,
+                'products' => $result,
                 'breadcrumbs' => $breadcrumbs->get(),
             ]
         );
