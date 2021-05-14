@@ -10,8 +10,10 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\QueryBuilder;
 use Gedmo\Exception\InvalidArgumentException;
 use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 
@@ -71,7 +73,7 @@ class Category extends ClosureTreeRepository
     ) {
         return $this
             ->getChildNodesQuery($node, $criteria, $orderBy, $direction)
-            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
+//            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
             ->getResult()
             ;
     }
@@ -86,7 +88,7 @@ class Category extends ClosureTreeRepository
         array $criteria = [],
         string $orderBy = 'sort',
         string $direction = 'asc'
-    ): \Doctrine\ORM\Query {
+    ): Query {
         return $this->getChildNodesQueryBuilder($node, $criteria, $orderBy, $direction)->getQuery();
     }
 
@@ -100,8 +102,9 @@ class Category extends ClosureTreeRepository
         array $criteria = [],
         string $orderBy = 'sort',
         string $direction = 'asc'
-    ): \Doctrine\ORM\QueryBuilder {
+    ): QueryBuilder {
         $currentLevel = 0;
+
         $maxLevel = $this->createQueryBuilder('c')
             ->select('max(c.level)')
             ->getQuery()
@@ -147,7 +150,7 @@ class Category extends ClosureTreeRepository
         }
 
         $parentAlias = 'node';
-        for ($i = $currentLevel + 2; $i <= $maxLevel; $i++) {
+        for ($i = $currentLevel + 2; $i <= $maxLevel + 1; $i++) {
             $condition = "c{$i}.level = $i and c{$i}.parent = {$parentAlias}.id";
             foreach ($criteria as $field => $value) {
                 $condition .= " AND c{$i}.{$field} = :{$field}";
