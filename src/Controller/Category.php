@@ -10,16 +10,20 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
+use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 
 final class Category
 {
+
+    use Options;
 
     /**
      * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
@@ -33,6 +37,7 @@ final class Category
     private $productRepository;
     private UrlGeneratorInterface $urlGenerator;
 
+
     public function __construct(
         ServerRequestInterface $serverRequest,
         EntityManager $entityManager,
@@ -44,6 +49,12 @@ final class Category
         $this->serverRequest = $serverRequest;
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
+
+        $configFile = __DIR__.'/../../config.yml.dist';
+        if(file_exists(__DIR__.'/../../config.yml')){
+            $configFile = __DIR__.'/../../config.yml';
+        }
+        $this->setOptions(Yaml::parseFile($configFile));
     }
 
     /**
@@ -81,7 +92,7 @@ final class Category
         }
 
 //        $products = $this->productRepository->findByCategory($category);
-        $pagination = new Pagination($this->serverRequest->get('page', 1), 3);
+        $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
 
         $qb = $this->productRepository
             ->getQueryFindByCategory($category)
