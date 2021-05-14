@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -15,13 +16,16 @@ use EnjoysCMS\Module\Catalog\Entities\Category;
 final class Product extends EntityRepository
 {
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function findBySlug(string $slugs)
     {
         $slugs = explode('/', $slugs);
         $slug = array_pop($slugs);
         /** @var Category $categoryRepository */
         $categoryRepository = $this->getEntityManager()->getRepository(
-            \EnjoysCMS\Module\Catalog\Entities\Category::class
+            Category::class
         )
         ;
         $category = $categoryRepository->findByPath(implode("/", $slugs));
@@ -38,7 +42,8 @@ final class Product extends EntityRepository
             ->setParameter('url', $slug)
         ;
 
-        $product = $dql->getQuery()->getOneOrNullResult();
+
+        $product = $dql->getQuery()->setMaxResults(1)->getOneOrNullResult();
 
         if ($product === null) {
             return null;
