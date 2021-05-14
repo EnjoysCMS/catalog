@@ -77,7 +77,7 @@ final class Category
         }
 
 //        $products = $this->productRepository->findByCategory($category);
-        $pagination = new Pagination($this->serverRequest->get('page', 1), 1);
+        $pagination = new Pagination($this->serverRequest->get('page', 1), 12);
 
         $qb = $this->productRepository
             ->getQueryFindByCategory($category)
@@ -85,6 +85,7 @@ final class Category
             ->setMaxResults($pagination->getLimitItems())
         ;
         $result = new Paginator($qb);
+
 
         $pagination->setTotalItems($result->count());
 
