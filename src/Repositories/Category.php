@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr;
@@ -62,9 +63,17 @@ class Category extends ClosureTreeRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getChildNodes($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc')
-    {
-        return $this->getChildNodesQuery($node, $criteria, $orderBy, $direction)->getResult();
+    public function getChildNodes(
+        $node = null,
+        array $criteria = [],
+        string $orderBy = 'sort',
+        string $direction = 'asc'
+    ) {
+        return $this
+            ->getChildNodesQuery($node, $criteria, $orderBy, $direction)
+            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
+            ->getResult()
+            ;
     }
 
     /**
@@ -72,8 +81,12 @@ class Category extends ClosureTreeRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getChildNodesQuery($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc'): \Doctrine\ORM\Query
-    {
+    public function getChildNodesQuery(
+        $node = null,
+        array $criteria = [],
+        string $orderBy = 'sort',
+        string $direction = 'asc'
+    ): \Doctrine\ORM\Query {
         return $this->getChildNodesQueryBuilder($node, $criteria, $orderBy, $direction)->getQuery();
     }
 
@@ -82,8 +95,12 @@ class Category extends ClosureTreeRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getChildNodesQueryBuilder($node = null, array $criteria = [], string $orderBy = 'sort', string $direction = 'asc'): \Doctrine\ORM\QueryBuilder
-    {
+    public function getChildNodesQueryBuilder(
+        $node = null,
+        array $criteria = [],
+        string $orderBy = 'sort',
+        string $direction = 'asc'
+    ): \Doctrine\ORM\QueryBuilder {
         $currentLevel = 0;
         $maxLevel = $this->createQueryBuilder('c')
             ->select('max(c.level)')
@@ -123,8 +140,6 @@ class Category extends ClosureTreeRepository
                 "Invalid sort options specified: field - {$orderBy}, direction - {$direction}"
             );
         }
-
-
 
 
         foreach ($criteria as $field => $value) {
