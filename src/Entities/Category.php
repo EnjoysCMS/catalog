@@ -217,6 +217,6 @@ class Category
      */
     public function getChildren()
     {
-        return $this->children;
+        return $this->children->getSnapshot();
     }
 }
