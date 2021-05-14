@@ -51,8 +51,14 @@ final class Category
     /**
      * @Route(
      *     name="catalog/category",
-     *     path="catalog/{slug}",
-     *     requirements={"slug": "[^.]+"},
+     *     path="catalog/{slug}@{page}",
+     *     defaults={
+     *      "page": 1
+     *     },
+     *     requirements={
+     *      "slug": "[^.^@]+",
+     *      "page": "\d+"
+     *     },
      *     options={
      *      "aclComment": "[public] Просмотр категорий"
      *     }
@@ -77,7 +83,7 @@ final class Category
         }
 
 //        $products = $this->productRepository->findByCategory($category);
-        $pagination = new Pagination($this->serverRequest->get('page', 1), 12);
+        $pagination = new Pagination($this->serverRequest->get('page', 1), 3);
 
         $qb = $this->productRepository
             ->getQueryFindByCategory($category)
