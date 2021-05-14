@@ -5,16 +5,14 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Controller;
 
-
-use App\Helper\Pagination;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Http\ServerRequest;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Core\Components\Pagination\Pagination;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
