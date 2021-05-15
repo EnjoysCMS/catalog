@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 
 
 use Doctrine\ORM\EntityManager;
+use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Blocks as Entity;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -26,11 +27,14 @@ final class CategoryTree  extends AbstractBlock
      */
     private $twig;
 
+    private ServerRequestInterface $serverRequest;
+
     public function __construct(ContainerInterface $container, Entity $block)
     {
         parent::__construct($container, $block);
         $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(Category::class);
         $this->twig = $this->container->get(Environment::class);
+        $this->serverRequest = $this->container->get(ServerRequestInterface::class);
        $this->templatePath = $this->getOption('template');
     }
 
@@ -39,6 +43,7 @@ final class CategoryTree  extends AbstractBlock
 
         return $this->twig->render($this->templatePath, [
              'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
+             'currentSlug' => $this->serverRequest->get('slug')
         ]);
     }
 
