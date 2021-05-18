@@ -3,6 +3,7 @@
   "description": "Module Catalog for EnjoysCMS",
   "type": "enjoyscms-module",
   "require": {
+    "php": "^8.0",
     "oomphinc/composer-installers-extender": "^2.0",
     "gedmo/doctrine-extensions": "^3.0",
     "jbroadway/urlify": "^1.2",
