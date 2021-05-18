@@ -24,12 +24,12 @@ class Category
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private int $id;
 
     /**
      * @ORM\Column(name="title", type="string", length=64)
      */
-    private $title;
+    private string $title;
 
     /**
      * This parameter is optional for the closure strategy
@@ -37,7 +37,7 @@ class Category
      * @ORM\Column(name="level", type="integer", nullable=true)
      * @Gedmo\TreeLevel
      */
-    private $level;
+    private int $level;
 
 
     /**
