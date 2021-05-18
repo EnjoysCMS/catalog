@@ -123,6 +123,14 @@ final class Edit implements ModelInterface
             )
         ;
         $form->textarea('description', 'Описание');
+
+        $form->text('img');
+        $form->html(<<<HTML
+<a class="btn btn-default btn-outline btn-upload"   id="inputImage" title="Upload image file">
+                                    <span class="fa fa-upload "></span>
+                              </a>  
+HTML
+);
         $form->submit('add');
         return $form;
     }
