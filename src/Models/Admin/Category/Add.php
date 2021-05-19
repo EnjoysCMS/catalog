@@ -8,6 +8,9 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Enjoys\Forms\Element;
+use Enjoys\Forms\Elements\Html;
+use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -110,7 +113,20 @@ final class Add implements ModelInterface
         ;
 
         $form->textarea('description', 'Описание');
-
+        $form->group('Изображение')
+            ->add(
+                [
+                    new Text('img'),
+                    new Html(
+                        <<<HTML
+<a class="btn btn-default btn-outline btn-upload"  id="inputImage" title="Upload image file">
+    <span class="fa fa-upload "></span>
+</a>  
+HTML
+                    ),
+                ]
+            )
+        ;
         $form->submit('add');
         return $form;
     }
@@ -125,6 +141,7 @@ final class Add implements ModelInterface
         $category->setTitle($this->serverRequest->post('title'));
         $category->setDescription($this->serverRequest->post('description'));
         $category->setUrl($this->serverRequest->post('url'));
+        $category->setImg($this->serverRequest->post('img'));
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();

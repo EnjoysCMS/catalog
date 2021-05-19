@@ -8,6 +8,9 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Enjoys\Forms\Element;
+use Enjoys\Forms\Elements\Html;
+use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -49,8 +52,7 @@ final class Edit implements ModelInterface
 
         $this->category = $this->categoryRepository->find(
             $this->serverRequest->get('id', 0)
-        )
-        ;
+        );
         if ($this->category === null) {
             Error::code(404);
         }
@@ -87,12 +89,16 @@ final class Edit implements ModelInterface
                 'title' => $this->category->getTitle(),
                 'description' => $this->category->getDescription(),
                 'url' => $this->category->getUrl(),
-                'status' => [(int) $this->category->isStatus()],
+                'img' => $this->category->getImg(),
+                'status' => [(int)$this->category->isStatus()],
             ]
         );
 
         $form->checkbox('status', null)
-            ->addClass('custom-switch custom-switch-off-danger custom-switch-on-success', Form::ATTRIBUTES_FILLABLE_BASE)
+            ->addClass(
+                'custom-switch custom-switch-off-danger custom-switch-on-success',
+                Form::ATTRIBUTES_FILLABLE_BASE
+            )
             ->fill([1 => 'Статус категории'])
         ;
 
@@ -108,7 +114,7 @@ final class Edit implements ModelInterface
                 function () {
                     $url = $this->serverRequest->post('url');
 
-                    if($url === $this->category->getUrl()){
+                    if ($url === $this->category->getUrl()) {
                         return true;
                     }
 
@@ -124,13 +130,21 @@ final class Edit implements ModelInterface
         ;
         $form->textarea('description', 'Описание');
 
-        $form->text('img');
-        $form->html(<<<HTML
-<a class="btn btn-default btn-outline btn-upload"   id="inputImage" title="Upload image file">
-                                    <span class="fa fa-upload "></span>
-                              </a>  
+        $form->group('Изображение')
+            ->add(
+                [
+                    new Text('img'),
+                    new Html(
+                        <<<HTML
+<a class="btn btn-default btn-outline btn-upload"  id="inputImage" title="Upload image file">
+    <span class="fa fa-upload "></span>
+</a>  
 HTML
-);
+                    ),
+                ]
+            )
+        ;
+
         $form->submit('add');
         return $form;
     }
@@ -141,6 +155,7 @@ HTML
         $this->category->setDescription($this->serverRequest->post('description'));
         $this->category->setUrl($this->serverRequest->post('url'));
         $this->category->setStatus((bool)$this->serverRequest->post('status', false));
+        $this->category->setImg($this->serverRequest->post('img'));
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }

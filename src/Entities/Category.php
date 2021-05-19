@@ -97,6 +97,24 @@ class Category
      */
     private $children;
 
+    /**
+     * @var string|null
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private ?string $img = null;
+
+
+
+    public function getImg(): ?string
+    {
+        return $this->img;
+    }
+
+    public function setImg(?string $img): void
+    {
+        $this->img = $img;
+    }
+
     public function getId()
     {
         return $this->id;
