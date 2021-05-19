@@ -99,7 +99,7 @@ class Category
 
     /**
      * @var string|null
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", length=500, nullable=true)
      */
     private ?string $img = null;
 
