@@ -8,7 +8,6 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
-use Enjoys\Forms\Element;
 use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
@@ -17,10 +16,9 @@ use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
-use EnjoysCMS\Module\Catalog\ModuleConfig;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -34,6 +32,8 @@ final class Edit implements ModelInterface
      * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
      */
     private $categoryRepository;
+    private ModuleConfig $config;
+
 
     public function __construct(
         private RendererInterface $renderer,
@@ -41,8 +41,7 @@ final class Edit implements ModelInterface
         private ServerRequestInterface $serverRequest,
         private UrlGeneratorInterface $urlGenerator,
         private Environment $twig,
-        private ContainerInterface $container,
-        private ModuleConfig $config
+        private ContainerInterface $container
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
@@ -52,6 +51,7 @@ final class Edit implements ModelInterface
         if ($this->category === null) {
             Error::code(404);
         }
+        $this->config = $this->container->make(ModuleConfig::class, ["moduleName" => "enjoyscms/catalog"]);
     }
 
     public function getContext(): array
