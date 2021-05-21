@@ -7,7 +7,12 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
 
 use App\Module\Admin\Core\ModelInterface;
+use DI\DependencyException;
+use DI\FactoryInterface;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
@@ -29,12 +34,16 @@ final class Edit implements ModelInterface
     private ?Category $category;
 
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
     private ModuleConfig $config;
 
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
@@ -51,7 +60,11 @@ final class Edit implements ModelInterface
         if ($this->category === null) {
             Error::code(404);
         }
-        $this->config = $this->container->make(ModuleConfig::class, ["moduleName" => "enjoyscms/catalog"]);
+
+        $this->config = $this->container
+            ->get(FactoryInterface::class)
+            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog'])
+        ;
     }
 
     public function getContext(): array
