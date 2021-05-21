@@ -18,36 +18,32 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Module\Catalog\ModuleConfig;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 final class Edit implements ModelInterface
 {
-    private RendererInterface $renderer;
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private UrlGeneratorInterface $urlGenerator;
+
     private ?Category $category;
-    private Environment $twig;
+
     /**
      * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
      */
     private $categoryRepository;
 
     public function __construct(
-        RendererInterface $renderer,
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        UrlGeneratorInterface $urlGenerator,
-        Environment $twig
+        private RendererInterface $renderer,
+        private EntityManager $entityManager,
+        private ServerRequestInterface $serverRequest,
+        private UrlGeneratorInterface $urlGenerator,
+        private Environment $twig,
+        private ContainerInterface $container,
+        private ModuleConfig $config
     ) {
-        $this->renderer = $renderer;
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->urlGenerator = $urlGenerator;
-
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
@@ -56,7 +52,6 @@ final class Edit implements ModelInterface
         if ($this->category === null) {
             Error::code(404);
         }
-        $this->twig = $twig;
     }
 
     public function getContext(): array
@@ -68,7 +63,9 @@ final class Edit implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
         }
-        $wysiwyg = new WYSIWYG(new Summernote());
+
+
+        $wysiwyg = new WYSIWYG($this->container->get($this->config->get('WYSIWYG')));
         $wysiwyg->setTwig($this->twig);
 
 
