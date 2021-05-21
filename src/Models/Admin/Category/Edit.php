@@ -22,8 +22,8 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
+use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\Module\Catalog\WYSIWYG;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -49,7 +49,6 @@ final class Edit implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestInterface $serverRequest,
         private UrlGeneratorInterface $urlGenerator,
-        private Environment $twig,
         private ContainerInterface $container
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
@@ -76,7 +75,6 @@ final class Edit implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
         }
-
 
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
