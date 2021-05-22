@@ -23,6 +23,7 @@ use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -60,10 +61,7 @@ final class Edit implements ModelInterface
             Error::code(404);
         }
 
-        $this->config = $this->container
-            ->get(FactoryInterface::class)
-            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog'])
-        ;
+        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array

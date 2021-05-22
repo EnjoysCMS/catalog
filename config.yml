@@ -1,2 +1,2 @@
-enjoyscms/catalog:
-  WYSIWYG: summernote
+WYSIWYG: summernote
+limitItems: 12

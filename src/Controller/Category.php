@@ -14,6 +14,7 @@ use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Module\Catalog\Config;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -42,7 +43,8 @@ final class Category
         ServerRequestInterface $serverRequest,
         EntityManager $entityManager,
         Environment $twig,
-        UrlGeneratorInterface $urlGenerator
+        UrlGeneratorInterface $urlGenerator,
+        ContainerInterface $container
     ) {
         $this->categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
         $this->productRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class);
@@ -50,11 +52,7 @@ final class Category
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
 
-        $configFile = __DIR__.'/../../config.yml.dist';
-        if(file_exists(__DIR__.'/../../config.yml')){
-            $configFile = __DIR__.'/../../config.yml';
-        }
-        $this->setOptions(Yaml::parseFile($configFile));
+        $this->setOptions($this->config = Config::getConfig($container)->getAll());
     }
 
     /**
