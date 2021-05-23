@@ -1,2 +1,14 @@
 WYSIWYG: summernote
 limitItems: 12
+mailer:
+  from: [
+    no-reply@localhost,
+    "---Project Name---"
+  ]
+  address: [
+      to@localhost,
+  ]
+formSendRequest:
+  captcha: true
+  RECAPTCHA_SECRET_KEY: null
+  RECAPTCHA_PUBLIC_KEY: null
