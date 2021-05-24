@@ -38,6 +38,12 @@ final class CategoryTree  extends AbstractBlock
        $this->templatePath = $this->getOption('template');
     }
 
+
+    public static function getBlockDefinitionFile(): string
+    {
+        return __DIR__.'/../../blocks.yml';
+    }
+
     public function view()
     {
 
@@ -47,8 +53,4 @@ final class CategoryTree  extends AbstractBlock
         ]);
     }
 
-    public static function getMeta(): ?array
-    {
-        return Yaml::parseFile(__DIR__.'/../../blocks.yml')[__CLASS__];
-    }
 }
