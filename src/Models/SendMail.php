@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models;
 
-use Enjoys\Core\Session\Session;
 use Enjoys\Forms\Captcha\reCaptcha\reCaptcha;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
-use Enjoys\Mail;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Module\Catalog\Config;
 use PHPMailer\PHPMailer\Exception;
