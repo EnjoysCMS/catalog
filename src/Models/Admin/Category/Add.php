@@ -8,6 +8,8 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Category;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
@@ -16,10 +18,13 @@ use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -30,26 +35,20 @@ final class Add implements ModelInterface
     private ServerRequestInterface $serverRequest;
     private RendererInterface $renderer;
     private UrlGeneratorInterface $urlGenerator;
-    private Environment $twig;
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
+    private ModuleConfig $config;
 
-    public function __construct(
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        RendererInterface $renderer,
-        UrlGeneratorInterface $urlGenerator,
-        Environment $twig
-    ) {
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->renderer = $renderer;
-        $this->urlGenerator = $urlGenerator;
-        $this->twig = $twig;
-
+    public function __construct(private ContainerInterface $container)
+    {
+        $this->entityManager = $this->container->get(EntityManager::class);
+        $this->serverRequest = $this->container->get(ServerRequestInterface::class);
+        $this->renderer = $this->container->get(RendererInterface::class);
+        $this->urlGenerator = $this->container->get(UrlGeneratorInterface::class);
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array
@@ -62,8 +61,7 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
-        $wysiwyg = new WYSIWYG(new Summernote());
-        $wysiwyg->setTwig($this->twig);
+        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
         return [
             'subtitle' => 'Добавление категории',
@@ -112,6 +110,7 @@ final class Add implements ModelInterface
             )
         ;
 
+        $form->textarea('shortDescription', 'Короткое Описание');
         $form->textarea('description', 'Описание');
         $form->group('Изображение')
             ->add(
@@ -139,6 +138,7 @@ HTML
         $category->setParent($parent);
         $category->setSort(0);
         $category->setTitle($this->serverRequest->post('title'));
+        $category->setShortDescription($this->serverRequest->post('shortDescription'));
         $category->setDescription($this->serverRequest->post('description'));
         $category->setUrl($this->serverRequest->post('url'));
         $category->setImg($this->serverRequest->post('img'));

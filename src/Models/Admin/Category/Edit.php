@@ -25,6 +25,7 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -42,8 +43,11 @@ final class Edit implements ModelInterface
 
 
     /**
-     * @throws DependencyException
-     * @throws NotFoundException
+     * @param RendererInterface $renderer
+     * @param EntityManager $entityManager
+     * @param ServerRequestInterface $serverRequest
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param ContainerInterface $container
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -93,6 +97,7 @@ final class Edit implements ModelInterface
             [
                 'title' => $this->category->getTitle(),
                 'description' => $this->category->getDescription(),
+                'shortDescription' => $this->category->getShortDescription(),
                 'url' => $this->category->getUrl(),
                 'img' => $this->category->getImg(),
                 'status' => [(int)$this->category->isStatus()],
@@ -133,7 +138,9 @@ final class Edit implements ModelInterface
                 }
             )
         ;
+        $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
+
 
         $form->group('Изображение')
             ->add(
@@ -158,6 +165,7 @@ HTML
     {
         $this->category->setTitle($this->serverRequest->post('title'));
         $this->category->setDescription($this->serverRequest->post('description'));
+        $this->category->setShortDescription($this->serverRequest->post('shortDescription'));
         $this->category->setUrl($this->serverRequest->post('url'));
         $this->category->setStatus((bool)$this->serverRequest->post('status', false));
         $this->category->setImg($this->serverRequest->post('img'));

@@ -67,6 +67,26 @@ class Category
         $this->description = $description;
     }
 
+
+    /**
+     * @var string|null
+     * @ORM\Column(type="string", length=500, nullable=true)
+     */
+    private ?string $shortDescription = null;
+
+
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(?string $shortDescription): void
+    {
+        $this->shortDescription = $shortDescription;
+    }
+
+
     /**
      * @var bool
      * @ORM\Column(type="boolean", options={"default": true})
