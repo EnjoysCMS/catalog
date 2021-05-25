@@ -4,4 +4,12 @@ EnjoysCMS\Module\Catalog\Blocks\CategoryTree: #Класс блока полно�
     template:
       value:
       name: Путь до template
-      description:
+      description: Обязательно
+    title:
+      value:
+      name: Заголовок блока
+      description: Для отображения в шаблоне (необязательно)
+    description:
+      value:
+      name: Небольшое описание блока
+      description: Для отображения в шаблоне (необязательно)
