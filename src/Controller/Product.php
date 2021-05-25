@@ -93,6 +93,8 @@ final class Product
             ]
         );
 
+        /** @var SendMail $sendMail */
+
         $sendMail = $container->get(FactoryInterface::class)->make(SendMail::class);
 
         return $this->twig->render(

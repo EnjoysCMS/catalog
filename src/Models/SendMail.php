@@ -32,6 +32,7 @@ final class SendMail
     {
         $config = $this->getOption('formSendRequest');
 
+
         $form = new Form(
             [
                 'action' => $this->container->get(UrlGeneratorInterface::class)->generate('catalog/sendmail'),
@@ -55,15 +56,8 @@ final class SendMail
             ->addRule(Rules::REQUIRED, 'Сообщение - обязательно для заполнения')
         ;
 
-        if ($config['captcha']) {
-            $captcha = new reCaptcha();
-            $captcha->setOptions(
-                [
-                    'privatekey' => $_ENV['RECAPTCHA_SECRET_KEY'] ?? $config['RECAPTCHA_SECRET_KEY'] ?? '6LdUGNEZAAAAAPPz685RwftPySFeCLbV1xYJJjsk',
-                    'publickey' => $_ENV['RECAPTCHA_PUBLIC_KEY'] ?? $config['RECAPTCHA_PUBLIC_KEY'] ?? '6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy',
-                ]
-            );
-            $form->captcha($captcha);
+        if ($config['useCaptcha'] !== false) {
+              $form->captcha($this->container->get($config['captchaClass']));
         }
 
         $form->submit('sendMessage');

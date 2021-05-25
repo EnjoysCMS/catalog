@@ -12,11 +12,10 @@ use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Blocks as Entity;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 
 
-final class CategoryTree  extends AbstractBlock
+final class CategoryTree extends AbstractBlock
 {
     /**
      * @var \EnjoysCMS\Module\Catalog\Repositories\Category
@@ -35,22 +34,24 @@ final class CategoryTree  extends AbstractBlock
         $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(Category::class);
         $this->twig = $this->container->get(Environment::class);
         $this->serverRequest = $this->container->get(ServerRequestInterface::class);
-       $this->templatePath = $this->getOption('template');
+        $this->templatePath = $this->getOption('template');
     }
 
 
     public static function getBlockDefinitionFile(): string
     {
-        return __DIR__.'/../../blocks.yml';
+        return __DIR__ . '/../../blocks.yml';
     }
 
     public function view()
     {
-
-        return $this->twig->render($this->templatePath, [
-             'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
-             'currentSlug' => $this->serverRequest->get('slug')
-        ]);
+        return $this->twig->render(
+            $this->templatePath,
+            [
+                'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
+                'currentSlug' => $this->serverRequest->get('slug')
+            ]
+        );
     }
 
 }
