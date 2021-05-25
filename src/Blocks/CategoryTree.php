@@ -49,6 +49,7 @@ final class CategoryTree extends AbstractBlock
             $this->templatePath,
             [
                 'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
+                'block' => $this->block,
                 'currentSlug' => $this->serverRequest->get('slug')
             ]
         );
