@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Expr\Join;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Blocks as Entity;
@@ -46,13 +47,40 @@ final class RandomProducts extends AbstractBlock
 
     public function view()
     {
+        $dbl = $this->repository->createQueryBuilder('p')
+            ->select('p', 'c', 't', 'i')
+            ->leftJoin('p.category', 'c')
+            ->leftJoin('c.parent', 't')
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+            ->where('c.status = true')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', $this->getRandIds())
+            ->getQuery()
+        ;
+
         return $this->twig->render(
             $this->templatePath,
             [
-                'products' => $this->repository->findBy([]),
+                'products' => $dbl->getResult(),
                 'blockOptions' => $this->getOptions()
             ]
         );
+    }
+
+    private function getRandIds()
+    {
+        $ids = $this->repository->createQueryBuilder('p')
+            ->select('p.id')
+            ->leftJoin('p.category', 'c')
+            ->where('c.status = true')
+            ->getQuery()
+            ->getResult('Column')
+        ;
+
+        $limit = (int)$this->getOption('limit', 3);
+        $count = count($ids);
+
+        return array_rand(array_flip($ids), ($limit > $count) ? $count : $limit);
     }
 
 }
