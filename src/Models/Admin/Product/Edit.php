@@ -13,10 +13,12 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -33,13 +35,15 @@ final class Edit implements ModelInterface
      * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
      */
     private $productRepository;
+    private ContainerInterface $container;
 
     public function __construct(
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
         RendererInterface $renderer,
         UrlGeneratorInterface $urlGenerator,
-        Environment $twig
+        Environment $twig,
+        ContainerInterface $container
     ) {
         $this->entityManager = $entityManager;
         $this->serverRequest = $serverRequest;
@@ -54,6 +58,8 @@ final class Edit implements ModelInterface
         if ($this->product === null) {
             Error::code(404);
         }
+        $this->container = $container;
+        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array
@@ -66,8 +72,7 @@ final class Edit implements ModelInterface
             $this->doAction();
         }
 
-        $wysiwyg = new WYSIWYG(new Summernote());
-        $wysiwyg->setTwig($this->twig);
+        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
 
         return [
