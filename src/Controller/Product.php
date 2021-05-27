@@ -12,6 +12,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Models\SendMail;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
@@ -100,6 +101,12 @@ final class Product
         return $this->twig->render(
             $template_path,
             [
+                '_title' => sprintf(
+                    '%2$s - %3$s - %1$s',
+                    Setting::get('sitename'),
+                    $product->getName(),
+                    $product->getCategory()->getFullTitle(reverse: true)
+                ),
                 'product' => $product,
                 'breadcrumbs' => $breadcrumbs->get(),
                 'sendMailForm' => $sendMail->getForm()
@@ -123,12 +130,9 @@ final class Product
         $response = new Response();
 
 
-
         $form = $sendMail->getForm();
         try {
-
             if ($form->isSubmitted()) {
-
                 /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
                 $product = $this->repository->find($this->serverRequest->post('product_id', 0));
                 if ($product === null) {
@@ -166,7 +170,7 @@ BODY;
                         $errors[] = $element->getRuleErrorMessage();
                     }
                 }
-                if(!empty($errors)){
+                if (!empty($errors)) {
                     throw new \Exception(implode("<br>", $errors));
                 }
 

@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
+use EnjoysCMS\Core\Components\Helpers\Setting;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
@@ -55,6 +56,11 @@ final class Index
         return $this->twig->render(
             $template_path,
             [
+                '_title' => sprintf(
+                    '%2$s - %1$s',
+                    Setting::get('sitename'),
+                    'Каталог'
+                ),
                 'categories' => $categories,
                 'breadcrumbs' => $breadcrumbs->get(),
             ]

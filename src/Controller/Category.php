@@ -13,6 +13,7 @@ use Enjoys\Http\ServerRequestInterface;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use Psr\Container\ContainerInterface;
@@ -111,6 +112,11 @@ final class Category
         return $this->twig->render(
             $template_path,
             [
+                '_title' => sprintf(
+                    '%2$s - %1$s',
+                    Setting::get('sitename'),
+                    $category->getFullTitle(reverse: true)
+                ),
                 'category' => $category,
                 'pagination' => $pagination,
                 'products' => $result,
