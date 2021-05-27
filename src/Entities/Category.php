@@ -75,7 +75,6 @@ class Category
     private ?string $shortDescription = null;
 
 
-
     public function getShortDescription(): ?string
     {
         return $this->shortDescription;
@@ -92,7 +91,6 @@ class Category
      * @ORM\Column(type="boolean", options={"default": true})
      */
     private bool $status = true;
-
 
 
     public function isStatus(): bool
@@ -122,7 +120,6 @@ class Category
      * @ORM\Column(type="string", length=500, nullable=true)
      */
     private ?string $img = null;
-
 
 
     public function getImg(): ?string
@@ -216,11 +213,15 @@ class Category
         return $parent->getSlug() . '/' . $this->getUrl();
     }
 
-    public function getFullTitle($separator = " / "): string
+    public function getFullTitle(string $separator = " / ",  bool $reverse = false): string
     {
         $parent = $this->getParent();
         if ($parent === null) {
             return $this->getTitle();
+        }
+
+        if ($reverse === true) {
+            return $this->getTitle() . $separator . $parent->getFullTitle($separator);
         }
         return $parent->getFullTitle($separator) . $separator . $this->getTitle();
     }
@@ -239,15 +240,17 @@ class Category
     public function getBreadcrumbs(): array
     {
         $parent = $this->getParent();
-        $data = [[
-            'slug' => $this->getSlug(),
-            'title' => $this->getTitle(),
-        ]];
+        $data = [
+            [
+                'slug' => $this->getSlug(),
+                'title' => $this->getTitle(),
+            ]
+        ];
         if ($parent === null) {
             return $data;
         }
 
-        return array_merge($parent->getBreadcrumbs(),  $data);
+        return array_merge($parent->getBreadcrumbs(), $data);
     }
 
     /**
