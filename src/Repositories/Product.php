@@ -12,6 +12,8 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use EnjoysCMS\Core\Components\Helpers\HelpersBase;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 
 final class Product extends EntityRepository
@@ -93,14 +95,22 @@ final class Product extends EntityRepository
             ;
     }
 
+    public function getFindByCategorysIdsDQL($categoryIds)
+    {
+        return $this->getFindAllBuilder()
+            ->where('p.category IN (:category)')
+            ->setParameter('category', $categoryIds)
+            ;
+    }
+
+    public function getFindByCategorysIdsQuery($categoryIds)
+    {
+        return $this->getFindByCategorysIdsDQL($categoryIds)->getQuery();
+    }
 
     public function findByCategorysIds($categoryIds)
     {
-        $dql = $this->getFindAllBuilder()
-            ->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds)
-        ;
-        return $dql->getQuery()->getResult();
+        return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
     }
 
 

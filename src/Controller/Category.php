@@ -16,6 +16,7 @@ use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entities\Product;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -38,6 +39,7 @@ final class Category
      */
     private $productRepository;
     private UrlGeneratorInterface $urlGenerator;
+    private EntityManager $entityManager;
 
 
     public function __construct(
@@ -54,6 +56,7 @@ final class Category
         $this->urlGenerator = $urlGenerator;
 
         $this->setOptions($this->config = Config::getConfig($container)->getAll());
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -93,9 +96,20 @@ final class Category
 //        $products = $this->productRepository->findByCategory($category);
         $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
 
-        $qb = $this->productRepository
-            ->getQueryFindByCategory($category)
-            ->setFirstResult($pagination->getOffset())
+        if ($this->getOption('showSubcategoryProducts', false)) {
+            $allCategoryIds = $this->entityManager->getRepository(
+                \EnjoysCMS\Module\Catalog\Entities\Category::class
+            )->getAllIds($category)
+            ;
+            $qb = $this->productRepository
+                ->getFindByCategorysIdsQuery($allCategoryIds);
+        } else {
+            $qb = $this->productRepository
+                ->getQueryFindByCategory($category);
+        }
+
+
+        $qb->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems())
         ;
         $result = new Paginator($qb);
