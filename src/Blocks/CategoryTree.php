@@ -9,7 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Blocks as Entity;
+use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
 use Twig\Environment;
