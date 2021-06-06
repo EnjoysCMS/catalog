@@ -36,3 +36,10 @@ EnjoysCMS\Module\Catalog\Blocks\RandomProducts:
       value:
       name: Небольшое описание блока
       description: Для отображения в шаблоне (необязательно)
+    only_with_images:
+      value: [withimg]
+      name: '&nbsp;'
+      description:
+      form:
+        type: checkbox
+        data: {'withimg': Показывать товары только с фото}

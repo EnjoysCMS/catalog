@@ -27,7 +27,7 @@ final class RandomProducts extends AbstractBlock
     private $repository;
 
     private Environment $twig;
-    private string $templatePath;
+    private ?string $templatePath;
 
 
     public function __construct(ContainerInterface $container, Entity $block)
@@ -55,21 +55,30 @@ final class RandomProducts extends AbstractBlock
      */
     public function view(): string
     {
-        $dbl = $this->repository->createQueryBuilder('p')
+        $qb = $this->repository->createQueryBuilder('p')
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
-            ->where('c.status = true')
+        ;
+
+
+        if ($this->getOption('only_with_images') === null) {
+            $qb = $qb->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+        } else {
+            $qb = $qb->innerJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+        }
+
+
+        $qb = $qb->where('c.status = true')
             ->orderBy('RAND()')
             ->getQuery()
             ->setMaxResults((int)$this->getOption('limit', 3))
         ;
 
         return $this->twig->render(
-            $this->templatePath,
+            (string)$this->templatePath,
             [
-                'products' => $dbl->getResult(),
+                'products' => $qb->getResult(),
                 'blockOptions' => $this->getOptions()
             ]
         );
