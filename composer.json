@@ -19,7 +19,6 @@
   },
   "extra": {
     "module-name": "Каталог",
-    "use-migrations": true,
     "admin-links": {
       "catalog/admin/category": "Категории",
       "catalog/admin/products": "Продукты"
