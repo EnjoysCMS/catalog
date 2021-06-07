@@ -30,7 +30,7 @@ final class Index implements ModelInterface
 
     public function getContext(): array
     {
-        $pagination = new Pagination($this->serverRequest->get('page', 1), 1);
+        $pagination = new Pagination($this->serverRequest->get('page', 1), 10);
         $qb = $this->productRepository->getFindAllQuery();
         $qb
             ->setFirstResult($pagination->getOffset())
