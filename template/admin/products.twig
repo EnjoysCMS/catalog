@@ -17,12 +17,19 @@
                     <nav aria-label="Page navigation">
                         <ul class="pagination">
                             <li class="page-item{% if pagination.getPrevPage is null %} disabled{% endif %}">
-                                <a class="page-link" {% if pagination.getPrevPage is not null %} href="{{ path("catalog/admin/products", { "page": pagination.getPrevPage }) }}"{% endif %}
-                                        aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a class="page-link" {% if pagination.getPrevPage is not null %} href="{{ path("catalog/admin/products", { "page": 1 }) }}"{% endif %}
+                                   aria-label="First">
+                                    <span aria-hidden="true">Первая</span>
                                 </a>
                             </li>
-                            {% for page in 1..pagination.getTotalPages %}
+                            <li class="page-item{% if pagination.getPrevPage is null %} disabled{% endif %}">
+                                <a class="page-link" {% if pagination.getPrevPage is not null %} href="{{ path("catalog/admin/products", { "page": pagination.getPrevPage }) }}"{% endif %}
+                                   aria-label="Previous">
+                                    <span aria-hidden="true">Предыдущая</span>
+                                </a>
+                            </li>
+                            {% set slice_start =  pagination.getCurrentPage-5 %}
+                            {% for page in (1..pagination.getTotalPages)|slice((slice_start<0)?0:slice_start, 9) %}
                                 <li class="page-item{% if page == pagination.getCurrentPage %} active{% endif %}">
                                     <a class="page-link" href="{{ path("catalog/admin/products", {"page": page }) }}">
                                         {{ page }}
@@ -32,8 +39,15 @@
                             <li class="page-item{% if pagination.getNextPage is null %} disabled{% endif %}">
 
                                 <a class="page-link" {% if pagination.getNextPage is not null %} href="{{ path("catalog/admin/products", {"page": pagination.getNextPage }) }}" {% endif %}
-                                        aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
+                                   aria-label="Next">
+                                    <span aria-hidden="true">Следующая</span>
+                                </a>
+                            </li>
+                            <li class="page-item{% if pagination.getNextPage is null %} disabled{% endif %}">
+
+                                <a class="page-link" {% if pagination.getNextPage is not null %} href="{{ path("catalog/admin/products", {"page": pagination.getTotalPages }) }}" {% endif %}
+                                   aria-label="Last">
+                                    <span aria-hidden="true">Последняя</span>
                                 </a>
                             </li>
                         </ul>
@@ -52,22 +66,25 @@
                     </thead>
                     <tbody>
                     {% for product in products %}
-                    {% set image = product.getImages.first %}
-                    <tr>
-                        <td>
-                            {% if image %}
-                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}" >
-                            {% endif %}
-                        </td>
-                        <td>{{ product.getName }}</td>
-                        <td> {{ product.getCategory.getUrl }}</td>
-                        <td><a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a></td>
-                        <td>
-                            <a href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}">Управление изображениями</a>
-                            <a href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Редактирование</a>
-                            <a href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}">Удаление</a>
-                        </td>
-                    </tr>
+                        {% set image = product.getImages.first %}
+                        <tr>
+                            <td>
+                                {% if image %}
+                                    <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}">
+                                {% endif %}
+                            </td>
+                            <td>{{ product.getName }}</td>
+                            <td> {{ product.getCategory.getUrl }}</td>
+                            <td>
+                                <a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}">Управление
+                                    изображениями</a>
+                                <a href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Редактирование</a>
+                                <a href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}">Удаление</a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
