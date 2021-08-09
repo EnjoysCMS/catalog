@@ -16,5 +16,16 @@ use Doctrine\ORM\Mapping as ORM;
 class CategoryClosure extends AbstractClosure
 {
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Category")
+     * @ORM\JoinColumn(name="`descendant`", referencedColumnName="`id`", nullable=false, onDelete="CASCADE")
+     */
+    protected $descendant;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Category")
+     * @ORM\JoinColumn(name="`ancestor`", referencedColumnName="`id`", nullable=false, onDelete="CASCADE")
+     */
+    protected $ancestor;
 
 }
