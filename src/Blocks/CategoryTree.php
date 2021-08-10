@@ -27,6 +27,7 @@ final class CategoryTree extends AbstractBlock
     private $twig;
 
     private ServerRequestInterface $serverRequest;
+    private string $templatePath;
 
     public function __construct(ContainerInterface $container, Entity $block)
     {
@@ -34,7 +35,7 @@ final class CategoryTree extends AbstractBlock
         $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(Category::class);
         $this->twig = $this->container->get(Environment::class);
         $this->serverRequest = $this->container->get(ServerRequestInterface::class);
-        $this->templatePath = $this->getOption('template');
+        $this->templatePath = (string)$this->getOption('template');
     }
 
 

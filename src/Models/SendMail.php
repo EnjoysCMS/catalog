@@ -43,21 +43,20 @@ final class SendMail
         $form->setAttribute('id', 'formSendRequest');
 
         $form->text('name')
-            ->addRule(Rules::REQUIRED, 'Имя - обязательно для заполнения')
-        ;
+            ->addRule(Rules::REQUIRED, 'Имя - обязательно для заполнения');
+
         $form->email('email')
             ->addRule(Rules::REQUIRED, 'Email - обязательно для заполнения')
-            ->addRule(Rules::EMAIL)
-        ;
+            ->addRule(Rules::EMAIL);
+
         $form->text('phone')
-            ->addRule(Rules::REQUIRED, 'Телефон - обязательно для заполнения')
-        ;
+            ->addRule(Rules::REQUIRED, 'Телефон - обязательно для заполнения');
+
         $form->textarea('message')
-            ->addRule(Rules::REQUIRED, 'Сообщение - обязательно для заполнения')
-        ;
+            ->addRule(Rules::REQUIRED, 'Сообщение - обязательно для заполнения');
 
         if ($config['useCaptcha'] !== false) {
-              $form->captcha($this->container->get($config['captchaClass']));
+            $form->captcha($this->container->get($config['captchaClass']));
         }
 
         $form->submit('sendMessage');
