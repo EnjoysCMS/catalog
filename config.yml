@@ -7,3 +7,4 @@ mailer:
 formSendRequest:
   useCaptcha: true
   captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
+adminTemplateDir: /modules/catalog/template/admin

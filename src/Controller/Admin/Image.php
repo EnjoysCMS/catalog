@@ -7,24 +7,33 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
+use Doctrine\ORM\EntityManager;
+use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Catalog\Helpers\Template;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Images\Index;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
 final class Image extends BaseController
 {
-    private string $templatePath = __DIR__ . '/../../../template';
+    private string $templatePath;
 
-    /**
-     * @return string
-     */
-    public function getTemplatePath(): string
-    {
-        return realpath($this->templatePath);
+    public function __construct(
+        Environment $twig,
+        ServerRequestInterface $serverRequest,
+        EntityManager $entityManager,
+        UrlGeneratorInterface $urlGenerator,
+        RendererInterface $renderer
+    ) {
+        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
+        $this->templatePath = Template::getAdminTemplatePath();
     }
 
     /**
@@ -40,9 +49,8 @@ final class Image extends BaseController
      */
     public function manage(ContainerInterface $container): string
     {
-
         return $this->view(
-            $this->getTemplatePath() . '/admin/images.twig',
+            $this->templatePath . '/images.twig',
             $this->getContext($container->get(Index::class))
         );
     }
@@ -61,9 +69,8 @@ final class Image extends BaseController
      */
     public function add(ContainerInterface $container): string
     {
-
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->templatePath . '/form.twig',
             $this->getContext($container->get(Add::class))
         );
     }
@@ -81,7 +88,7 @@ final class Image extends BaseController
     {
         $repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
         $image = $repository->find($this->serverRequest->get('id'));
-        if($image === null){
+        if ($image === null) {
             Error::code(404);
         }
         $images = $repository->findBy(['product' => $image->getProduct()]);
@@ -112,9 +119,8 @@ final class Image extends BaseController
      */
     public function delete(ContainerInterface $container): string
     {
-
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->templatePath . '/form.twig',
             $this->getContext($container->get(Delete::class))
         );
     }

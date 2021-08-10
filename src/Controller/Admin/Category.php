@@ -5,25 +5,37 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use App\Module\Admin\BaseController;
+use Doctrine\ORM\EntityManager;
+use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Helpers\Template;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Index;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Twig\Environment;
 
 final class Category extends BaseController
 {
 
-    private string $templatePath = __DIR__ . '/../../../template';
+    private string $templatePath;
 
-    /**
-     * @return string
-     */
-    public function getTemplatePath(): string
-    {
-        return realpath($this->templatePath);
+    public function __construct(
+        Environment $twig,
+        ServerRequestInterface $serverRequest,
+        EntityManager $entityManager,
+        UrlGeneratorInterface $urlGenerator,
+        RendererInterface $renderer,
+        ContainerInterface $container,
+    ) {
+        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
+        $this->templatePath = Template::getAdminTemplatePath();
     }
+
 
     /**
      * @Route(
@@ -39,7 +51,7 @@ final class Category extends BaseController
     public function index(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/category.twig',
+            $this->templatePath . '/category.twig',
             $this->getContext($container->get(Index::class))
         );
     }
@@ -59,7 +71,7 @@ final class Category extends BaseController
     public function add(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/addcategory.twig',
+            $this->templatePath . '/addcategory.twig',
             $this->getContext($container->get(Add::class))
         );
     }
@@ -79,7 +91,7 @@ final class Category extends BaseController
     public function edit(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/editcategory.twig',
+            $this->templatePath . '/editcategory.twig',
             $this->getContext($container->get(Edit::class))
         );
     }
@@ -99,7 +111,7 @@ final class Category extends BaseController
     public function delete(ContainerInterface $container): string
     {
         return $this->view(
-            $this->getTemplatePath() . '/admin/form.twig',
+            $this->templatePath . '/form.twig',
             $this->getContext($container->get(Delete::class))
         );
     }
