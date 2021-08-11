@@ -25,14 +25,9 @@ final class Image extends BaseController
 {
     private string $templatePath;
 
-    public function __construct(
-        Environment $twig,
-        ServerRequestInterface $serverRequest,
-        EntityManager $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        RendererInterface $renderer
-    ) {
-        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
+    public function __construct(private ContainerInterface $container)
+    {
+        parent::__construct($this->container);
         $this->templatePath = Template::getAdminTemplatePath();
     }
 

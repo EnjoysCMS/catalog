@@ -24,15 +24,9 @@ final class Category extends BaseController
 
     private string $templatePath;
 
-    public function __construct(
-        Environment $twig,
-        ServerRequestInterface $serverRequest,
-        EntityManager $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        RendererInterface $renderer,
-        ContainerInterface $container,
-    ) {
-        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
+    public function __construct(private ContainerInterface $container)
+    {
+        parent::__construct($this->container);
         $this->templatePath = Template::getAdminTemplatePath();
     }
 
@@ -45,14 +39,13 @@ final class Category extends BaseController
      *      "aclComment": "Просмотр списка категорий в админке"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function index(ContainerInterface $container): string
+    public function index(): string
     {
         return $this->view(
             $this->templatePath . '/category.twig',
-            $this->getContext($container->get(Index::class))
+            $this->getContext($this->container->get(Index::class))
         );
     }
 
@@ -65,14 +58,13 @@ final class Category extends BaseController
      *      "aclComment": "Добавление категорий"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function add(ContainerInterface $container): string
+    public function add(): string
     {
         return $this->view(
             $this->templatePath . '/addcategory.twig',
-            $this->getContext($container->get(Add::class))
+            $this->getContext($this->container->get(Add::class))
         );
     }
 
@@ -85,14 +77,13 @@ final class Category extends BaseController
      *      "aclComment": "Редактирование категорий"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function edit(ContainerInterface $container): string
+    public function edit(): string
     {
         return $this->view(
             $this->templatePath . '/editcategory.twig',
-            $this->getContext($container->get(Edit::class))
+            $this->getContext($this->container->get(Edit::class))
         );
     }
 
@@ -105,14 +96,13 @@ final class Category extends BaseController
      *      "aclComment": "Удаление категорий"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function delete(ContainerInterface $container): string
+    public function delete(): string
     {
         return $this->view(
             $this->templatePath . '/form.twig',
-            $this->getContext($container->get(Delete::class))
+            $this->getContext($this->container->get(Delete::class))
         );
     }
 

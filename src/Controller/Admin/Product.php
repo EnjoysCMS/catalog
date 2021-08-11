@@ -7,9 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
-use Doctrine\ORM\EntityManager;
-use Enjoys\Forms\Renderer\RendererInterface;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Delete;
@@ -17,22 +14,15 @@ use EnjoysCMS\Module\Catalog\Models\Admin\Product\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Index;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
 
 final class Product extends BaseController
 {
 
     private string $templatePath;
 
-    public function __construct(
-        Environment $twig,
-        ServerRequestInterface $serverRequest,
-        EntityManager $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        RendererInterface $renderer
-    ) {
-        parent::__construct($twig, $serverRequest, $entityManager, $urlGenerator, $renderer);
+    public function __construct(private ContainerInterface $container)
+    {
+        parent::__construct($this->container);
         $this->templatePath = Template::getAdminTemplatePath();
     }
 
@@ -44,14 +34,13 @@ final class Product extends BaseController
      *      "aclComment": "Просмотр товаров в админке"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function index(ContainerInterface $container): string
+    public function index(): string
     {
         return $this->view(
             $this->templatePath . '/products.twig',
-            $this->getContext($container->get(Index::class))
+            $this->getContext($this->container->get(Index::class))
         );
     }
 
@@ -64,14 +53,13 @@ final class Product extends BaseController
      *      "aclComment": "Добавление товара"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function add(ContainerInterface $container): string
+    public function add(): string
     {
         return $this->view(
             $this->templatePath . '/addproduct.twig',
-            $this->getContext($container->get(Add::class))
+            $this->getContext($this->container->get(Add::class))
         );
     }
 
@@ -84,14 +72,13 @@ final class Product extends BaseController
      *      "aclComment": "Редактирование товара"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function edit(ContainerInterface $container): string
+    public function edit(): string
     {
         return $this->view(
             $this->templatePath . '/editproduct.twig',
-            $this->getContext($container->get(Edit::class))
+            $this->getContext($this->container->get(Edit::class))
         );
     }
 
@@ -103,14 +90,13 @@ final class Product extends BaseController
      *      "aclComment": "Удаление товара"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function delete(ContainerInterface $container): string
+    public function delete(): string
     {
         return $this->view(
             $this->templatePath . '/form.twig',
-            $this->getContext($container->get(Delete::class))
+            $this->getContext($this->container->get(Delete::class))
         );
     }
 
