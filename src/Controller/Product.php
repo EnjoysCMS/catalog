@@ -16,6 +16,12 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
+#[Route(
+    path: 'catalog/{slug}.html',
+    name: 'catalog/product',
+    requirements: ['slug' => '[^.]+'],
+    options: ['aclComment' => '[public] Просмотр продуктов (товаров)']
+)]
 final class Product
 {
 
@@ -26,13 +32,8 @@ final class Product
      * @throws DependencyException
      * @throws LoaderError
      */
-    #[Route(
-        path: 'catalog/{slug}.html',
-        name: 'catalog/product',
-        requirements: ['slug' => '[^.]+'],
-        options: ['aclComment' => '[public] Просмотр продуктов (товаров)']
-    )]
-    public function view(FactoryInterface $container, Environment $twig): string
+
+    public function __invoke(FactoryInterface $container, Environment $twig): string
     {
         $template_path = '@m/catalog/product.twig';
 
