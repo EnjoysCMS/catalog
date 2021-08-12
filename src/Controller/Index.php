@@ -34,7 +34,7 @@ final class Index
 
         $template_path = '@m/catalog/category_index.twig';
         if (!$twig->getLoader()->exists($template_path)) {
-            $template_path = __DIR__ . '/../../template/category_index.twig.sample';
+            $template_path = __DIR__ . '/../../template/category_index.twig';
         }
 
         return $twig->render(

@@ -37,7 +37,7 @@ final class Product
         $template_path = '@m/catalog/product.twig';
 
         if (!$twig->getLoader()->exists($template_path)) {
-            $template_path = __DIR__ . '/../../template/product.twig.sample';
+            $template_path = __DIR__ . '/../../template/product.twig';
         }
 
 

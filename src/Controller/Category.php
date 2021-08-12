@@ -60,7 +60,7 @@ final class Category
 
 
         if (!$twig->getLoader()->exists($template_path)) {
-            $template_path = __DIR__ . '/../../template/category.twig.sample';
+            $template_path = __DIR__ . '/../../template/category.twig';
         }
 
         return $twig->render(
