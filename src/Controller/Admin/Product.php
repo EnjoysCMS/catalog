@@ -12,6 +12,7 @@ use EnjoysCMS\Module\Catalog\Models\Admin\Product\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Index;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Tags\TagsList;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -97,6 +98,24 @@ final class Product extends BaseController
         return $this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Delete::class))
+        );
+    }
+
+    /**
+     * @Route(
+     *     path="catalog/admin/product/tags",
+     *     name="@a/catalog/product/tags",
+     *     options={
+     *      "aclComment": "Просмотр тегов товара"
+     *     }
+     * )
+     * @return string
+     */
+    public function manageTags(): string
+    {
+        return $this->view(
+            $this->templatePath . '/product/tags/tags_list.twig',
+            $this->getContext($this->container->get(TagsList::class))
         );
     }
 

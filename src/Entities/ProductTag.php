@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -47,9 +48,6 @@ final class ProductTag
         $this->name = $name;
     }
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="tags")
-     */
-    private Product $product;
+
 
 }

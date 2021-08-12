@@ -60,7 +60,11 @@ class Product
 
 
     /**
-     * @ORM\OneToMany(targetEntity="ProductTag", mappedBy="product")
+     * @ORM\ManyToMany(targetEntity="ProductTag")
+     * @ORM\JoinTable(name="products_tags",
+     *      joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
+     *      )
      */
     private $tags;
 
