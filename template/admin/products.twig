@@ -59,8 +59,6 @@
                     <tr>
                         <th></th>
                         <th>Наименование</th>
-                        <th>Category URL slug</th>
-                        <th>Product URL slug</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -70,19 +68,44 @@
                         <tr>
                             <td>
                                 {% if image %}
-                                    <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}">
+                                    <img class="w-50"
+                                         src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}">
                                 {% endif %}
                             </td>
-                            <td>{{ product.getName }}</td>
-                            <td> {{ product.getCategory.getUrl }}</td>
                             <td>
-                                <a href="{{ path('catalog/product', {"slug": product.getSlug}) }}"> {{ product.getSlug }}</a>
+                                <div class="h4">{{ product.getName }}
+                                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i class="fas fa-external-link-alt"></i></a>
+                                </div>
+                                <div class="small">
+                                    {% if product.getArticul %}
+                                    <div  class="text-muted">Артикул: <b>{{ product.getArticul }}</b></div>
+                                    {% endif %}
+
+                                    <div class="text-muted">Категория:
+                                        <a href="{{ path('catalog/category', {"slug": product.getCategory.getUrl}) }}"> {{ product.getCategory.getTitle }}</a> </div>
+
+                                </div>
                             </td>
+
                             <td>
-                                <a href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}">Управление
-                                    изображениями</a>
-                                <a href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Редактирование</a>
-                                <a href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}">Удаление</a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"
+                                   title="Управление
+                                    изображениями"><i class="fa fa-image"></i></a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}"
+                                   title="Редактирование"><i class="fa fa-edit"></i></a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Параметры</a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Файлы</a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Цены</a>
+                                <a class="btn btn-default"
+                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">SEO</a>
+                                <a class="btn btn-danger"
+                                   href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}"
+                                   title="Удаление"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>
                     {% endfor %}

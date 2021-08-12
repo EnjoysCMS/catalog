@@ -6,12 +6,16 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Product;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -21,36 +25,24 @@ use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 final class Edit implements ModelInterface
 {
 
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private RendererInterface $renderer;
-    private UrlGeneratorInterface $urlGenerator;
-    private Environment $twig;
     private ?Product $product;
-    /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
-     */
-    private $productRepository;
-    private ContainerInterface $container;
+    private ObjectRepository|EntityRepository $productRepository;
+    private ModuleConfig $config;
 
     public function __construct(
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        RendererInterface $renderer,
-        UrlGeneratorInterface $urlGenerator,
-        Environment $twig,
-        ContainerInterface $container
+        private EntityManager $entityManager,
+        private ServerRequestInterface $serverRequest,
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator,
+        private ContainerInterface $container
     ) {
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->renderer = $renderer;
-        $this->urlGenerator = $urlGenerator;
-        $this->twig = $twig;
-
         $this->productRepository = $entityManager->getRepository(Product::class);
         $this->product = $this->productRepository->find(
             $this->serverRequest->get('id', 0)
@@ -58,10 +50,14 @@ final class Edit implements ModelInterface
         if ($this->product === null) {
             Error::code(404);
         }
-        $this->container = $container;
         $this->config = Config::getConfig($this->container);
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -81,11 +77,15 @@ final class Edit implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $defaults = [
             'name' => $this->product->getName(),
             'url' => $this->product->getUrl(),
+            'articul' => $this->product->getArticul(),
             'description' => $this->product->getDescription(),
         ];
 
@@ -105,11 +105,13 @@ final class Edit implements ModelInterface
                     Category::class
                 )->getFormFillArray()
             )
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
+
         $form->text('name', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
+
+        $form->text('articul', 'Артикул');
+
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
             ->addRule(
@@ -128,8 +130,7 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
         $form->textarea('description', 'Описание');
 
         $form->submit('add');
@@ -141,11 +142,11 @@ final class Edit implements ModelInterface
         /** @var Category|null $category */
         $category = $this->entityManager->getRepository(Category::class)->find(
             $this->serverRequest->post('category', 0)
-        )
-        ;
+        );
 
         $this->product->setName($this->serverRequest->post('name'));
         $this->product->setDescription($this->serverRequest->post('description'));
+        $this->product->setArticul($this->serverRequest->post('articul'));
         $this->product->setCategory($category);
         $this->product->setUrl(
             (empty($this->serverRequest->post('url')))

@@ -6,6 +6,11 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\Product;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -30,11 +35,11 @@ final class Add implements ModelInterface
     private UrlGeneratorInterface $urlGenerator;
     private Environment $twig;
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $productRepository;
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository
+     * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
     private ContainerInterface $container;
@@ -79,7 +84,7 @@ final class Add implements ModelInterface
     }
 
     /**
-     * @throws \Enjoys\Forms\Exception\ExceptionRule
+     * @throws ExceptionRule
      */
     private function getForm(): Form
     {
@@ -103,6 +108,9 @@ final class Add implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED)
         ;
+
+        $form->text('articul', 'Артикул');
+
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
             ->addRule(
@@ -126,8 +134,8 @@ final class Add implements ModelInterface
     }
 
     /**
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
     private function doAction()
     {
@@ -136,6 +144,7 @@ final class Add implements ModelInterface
         $product = new Product();
         $product->setName($this->serverRequest->post('name'));
         $product->setDescription($this->serverRequest->post('description'));
+        $product->setArticul($this->serverRequest->post('articul'));
         /** @var Category $category */
         $product->setCategory($category);
         $product->setUrl(
@@ -143,7 +152,6 @@ final class Add implements ModelInterface
                 ? URLify::slug($product->getName())
                 : $this->serverRequest->post('url')
         );
-        $product->setArticul(null);
         $product->setHide(false);
         $product->setActive(true);
 
