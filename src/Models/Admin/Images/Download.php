@@ -11,6 +11,7 @@ use Enjoys\Http\ServerRequestInterface;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\RequestOptions;
 
 final class Download implements LoadImage
 {
@@ -89,7 +90,8 @@ final class Download implements LoadImage
 
         $client = new Client(
             [
-                'verify' => false
+                'verify' => false,
+                RequestOptions::IDN_CONVERSION => true
             ]
         );
         $response = $client->get($serverRequest->post('image'));
@@ -142,7 +144,6 @@ final class Download implements LoadImage
             'image/vnd.microsoft.icon' => 'ico',
             'image/tiff' => 'tiff',
             'image/svg+xml' => 'svg',
-            'image/svg+xml' => 'svgz',
         );
 
         if (array_key_exists($content_type, $mime_types)) {
