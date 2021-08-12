@@ -143,7 +143,7 @@ final class Add implements ModelInterface
                 ? URLify::slug($product->getName())
                 : $this->serverRequest->post('url')
         );
-        $product->setArticle(null);
+        $product->setArticul(null);
         $product->setHide(false);
         $product->setActive(true);
 

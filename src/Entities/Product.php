@@ -34,7 +34,7 @@ class Product
     /**
      * @ORM\Column(type="string", nullable=true, options={"default": null})
      */
-    private ?string $article = null;
+    private ?string $articul = null;
     /**
      * @ORM\Column(type="string")
      */
@@ -102,17 +102,17 @@ class Product
     /**
      * @return string|null
      */
-    public function getArticle(): ?string
+    public function getArticul(): ?string
     {
-        return $this->article;
+        return $this->articul;
     }
 
     /**
-     * @param string|null $article
+     * @param string|null $articul
      */
-    public function setArticle(?string $article): void
+    public function setArticul(?string $articul): void
     {
-        $this->article = $article;
+        $this->articul = $articul;
     }
 
     /**
