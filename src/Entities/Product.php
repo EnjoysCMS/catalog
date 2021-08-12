@@ -60,6 +60,16 @@ class Product
 
 
     /**
+     * @ORM\OneToMany(targetEntity="ProductTag", mappedBy="product")
+     */
+    private $tags;
+
+    public function __construct()
+    {
+        $this->tags = new ArrayCollection();
+    }
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -163,9 +173,7 @@ class Product
         $this->active = $active;
     }
 
-    /**
-     * @return mixed
-     */
+
     public function getCategory()
     {
         return $this->category;
@@ -192,6 +200,18 @@ class Product
     public function getImages()
     {
         return $this->images;
+    }
+
+
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+
+    public function setTag(ProductTag $tag): void
+    {
+        $this->tags->add($tag);
     }
 
 
