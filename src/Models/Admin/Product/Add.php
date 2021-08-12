@@ -112,7 +112,7 @@ final class Add implements ModelInterface
                     $check = $this->productRepository->findOneBy(
                         [
                             'url' => $this->serverRequest->post('url'),
-                            'category' => $this->categoryRepository->find($this->serverRequest->post('category'))
+                            'category' => $this->categoryRepository->find($this->serverRequest->post('category', 0))
                         ]
                     );
                     return is_null($check);
