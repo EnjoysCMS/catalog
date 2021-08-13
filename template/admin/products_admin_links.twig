@@ -1,20 +1,37 @@
+{% if access2route('catalog/admin/product/edit') %}
+    <a class="btn btn-default"
+       href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}"
+       title="Редактирование"><i class="fa fa-edit"></i></a>
+{% endif %}
 
-<a class="btn btn-default"
-   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}"
-   title="Редактирование"><i class="fa fa-edit"></i></a>
+{% if access2route('catalog/admin/product/images') %}
+    <a class="btn btn-default"
+       href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"
+       title="Управление изображениями"><i class="fa fa-image"></i></a>
+{% endif %}
 
-<a class="btn btn-default"
-   href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"
-   title="Управление изображениями"><i class="fa fa-image"></i></a>
+{% if access2route('@a/catalog/product/tags') %}
+    <a class="btn btn-default"
+       href="{{ path('@a/catalog/product/tags', {"id": product.getId}) }}" title="Теги"><i class="fa fa-tags"></i></a>
+{% endif %}
 
-<a class="btn btn-default"
-   href="{{ path('@a/catalog/product/tags', {"id": product.getId}) }}" title="Теги"><i class="fa fa-tags"></i></a>
-<a class="btn btn-default"
-   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Файлы"><i class="fa fa-file"></i></a>
-<a class="btn btn-default"
-   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Цены"><i class="fa fa-dollar-sign"></i></a>
-<a class="btn btn-default"
-   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="SEO"><i class="fa fa-globe"></i></a>
-<a class="btn btn-danger"
-   href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}"
-   title="Удаление"><i class="fa fa-trash"></i></a>
+{% if access2route('catalog/admin/product/edit') %}
+    <a class="btn btn-default"
+       href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Файлы"><i class="fa fa-file"></i></a>
+{% endif %}
+
+{% if access2route('catalog/admin/product/edit') %}
+    <a class="btn btn-default"
+       href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Цены"><i class="fa fa-dollar-sign"></i></a>
+{% endif %}
+
+{% if access2route('catalog/admin/product/edit') %}
+    <a class="btn btn-default"
+       href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="SEO"><i class="fa fa-globe"></i></a>
+{% endif %}
+
+{% if access2route('catalog/admin/product/delete') %}
+    <a class="btn btn-danger"
+       href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}"
+       title="Удаление"><i class="fa fa-trash"></i></a>
+{% endif %}
