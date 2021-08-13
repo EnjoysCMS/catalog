@@ -8,7 +8,6 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Query\Expr\From;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
@@ -20,11 +19,11 @@ use EnjoysCMS\Module\Catalog\Entities\ProductTag;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class TagsList implements ModelInterface
+class TagsList implements ModelInterface
 {
 
     private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
-    private Product $product;
+    protected Product $product;
     private ObjectRepository|EntityRepository $tagRepository;
 
     /**
@@ -75,7 +74,7 @@ final class TagsList implements ModelInterface
         ];
     }
 
-    private function getForm(): Form
+    protected function getForm(): Form
     {
         $form = new Form();
 
@@ -99,7 +98,7 @@ final class TagsList implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    protected function doAction()
     {
         $tags = array_map('trim', array_unique(explode(',', $this->serverRequest->post('tags'))));
 
@@ -123,4 +122,6 @@ final class TagsList implements ModelInterface
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }
+
+
 }
