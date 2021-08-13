@@ -105,4 +105,5 @@ final class ProductMeta
     {
         $this->product = $product;
     }
+
 }

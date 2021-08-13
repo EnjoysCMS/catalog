@@ -81,9 +81,9 @@ final class MetaManage implements ModelInterface
 
         $form->setDefaults(
             [
-                'title' => $this->product->getMeta()->getTitle(),
-                'keywords' => $this->product->getMeta()->getKeyword(),
-                'description' => $this->product->getMeta()->getDescription()
+                'title' => $this->product->getMeta()?->getTitle(),
+                'keywords' => $this->product->getMeta()?->getKeyword(),
+                'description' => $this->product->getMeta()?->getDescription()
             ]
         );
 
