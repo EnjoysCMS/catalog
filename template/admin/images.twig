@@ -2,6 +2,16 @@
 {% block content %}
 
     <section class="content">
+        <div class="card-header">
+            <h2 class="card-title">{{ product.getName }}
+                <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i class="fas fa-external-link-alt"></i></a>
+                <small class="d-block">Управление изображениями</small>
+            </h2>
+            <div class="float-right">
+            {% include '../modules/catalog/template/admin/products_admin_links.twig' %}
+            </div>
+        </div>
+
         <a class="btn btn-primary my-3"
            href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить
             с компьютера</a>

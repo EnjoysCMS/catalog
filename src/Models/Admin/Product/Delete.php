@@ -63,6 +63,7 @@ final class Delete implements ModelInterface
 
 
         return [
+            'product' => $this->product,
             'form' => $this->renderer,
         ];
     }

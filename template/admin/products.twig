@@ -88,24 +88,7 @@
                             </td>
 
                             <td>
-                                <a class="btn btn-default"
-                                   href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"
-                                   title="Управление
-                                    изображениями"><i class="fa fa-image"></i></a>
-                                <a class="btn btn-default"
-                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}"
-                                   title="Редактирование"><i class="fa fa-edit"></i></a>
-                                <a class="btn btn-default"
-                                   href="{{ path('@a/catalog/product/tags', {"id": product.getId}) }}">Теги</a>
-                                <a class="btn btn-default"
-                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Файлы</a>
-                                <a class="btn btn-default"
-                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">Цены</a>
-                                <a class="btn btn-default"
-                                   href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}">SEO</a>
-                                <a class="btn btn-danger"
-                                   href="{{ path('catalog/admin/product/delete', {"id": product.getId}) }}"
-                                   title="Удаление"><i class="fa fa-trash"></i></a>
+                                {% include '../modules/catalog/template/admin/products_admin_links.twig' %}
                             </td>
                         </tr>
                     {% endfor %}

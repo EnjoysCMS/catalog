@@ -73,6 +73,8 @@ final class Edit implements ModelInterface
 
         return [
             'form' => $this->renderer,
+            'product' => $this->product,
+            'subtitle' => 'Редактирование',
             'wysiwyg' => $wysiwyg->selector('#description'),
         ];
     }
