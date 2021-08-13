@@ -25,9 +25,9 @@
        href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Цены"><i class="fa fa-dollar-sign"></i></a>
 {% endif %}
 
-{% if access2route('catalog/admin/product/edit') %}
+{% if access2route('@a/catalog/product/meta') %}
     <a class="btn btn-default"
-       href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="SEO"><i class="fa fa-globe"></i></a>
+       href="{{ path('@a/catalog/product/meta', {"id": product.getId}) }}" title="SEO"><i class="fa fa-globe"></i></a>
 {% endif %}
 
 {% if access2route('catalog/admin/product/delete') %}

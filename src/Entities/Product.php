@@ -61,7 +61,7 @@ class Product
     /**
      * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product")
      */
-    private $meta;
+    private ?ProductMeta $meta = null;
 
     /**
      * @ORM\ManyToMany(targetEntity="ProductTag")
@@ -228,4 +228,8 @@ class Product
     }
 
 
+    public function getMeta(): ?ProductMeta
+    {
+        return $this->meta;
+    }
 }

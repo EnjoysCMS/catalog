@@ -43,6 +43,9 @@ final class ProductMeta
 
     public function setTitle(?string $title): void
     {
+        if(empty($title)){
+            $title = null;
+        }
         $this->title = $title;
     }
 
@@ -56,11 +59,15 @@ final class ProductMeta
 
     public function getKeyword(): ?string
     {
+
         return $this->keyword;
     }
 
     public function setKeyword(?string $keyword): void
     {
+        if(empty($keyword)){
+            $keyword = null;
+        }
         $this->keyword = $keyword;
     }
 
@@ -79,6 +86,9 @@ final class ProductMeta
 
     public function setDescription(?string $description): void
     {
+        if(empty($description)){
+            $description = null;
+        }
         $this->description = $description;
     }
 
@@ -88,5 +98,11 @@ final class ProductMeta
      * @ORM\OneToOne(targetEntity="Product", inversedBy="meta")
      * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
      */
-    private $product;
+    private Product $product;
+
+
+    public function setProduct(Product $product): void
+    {
+        $this->product = $product;
+    }
 }
