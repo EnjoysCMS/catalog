@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "bootstrap-tagsinput": "https://github.com/bootstrap-tagsinput/bootstrap-tagsinput#0.8.0"
+  }
+}

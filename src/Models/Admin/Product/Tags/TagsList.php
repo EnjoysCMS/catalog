@@ -13,6 +13,7 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductTag;
@@ -64,7 +65,12 @@ final class TagsList implements ModelInterface
         $renderer = new Bootstrap4();
         $renderer->setForm($form);
 
+        Assets::css([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css']);
+        Assets::js([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js']);
+
         return [
+            'title' => $this->product->getName(),
+            'subtitle' => 'Управление тегами',
             'form' => $renderer->render(),
         ];
     }
@@ -77,15 +83,15 @@ final class TagsList implements ModelInterface
 
         $form->setDefaults([
                                'tags' => implode(
-                                   ', ',
+                                   ',',
                                    array_map(function ($tag) {
-                                       return $tag->getName();
+                                       return \trim($tag->getName());
                                    }, $this->product->getTags()->toArray())
                                )
                            ]);
 
         $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttributes(
-            ['tabindex' => 105, 'data-role' => 'tagsinput', 'placeholder' => '']
+            ['placeholder' => '']
         );
 
         $form->submit('submit1', 'Изменить');
@@ -95,12 +101,12 @@ final class TagsList implements ModelInterface
 
     private function doAction()
     {
-        $tags = array_map('trim', explode(',', $this->serverRequest->post('tags')));
+        $tags = array_map('trim', array_unique(explode(',', $this->serverRequest->post('tags'))));
 
         $this->product->clearTags();
 
         foreach ($tags as $tag) {
-            if(empty($tag)){
+            if (empty($tag)) {
                 continue;
             }
             $tagEntity = $this->tagRepository->findOneBy(['name' => $tag]);
