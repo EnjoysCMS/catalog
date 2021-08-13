@@ -94,7 +94,6 @@ final class ProductMeta
 
 
     /**
-     * One Cart has One Customer.
      * @ORM\OneToOne(targetEntity="Product", inversedBy="meta")
      * @ORM\JoinColumn(name="product_id", referencedColumnName="id")
      */
