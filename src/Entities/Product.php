@@ -58,6 +58,10 @@ class Product
      */
     private $images;
 
+    /**
+     * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product")
+     */
+    private $meta;
 
     /**
      * @ORM\ManyToMany(targetEntity="ProductTag")
