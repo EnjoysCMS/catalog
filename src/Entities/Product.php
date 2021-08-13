@@ -218,5 +218,10 @@ class Product
         $this->tags->add($tag);
     }
 
+    public function clearTags()
+    {
+        $this->tags = new ArrayCollection();
+    }
+
 
 }
