@@ -29,7 +29,7 @@ final class Product extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/products",
+     *     path="admin/catalog/products",
      *     name="catalog/admin/products",
      *     options={
      *      "aclComment": "Просмотр товаров в админке"
@@ -48,7 +48,7 @@ final class Product extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/add",
+     *     path="admin/catalog/product/add",
      *     name="catalog/admin/product/add",
      *     options={
      *      "aclComment": "Добавление товара"
@@ -67,7 +67,7 @@ final class Product extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/edit",
+     *     path="admin/catalog/product/edit",
      *     name="catalog/admin/product/edit",
      *     options={
      *      "aclComment": "Редактирование товара"
@@ -85,7 +85,7 @@ final class Product extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/delete",
+     *     path="admin/catalog/product/delete",
      *     name="catalog/admin/product/delete",
      *     options={
      *      "aclComment": "Удаление товара"
@@ -103,7 +103,7 @@ final class Product extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/tags",
+     *     path="admin/catalog/product/tags",
      *     name="@a/catalog/product/tags",
      *     options={
      *      "aclComment": "Просмотр тегов товара"

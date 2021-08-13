@@ -33,7 +33,7 @@ final class Category extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/category",
+     *     path="admin/catalog/category",
      *     name="catalog/admin/category",
      *     options={
      *      "aclComment": "Просмотр списка категорий в админке"
@@ -52,7 +52,7 @@ final class Category extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/category/add",
+     *     path="admin/catalog/category/add",
      *     name="catalog/admin/category/add",
      *     options={
      *      "aclComment": "Добавление категорий"
@@ -71,7 +71,7 @@ final class Category extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/category/edit",
+     *     path="admin/catalog/category/edit",
      *     name="catalog/admin/category/edit",
      *     options={
      *      "aclComment": "Редактирование категорий"
@@ -90,7 +90,7 @@ final class Category extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/category/delete",
+     *     path="admin/catalog/category/delete",
      *     name="catalog/admin/category/delete",
      *     options={
      *      "aclComment": "Удаление категорий"

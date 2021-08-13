@@ -33,7 +33,7 @@ final class Image extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/images",
+     *     path="admin/catalog/product/images",
      *     name="catalog/admin/product/images",
      *     options={
      *      "aclComment": "Управление изображениями товара"
@@ -53,7 +53,7 @@ final class Image extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/images/add",
+     *     path="admin/catalog/product/images/add",
      *     name="catalog/admin/product/images/add",
      *     options={
      *      "aclComment": "Загрузка изображения к товару"
@@ -72,7 +72,7 @@ final class Image extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/images/make_general",
+     *     path="admin/catalog/product/images/make_general",
      *     name="catalog/admin/product/images/make_general",
      *     options={
      *      "aclComment": "Переключение основного изображения"
@@ -103,7 +103,7 @@ final class Image extends BaseController
 
     /**
      * @Route(
-     *     path="catalog/admin/product/images/delete",
+     *     path="admin/catalog/product/images/delete",
      *     name="catalog/admin/product/images/delete",
      *     options={
      *      "aclComment": "Удаление изображения к товару"
