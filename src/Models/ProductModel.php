@@ -55,7 +55,7 @@ final class ProductModel implements ModelInterface
                 '%2$s - %3$s - %1$s',
                 Setting::get('sitename'),
                 $this->product->getName(),
-                $this->product->getCategory()->getFullTitle(reverse: true)
+                $this->product->getCategory()?->getFullTitle(reverse: true)
             ),
             'product' => $this->product,
             'breadcrumbs' => $this->getBreadcrumbs(),
@@ -79,7 +79,8 @@ final class ProductModel implements ModelInterface
     private function getBreadcrumbs(): array
     {
         $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
-        foreach ($this->product->getCategory()->getBreadcrumbs() as $breadcrumb) {
+        $breadcrumbs = $this->product->getCategory()?->getBreadcrumbs();
+        foreach ((array)$breadcrumbs as $breadcrumb) {
             $this->breadcrumbs->add(
                 $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
                 $breadcrumb['title']

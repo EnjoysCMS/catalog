@@ -33,7 +33,7 @@ final class CategoryModel implements ModelInterface
     private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
-    private Category $category;
+    private ?Category $category;
 
     /**
      * @throws NonUniqueResultException
@@ -51,6 +51,7 @@ final class CategoryModel implements ModelInterface
         $this->category = $this->getCategory(
             $this->serverRequest->get('slug')
         );
+
 
         $this->setOptions($config);
     }
@@ -81,7 +82,7 @@ final class CategoryModel implements ModelInterface
             '_title' => sprintf(
                 '%2$s - %1$s',
                 Setting::get('sitename'),
-                $this->category->getFullTitle(reverse: true)
+                $this->category?->getFullTitle(reverse: true)
             ),
             'category' => $this->category,
             'pagination' => $pagination,
@@ -94,19 +95,16 @@ final class CategoryModel implements ModelInterface
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    private function getCategory(string $slug): Category
+    private function getCategory(string $slug): ?Category
     {
-        $category = $this->categoryRepository->findByPath($slug);
-        if ($category === null) {
-            throw new NoResultException();
-        }
-        return $category;
+        return $this->categoryRepository->findByPath($slug);
     }
 
     private function getBreadcrumbs(): array
     {
         $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
-        foreach ($this->category->getBreadcrumbs() as $breadcrumb) {
+        $breadcrumbs = $this->category?->getBreadcrumbs();
+        foreach ((array)$breadcrumbs as $breadcrumb) {
             $this->breadcrumbs->add(
                 $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
                 $breadcrumb['title']

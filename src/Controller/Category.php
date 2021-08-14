@@ -44,14 +44,15 @@ final class Category
         path: 'catalog/{slug}@{page}',
         name: 'catalog/category',
         requirements: [
-            'slug' => '[^.^@]+',
+            'slug' => '[^.^@]*',
             'page' => '\d+'
         ],
         options: [
             'aclComment' => '[public] Просмотр категорий'
         ],
         defaults: [
-            'page' => 1
+            'page' => 1,
+            'slug' => ''
         ]
     )]
     public function view(FactoryInterface $container, Environment $twig): string

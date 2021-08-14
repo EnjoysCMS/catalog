@@ -24,8 +24,9 @@ class Category extends ClosureTreeRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function findByPath(string $path)
+    public function findByPath(?string $path)
     {
+
         $slugs = explode('/', $path);
         $first = array_shift($slugs);
         $alias = 'c';
@@ -199,11 +200,11 @@ class Category extends ClosureTreeRepository
         $nodes = $this->getChildren($node);
         $ids = array_map(
             function ($node) {
-                return $node->getId();
+                return $node?->getId();
             },
             $nodes
         );
-        $ids[] = $node->getId();
+        $ids[] = $node?->getId();
         return $ids;
     }
 

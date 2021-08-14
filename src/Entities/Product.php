@@ -182,7 +182,7 @@ class Product
     }
 
 
-    public function getCategory()
+    public function getCategory(): ?Category
     {
         return $this->category;
     }
@@ -198,11 +198,13 @@ class Product
     public function getSlug(): string
     {
         $category = $this->getCategory();
-        $slug = '{CATEGORY_NOT_ISSET}';
+
+        $slug = null;
         if ($category instanceof Category) {
-            $slug = $category->getSlug();
+            $slug = $category->getSlug()  . '/';
         }
-        return $slug . '/' . $this->getUrl();
+
+        return $slug . $this->getUrl();
     }
 
     public function getImages()

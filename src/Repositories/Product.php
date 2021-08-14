@@ -25,8 +25,7 @@ final class Product extends EntityRepository
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
-            ;
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
     }
 
 
@@ -38,11 +37,12 @@ final class Product extends EntityRepository
     {
         $slugs = explode('/', $slugs);
         $slug = array_pop($slugs);
+
         /** @var  \EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository */
         $categoryRepository = $this->getEntityManager()->getRepository(
             Category::class
-        )
-        ;
+        );
+
         $category = $categoryRepository->findByPath(implode("/", $slugs));
 
 
@@ -50,12 +50,15 @@ final class Product extends EntityRepository
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id')
-            ->where('p.category = :category')
-            ->setParameter('category', $category)
-            ->andWhere('p.url = :url')
-            ->setParameter('url', $slug)
-        ;
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id');
+        if ($category === null) {
+            $dql->where('p.category IS NULL');
+        } else {
+            $dql->where('p.category = :category')
+                ->setParameter('category', $category);
+        }
+        $dql->andWhere('p.url = :url')
+            ->setParameter('url', $slug);
 
         $product = $dql->getQuery()->getOneOrNullResult();
 
@@ -82,25 +85,34 @@ final class Product extends EntityRepository
         return $this->getQueryFindByCategory($category)->getResult();
     }
 
-    public function getQueryFindByCategory(Category $category): Query
+    public function getQueryFindByCategory(?Category $category): Query
     {
         return $this->getQueryBuilderFindByCategory($category)->getQuery();
     }
 
-    public function getQueryBuilderFindByCategory(Category $category): QueryBuilder
+    public function getQueryBuilderFindByCategory(?Category $category): QueryBuilder
     {
+        if($category === null){
+            return $this->getFindAllBuilder()->where('p.category IS NULL');
+        }
         return $this->getFindAllBuilder()
             ->where('p.category = :category')
-            ->setParameter('category', $category)
-            ;
+            ->setParameter('category', $category);
     }
 
     public function getFindByCategorysIdsDQL($categoryIds)
     {
-        return $this->getFindAllBuilder()
-            ->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds)
-            ;
+
+        $qb = $this->getFindAllBuilder();
+
+        $qb->where('p.category IN (:category)')
+            ->setParameter('category', $categoryIds);
+
+        if (false !== $null_key = array_search(null, $categoryIds)){
+            $qb->orWhere('p.category IS NULL');
+        }
+
+        return $qb;
     }
 
     public function getFindByCategorysIdsQuery($categoryIds)
