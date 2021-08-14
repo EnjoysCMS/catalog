@@ -57,13 +57,6 @@ final class CategoryModel implements ModelInterface
     }
 
 
-    #[ArrayShape([
-        '_title' => "string",
-        'category' => Category::class,
-        'pagination' => Pagination::class,
-        'products' => Paginator::class,
-        'breadcrumbs' => "array"
-    ])]
     public function getContext(): array
     {
         $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
@@ -85,6 +78,7 @@ final class CategoryModel implements ModelInterface
                 $this->category?->getFullTitle(reverse: true)
             ),
             'category' => $this->category,
+            'children' => $this->getChildren(),
             'pagination' => $pagination,
             'products' => $result,
             'breadcrumbs' => $this->getBreadcrumbs(),
@@ -98,6 +92,19 @@ final class CategoryModel implements ModelInterface
     private function getCategory(string $slug): ?Category
     {
         return $this->categoryRepository->findByPath($slug);
+    }
+
+    private function getChildren()
+    {
+        if($this->category instanceof Category){
+            return $this->category->getChildren();
+        }
+
+        return array_map(function($item){
+            if($item->getParent() === null){
+                return $item;
+            }
+        }, (array)$this->categoryRepository->getChildren());
     }
 
     private function getBreadcrumbs(): array
