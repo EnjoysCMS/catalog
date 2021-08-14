@@ -59,7 +59,7 @@ class Product
     private $images;
 
     /**
-     * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product")
+     * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product", cascade={"persist", "remove"})
      */
     private ?ProductMeta $meta = null;
 
