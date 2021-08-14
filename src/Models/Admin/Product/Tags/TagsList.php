@@ -116,7 +116,7 @@ class TagsList implements ModelInterface
                 $this->em->persist($tagEntity);
             }
 
-            $this->product->setTag($tagEntity);
+            $this->product->addTag($tagEntity);
         }
 
         $this->em->flush();

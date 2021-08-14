@@ -99,7 +99,7 @@ final class Add implements ModelInterface
 
         $form->select('category', 'Категория')
             ->fill(
-                $this->entityManager->getRepository(
+                ['0' => '_без категории_'] + $this->entityManager->getRepository(
                     Category::class
                 )->getFormFillArray()
             )

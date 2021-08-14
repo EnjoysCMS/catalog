@@ -188,7 +188,7 @@ class Product
     }
 
     /**
-     * @param Category $category
+     * @param Category|null $category
      */
     public function setCategory(?Category $category): void
     {
@@ -217,7 +217,7 @@ class Product
     }
 
 
-    public function setTag(ProductTag $tag): void
+    public function addTag(ProductTag $tag): void
     {
         $this->tags->add($tag);
     }
