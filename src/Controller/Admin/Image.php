@@ -39,14 +39,13 @@ final class Image extends BaseController
      *      "aclComment": "Управление изображениями товара"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function manage(ContainerInterface $container): string
+    public function manage(): string
     {
         return $this->view(
             $this->templatePath . '/images.twig',
-            $this->getContext($container->get(Index::class))
+            $this->getContext($this->container->get(Index::class))
         );
     }
 
@@ -59,14 +58,13 @@ final class Image extends BaseController
      *      "aclComment": "Загрузка изображения к товару"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function add(ContainerInterface $container): string
+    public function add(): string
     {
         return $this->view(
             $this->templatePath . '/form.twig',
-            $this->getContext($container->get(Add::class))
+            $this->getContext($this->container->get(Add::class))
         );
     }
 
@@ -79,10 +77,10 @@ final class Image extends BaseController
      *     }
      * )
      */
-    public function makeGeneral(): void
+    public function makeGeneral(EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator): void
     {
-        $repository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
-        $image = $repository->find($this->serverRequest->get('id'));
+        $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
+        $image = $repository->find($serverRequest->get('id'));
         if ($image === null) {
             Error::code(404);
         }
@@ -91,9 +89,9 @@ final class Image extends BaseController
             $item->setGeneral(false);
         }
         $image->setGeneral(true);
-        $this->entityManager->flush();
+        $entityManager->flush();
         Redirect::http(
-            $this->urlGenerator->generate(
+            $urlGenerator->generate(
                 'catalog/admin/product/images',
                 ['product_id' => $image->getProduct()->getId()]
             )
@@ -109,14 +107,13 @@ final class Image extends BaseController
      *      "aclComment": "Удаление изображения к товару"
      *     }
      * )
-     * @param ContainerInterface $container
      * @return string
      */
-    public function delete(ContainerInterface $container): string
+    public function delete(): string
     {
         return $this->view(
             $this->templatePath . '/form.twig',
-            $this->getContext($container->get(Delete::class))
+            $this->getContext($this->container->get(Delete::class))
         );
     }
 }
