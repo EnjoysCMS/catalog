@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models\Admin\Product\Tags;
 
+use App\Controller\Catalog\ManageTags;
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -101,25 +102,11 @@ class TagsList implements ModelInterface
     protected function doAction()
     {
         $tags = array_map('trim', array_unique(explode(',', $this->serverRequest->post('tags'))));
-
+        $manageTags = new TagsManager($this->em);
         $this->product->clearTags();
-
-        foreach ($tags as $tag) {
-            if (empty($tag)) {
-                continue;
-            }
-            $tagEntity = $this->tagRepository->findOneBy(['name' => $tag]);
-
-            if ($tagEntity === null) {
-                $tagEntity = new ProductTag();
-                $tagEntity->setName($tag);
-                $this->em->persist($tagEntity);
-            }
-
-            $this->product->addTag($tagEntity);
-        }
-
+        $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));
         $this->em->flush();
+
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }
 

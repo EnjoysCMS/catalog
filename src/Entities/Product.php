@@ -235,4 +235,17 @@ class Product
     {
         return $this->meta;
     }
+
+    /**
+     * @param ProductTag[] $tags
+     */
+    public function addTagsFromArray(array $tags)
+    {
+        foreach ($tags as $tag) {
+            if(!($tag instanceof ProductTag)){
+                continue;
+            }
+            $this->addTag($tag);
+        }
+    }
 }
