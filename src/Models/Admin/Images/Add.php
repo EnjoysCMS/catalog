@@ -66,7 +66,7 @@ final class Add implements ModelInterface
             $method = 'upload';
         }
 
-        $method = '\EnjoysCMS\Module\Catalog\Models\Admin\Images\\'.ucfirst($method);
+        $method = '\EnjoysCMS\Module\Catalog\Models\Admin\Images\\' . ucfirst($method);
 
         $this->uploadMethod = new $method();
     }
@@ -91,47 +91,12 @@ final class Add implements ModelInterface
     {
         $this->uploadMethod->upload($this->serverRequest);
 
-        $image = new Image();
-        $image->setProduct($this->product);
-        $image->setFilename($this->uploadMethod->getName());
-        $image->setExtension($this->uploadMethod->getExtension());
-        $image->setGeneral(empty($this->productImages));
+        $manageImage = new ManageImage($this->product, $this->entityManager);
 
-        $this->entityManager->persist($image);
-        $this->entityManager->flush();
-
-        $imgSmall = ImageManagerStatic::make($this->uploadMethod->getFullPathFileNameWithExtension());
-        $imgSmall->resize(
-            300,
-            300,
-            function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            }
-        );
-        $imgSmall->save(
-            str_replace(
-                $this->uploadMethod->getName(),
-                $this->uploadMethod->getName() . '_small',
-                $this->uploadMethod->getFullPathFileNameWithExtension()
-            )
-        );
-
-        $imgLarge = ImageManagerStatic::make($this->uploadMethod->getFullPathFileNameWithExtension());
-        $imgLarge->resize(
-            900,
-            900,
-            function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            }
-        );
-        $imgLarge->save(
-            str_replace(
-                $this->uploadMethod->getName(),
-                $this->uploadMethod->getName() . '_large',
-                $this->uploadMethod->getFullPathFileNameWithExtension()
-            )
+        $manageImage->addToDB(
+            $this->uploadMethod->getName(),
+            $this->uploadMethod->getExtension(),
+            $this->uploadMethod->getFullPathFileNameWithExtension()
         );
 
         Redirect::http(

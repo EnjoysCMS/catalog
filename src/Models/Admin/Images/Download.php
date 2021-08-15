@@ -87,20 +87,24 @@ final class Download implements LoadImage
 
     public function upload(ServerRequestInterface $serverRequest): void
     {
+        $this->loadAndSave($serverRequest->post('image'));
+    }
 
+    public function loadAndSave(string $link)
+    {
         $client = new Client(
             [
                 'verify' => false,
                 RequestOptions::IDN_CONVERSION => true
             ]
         );
-        $response = $client->get($serverRequest->post('image'));
+        $response = $client->get($link);
         $data = $response->getBody()->getContents();
         $ext = $this->getExt($response->getHeaderLine('Content-Type'));
         $newName = md5((string)microtime(true));
         $this->setName($newName[0] . '/' . $newName[1] . '/' . $newName);
         $this->setExtension($ext);
-        $this->setFullPathFileNameWithExtension($this->uploadDir  . $this->getName() . '.' . $this->getExtension());
+        $this->setFullPathFileNameWithExtension($this->uploadDir . $this->getName() . '.' . $this->getExtension());
 
         $directory = pathinfo($this->getFullPathFileNameWithExtension(), PATHINFO_DIRNAME);
         $this->makeDirectory($directory);
@@ -110,8 +114,6 @@ final class Download implements LoadImage
 
     private function makeDirectory(string $directory)
     {
-
-
         if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
             throw new \Exception(
                 sprintf("Нельзя создать директорию: %s", $directory)
@@ -129,7 +131,6 @@ final class Download implements LoadImage
                     sprintf("Не удалось создать директорию: %s! Причина: %s", $directory, $error['message'])
                 );
             }
-
         }
     }
 

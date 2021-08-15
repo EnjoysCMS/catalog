@@ -75,6 +75,7 @@ class Product
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     /**
