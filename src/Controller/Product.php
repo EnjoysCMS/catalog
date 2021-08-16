@@ -45,7 +45,6 @@ final class Product
         return $twig->render(
             $template_path,
             $container->make(ProductModel::class)->getContext(),
-
         );
     }
 }

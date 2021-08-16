@@ -21,7 +21,7 @@ use EnjoysCMS\Module\Catalog\Repositories;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class ProductModel implements ModelInterface
+class ProductModel implements ModelInterface
 {
 
     private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
@@ -36,18 +36,11 @@ final class ProductModel implements ModelInterface
         private ServerRequestInterface $serverRequest,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
-        private SendMail $sendMail
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
     }
 
-    #[ArrayShape([
-        '_title' => "string",
-        'product' => "\EnjoysCMS\Module\Catalog\Entities\Product",
-        'breadcrumbs' => "array",
-        'sendMailForm' => "\Enjoys\Forms\Form"
-    ])]
     public function getContext(): array
     {
         return [
@@ -58,8 +51,7 @@ final class ProductModel implements ModelInterface
                 $this->product->getCategory()?->getFullTitle(reverse: true)
             ),
             'product' => $this->product,
-            'breadcrumbs' => $this->getBreadcrumbs(),
-            'sendMailForm' => $this->sendMail->getForm()
+            'breadcrumbs' => $this->getBreadcrumbs()
         ];
     }
 
