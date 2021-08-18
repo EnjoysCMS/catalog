@@ -51,7 +51,8 @@ final class Product extends EntityRepository
             ->select('p', 'c', 't', 'i')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id');
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id')
+            ->orderBy('i.general', 'desc');
         if ($category === null) {
             $dql->where('p.category IS NULL');
         } else {
@@ -93,7 +94,7 @@ final class Product extends EntityRepository
 
     public function getQueryBuilderFindByCategory(?Category $category): QueryBuilder
     {
-        if($category === null){
+        if ($category === null) {
             return $this->getFindAllBuilder()->where('p.category IS NULL');
         }
         return $this->getFindAllBuilder()
@@ -103,13 +104,12 @@ final class Product extends EntityRepository
 
     public function getFindByCategorysIdsDQL($categoryIds)
     {
-
         $qb = $this->getFindAllBuilder();
 
         $qb->where('p.category IN (:category)')
             ->setParameter('category', $categoryIds);
 
-        if (false !== $null_key = array_search(null, $categoryIds)){
+        if (false !== $null_key = array_search(null, $categoryIds)) {
             $qb->orWhere('p.category IS NULL');
         }
 
