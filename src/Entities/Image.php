@@ -115,7 +115,7 @@ class Image
     public function getInfo()
     {
         return [
-            'path' => $_ENV['UPLOAD_DIR'] . '/' . $this->getFilename() . '.' . $this->getExtension(),
+            'path' => $_ENV['UPLOAD_DIR'] . '/catalog/' . $this->getFilename() . '.' . $this->getExtension(),
             'glob_pattern' => $this->getGlobPattern(),
             'filename' => $this->getFilename(),
             'extension' => $this->getExtension()
@@ -124,7 +124,7 @@ class Image
 
     public function getGlobPattern()
     {
-        return $_ENV['UPLOAD_DIR'] . '/' . $this->getFilename() . '*.' . $this->getExtension();
+        return $_ENV['UPLOAD_DIR'] . '/catalog/' . $this->getFilename() . '*.' . $this->getExtension();
     }
 
 }

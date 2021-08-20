@@ -23,7 +23,7 @@ final class Download implements LoadImage
 
     public function __construct()
     {
-        $this->uploadDir = rtrim($_ENV['UPLOAD_DIR'], '/') . DIRECTORY_SEPARATOR;
+        $this->uploadDir = rtrim($_ENV['UPLOAD_DIR'], '/') . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR;
     }
 
     /**

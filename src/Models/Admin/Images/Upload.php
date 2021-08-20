@@ -82,18 +82,16 @@ final class Upload implements LoadImage
                     'extensions' => 'jpg, png, jpeg',
                 ]
             )
-            ->setAttribute('accept', '.png, .jpg, .jpeg')
-        ;
+            ->setAttribute('accept', '.png, .jpg, .jpeg');
 
         $form->submit('upload');
         return $form;
     }
 
 
-
     public function upload(ServerRequestInterface $serverRequest): void
     {
-        $storage = new UploadFileSystem($_ENV['UPLOAD_DIR']);
+        $storage = new UploadFileSystem($_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR);
         $file = new File('image', $storage);
         $newName = md5((string)microtime(true));
         $file->setName($newName[0] . '/' . $newName[1] . '/' . $newName);

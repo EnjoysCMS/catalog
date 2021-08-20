@@ -39,7 +39,7 @@
 
                         <!-- /.box-header -->
                         <div class="card-body">
-                            <img src="{{ '/upload/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}"/>
+                            <img src="{{ _ENV.UPLOAD_URL ~ '/catalog/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}"/>
                         </div>
                         <!-- /.box-body -->
                     </div>
