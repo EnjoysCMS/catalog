@@ -221,7 +221,7 @@ class Category
         }
 
         if ($reverse === true) {
-            return $this->getTitle() . $separator . $parent->getFullTitle($separator);
+            return $this->getTitle() . $separator . $parent->getFullTitle($separator, $reverse);
         }
         return $parent->getFullTitle($separator) . $separator . $this->getTitle();
     }

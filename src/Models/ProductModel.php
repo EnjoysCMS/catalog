@@ -48,7 +48,7 @@ class ProductModel implements ModelInterface
                 '%2$s - %3$s - %1$s',
                 Setting::get('sitename'),
                 $this->product->getName(),
-                $this->product->getCategory()?->getFullTitle(reverse: true)
+                $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
             'product' => $this->product,
             'breadcrumbs' => $this->getBreadcrumbs()

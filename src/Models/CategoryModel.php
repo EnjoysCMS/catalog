@@ -73,9 +73,10 @@ final class CategoryModel implements ModelInterface
 
         return [
             '_title' => sprintf(
-                '%2$s - %1$s',
+                '%2$s #страница %3$d - %1$s',
                 Setting::get('sitename'),
-                $this->category?->getFullTitle(reverse: true)
+                $this->category?->getFullTitle(reverse: true) ?? 'Каталог',
+                $pagination->getCurrentPage()
             ),
             'category' => $this->category,
             'children' => $this->getChildren(),
