@@ -1,5 +1,13 @@
 {% extends '@a/layout.twig' %}
 {% block content %}
+
+    {% do asset('js', [
+        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js'
+    ]) %}
+    {% do asset('css', [
+        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css'
+    ]) %}
+
     <script>
         $('#tags').tagsinput({
             tagClass: 'badge bg-dark'

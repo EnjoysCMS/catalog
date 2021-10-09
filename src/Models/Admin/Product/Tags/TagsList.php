@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models\Admin\Product\Tags;
 
-use App\Controller\Catalog\ManageTags;
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -13,7 +12,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductTag;
@@ -25,7 +23,6 @@ class TagsList implements ModelInterface
 
     private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
     protected Product $product;
-    private ObjectRepository|EntityRepository $tagRepository;
 
     /**
      * @throws NoResultException
@@ -36,7 +33,6 @@ class TagsList implements ModelInterface
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->tagRepository = $this->em->getRepository(ProductTag::class);
         $this->product = $this->getProduct();
     }
 
@@ -65,11 +61,11 @@ class TagsList implements ModelInterface
         $renderer = new Bootstrap4();
         $renderer->setForm($form);
 
-        Assets::css([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css']);
-        Assets::js([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js']);
+//        Assets::css([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css']);
+//        Assets::js([__DIR__ . '/../../../../../node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js']);
 
         return [
-            'title' => $this->product->getName(),
+            'product' => $this->product,
             'subtitle' => 'Управление тегами',
             'form' => $renderer->render(),
         ];
