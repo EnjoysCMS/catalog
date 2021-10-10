@@ -1,0 +1,355 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    {% do asset('js', [
+        '//twitter.github.io/typeahead.js/js/handlebars.js',
+        'modules/catalog/node_modules/typeahead.js/dist/bloodhound.min.js',
+        'modules/catalog/node_modules/typeahead.js/dist/typeahead.bundle.min.js',
+        'modules/catalog/node_modules/typeahead.js/dist/typeahead.jquery.min.js',
+        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js',
+        'modules/catalog/node_modules/select2/dist/js/select2.full.min.js',
+        'modules/catalog/node_modules/select2/dist/js/i18n/ru.js',
+    ]) %}
+    {% do asset('css', [
+        'modules/catalog/node_modules/select2/dist/css/select2.min.css',
+        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css',
+    ]) %}
+
+    <style>
+        .bootstrap-tagsinput {
+            display: block;
+        }
+    </style>
+
+    <style>
+
+
+        .twitter-typeahead {
+            width: 100%;
+            padding-right: 90px;
+            margin-right: -90px;
+            display: inline !important;
+        }
+
+        .typeahead,
+        .tt-query,
+        .tt-hint {
+            width: 396px;
+            height: 30px;
+            padding: 8px 12px;
+            font-size: 24px;
+            line-height: 30px;
+            border: 2px solid #ccc;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            outline: none;
+
+        }
+
+        .typeahead {
+            background-color: #fff;
+        }
+
+        .typeahead:focus {
+            border: 2px solid #0097cf;
+        }
+
+        .tt-query {
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        }
+
+        .tt-hint {
+            color: #999
+        }
+
+        .tt-menu {
+            /*width: 422px;*/
+            margin: 12px 0;
+            padding: 8px 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+            -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+        }
+
+        .tt-suggestion {
+            padding: 3px 20px;
+            font-size: 14px;
+            line-height: 16px;
+        }
+
+        .tt-suggestion:hover {
+            cursor: pointer;
+            color: #fff;
+            background-color: #0097cf;
+        }
+
+        .tt-suggestion.tt-cursor {
+            color: #fff;
+            background-color: #0097cf;
+
+        }
+
+        .tt-suggestion p {
+            margin: 0;
+        }
+
+        .gist {
+            font-size: 14px;
+        }
+
+    </style>
+
+    <script>
+
+        let searchByArticul = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: "{{ path('@a/catalog/tools/find-option-keys', {'query' : '_QUERY'}) }}",
+                wildcard: '_QUERY'
+            }
+        });
+
+        function initializeTypeHead() {
+
+            $('.filter-option')
+                .typeahead('destroy')
+                .typeahead({
+                    hint: false
+                }, {
+
+                    display: 'name',
+                    source: searchByArticul,
+                    templates: {
+                        suggestion: Handlebars.compile('<div><strong>{{ '{{ name }}' }}</strong> {{ '{{ unit }}' }}</div>')
+                    }
+                })
+                .bind('typeahead:select', function (ev, suggestion) {
+                    let unit = $(this).parents('.form-row').find('.filter-unit');
+                    unit.val(suggestion.unit);
+                });
+        }
+
+        function initializeTagsInput() {
+            $('.filter-value').tagsinput({
+                tagClass: 'badge bg-secondary',
+                trimValue: true,
+                delimiter: ',',
+                confirmKeys: [13],
+                typeaheadjs: {
+                    display: 'value',
+                    source: function (query, syncResults, asyncResults) {
+
+                        let option = this.$el.parents('.form-row').find('.filter-option').val();
+                        let unit = this.$el.parents('.form-row').find('.filter-unit').val();
+
+                        $.ajax({
+                            url: "{{ path('@a/catalog/tools/find-option-values') }}",
+                            data: {query: query, option: option, unit: unit},
+                            type: "GET",
+                            success: function (data) {
+                             //   console.log(data)
+                                return asyncResults(data);
+                            }
+                        })
+                    }
+                },
+                //limit:10,
+            });
+        }
+
+        $(".fillby").select2({
+            width: "100%",
+            dropdownParent: $("#exampleModalCenter"),
+            ajax: {
+                url: "?app=tools&action=getproducts",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        query: params.term, // search term
+                        page: params.page
+                    };
+                },
+                processResults: function (data, params) {
+//                dump(data);
+                    // dump(params);
+                    // parse the results into the format expected by Select2
+                    // since we are using custom formatting functions we do not need to
+                    // alter the remote JSON data, except to indicate that infinite
+                    // scrolling can be used
+                    params.page = params.page || 1;
+
+                    return {
+                        results: data.items,
+                        pagination: {
+                            more: (params.page * 10) < data.total_count
+                        }
+                    };
+                }
+
+            },
+            templateResult: formatRepo,
+            templateSelection: formatRepoSelection
+        });
+
+        function formatRepo(repo) {
+            if (repo.loading) {
+                return repo.text;
+            }
+
+
+            var $container = $(
+                "<div class='select2-result-repository clearfix'>" +
+
+                "<div class='select2-result-repository__title'></div>" +
+                "<div class='select2-result-repository__meta small'></div>" +
+
+                "</div>"
+            );
+
+            $container.find(".select2-result-repository__title").text(repo.title);
+            $container.find(".select2-result-repository__meta").text(repo.category);
+
+            return $container;
+        }
+
+        function formatRepoSelection(repo) {
+            return repo.title;
+        }
+
+
+        let i = $('.form-row').length;
+
+        $(document).ready(function () {
+            initializeTypeHead();
+            initializeTagsInput();
+            $('form').on('click', '.add', function () {
+                $('.filter-option').typeahead('destroy');
+                $('input.filter-value').tagsinput('destroy');
+
+
+                let added_html = $('#template').html();
+                $('form > div').append(added_html.split('~~i~~').join(i++));
+
+
+
+                initializeTagsInput();
+
+                initializeTypeHead();
+
+                return false;
+            }).on('click', '.remove', function () {
+                //dump($(this).parents('.form-row').html());
+                $(this).parents('.form-row').remove();
+                return false;
+            });
+
+
+        });
+    </script>
+
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{{ title ?? product.getName }}
+                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i
+                                class="fas fa-external-link-alt"></i></a>
+                    <small class="d-block">{{ subtitle }}</small>
+                </h2>
+                <div class="float-right">
+                    {% include '../modules/catalog/template/admin/products_admin_links.twig' %}
+                </div>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <form {{ form.getAttributesString|raw }}>
+                    {{ form.getElement('_token_submit').baseHtml|raw }}
+                    {{ form.getElement('_token_csrf').baseHtml|raw }}
+
+                    <div>
+                        {% for group in form.getElements %}
+                            {% if group is instanceof('\\Enjoys\\Forms\\Elements\\Group') %}
+                                <div class="form-row pb-1">
+                                    {% for element in group.getElements %}
+                                        <div class="{{ element.getAttribute('grid') }}">
+                                            {{ element.baseHtml|raw }}
+                                        </div>
+                                    {% endfor %}
+                                    <div class="col-md-1">
+                                        &nbsp;&nbsp;&nbsp;<a href="#" class="remove "><i class="fa fa-trash"></i></a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+                    {{ form.getElement('submit').baseHtml|raw }}
+                    <a href="#" class="add btn btn-outline-success "><i class="fa fa-plus"></i> Добавить опцию</a>
+                    <a href="#" class="btn btn-outline-success" data-toggle="modal" data-target="#exampleModalCenter"><i
+                                class="fa fa-plus"></i> Заполнить по &hellip;</a>
+
+                </form>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    <div id="template" class="d-none">
+        <div class="form-row pb-1">
+            <div class="col-md-3">
+                <input type="text" name="options[~~i~~][option]"  class="filter-option form-control" placeholder="Опция">
+            </div>
+            <div class="col-md-1">
+                <input type="text" name="options[~~i~~][unit]"  class="filter-unit  form-control " placeholder="ед. изм">
+            </div>
+            <div class="col-md-7">
+                <input type="text" name="options[~~i~~][value]"  class="filter-value  form-control" placeholder="Значение">
+            </div>
+            <div class="col-md-1">
+                &nbsp;&nbsp;&nbsp;<a href="#" class="remove "><i class="fa fa-trash"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"  aria-labelledby="exampleModalCenterTitle" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Выбор товара с похожими характеристиками</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="fillby" method="GET">
+                        <input type="hidden" name="app" value="edit\product\option">
+                        <input type="hidden" name="id" value="<?=$pid?>">
+
+                        <select name="fillby"  class="fillby form-control" onchange="this.form.submit()"></select>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}

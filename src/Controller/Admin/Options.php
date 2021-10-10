@@ -1,0 +1,98 @@
+<?php
+
+declare(strict_types=1);
+
+
+namespace EnjoysCMS\Module\Catalog\Controller\Admin;
+
+
+use App\Module\Admin\BaseController;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
+use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entities\OptionValue;
+use EnjoysCMS\Module\Catalog\Helpers\Template;
+use HttpSoft\Emitter\EmitterInterface;
+use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\Response;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Options as ModelOptions;
+
+final class Options extends BaseController
+{
+    private string $templatePath;
+
+    public function __construct(private ContainerInterface $container)
+    {
+        parent::__construct($this->container);
+        $this->templatePath = Template::getAdminTemplatePath();
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/product/options",
+     *     name="@a/catalog/product/options",
+     *     options={
+     *      "aclComment": "Просмотр опций товара"
+     *     }
+     * )
+     * @return string
+     */
+    public function manageOptions(): string
+    {
+        return $this->view(
+            $this->templatePath . '/product/options/options.twig',
+            $this->getContext($this->container->get(ModelOptions\Manage::class))
+        );
+    }
+
+
+    /**
+     * @Route(
+     *     path="admin/catalog/tools/find-option-keys",
+     *     name="@a/catalog/tools/find-option-keys",
+     *     options={
+     *      "aclComment": "[JSON] Получение списка названий опций (поиск)"
+     *     }
+     * )
+     */
+    public function getOptionKeys(
+        EntityManager $entityManager,
+        ServerRequestInterface $serverRequest,
+        Response $response,
+        SapiEmitter $emitter
+    ) {
+        $matched = $entityManager->getRepository(OptionKey::class)->like('name', $serverRequest->get('query'));
+        $response = $response->withHeader('content-type', 'application/json');
+        $response->getBody()->write(json_encode($matched));
+        $emitter->emit($response);
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/tools/find-option-values",
+     *     name="@a/catalog/tools/find-option-values",
+     *     options={
+     *      "aclComment": "[JSON] Получение списка значений опций (поиск)"
+     *     }
+     * )
+     */
+    public function getOptionValues(
+        EntityManager $entityManager,
+        ServerRequestInterface $serverRequest,
+        Response $response,
+        SapiEmitter $emitter
+    ) {
+        $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
+            ['name' => $serverRequest->get('option'), 'unit' => $serverRequest->get('unit')]
+        );
+        $matched = $entityManager->getRepository(OptionValue::class)->like('value', $serverRequest->get('query'), $key);
+        $response = $response->withHeader('content-type', 'application/json');
+        $response->getBody()->write(json_encode($matched));
+        $emitter->emit($response);
+    }
+}

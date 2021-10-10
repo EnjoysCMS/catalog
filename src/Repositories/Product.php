@@ -125,6 +125,4 @@ final class Product extends EntityRepository
     {
         return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
     }
-
-
 }

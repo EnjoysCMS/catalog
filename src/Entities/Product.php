@@ -72,10 +72,17 @@ class Product
      */
     private $tags;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="OptionValue")
+     * @ORM\JoinTable(name="products_options")
+     */
+    private $options;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->images = new ArrayCollection();
+        $this->options = new ArrayCollection();
     }
 
     /**
@@ -247,5 +254,31 @@ class Product
             }
             $this->addTag($tag);
         }
+    }
+
+
+    public function getOptions()
+    {
+        $result = [];
+        /** @var OptionValue $option */
+        foreach ($this->options as $i => $option) {
+            /** @var OptionKey $key */
+            $key = $option->getOptionKey();
+            $result[$key->getId()]['key'] = $key;
+            $result[$key->getId()]['values'][] = $option;
+        }
+        sort($result);
+        return $result;
+    }
+
+    public function clearOptions()
+    {
+        $this->options = new ArrayCollection();
+    }
+
+
+    public function addOption(OptionValue $option): void
+    {
+        $this->options->add($option);
     }
 }
