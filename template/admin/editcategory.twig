@@ -1,6 +1,14 @@
 {% extends '../modules/catalog/template/admin/form.twig' %}
 
 {% block additional %}
+    {% do asset('css', [
+        {0: 'modules/catalog/node_modules/select2/dist/css/select2.min.css','minify': false},
+        {0: 'modules/catalog/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css','minify': false},
+    ]) %}
+
+    {% do asset('js', [
+        {0: 'modules/catalog/node_modules/select2/dist/js/select2.full.min.js','minify': false }
+    ]) %}
     <script>
 
 
@@ -44,5 +52,48 @@
             $("#img").val(file.url);
         }
 
+    </script>
+
+    <script>
+        $(function () {
+
+            $(".set-extra-fields option").each(function() {
+                $(this).removeAttr('id');
+            });
+
+            $(".set-extra-fields").select2({
+                width: "100%",
+                theme: 'bootstrap4',
+                allowClear: true,
+                placeholder :'select..',
+                ajax: {
+                    url: "{{ path('@a/catalog/tools/find-option-keys') }}",
+                    dataType: 'json',
+                    // delay: 250,
+                    data: function (params) {
+                        return {
+                            query: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+
+                },
+                templateResult: function (result) {
+                    if (result.loading) {
+                        return result.text;
+                    }
+
+                    return result.name + result.unit;
+                },
+                templateSelection: function (result) {
+                    return result.name + result.unit;
+                }
+            });
+
+        });
     </script>
 {% endblock %}

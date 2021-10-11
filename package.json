@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@ttskch/select2-bootstrap4-theme": "^1.5.2",
     "bootstrap-tagsinput": "https://github.com/bootstrap-tagsinput/bootstrap-tagsinput#0.8.0",
     "select2": "^4.1.0-rc.0",
     "typeahead.js": "^0.11.1"

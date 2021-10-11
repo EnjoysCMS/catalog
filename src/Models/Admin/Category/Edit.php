@@ -25,6 +25,7 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -93,6 +94,7 @@ final class Edit implements ModelInterface
     private function getForm(): Form
     {
         $form = new Form(['method' => 'post']);
+
         $form->setDefaults(
             [
                 'title' => $this->category->getTitle(),
@@ -101,6 +103,7 @@ final class Edit implements ModelInterface
                 'url' => $this->category->getUrl(),
                 'img' => $this->category->getImg(),
                 'status' => [(int)$this->category->isStatus()],
+                'extraFields' => $this->category->getExtraFields()
             ]
         );
 
@@ -109,12 +112,10 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Статус категории'])
-        ;
+            ->fill([1 => 'Статус категории']);
 
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -136,8 +137,7 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
         $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
 
@@ -154,8 +154,21 @@ final class Edit implements ModelInterface
 HTML
                     ),
                 ]
-            )
-        ;
+            );
+
+        $form->select('extraFields', 'Дополнительные поля')
+            ->setDescription(
+                'Дополнительные поля, которые можно отображать в списке продуктов. Берутся из параметров товара (опций)'
+            )->addClass('set-extra-fields')
+            ->setMultiple()
+            ->fill(function (){
+                $optionKeys = $this->entityManager->getRepository(OptionKey::class)->findBy(['id' => $this->category->getExtraFields()]);
+                $result = [];
+                foreach ($optionKeys as $key) {
+                    $result[$key->getId()] = $key->getName();
+                }
+                return $result;
+            });
 
         $form->submit('add');
         return $form;
@@ -169,6 +182,8 @@ HTML
         $this->category->setUrl($this->serverRequest->post('url'));
         $this->category->setStatus((bool)$this->serverRequest->post('status', false));
         $this->category->setImg($this->serverRequest->post('img'));
+        $this->category->setExtraFields($this->serverRequest->post('extraFields'));
+
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
