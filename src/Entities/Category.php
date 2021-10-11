@@ -56,53 +56,17 @@ class Category
      */
     private ?string $description = null;
 
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): void
-    {
-        $this->description = $description;
-    }
-
-
     /**
      * @var string|null
      * @ORM\Column(type="string", length=500, nullable=true)
      */
     private ?string $shortDescription = null;
 
-
-    public function getShortDescription(): ?string
-    {
-        return $this->shortDescription;
-    }
-
-    public function setShortDescription(?string $shortDescription): void
-    {
-        $this->shortDescription = $shortDescription;
-    }
-
-
     /**
      * @var bool
      * @ORM\Column(type="boolean", options={"default": true})
      */
     private bool $status = true;
-
-
-    public function isStatus(): bool
-    {
-        return $this->status;
-    }
-
-    public function setStatus(bool $status): void
-    {
-        $this->status = $status;
-    }
-
     /**
      * @Gedmo\TreeParent
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
@@ -120,6 +84,43 @@ class Category
      * @ORM\Column(type="string", length=500, nullable=true)
      */
     private ?string $img = null;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $extraFields = null;
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(?string $shortDescription): void
+    {
+        $this->shortDescription = $shortDescription;
+    }
+
+
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): void
+    {
+        $this->status = $status;
+    }
 
 
     public function getImg(): ?string
@@ -172,33 +173,25 @@ class Category
         return $this->level;
     }
 
-    /**
-     * @return int
-     */
+
     public function getSort(): int
     {
         return $this->sort;
     }
 
-    /**
-     * @param int $sort
-     */
+
     public function setSort(int $sort): void
     {
         $this->sort = $sort;
     }
 
-    /**
-     * @return string
-     */
+
     public function getUrl(): string
     {
         return $this->url;
     }
 
-    /**
-     * @param string $url
-     */
+
     public function setUrl(string $url): void
     {
         $this->url = $url;
@@ -213,7 +206,7 @@ class Category
         return $parent->getSlug() . '/' . $this->getUrl();
     }
 
-    public function getFullTitle(string $separator = " / ",  bool $reverse = false): string
+    public function getFullTitle(string $separator = " / ", bool $reverse = false): string
     {
         $parent = $this->getParent();
         if ($parent === null) {
@@ -253,11 +246,21 @@ class Category
         return array_merge($parent->getBreadcrumbs(), $data);
     }
 
-    /**
-     * @return mixed
-     */
+
     public function getChildren()
     {
         return $this->children;
+    }
+
+
+    public function getExtraFields(): ?array
+    {
+        return $this->extraFields;
+    }
+
+
+    public function setExtraFields(?array $extraFields): void
+    {
+        $this->extraFields = $extraFields;
     }
 }
