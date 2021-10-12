@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -86,9 +87,15 @@ class Category
     private ?string $img = null;
 
     /**
-     * @ORM\Column(type="json", nullable=true)
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="OptionKey")
      */
-    private ?array $extraFields = null;
+    private  $extraFields;
+
+    public function __construct()
+    {
+        $this->extraFields = new ArrayCollection();
+    }
 
     public function getDescription(): ?string
     {
@@ -253,14 +260,32 @@ class Category
     }
 
 
-    public function getExtraFields(): ?array
+    /**
+     * @return ArrayCollection|null
+     */
+    public function getExtraFields()
     {
         return $this->extraFields;
     }
 
-
-    public function setExtraFields(?array $extraFields): void
+    public function removeExtraFields()
     {
-        $this->extraFields = $extraFields;
+        $this->extraFields = new ArrayCollection();
     }
+
+    public function addExtraField(OptionKey $field)
+    {
+        if ($this->extraFields->contains($field)){
+            return;
+        }
+        $this->extraFields->add($field);
+    }
+
+
+//
+//
+//    public function setExtraFields(?array $extraFields): void
+//    {
+//        $this->extraFields = $extraFields;
+//    }
 }

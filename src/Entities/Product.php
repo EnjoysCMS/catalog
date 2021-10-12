@@ -6,6 +6,10 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Expr\Expression;
+use Doctrine\Common\Collections\Expr\Value;
+use Doctrine\Common\Collections\ExpressionBuilder;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 
@@ -209,7 +213,7 @@ class Product
 
         $slug = null;
         if ($category instanceof Category) {
-            $slug = $category->getSlug()  . '/';
+            $slug = $category->getSlug() . '/';
         }
 
         return $slug . $this->getUrl();
@@ -249,7 +253,7 @@ class Product
     public function addTagsFromArray(array $tags)
     {
         foreach ($tags as $tag) {
-            if(!($tag instanceof ProductTag)){
+            if (!($tag instanceof ProductTag)) {
                 continue;
             }
             $this->addTag($tag);
@@ -269,6 +273,15 @@ class Product
         }
         sort($result);
         return $result;
+    }
+
+    public function getValuesByOptionKey($optionKey): array
+    {
+        return array_filter($this->options->toArray(), function ($item) use ($optionKey) {
+            if ($item->getOptionKey() === $optionKey) {
+                return $item;
+            }
+        });
     }
 
     public function clearOptions()

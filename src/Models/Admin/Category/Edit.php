@@ -95,6 +95,7 @@ final class Edit implements ModelInterface
     {
         $form = new Form(['method' => 'post']);
 
+
         $form->setDefaults(
             [
                 'title' => $this->category->getTitle(),
@@ -103,7 +104,12 @@ final class Edit implements ModelInterface
                 'url' => $this->category->getUrl(),
                 'img' => $this->category->getImg(),
                 'status' => [(int)$this->category->isStatus()],
-                'extraFields' => $this->category->getExtraFields()
+                'extraFields' => array_map(
+                    function ($item) {
+                        return $item->getId();
+                    },
+                    $this->category->getExtraFields()->toArray()
+                )
             ]
         );
 
@@ -161,8 +167,17 @@ HTML
                 'Дополнительные поля, которые можно отображать в списке продуктов. Берутся из параметров товара (опций)'
             )->addClass('set-extra-fields')
             ->setMultiple()
-            ->fill(function (){
-                $optionKeys = $this->entityManager->getRepository(OptionKey::class)->findBy(['id' => $this->category->getExtraFields()]);
+            ->fill(function () {
+                $optionKeys = $this->entityManager->getRepository(OptionKey::class)->findBy(
+                    [
+                        'id' => array_map(
+                            function ($item) {
+                                return $item->getId();
+                            },
+                            $this->category->getExtraFields()->toArray()
+                        )
+                    ]
+                );
                 $result = [];
                 foreach ($optionKeys as $key) {
                     $result[$key->getId()] = $key->getName();
@@ -182,7 +197,15 @@ HTML
         $this->category->setUrl($this->serverRequest->post('url'));
         $this->category->setStatus((bool)$this->serverRequest->post('status', false));
         $this->category->setImg($this->serverRequest->post('img'));
-        $this->category->setExtraFields($this->serverRequest->post('extraFields'));
+
+        $extraFields = $this->entityManager->getRepository(OptionKey::class)->findBy(
+            ['id' => $this->serverRequest->post('extraFields', [])]
+        )        ;
+
+        $this->category->removeExtraFields();
+        foreach ($extraFields as $extraField) {
+            $this->category->addExtraField($extraField);
+        }
 
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
