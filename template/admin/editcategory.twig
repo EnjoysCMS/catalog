@@ -2,12 +2,12 @@
 
 {% block additional %}
     {% do asset('css', [
-        {0: 'modules/catalog/node_modules/select2/dist/css/select2.min.css','minify': false},
-        {0: 'modules/catalog/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css','minify': false},
+        {0: 'modules/catalog/node_modules/select2/dist/css/select2.css','minify': false},
+        {0: 'modules/catalog/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
     ]) %}
 
     {% do asset('js', [
-        {0: 'modules/catalog/node_modules/select2/dist/js/select2.full.min.js','minify': false }
+        {0: 'modules/catalog/node_modules/select2/dist/js/select2.full.js','minify': false }
     ]) %}
     <script>
 
@@ -20,7 +20,7 @@
                     (async () => {
                         let response = await fetch('{{ path('tools/translit') }}', {
                             method: 'POST',
-                           headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                             body: query
                             // body: JSON.stringify({query: $(this).prop('value')})
                         });
@@ -32,23 +32,21 @@
         );
 
 
-
-
-        $(document).ready(function(){
-            $("#inputImage").on('click', function() {
+        $(document).ready(function () {
+            $("#inputImage").on('click', function () {
                 let width = 950;
                 let height = 420;
                 let params = [];
                 params.push('height=' + height);
                 params.push('width=' + width);
                 params.push('left=' + (screen.width - width) / 2);
-                params.push('top=' + ((screen.height - height) / 2) - 50 );
+                params.push('top=' + ((screen.height - height) / 2) - 50);
 
                 window.open('{{ path('elfinder/popup') }}', 'FileBrowser', params.join(','));
             });
         });
 
-        function processFile(file){
+        function processFile(file) {
             $("#img").val(file.url);
         }
 
@@ -57,15 +55,17 @@
     <script>
         $(function () {
 
-            $(".set-extra-fields option").each(function() {
-                $(this).removeAttr('id');
-            });
+
+            //
+            // $(".set-extra-fields option").each(function () {
+            //     $(this).removeAttr('id');
+            // });
 
             $(".set-extra-fields").select2({
                 width: "100%",
                 theme: 'bootstrap4',
                 allowClear: true,
-                placeholder :'select..',
+                placeholder: 'select..',
                 ajax: {
                     url: "{{ path('@a/catalog/tools/find-option-keys') }}",
                     dataType: 'json',
@@ -86,11 +86,20 @@
                     if (result.loading) {
                         return result.text;
                     }
+                    let $container = $(
+                        "<div class='select2-result-repository clearfix'>" +
+                            "<span class='select2-result---name'></span> " +
+                            "<span class='select2-result---unit small text-muted'></span>" +
+                        "</div>"
+                    );
 
-                    return result.name + result.unit;
+                    $container.find(".select2-result---name").text(result.name);
+                    $container.find(".select2-result---unit").text(result.unit);
+
+                    return $container;
                 },
                 templateSelection: function (result) {
-                    return result.name + result.unit;
+                    return result.text || (result.name + (result.unit ? ' (' + result.unit + ')' : ''));
                 }
             });
 

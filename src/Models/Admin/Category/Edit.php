@@ -180,7 +180,10 @@ HTML
                 );
                 $result = [];
                 foreach ($optionKeys as $key) {
-                    $result[$key->getId()] = $key->getName();
+                    $result[$key->getId()] = [
+                        $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : ''),
+                        ['id' => uniqid()]
+                    ];
                 }
                 return $result;
             });
@@ -200,7 +203,7 @@ HTML
 
         $extraFields = $this->entityManager->getRepository(OptionKey::class)->findBy(
             ['id' => $this->serverRequest->post('extraFields', [])]
-        )        ;
+        );
 
         $this->category->removeExtraFields();
         foreach ($extraFields as $extraField) {
