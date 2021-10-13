@@ -6,14 +6,18 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Index;
+use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -106,4 +110,42 @@ final class Category extends BaseController
         );
     }
 
+
+    /**
+     * @Route(
+     *     path="admin/catalog/tools/category/get-extra-fields",
+     *     name="@a/catalog/tools/category/get-extra-fields",
+     *     options={
+     *      "aclComment": "[JSON] Получение списка extra fields"
+     *     }
+     * )
+     * @throws NoResultException
+     */
+    public function getExtraFieldsJson(
+        EntityManager $entityManager,
+        ServerRequestInterface $serverRequest,
+        Response $response,
+        SapiEmitter $emitter
+    ) {
+        $result = [];
+
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
+        $category = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)->find(
+            $serverRequest->post('id')
+        );
+
+        if ($category === null) {
+            throw new NoResultException();
+        }
+
+        $extraFields = $category->getParent()?->getExtraFields() ?? [];
+
+        foreach ($extraFields as $key) {
+            $result[$key->getId()] = $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : '');
+        }
+
+        $response = $response->withHeader('content-type', 'application/json');
+        $response->getBody()->write(json_encode($result));
+        $emitter->emit($response);
+    }
 }

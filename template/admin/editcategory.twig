@@ -53,14 +53,9 @@
     </script>
 
     <script>
+
+
         $(function () {
-
-
-            //
-            // $(".set-extra-fields option").each(function () {
-            //     $(this).removeAttr('id');
-            // });
-
             $(".set-extra-fields").select2({
                 width: "100%",
                 theme: 'bootstrap4',
@@ -88,8 +83,8 @@
                     }
                     let $container = $(
                         "<div class='select2-result-repository clearfix'>" +
-                            "<span class='select2-result---name'></span> " +
-                            "<span class='select2-result---unit small text-muted'></span>" +
+                        "<span class='select2-result---name'></span> " +
+                        "<span class='select2-result---unit small text-muted'></span>" +
                         "</div>"
                     );
 
@@ -103,6 +98,26 @@
                 }
             });
 
+        });
+
+        $(document).ready(function () {
+            $("#fill-from-parent").on('click', function () {
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('@a/catalog/tools/category/get-extra-fields') }}",
+                    data: {id: $(this).data('id')}
+                }).done(function (result) {
+                    Object.keys(result).forEach(function (key) {
+                        let value = result[key];
+                        if (!$("#extraFields option[value='" + key + "']").length) {
+                            $('#extraFields').append(new Option(value, key, false, true));
+                        }
+                    });
+                    $('#extraFields').trigger('change');
+                }).fail(function () {
+                    console.log('An error occurred');
+                });
+            });
         });
     </script>
 {% endblock %}

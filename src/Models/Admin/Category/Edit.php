@@ -118,10 +118,12 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Статус категории']);
+            ->fill([1 => 'Статус категории'])
+        ;
 
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -143,7 +145,8 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            );
+            )
+        ;
         $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
 
@@ -160,11 +163,20 @@ final class Edit implements ModelInterface
 HTML
                     ),
                 ]
-            );
+            )
+        ;
 
-        $form->select('extraFields', 'Дополнительные поля')
+        $form->select(
+            'extraFields',
+            'Дополнительные поля 
+            <a class="align-top btn btn-xs btn-warning" 
+                id="fill-from-parent" 
+                data-id="' . $this->category->getId() . '">
+                заполнить из родительской категории</a>'
+        )
             ->setDescription(
-                'Дополнительные поля, которые можно отображать в списке продуктов. Берутся из параметров товара (опций)'
+                'Дополнительные поля, которые можно отображать в списке продуктов. 
+                Берутся из параметров товара (опций)'
             )->addClass('set-extra-fields')
             ->setMultiple()
             ->fill(function () {
@@ -186,7 +198,8 @@ HTML
                     ];
                 }
                 return $result;
-            });
+            })
+        ;
 
         $form->submit('add');
         return $form;
