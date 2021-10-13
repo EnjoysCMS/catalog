@@ -16,6 +16,7 @@ use EnjoysCMS\Module\Catalog\Models\Admin\Category\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Category\Index;
+use EnjoysCMS\Module\Catalog\Models\Admin\Category\SetExtraFieldsToChildren;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
@@ -147,5 +148,21 @@ final class Category extends BaseController
         $response = $response->withHeader('content-type', 'application/json');
         $response->getBody()->write(json_encode($result));
         $emitter->emit($response);
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/tools/category/set-extra-fields-to-children",
+     *     name="@a/catalog/tools/category/set-extra-fields-to-children",
+     *     options={
+     *      "aclComment": "[ADMIN] Установка extra fields всем дочерним категориям"
+     *     }
+     * )
+     */
+    public function setExtraFieldsToAllChildren() {
+        return $this->view(
+            $this->templatePath . '/form.twig',
+            $this->getContext($this->container->get(SetExtraFieldsToChildren::class))
+        );
     }
 }

@@ -171,9 +171,12 @@ HTML
                 data-id="' . $this->category->getId() . '">
                 заполнить из родительской категории</a>' : '';
 
-        $linkFillAllChildren = ($this->category->getChildren()->count() && $this->category->getExtraFields()->count()) ? '<a class="align-top btn btn-xs btn-info" 
+        $linkFillAllChildren = $this->category->getChildren()->count() ? '<a class="align-top btn btn-xs btn-info" 
                 id="fill-all-children" 
-                data-id="' . $this->category->getId() . '">
+                href="' . $this->urlGenerator->generate(
+                '@a/catalog/tools/category/set-extra-fields-to-children',
+                ['id' => $this->category->getId()]
+            ) . '">
                     заполнить все дочерние категории</a>' : '';
 
 
