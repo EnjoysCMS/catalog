@@ -166,13 +166,20 @@ HTML
             )
         ;
 
-        $form->select(
-            'extraFields',
-            'Дополнительные поля 
-            <a class="align-top btn btn-xs btn-warning" 
+        $linkFillFromParent = $this->category->getParent() ? '<a class="align-top btn btn-xs btn-warning" 
                 id="fill-from-parent" 
                 data-id="' . $this->category->getId() . '">
-                заполнить из родительской категории</a>'
+                заполнить из родительской категории</a>' : '';
+
+        $linkFillAllChildren = ($this->category->getChildren()->count() && $this->category->getExtraFields()->count()) ? '<a class="align-top btn btn-xs btn-info" 
+                id="fill-all-children" 
+                data-id="' . $this->category->getId() . '">
+                    заполнить все дочерние категории</a>' : '';
+
+
+        $form->select(
+            'extraFields',
+            "Дополнительные поля {$linkFillFromParent} {$linkFillAllChildren} "
         )
             ->setDescription(
                 'Дополнительные поля, которые можно отображать в списке продуктов. 
