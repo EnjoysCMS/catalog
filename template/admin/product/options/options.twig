@@ -157,7 +157,7 @@
                             data: {query: query, option: option, unit: unit},
                             type: "GET",
                             success: function (data) {
-                             //   console.log(data)
+                                //   console.log(data)
                                 return asyncResults(data);
                             }
                         })
@@ -169,15 +169,15 @@
 
         $(".fillby").select2({
             width: "100%",
-            dropdownParent: $("#exampleModalCenter"),
+            dropdownParent: $("#fill-by-modal"),
             ajax: {
-                url: "?app=tools&action=getproducts",
+                url: "{{ path('@a/catalog/tools/find-products') }}",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
                     return {
                         query: params.term, // search term
-                        page: params.page
+                        //  page: params.page
                     };
                 },
                 processResults: function (data, params) {
@@ -187,28 +187,30 @@
                     // since we are using custom formatting functions we do not need to
                     // alter the remote JSON data, except to indicate that infinite
                     // scrolling can be used
-                    params.page = params.page || 1;
+                    // params.page = params.page || 1;
 
                     return {
                         results: data.items,
-                        pagination: {
-                            more: (params.page * 10) < data.total_count
-                        }
+                        // pagination: {
+                        //     more: (params.page * 10) < data.total_count
+                        // }
                     };
                 }
 
             },
             templateResult: formatRepo,
-            templateSelection: formatRepoSelection
+            templateSelection: function (result) {
+                return result.title;
+            }
         });
 
-        function formatRepo(repo) {
-            if (repo.loading) {
-                return repo.text;
+        function formatRepo(result) {
+            if (result.loading) {
+                return result.text;
             }
 
 
-            var $container = $(
+            let $container = $(
                 "<div class='select2-result-repository clearfix'>" +
 
                 "<div class='select2-result-repository__title'></div>" +
@@ -217,14 +219,10 @@
                 "</div>"
             );
 
-            $container.find(".select2-result-repository__title").text(repo.title);
-            $container.find(".select2-result-repository__meta").text(repo.category);
+            $container.find(".select2-result-repository__title").text(result.title);
+            $container.find(".select2-result-repository__meta").text(result.category);
 
             return $container;
-        }
-
-        function formatRepoSelection(repo) {
-            return repo.title;
         }
 
 
@@ -240,7 +238,6 @@
 
                 let added_html = $('#template').html();
                 $('form > div').append(added_html.split('~~i~~').join(i++));
-
 
 
                 initializeTagsInput();
@@ -299,9 +296,12 @@
                     </div>
                     {{ form.getElement('submit').baseHtml|raw }}
                     <a href="#" class="add btn btn-outline-success "><i class="fa fa-plus"></i> Добавить опцию</a>
-                    <a href="#" class="btn btn-outline-success" data-toggle="modal" data-target="#exampleModalCenter"><i
-                                class="fa fa-plus"></i> Заполнить по &hellip;</a>
-
+                    <a href="#" class="btn btn-outline-success" data-toggle="modal" data-target="#fill-by-modal"><i
+                                class="fa fa-fill"></i> Заполнить по &hellip;</a>
+                    <a href="#" class="fill-from-text btn btn-outline-success "><i class="fa fa-paste"></i> Импорт из
+                        текса</a>
+                    <a href="#" class="fill-from-file btn btn-outline-success "><i class="fa fa-file-import"></i> Импорт
+                        из файлв</a>
                 </form>
             </div>
             <!-- /.card-body -->
@@ -313,13 +313,14 @@
     <div id="template" class="d-none">
         <div class="form-row pb-1">
             <div class="col-md-3">
-                <input type="text" name="options[~~i~~][option]"  class="filter-option form-control" placeholder="Опция">
+                <input type="text" name="options[~~i~~][option]" class="filter-option form-control" placeholder="Опция">
             </div>
             <div class="col-md-1">
-                <input type="text" name="options[~~i~~][unit]"  class="filter-unit  form-control " placeholder="ед. изм">
+                <input type="text" name="options[~~i~~][unit]" class="filter-unit  form-control " placeholder="ед. изм">
             </div>
             <div class="col-md-7">
-                <input type="text" name="options[~~i~~][value]"  class="filter-value  form-control" placeholder="Значение">
+                <input type="text" name="options[~~i~~][value]" class="filter-value  form-control"
+                       placeholder="Значение">
             </div>
             <div class="col-md-1">
                 &nbsp;&nbsp;&nbsp;<a href="#" class="remove "><i class="fa fa-trash"></i></a>
@@ -327,7 +328,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"  aria-labelledby="exampleModalCenterTitle" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="fill-by-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -337,11 +339,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="fillby" method="GET">
-                        <input type="hidden" name="app" value="edit\product\option">
-                        <input type="hidden" name="id" value="<?=$pid?>">
-
-                        <select name="fillby"  class="fillby form-control" onchange="this.form.submit()"></select>
+                    <form name="fillFromProduct" action="{{ path('@a/catalog/product/options/fill-from-product') }}" method="POST">
+                        <input type="hidden" name="id" value="{{ product.getId }}">
+                        <select name="fillFromProduct" class="fillby form-control" onchange="this.form.submit()"></select>
                     </form>
                 </div>
 

@@ -260,6 +260,11 @@ class Product
         }
     }
 
+    public function getOptionsCollection()
+    {
+        return $this->options;
+    }
+
 
     public function getOptions()
     {
@@ -292,6 +297,9 @@ class Product
 
     public function addOption(OptionValue $option): void
     {
+        if($this->options->contains($option)){
+            return;
+        }
         $this->options->add($option);
     }
 }

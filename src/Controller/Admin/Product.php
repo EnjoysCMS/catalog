@@ -7,12 +7,16 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
+use Doctrine\ORM\EntityManager;
+use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Add;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Delete;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Edit;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Index;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Tags\TagsList;
+use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -119,6 +123,45 @@ final class Product extends BaseController
         );
     }
 
+
+    /**
+     * @Route(
+     *     path="admin/catalog/tools/find-products",
+     *     name="@a/catalog/tools/find-products",
+     *     options={
+     *      "aclComment": "[JSON] Получение списка продукции (поиск)"
+     *     }
+     * )
+     */
+    public function findProductsByLike(
+        EntityManager $entityManager,
+        ServerRequestInterface $serverRequest,
+        Response $response,
+        SapiEmitter $emitter
+    ) {
+        $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
+            $serverRequest->get(
+                'query'
+            )
+        );
+        $response = $response->withHeader('content-type', 'application/json');
+
+        $result = [
+            'items' => array_map(function ($item) {
+                /** @var \EnjoysCMS\Module\Catalog\Entities\Product $item */
+                return [
+                    'id' => $item->getId(),
+                    'title' => $item->getName(),
+                    'category' => $item->getCategory()->getFullTitle()
+                ];
+            }, $matched),
+            'total_count' => count($matched)
+        ];
+        $response->getBody()->write(
+            json_encode($result)
+        );
+        $emitter->emit($response);
+    }
 
 
 }

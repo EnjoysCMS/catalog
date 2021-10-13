@@ -26,7 +26,8 @@ final class Product extends EntityRepository
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.meta', 'm')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+        ;
     }
 
 
@@ -57,10 +58,12 @@ final class Product extends EntityRepository
             $dql->where('p.category IS NULL');
         } else {
             $dql->where('p.category = :category')
-                ->setParameter('category', $category);
+                ->setParameter('category', $category)
+            ;
         }
         $dql->andWhere('p.url = :url')
-            ->setParameter('url', $slug);
+            ->setParameter('url', $slug)
+        ;
 
         $product = $dql->getQuery()->getOneOrNullResult();
 
@@ -82,6 +85,16 @@ final class Product extends EntityRepository
         return $this->getFindAllQuery()->getResult();
     }
 
+    public function like(string $query)
+    {
+        return $this->getFindAllBuilder()
+            ->andWhere('p.name LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     public function findByCategory(Category $category)
     {
         return $this->getQueryFindByCategory($category)->getResult();
@@ -99,7 +112,8 @@ final class Product extends EntityRepository
         }
         return $this->getFindAllBuilder()
             ->where('p.category = :category')
-            ->setParameter('category', $category);
+            ->setParameter('category', $category)
+        ;
     }
 
     public function getFindByCategorysIdsDQL($categoryIds)
@@ -107,7 +121,8 @@ final class Product extends EntityRepository
         $qb = $this->getFindAllBuilder();
 
         $qb->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds);
+            ->setParameter('category', $categoryIds)
+        ;
 
         if (false !== $null_key = array_search(null, $categoryIds)) {
             $qb->orWhere('p.category IS NULL');

@@ -50,6 +50,20 @@ final class Options extends BaseController
         );
     }
 
+    /**
+     * @Route(
+     *     path="admin/catalog/product/options/fill-from-product",
+     *     name="@a/catalog/product/options/fill-from-product",
+     *     options={
+     *      "aclComment": "Заполнение опций из другого продукта"
+     *     }
+     * )
+     */
+    public function fillFromProduct()
+    {
+        $this->container->get(ModelOptions\FillFromProduct::class)();
+    }
+
 
     /**
      * @Route(
