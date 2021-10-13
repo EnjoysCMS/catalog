@@ -298,7 +298,7 @@
                     <a href="#" class="add btn btn-outline-success "><i class="fa fa-plus"></i> Добавить опцию</a>
                     <a href="#" class="btn btn-outline-success" data-toggle="modal" data-target="#fill-by-modal"><i
                                 class="fa fa-fill"></i> Заполнить по &hellip;</a>
-                    <a href="#" class="fill-from-text btn btn-outline-success "><i class="fa fa-paste"></i> Импорт из
+                    <a href="#" class="fill-from-text btn btn-outline-success " data-toggle="modal" data-target="#fill-from-text-modal"><i class="fa fa-paste"></i> Импорт из
                         текса</a>
                     <a href="#" class="fill-from-file btn btn-outline-success "><i class="fa fa-file-import"></i> Импорт
                         из файлв</a>
@@ -342,6 +342,28 @@
                     <form name="fillFromProduct" action="{{ path('@a/catalog/product/options/fill-from-product') }}" method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
                         <select name="fillFromProduct" class="fillby form-control" onchange="this.form.submit()"></select>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="fill-from-text-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Импорт характеристик из текста</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="fillFromText" action="{{ path('@a/catalog/product/options/fill-from-text') }}" method="POST">
+                        <input type="hidden" name="id" value="{{ product.getId }}">
+                        <textarea name="text" class="form-control"></textarea>
+                        <input type="submit" class="btn btn-primary form-control">
                     </form>
                 </div>
 

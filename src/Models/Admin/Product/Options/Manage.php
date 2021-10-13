@@ -33,8 +33,7 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
-        private UrlGeneratorInterface $urlGenerator
+        private ServerRequestInterface $serverRequest
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -80,13 +79,27 @@ final class Manage implements ModelInterface
 
         foreach ($options as $key => $option) {
             $form->group()->setAttribute('id', 'group')->add([
-                (new Text('options[' . $key . '][option]'))->setAttributes(
-                    ['class' => 'filter-option form-control', 'placeholder' => 'Опция', 'grid' => 'col-md-3']
+                (new Text(
+                    'options[' . $key . '][option]'
+                ))->setAttributes(
+                    [
+                        'class' => 'filter-option form-control',
+                        'placeholder' => 'Опция',
+                        'grid' => 'col-md-3'
+                    ]
                 ),
-                (new Text('options[' . $key . '][unit]'))->setAttributes(
-                    ['class' => 'filter-unit form-control', 'placeholder' => 'ед.изм.', 'grid' => 'col-md-1']
+                (new Text(
+                    'options[' . $key . '][unit]'
+                ))->setAttributes(
+                    [
+                        'class' => 'filter-unit form-control',
+                        'placeholder' => 'ед.изм.',
+                        'grid' => 'col-md-1'
+                    ]
                 ),
-                (new Text('options[' . $key . '][value]'))->setAttributes(
+                (new Text(
+                    'options[' . $key . '][value]'
+                ))->setAttributes(
                     [
                         'class' => 'filter-value form-control',
                         'placeholder' => 'Значение',
@@ -121,12 +134,12 @@ final class Manage implements ModelInterface
 //        dd($this->serverRequest->post('options', []));
         $this->product->clearOptions();
         foreach ($this->serverRequest->post('options', []) as $option) {
-            if(empty($option['option']) || empty($option['value'])){
+            if (empty($option['option']) || empty($option['value'])) {
                 continue;
             }
-            $optionKey = $this->getOptionKey($option['option'], $option['unit']);
+            $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
             foreach (explode(',', $option['value']) as $value) {
-                $optionValue = $this->getOptionValue($value, $optionKey);
+                $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
                 $this->product->addOption($optionValue);
             }
         }
@@ -134,37 +147,4 @@ final class Manage implements ModelInterface
         Redirect::http();
     }
 
-    private function getOptionKey(string $name, string $unit): OptionKey
-    {
-        $optionKey = $this->keyRepository->findOneBy([
-            'name' => $name,
-            'unit' => $unit
-        ]);
-        if ($optionKey !== null) {
-            return $optionKey;
-        }
-        $optionKey = new OptionKey();
-        $optionKey->setName($name);
-        $optionKey->setUnit($unit);
-        $this->em->persist($optionKey);
-        $this->em->flush();
-        return $optionKey;
-    }
-
-    private function getOptionValue(string $value, OptionKey $optionKey): OptionValue
-    {
-        $optionValue = $this->valueRepository->findOneBy([
-            'optionKey' => $optionKey,
-            'value' => $value
-        ]);
-        if ($optionValue !== null) {
-            return $optionValue;
-        }
-        $optionValue = new OptionValue();
-        $optionValue->setOptionKey($optionKey);
-        $optionValue->setValue($value);
-        $this->em->persist($optionValue);
-        $this->em->flush();
-        return $optionValue;
-    }
 }

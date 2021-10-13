@@ -55,13 +55,27 @@ final class Options extends BaseController
      *     path="admin/catalog/product/options/fill-from-product",
      *     name="@a/catalog/product/options/fill-from-product",
      *     options={
-     *      "aclComment": "Заполнение опций из другого продукта"
+     *      "aclComment": "[ADMIN] Заполнение опций из другого продукта"
      *     }
      * )
      */
     public function fillFromProduct()
     {
         $this->container->get(ModelOptions\FillFromProduct::class)();
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/product/options/fill-from-text",
+     *     name="@a/catalog/product/options/fill-from-text",
+     *     options={
+     *      "aclComment": "[ADMIN] Заполнение опций из текста"
+     *     }
+     * )
+     */
+    public function fillFromText()
+    {
+        $this->container->get(ModelOptions\FillFromText::class)();
     }
 
 
