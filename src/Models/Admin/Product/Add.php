@@ -10,61 +10,55 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Cookie\Cookie;
+use Enjoys\Cookie\Exception;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 final class Add implements ModelInterface
 {
 
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private RendererInterface $renderer;
-    private UrlGeneratorInterface $urlGenerator;
-    private Environment $twig;
-    /**
-     * @var EntityRepository|ObjectRepository
-     */
-    private $productRepository;
-    /**
-     * @var EntityRepository|ObjectRepository
-     */
-    private $categoryRepository;
-    private ContainerInterface $container;
+    private ObjectRepository|EntityRepository $productRepository;
+    private ObjectRepository|EntityRepository $categoryRepository;
+    private ModuleConfig $config;
 
     public function __construct(
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        RendererInterface $renderer,
-        UrlGeneratorInterface $urlGenerator,
-        Environment $twig,
-        ContainerInterface $container
+        private EntityManager $em,
+        private ServerRequestInterface $serverRequest,
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator,
+        private ContainerInterface $container,
+        private Cookie $cookie
     ) {
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->renderer = $renderer;
-        $this->urlGenerator = $urlGenerator;
-        $this->twig = $twig;
+        $this->productRepository = $em->getRepository(Product::class);
+        $this->categoryRepository = $em->getRepository(Category::class);
 
-        $this->productRepository = $entityManager->getRepository(Product::class);
-        $this->categoryRepository = $entityManager->getRepository(Category::class);
-
-        $this->container = $container;
         $this->config = Config::getConfig($this->container);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -92,22 +86,23 @@ final class Add implements ModelInterface
 
         $form->setDefaults(
             [
-                'category' => $this->serverRequest->get('category_id')
+                'category' => $this->serverRequest->get(
+                    'category_id',
+                    Cookie::get('__catalog__last_category_when_add_product')
+                )
             ]
         );
 
 
         $form->select('category', 'Категория')
             ->fill(
-                ['0' => '_без категории_'] + $this->entityManager->getRepository(
+                ['0' => '_без категории_'] + $this->em->getRepository(
                     Category::class
                 )->getFormFillArray()
             )
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
         $form->text('name', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('articul', 'Артикул');
 
@@ -125,8 +120,7 @@ final class Add implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
         $form->textarea('description', 'Описание');
 
         $form->submit('add');
@@ -136,16 +130,22 @@ final class Add implements ModelInterface
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws Exception
      */
     private function doAction()
     {
-        $category = $this->entityManager->getRepository(Category::class)->find($this->serverRequest->post('category', 0));
+        $categoryId = $this->serverRequest->post('category', 0);
+        $this->cookie->set('__catalog__last_category_when_add_product', $categoryId);
+
+        /** @var Category|null $category */
+        $category = $this->em->getRepository(Category::class)->find($categoryId);
 
         $product = new Product();
         $product->setName($this->serverRequest->post('name'));
         $product->setDescription($this->serverRequest->post('description'));
         $product->setArticul($this->serverRequest->post('articul'));
-        /** @var Category $category */
+
+
         $product->setCategory($category);
         $product->setUrl(
             (empty($this->serverRequest->post('url')))
@@ -155,9 +155,9 @@ final class Add implements ModelInterface
         $product->setHide(false);
         $product->setActive(true);
 
-        $this->entityManager->persist($product);
+        $this->em->persist($product);
 
-        $this->entityManager->flush();
+        $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }
 }
