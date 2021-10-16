@@ -110,7 +110,7 @@ class Product
      */
     public function setName(string $name): void
     {
-        $this->name = $name;
+        $this->name = \trim($name);
     }
 
     /**
