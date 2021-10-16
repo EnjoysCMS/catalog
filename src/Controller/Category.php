@@ -55,8 +55,13 @@ final class Category
             'slug' => ''
         ]
     )]
-    public function view(FactoryInterface $container, Environment $twig): string
+    public function view(FactoryInterface $container, Environment $twig, ServerRequestInterface $serverRequest): string
     {
+        if ($serverRequest->get('slug') === '') {
+            return $container->make(Index::class)->view();
+        }
+
+
         $template_path = '@m/catalog/category.twig';
 
 

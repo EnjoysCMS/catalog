@@ -17,27 +17,30 @@ use Twig\Environment;
 final class Index
 {
 
+    public function __construct(private EntityManager $entityManager, private Environment $twig, private BreadcrumbsInterface $breadcrumbs)
+    {
+    }
 
     #[Route(
         path: 'catalog',
         name: 'catalog/index',
         options: ['aclComment' => '[public] Просмотр категорий (индекс)']
     )]
-    public function view(EntityManager $entityManager, Environment $twig, BreadcrumbsInterface $breadcrumbs): string
+    public function view(): string
     {
         /**
          * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository
          */
-        $categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
+        $categoryRepository = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
 
-        $breadcrumbs->add(null, 'Каталог');
+        $this->breadcrumbs->add(null, 'Каталог');
 
         $template_path = '@m/catalog/category_index.twig';
-        if (!$twig->getLoader()->exists($template_path)) {
+        if (!$this->twig->getLoader()->exists($template_path)) {
             $template_path = __DIR__ . '/../../template/category_index.twig';
         }
 
-        return $twig->render(
+        return $this->twig->render(
             $template_path,
             [
                 '_title' => sprintf(
@@ -46,7 +49,7 @@ final class Index
                     'Каталог'
                 ),
                 'categories' => $categoryRepository->getRootNodes(),
-                'breadcrumbs' => $breadcrumbs->get(),
+                'breadcrumbs' => $this->breadcrumbs->get(),
             ]
         );
     }

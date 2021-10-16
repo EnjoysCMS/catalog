@@ -33,7 +33,7 @@ final class CategoryModel implements ModelInterface
     private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
-    private ?Category $category;
+    private Category $category;
 
     /**
      * @throws NonUniqueResultException
@@ -48,9 +48,17 @@ final class CategoryModel implements ModelInterface
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->category = $this->getCategory(
+        $category = $this->getCategory(
             $this->serverRequest->get('slug')
         );
+
+
+        if ($category === null){
+            Error::code(404);
+        }
+
+        $this->category = $category;
+
 
 
         $this->setOptions($config);
