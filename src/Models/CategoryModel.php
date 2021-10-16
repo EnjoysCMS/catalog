@@ -63,11 +63,15 @@ final class CategoryModel implements ModelInterface
 
         if ($this->getOption('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);
-            $qb = $this->productRepository->getFindByCategorysIdsQuery($allCategoryIds);
+            $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
         } else {
-            $qb = $this->productRepository->getQueryFindByCategory($this->category);
+            $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
         }
+
+        $qb->orderBy('p.name', 'ASC');
+
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
+
         $result = new Paginator($qb);
         $pagination->setTotalItems($result->count());
 
