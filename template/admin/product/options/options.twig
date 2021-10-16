@@ -351,7 +351,7 @@
 
     <div class="modal fade" id="fill-from-text-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
          style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalCenterTitle">Импорт характеристик из текста</h5>
@@ -362,8 +362,8 @@
                 <div class="modal-body">
                     <form name="fillFromText" action="{{ path('@a/catalog/product/options/fill-from-text') }}" method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
-                        <textarea name="text" class="form-control"></textarea>
-                        <input type="submit" class="btn btn-primary form-control">
+                        <textarea name="text" class="form-control" rows="10"></textarea>
+                        <input type="submit" class="my-3 btn btn-primary form-control">
                     </form>
                 </div>
 
