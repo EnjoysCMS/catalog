@@ -39,10 +39,7 @@ class Product
      * @ORM\Column(type="string", nullable=true, options={"default": null})
      */
     private ?string $articul = null;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $url;
+
     /**
      * @ORM\Column(type="boolean", options={"default": false})
      */
@@ -82,11 +79,17 @@ class Product
      */
     private $options;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Url", mappedBy="products")
+     */
+    private $urls;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->options = new ArrayCollection();
+        $this->urls = new ArrayCollection();
     }
 
     /**
@@ -145,21 +148,6 @@ class Product
         $this->articul = $articul;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
 
     /**
      * @return bool
@@ -207,6 +195,9 @@ class Product
         $this->category = $category;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getSlug(): string
     {
         $category = $this->getCategory();
@@ -216,7 +207,7 @@ class Product
             $slug = $category->getSlug() . '/';
         }
 
-        return $slug . $this->getUrl();
+        return $slug . $this->getUrl()->getPath();
     }
 
     public function getImages()
@@ -301,5 +292,25 @@ class Product
             return;
         }
         $this->options->add($option);
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getUrls(): ArrayCollection
+    {
+        return $this->urls;
+    }
+
+    /**
+     * @return Url
+     * @throws \Exception
+     */
+    public function getUrl(): Url
+    {
+
+        return array_filter($this->urls->toArray(), function ($item){
+            return $item->isDefault();
+        })[0] ?? $this->urls->current() ?? throw new \Exception('Not set urls for product');
     }
 }
