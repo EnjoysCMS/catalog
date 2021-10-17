@@ -89,6 +89,8 @@ final class Edit implements ModelInterface
             'url' => $this->product->getUrl(),
             'articul' => $this->product->getArticul(),
             'description' => $this->product->getDescription(),
+            'active' => [(int)$this->product->isActive()],
+            'hide' => [(int)$this->product->isHide()],
         ];
 
         $category = $this->product->getCategory();
@@ -100,6 +102,23 @@ final class Edit implements ModelInterface
 
         $form->setDefaults($defaults);
 
+        $form->checkbox('active', null)
+            ->setPrefixId('active')
+            ->addClass(
+                'custom-switch custom-switch-off-danger custom-switch-on-success',
+                Form::ATTRIBUTES_FILLABLE_BASE
+            )
+            ->fill([1 => 'Включен?'])
+        ;
+
+        $form->checkbox('hide', null)
+            ->setPrefixId('hide')
+            ->addClass(
+                'custom-switch custom-switch-off-danger custom-switch-on-success',
+                Form::ATTRIBUTES_FILLABLE_BASE
+            )
+            ->fill([1 => 'Скрыт?'])
+        ;
 
         $form->select('category', 'Категория')
             ->fill(
@@ -155,6 +174,8 @@ final class Edit implements ModelInterface
                 ? URLify::slug($this->product->getName())
                 : $this->serverRequest->post('url')
         );
+        $this->product->setActive((bool)$this->serverRequest->post('active', false));
+        $this->product->setHide((bool)$this->serverRequest->post('hide', false));
 
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));

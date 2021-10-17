@@ -76,6 +76,9 @@ final class CategoryModel implements ModelInterface
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
         }
 
+        $qb->andWhere('p.hide = false');
+        $qb->andWhere('p.active = true');
+
         $qb->orderBy('p.name', 'ASC');
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());

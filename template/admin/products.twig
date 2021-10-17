@@ -65,7 +65,7 @@
                     <tbody>
                     {% for product in products %}
                         {% set image = product.getImages.first %}
-                        <tr>
+                        <tr{% if product.isActive == false %} class="table-danger" {% endif %}>
                             <td>
                                 {% if image %}
                                     <img class="w-50"
@@ -75,6 +75,8 @@
                             <td>
                                 <div class="h4">{{ product.getName }}
                                     <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i class="fas fa-external-link-alt"></i></a>
+                                    {% if product.isHide %}[скрыт]{% endif %}
+                                    {% if product.isActive == false %}[отключен]{% endif %}
                                 </div>
                                 <div class="small">
                                     {% if product.getArticul %}
