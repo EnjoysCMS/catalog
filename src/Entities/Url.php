@@ -32,14 +32,11 @@ class Url
     private bool $default;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="urls")
      */
-    private $products;
+    private Product $product;
 
-    public function __construct()
-    {
-        $this->products = new ArrayCollection();
-    }
+
 
 
     public function isDefault(): bool
@@ -62,4 +59,6 @@ class Url
     {
         $this->path = $path;
     }
+
+
 }
