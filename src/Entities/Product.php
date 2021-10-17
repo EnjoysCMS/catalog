@@ -288,7 +288,7 @@ class Product
 
     public function addOption(OptionValue $option): void
     {
-        if($this->options->contains($option)){
+        if ($this->options->contains($option)) {
             return;
         }
         $this->options->add($option);
@@ -302,15 +302,29 @@ class Product
         return $this->urls;
     }
 
+    private ?Url $currentUrl = null;
+
+    /**
+     * @throws \Exception
+     */
+    public function getCurrentUrl(): Url
+    {
+        return $this->currentUrl ?? $this->getUrl();
+    }
+
+    public function setCurrentUrl(Url $currentUrl = null): void
+    {
+        $this->currentUrl = $currentUrl;
+    }
+
     /**
      * @return Url
      * @throws \Exception
      */
     public function getUrl(): Url
     {
-
-        return array_filter($this->urls->toArray(), function ($item){
-            return $item->isDefault();
-        })[0] ?? $this->urls->current() ?? throw new \Exception('Not set urls for product');
+        return $this->getUrls()->filter(function ($item) {
+                return $item->isDefault();
+            })->current() ?? throw new \Exception('Not set urls for product');
     }
 }

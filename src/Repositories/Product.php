@@ -65,11 +65,20 @@ final class Product extends EntityRepository
 
         $dql->andWhere('p.active = true');
 
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
         $product = $dql->getQuery()->getOneOrNullResult();
 
         if ($product === null) {
             return null;
         }
+        $product->setCurrentUrl(
+            $product->getUrls()->filter(function ($item) use ($slug) {
+                if ($item->getPath() === $slug) {
+                    return true;
+                }
+                return false;
+            })->current()
+        );
         return $product;
     }
 
