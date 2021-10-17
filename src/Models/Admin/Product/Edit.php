@@ -33,7 +33,7 @@ final class Edit implements ModelInterface
 {
 
     private ?Product $product;
-    private ObjectRepository|EntityRepository $productRepository;
+    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
     private ModuleConfig $config;
 
     public function __construct(
@@ -86,7 +86,7 @@ final class Edit implements ModelInterface
     {
         $defaults = [
             'name' => $this->product->getName(),
-            'url' => $this->product->getUrl(),
+            'url' => $this->product->getUrl()->getPath(),
             'articul' => $this->product->getArticul(),
             'description' => $this->product->getDescription(),
             'active' => [(int)$this->product->isActive()],
@@ -108,8 +108,7 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Включен?'])
-        ;
+            ->fill([1 => 'Включен?']);
 
         $form->checkbox('hide', null)
             ->setPrefixId('hide')
@@ -117,8 +116,7 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Скрыт?'])
-        ;
+            ->fill([1 => 'Скрыт?']);
 
         $form->select('category', 'Категория')
             ->fill(
@@ -140,15 +138,13 @@ final class Edit implements ModelInterface
                 'Ошибка, такой url уже существует',
                 function () {
                     $url = $this->serverRequest->post('url');
-                    if ($url === $this->product->getUrl()) {
+                    if ($url === $this->product->getUrl()->getPath()) {
                         return true;
                     }
-                    $check = $this->productRepository->findOneBy(
-                        [
-                            'url' => $url,
-                            'category' => $this->product->getCategory()
-                        ]
-                    );
+                    $check = $this->productRepository->getFindByUrlBuilder(
+                        $url,
+                        $this->product->getCategory()
+                    )->getQuery()->getOneOrNullResult();
                     return is_null($check);
                 }
             );
@@ -169,13 +165,16 @@ final class Edit implements ModelInterface
         $this->product->setDescription($this->serverRequest->post('description'));
         $this->product->setArticul($this->serverRequest->post('articul'));
         $this->product->setCategory($category);
-        $this->product->setUrl(
-            (empty($this->serverRequest->post('url')))
-                ? URLify::slug($this->product->getName())
-                : $this->serverRequest->post('url')
-        );
         $this->product->setActive((bool)$this->serverRequest->post('active', false));
         $this->product->setHide((bool)$this->serverRequest->post('hide', false));
+
+        //TODO set default url with edit
+        $urlString = (empty($this->serverRequest->post('url')))
+            ? URLify::slug($this->product->getName())
+            : $this->serverRequest->post('url');
+        $this->product->getUrls()->filter();
+
+        $this->product->setUrl();
 
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
