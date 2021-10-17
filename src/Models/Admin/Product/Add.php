@@ -23,6 +23,7 @@ use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -33,7 +34,7 @@ use Twig\Error\SyntaxError;
 final class Add implements ModelInterface
 {
 
-    private ObjectRepository|EntityRepository $productRepository;
+    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
     private ObjectRepository|EntityRepository $categoryRepository;
     private ModuleConfig $config;
 
@@ -112,12 +113,10 @@ final class Add implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () {
-                    $check = $this->productRepository->findOneBy(
-                        [
-                            'url' => $this->serverRequest->post('url'),
-                            'category' => $this->categoryRepository->find($this->serverRequest->post('category', 0))
-                        ]
-                    );
+                    $check = $this->productRepository->getFindByUrlBuilder(
+                        $this->serverRequest->post('url'),
+                        $this->categoryRepository->find($this->serverRequest->post('category', 0))
+                    )->getQuery()->getOneOrNullResult();
                     return is_null($check);
                 }
             );
@@ -147,16 +146,23 @@ final class Add implements ModelInterface
 
 
         $product->setCategory($category);
-        $product->setUrl(
-            (empty($this->serverRequest->post('url')))
-                ? URLify::slug($product->getName())
-                : $this->serverRequest->post('url')
-        );
+
         $product->setHide(false);
         $product->setActive(true);
 
         $this->em->persist($product);
+        $this->em->flush();
 
+        $url = new Url();
+        $url->setProduct($product);
+        $url->setDefault(true);
+        $url->setPath(
+            (empty($this->serverRequest->post('url')))
+                ? URLify::slug($product->getName())
+                : $this->serverRequest->post('url')
+        );
+
+        $this->em->persist($url);
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }

@@ -317,14 +317,27 @@ class Product
         $this->currentUrl = $currentUrl;
     }
 
+    public function addUrl(Url $url)
+    {
+        if ($this->urls->contains($url)) {
+            return;
+        }
+        $this->urls->add($url);
+    }
+
     /**
      * @return Url
      * @throws \Exception
      */
     public function getUrl(): Url
     {
-        return $this->getUrls()->filter(function ($item) {
-                return $item->isDefault();
-            })->current() ?? throw new \Exception('Not set urls for product');
+        $url = $this->getUrls()->filter(function ($item) {
+            return $item->isDefault();
+        })->current();
+
+        if ($url instanceof Url) {
+            return $url;
+        }
+        throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
     }
 }

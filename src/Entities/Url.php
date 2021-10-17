@@ -27,7 +27,7 @@ class Url
     private string $path;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", name="`default`")
      */
     private bool $default;
 

@@ -46,22 +46,7 @@ final class Product extends EntityRepository
 
         $category = $categoryRepository->findByPath(implode("/", $slugs));
 
-        $dql = $this->createQueryBuilder('p')
-            ->select('p', 'c', 't', 'i')
-            ->leftJoin('p.category', 'c')
-            ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i')
-            ->orderBy('i.general', 'desc');
-        if ($category === null) {
-            $dql->where('p.category IS NULL');
-        } else {
-            $dql->where('p.category = :category')
-                ->setParameter('category', $category);
-        }
-
-        $dql->leftJoin('p.urls', 'u')
-            ->andWhere('u.path = :url')
-            ->setParameter('url', $slug);
+        $dql = $this->getFindByUrlBuilder($slug, $category);
 
         $dql->andWhere('p.active = true');
 
@@ -144,5 +129,26 @@ final class Product extends EntityRepository
     public function findByCategorysIds($categoryIds)
     {
         return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
+    }
+
+    public function getFindByUrlBuilder(string $url, Category $category): QueryBuilder
+    {
+        $dql = $this->createQueryBuilder('p')
+            ->select('p', 'c', 't', 'i')
+            ->leftJoin('p.category', 'c')
+            ->leftJoin('c.parent', 't')
+            ->leftJoin('p.images', 'i')
+            ->orderBy('i.general', 'desc');
+        if ($category === null) {
+            $dql->where('p.category IS NULL');
+        } else {
+            $dql->where('p.category = :category')
+                ->setParameter('category', $category);
+        }
+        $dql->leftJoin('p.urls', 'u')
+            ->andWhere('u.path = :url')
+            ->setParameter('url', $url);
+
+        return $dql;
     }
 }
