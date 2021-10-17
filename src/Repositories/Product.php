@@ -26,7 +26,8 @@ final class Product extends EntityRepository
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.meta', 'm')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+            ;
     }
 
 
@@ -48,10 +49,10 @@ final class Product extends EntityRepository
 
 
         $dql = $this->createQueryBuilder('p')
-            ->select('p', 'c', 't', 'i')
+            ->select('p', 'c', 't', 'i', 'u')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id')
+            ->leftJoin('p.images', 'i')
             ->orderBy('i.general', 'desc');
         if ($category === null) {
             $dql->where('p.category IS NULL');
@@ -59,8 +60,11 @@ final class Product extends EntityRepository
             $dql->where('p.category = :category')
                 ->setParameter('category', $category);
         }
-        $dql->andWhere('p.url = :url')
-            ->setParameter('url', $slug);
+
+        $dql->leftJoin('p.urls', 'u')
+            ->andWhere('u.path = :url')
+            ->setParameter('url', $slug)
+        ;
 
         $dql->andWhere('p.active = true');
 

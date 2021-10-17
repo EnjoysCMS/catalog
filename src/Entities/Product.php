@@ -80,7 +80,7 @@ class Product
     private $options;
 
     /**
-     * @ORM\OneToMany(targetEntity="Url", mappedBy="products")
+     * @ORM\OneToMany(targetEntity="Url", mappedBy="product")
      */
     private $urls;
 
@@ -297,7 +297,7 @@ class Product
     /**
      * @return ArrayCollection
      */
-    public function getUrls(): ArrayCollection
+    public function getUrls()
     {
         return $this->urls;
     }

@@ -60,5 +60,16 @@ class Url
         $this->path = $path;
     }
 
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+
+    public function setProduct(Product $product): void
+    {
+        $this->product = $product;
+    }
+
 
 }
