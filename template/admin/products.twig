@@ -82,7 +82,7 @@
                                     {% endif %}
 
                                     <div class="text-muted">Категория:
-                                        <a href="{{ path('catalog/category', {"slug": product.getCategory.getUrl}) }}"> {{ product.getCategory.getTitle }}</a> </div>
+                                        <a href="{{ path('catalog/category', {"slug": product.getCategory.getSlug}) }}"> {{ product.getCategory.getFullTitle(' &rarr; ')|raw }}</a> </div>
 
                                 </div>
                             </td>
