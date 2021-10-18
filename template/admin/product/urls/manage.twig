@@ -41,11 +41,12 @@
                             <td>
                                 <a class="btn btn-primary"
                                    href="{{ path('@a/catalog/product/urls/edit', {'url_id': url.getId, 'product_id': product.getId}) }}">Редактировать</a>
-                                <a class="btn btn-primary"
-                                   href="">Удалить</a>
                                 {% if not url.isDefault %}
-                                <a class="btn btn-primary"
-                                   href="{{ path('@a/catalog/product/urls/makedefault', {'url_id': url.getId, 'product_id': product.getId}) }}">Сделать основным</a>
+                                    <a class="btn btn-primary"
+                                       href="{{ path('@a/catalog/product/urls/delete', {'url_id': url.getId, 'product_id': product.getId}) }}">Удалить</a>
+                                    <a class="btn btn-primary"
+                                       href="{{ path('@a/catalog/product/urls/makedefault', {'url_id': url.getId, 'product_id': product.getId}) }}">Сделать
+                                        основным</a>
                                 {% endif %}
                             </td>
                         </tr>
