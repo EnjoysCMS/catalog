@@ -15,6 +15,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\MakeDefault;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\Manage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -58,37 +59,9 @@ final class Urls extends BaseController
      *      "aclComment": "[ADMIN] Сделать URL основным"
      *     }
      * )
-
-     * @throws NoResultException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
-    public function makeDefault(ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator)
+    public function makeDefault()
     {
-        /** @var EntityManager $em */
-        $em = $this->container->get(EntityManager::class);
-        /** @var Product $product */
-        $product = $em->getRepository(Product::class)->find($serverRequest->get('product_id'));
-        if($product === null){
-            throw new NoResultException();
-        }
-
-        $setFlag = false;
-        /** @var Url $url */
-        foreach ($product->getUrls() as $url) {
-           if($url->getId() === (int) $serverRequest->get('url_id')){
-               $url->setDefault(true);
-               $setFlag = true;
-               continue;
-           }
-           $url->setDefault(false);
-        }
-
-        if($setFlag === false){
-            throw new \InvalidArgumentException('Url id is invalid');
-        }
-
-        $em->flush();
-        Redirect::http($urlGenerator->generate('@a/catalog/product/urls', ['id' => $product->getId()]));
+        $this->container->get(MakeDefault::class)();
     }
 }
