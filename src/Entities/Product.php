@@ -198,7 +198,7 @@ class Product
     /**
      * @throws \Exception
      */
-    public function getSlug(): string
+    public function getSlug(string $lastPartSlug = null): string
     {
         $category = $this->getCategory();
 
@@ -207,7 +207,7 @@ class Product
             $slug = $category->getSlug() . '/';
         }
 
-        return $slug . $this->getUrl()->getPath();
+        return $slug . ($lastPartSlug ?? $this->getUrl()->getPath());
     }
 
     public function getImages()
