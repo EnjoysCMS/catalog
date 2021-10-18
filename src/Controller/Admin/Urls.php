@@ -15,6 +15,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\AddUrl;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\DeleteUrl;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\EditUrl;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\MakeDefault;
@@ -67,6 +68,23 @@ final class Urls extends BaseController
         return $this->view(
             $this->templatePath . '/product/urls/edit.twig',
             $this->getContext($this->container->get(EditUrl::class))
+        );
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/product/urls/add",
+     *     name="@a/catalog/product/urls/add",
+     *     options={
+     *      "aclComment": "[ADMIN] Добавление URL"
+     *     }
+     * )
+     */
+    public function add()
+    {
+        return $this->view(
+            $this->templatePath . '/product/urls/add.twig',
+            $this->getContext($this->container->get(AddUrl::class))
         );
     }
 
