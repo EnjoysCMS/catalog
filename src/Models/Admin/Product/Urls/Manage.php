@@ -21,8 +21,6 @@ final class Manage  implements ModelInterface
 {
     private ObjectRepository|EntityRepository|ProductRepository $productRepository;
     protected Product $product;
-    private ObjectRepository|EntityRepository|OptionKeyRepository $keyRepository;
-    private ObjectRepository|EntityRepository|OptionValueRepository $valueRepository;
 
     /**
      * @throws NoResultException
@@ -31,8 +29,7 @@ final class Manage  implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $serverRequest
     ) {
-        $this->keyRepository = $this->em->getRepository(OptionKey::class);
-        $this->valueRepository = $this->em->getRepository(OptionValue::class);
+
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
     }

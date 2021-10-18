@@ -340,4 +340,14 @@ class Product
         }
         throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
     }
+
+    public function getUrlById(int $id): Url
+    {
+        foreach ($this->getUrls() as $url) {
+            if($url->getId() === $id){
+                return $url;
+            }
+        }
+        throw new \InvalidArgumentException(sprintf('Not found url with this id: %d', $id));
+    }
 }

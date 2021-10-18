@@ -15,6 +15,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
+use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\EditUrl;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\MakeDefault;
 use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\Manage;
 use Psr\Container\ContainerInterface;
@@ -48,6 +49,23 @@ final class Urls extends BaseController
         return $this->view(
             $this->templatePath . '/product/urls/manage.twig',
             $this->getContext($this->container->get(Manage::class))
+        );
+    }
+
+    /**
+     * @Route(
+     *     path="admin/catalog/product/urls/edit",
+     *     name="@a/catalog/product/urls/edit",
+     *     options={
+     *      "aclComment": "[ADMIN] Редактирование URL"
+     *     }
+     * )
+     */
+    public function edit()
+    {
+        return $this->view(
+            $this->templatePath . '/product/urls/edit.twig',
+            $this->getContext($this->container->get(EditUrl::class))
         );
     }
 
