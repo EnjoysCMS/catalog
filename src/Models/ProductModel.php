@@ -45,7 +45,7 @@ class ProductModel implements ModelInterface
     public function getContext(): array
     {
         if($this->product->getUrl() !== $this->product->getCurrentUrl()){
-            Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]));
+            Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
         }
 
         return [
