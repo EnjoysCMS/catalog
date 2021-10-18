@@ -20,6 +20,7 @@ use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
@@ -137,15 +138,24 @@ final class Edit implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () {
-                    $url = $this->serverRequest->post('url');
-                    if ($url === $this->product->getUrl()->getPath()) {
-                        return true;
-                    }
-                    $check = $this->productRepository->getFindByUrlBuilder(
-                        $url,
+                    /** @var Product $product */
+                    $product = $this->productRepository->getFindByUrlBuilder(
+                        $this->serverRequest->post('url'),
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
-                    return is_null($check);
+
+                    if($product === null){
+                        return true;
+                    }
+
+                    /** @var Url $url */
+                    foreach ($product->getUrls() as $url) {
+                        if($url->getProduct()->getId() === $this->product->getId()){
+                            return true;
+                        }
+                    }
+
+                    return false;
                 }
             );
         $form->textarea('description', 'Описание');
@@ -168,13 +178,29 @@ final class Edit implements ModelInterface
         $this->product->setActive((bool)$this->serverRequest->post('active', false));
         $this->product->setHide((bool)$this->serverRequest->post('hide', false));
 
-        //TODO set default url with edit
+
         $urlString = (empty($this->serverRequest->post('url')))
             ? URLify::slug($this->product->getName())
             : $this->serverRequest->post('url');
-        $this->product->getUrls()->filter();
 
-        $this->product->setUrl();
+        /** @var Url $url */
+        $urlSetFlag = false;
+        foreach ($this->product->getUrls() as $url) {
+            if($url->getPath() === $urlString){
+                $url->setDefault(true);
+                $urlSetFlag = true;
+                continue;
+            }
+            $url->setDefault(false);
+        }
+
+        if($urlSetFlag === false){
+            $url = new Url();
+            $url->setPath($urlString);
+            $url->setDefault(true);
+            $url->setProduct($this->product);
+            $this->entityManager->persist($url);
+        }
 
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
