@@ -79,14 +79,29 @@ final class Delete implements ModelInterface
 
     private function doAction()
     {
+        $this->removeImages();
+        $this->removeUrls();
+
+        $this->entityManager->remove($this->product);
+
+        $this->entityManager->flush();
+        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+    }
+
+    private function removeImages(): void
+    {
         foreach ($this->product->getImages() as $image) {
             foreach (glob($image->getGlobPattern()) as $item) {
                 @unlink($item);
             }
             $this->entityManager->remove($image);
         }
-        $this->entityManager->remove($this->product);
-        $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+    }
+
+    private function removeUrls()
+    {
+        foreach ($this->product->getUrls() as $url) {
+            $this->entityManager->remove($url);
+        }
     }
 }

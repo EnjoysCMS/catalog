@@ -20,6 +20,11 @@
        href="{{ path('@a/catalog/product/options', {"id": product.getId}) }}" title="Теги"><i class="fa fa-list"></i></a>
 {% endif %}
 
+{% if access2route('@a/catalog/product/urls') %}
+    <a class="btn btn-default"
+       href="{{ path('@a/catalog/product/urls', {"id": product.getId}) }}" title="URLs"><i class="fas fa-link"></i></a>
+{% endif %}
+
 {% if access2route('catalog/admin/product/edit') %}
     <a class="btn btn-default"
        href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Файлы"><i class="fa fa-file"></i></a>

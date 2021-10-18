@@ -15,6 +15,7 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
+use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -43,6 +44,10 @@ class ProductModel implements ModelInterface
 
     public function getContext(): array
     {
+        if($this->product->getUrl() !== $this->product->getCurrentUrl()){
+            Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
+        }
+
         return [
             '_title' => sprintf(
                 '%2$s - %3$s - %1$s',

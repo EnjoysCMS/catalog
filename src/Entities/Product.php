@@ -39,10 +39,7 @@ class Product
      * @ORM\Column(type="string", nullable=true, options={"default": null})
      */
     private ?string $articul = null;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $url;
+
     /**
      * @ORM\Column(type="boolean", options={"default": false})
      */
@@ -82,11 +79,17 @@ class Product
      */
     private $options;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Url", mappedBy="product")
+     */
+    private $urls;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->options = new ArrayCollection();
+        $this->urls = new ArrayCollection();
     }
 
     /**
@@ -145,21 +148,6 @@ class Product
         $this->articul = $articul;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
 
     /**
      * @return bool
@@ -207,7 +195,10 @@ class Product
         $this->category = $category;
     }
 
-    public function getSlug(): string
+    /**
+     * @throws \Exception
+     */
+    public function getSlug(string $lastPartSlug = null): string
     {
         $category = $this->getCategory();
 
@@ -216,7 +207,7 @@ class Product
             $slug = $category->getSlug() . '/';
         }
 
-        return $slug . $this->getUrl();
+        return $slug . ($lastPartSlug ?? $this->getUrl()->getPath());
     }
 
     public function getImages()
@@ -297,9 +288,66 @@ class Product
 
     public function addOption(OptionValue $option): void
     {
-        if($this->options->contains($option)){
+        if ($this->options->contains($option)) {
             return;
         }
         $this->options->add($option);
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getUrls()
+    {
+        return $this->urls;
+    }
+
+    private ?Url $currentUrl = null;
+
+    /**
+     * @throws \Exception
+     */
+    public function getCurrentUrl(): Url
+    {
+        return $this->currentUrl ?? $this->getUrl();
+    }
+
+    public function setCurrentUrl(Url $currentUrl = null): void
+    {
+        $this->currentUrl = $currentUrl;
+    }
+
+    public function addUrl(Url $url)
+    {
+        if ($this->urls->contains($url)) {
+            return;
+        }
+        $this->urls->add($url);
+    }
+
+    /**
+     * @return Url
+     * @throws \Exception
+     */
+    public function getUrl(): Url
+    {
+        $url = $this->getUrls()->filter(function ($item) {
+            return $item->isDefault();
+        })->current();
+
+        if ($url instanceof Url) {
+            return $url;
+        }
+        throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
+    }
+
+    public function getUrlById(int $id): Url
+    {
+        foreach ($this->getUrls() as $url) {
+            if($url->getId() === $id){
+                return $url;
+            }
+        }
+        throw new \InvalidArgumentException(sprintf('Not found url with this id: %d', $id));
     }
 }

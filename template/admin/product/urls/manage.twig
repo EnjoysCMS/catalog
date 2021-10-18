@@ -1,0 +1,71 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{{ title ?? product.getName }}
+                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i
+                                class="fas fa-external-link-alt"></i></a>
+                    <small class="d-block">{{ subtitle }}</small>
+                </h2>
+                <div class="float-right">
+                    {% include '../modules/catalog/template/admin/products_admin_links.twig' %}
+                </div>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <a class="btn btn-primary"
+                   href="{{ path('@a/catalog/product/urls/add', {'product_id': product.getId}) }}">Добавить</a>
+
+                <table class="table table-hover color-table inverse-table">
+                    <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for url in product.getUrls %}
+                        {% set link = url('catalog/product', {'slug': product.getSlug(url.getPath)}) %}
+                        <tr class="{% if url.isDefault %}table-success{% else %}table-default{% endif %}">
+                            <td><b>{{ url.getPath }}</b><br>
+                                <small>
+                                    <a href="{{ link }}" target="url">
+                                        {{ link }}
+                                    </a>
+                                    <i class="{% if url.isDefault %}fa fa-check{% else %}fa fa-share{% endif %}"></i>
+                                </small>
+                            </td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{{ path('@a/catalog/product/urls/edit', {'url_id': url.getId, 'product_id': product.getId}) }}">Редактировать</a>
+                                {% if not url.isDefault %}
+                                    <a class="btn btn-primary"
+                                       href="{{ path('@a/catalog/product/urls/delete', {'url_id': url.getId, 'product_id': product.getId}) }}">Удалить</a>
+                                    <a class="btn btn-primary"
+                                       href="{{ path('@a/catalog/product/urls/makedefault', {'url_id': url.getId, 'product_id': product.getId}) }}">Сделать
+                                        основным</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}
