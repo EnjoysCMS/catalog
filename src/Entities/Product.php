@@ -36,9 +36,9 @@ class Product
      */
     private string $description;
     /**
-     * @ORM\Column(type="string", nullable=true, options={"default": null})
+     * @ORM\Column(type="string", length=64, nullable=true, unique=true, options={"default": null})
      */
-    private ?string $articul = null;
+    private ?string $hashId = null;
 
     /**
      * @ORM\Column(type="boolean", options={"default": false})
@@ -135,17 +135,17 @@ class Product
     /**
      * @return string|null
      */
-    public function getArticul(): ?string
+    public function getHashId(): ?string
     {
-        return $this->articul;
+        return $this->hashId;
     }
 
     /**
-     * @param string|null $articul
+     * @param string|null $hashId
      */
-    public function setArticul(?string $articul): void
+    public function setHashId(?string $hashId): void
     {
-        $this->articul = $articul;
+        $this->hashId = $hashId;
     }
 
 

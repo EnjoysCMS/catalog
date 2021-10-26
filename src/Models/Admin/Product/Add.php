@@ -105,7 +105,6 @@ final class Add implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
-        $form->text('articul', 'Артикул');
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -142,8 +141,6 @@ final class Add implements ModelInterface
         $product = new Product();
         $product->setName($this->serverRequest->post('name'));
         $product->setDescription($this->serverRequest->post('description'));
-        $product->setArticul($this->serverRequest->post('articul'));
-
 
         $product->setCategory($category);
 

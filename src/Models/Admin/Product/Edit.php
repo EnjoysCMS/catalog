@@ -88,7 +88,6 @@ final class Edit implements ModelInterface
         $defaults = [
             'name' => $this->product->getName(),
             'url' => $this->product->getUrl()->getPath(),
-            'articul' => $this->product->getArticul(),
             'description' => $this->product->getDescription(),
             'active' => [(int)$this->product->isActive()],
             'hide' => [(int)$this->product->isHide()],
@@ -130,7 +129,6 @@ final class Edit implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
-        $form->text('articul', 'Артикул');
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -173,7 +171,6 @@ final class Edit implements ModelInterface
 
         $this->product->setName($this->serverRequest->post('name'));
         $this->product->setDescription($this->serverRequest->post('description'));
-        $this->product->setArticul($this->serverRequest->post('articul'));
         $this->product->setCategory($category);
         $this->product->setActive((bool)$this->serverRequest->post('active', false));
         $this->product->setHide((bool)$this->serverRequest->post('hide', false));
