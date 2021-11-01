@@ -1,6 +1,6 @@
 WYSIWYG: summernote
 limitItems: 12
-minSymbolForSearch: 3
+minSearchChars: 3
 showSubcategoryProducts: true
 mailer:
   from: [email, name]

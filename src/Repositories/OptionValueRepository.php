@@ -16,14 +16,22 @@ final class OptionValueRepository extends EntityRepository
 
     public function like(string $field, string $value, ?OptionKey $key = null)
     {
+        return $this->getLikeQuery($field, $value, $key)->getResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+
+    public function getLikeQuery(string $field, string $value, ?OptionKey $key = null)
+    {
+        return $this->getLikeQueryBuilder($field, $value, $key)->getQuery();
+    }
+
+    public function getLikeQueryBuilder(string $field, string $value, ?OptionKey $key = null)
+    {
         return $this->createQueryBuilder('v')
             ->select('v')
             ->where("v.{$field} LIKE :value ")
             ->setParameter('value', $value . '%')
             ->andWhere('v.optionKey = :optionKey')
             ->setParameter('optionKey', $key)
-            ->getQuery()
-            ->getResult(AbstractQuery::HYDRATE_ARRAY)
         ;
     }
 

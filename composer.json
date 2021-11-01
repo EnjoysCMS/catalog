@@ -21,7 +21,8 @@
     "module-name": "Каталог",
     "admin-links": {
       "catalog/admin/category": "Категории",
-      "catalog/admin/products": "Продукты"
+      "catalog/admin/products": "Продукты",
+      "catalog/admin/setting": "Настройки"
     }
   },
   "scripts": {

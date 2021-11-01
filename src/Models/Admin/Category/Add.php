@@ -22,6 +22,7 @@ use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
@@ -61,6 +62,7 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
+      //  dd(Setting::get('WYSIWYG'));
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
         return [

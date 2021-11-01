@@ -79,4 +79,12 @@ class OptionValue
         $this->optionKey = $optionKey;
     }
 
+    /**
+     * @return ArrayCollection
+     */
+    public function getProducts()
+    {
+        return $this->products;
+    }
+
 }
