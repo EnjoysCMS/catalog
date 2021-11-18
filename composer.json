@@ -22,6 +22,7 @@
     "admin-links": {
       "catalog/admin/category": "Категории",
       "catalog/admin/products": "Продукты",
+      "catalog/admin/pricegroup": "Группы цен",
       "catalog/admin/setting": "Настройки"
     }
   },
