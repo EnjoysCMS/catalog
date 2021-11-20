@@ -49,27 +49,27 @@ final class PriceGroup extends BaseController
         );
     }
 
-//    #[Route(
-//        path: 'admin/catalog/pricegroup/edit',
-//        name: 'catalog/admin/pricegroup/edit'
-//    )]
-//    public function edit()
-//    {
-//        return $this->view(
-//            $this->templatePath . '/PriceGroup/price_group_add.twig',
-//            $this->getContext($this->container->get(PriceGroupAdd::class))
-//        );
-//    }
-//
-//    #[Route(
-//        path: 'admin/catalog/pricegroup/delete',
-//        name: 'catalog/admin/pricegroup/delete'
-//    )]
-//    public function delete()
-//    {
-//        return $this->view(
-//            $this->templatePath . '/PriceGroup/price_group_add.twig',
-//            $this->getContext($this->container->get(PriceGroupAdd::class))
-//        );
-//    }
+    #[Route(
+        path: 'admin/catalog/pricegroup/edit',
+        name: 'catalog/admin/pricegroup/edit'
+    )]
+    public function edit()
+    {
+        return $this->view(
+            $this->templatePath . '/PriceGroup/price_group_edit.twig',
+            $this->getContext($this->container->get(PriceGroupEdit::class))
+        );
+    }
+
+    #[Route(
+        path: 'admin/catalog/pricegroup/delete',
+        name: 'catalog/admin/pricegroup/delete'
+    )]
+    public function delete()
+    {
+        return $this->view(
+            $this->templatePath . '/PriceGroup/price_group_delete.twig',
+            $this->getContext($this->container->get(PriceGroupDelete::class))
+        );
+    }
 }

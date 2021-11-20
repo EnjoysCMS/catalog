@@ -19,7 +19,17 @@
                     <a class="btn btn-primary" href="{{ path('catalog/admin/pricegroup/add') }}">Добавить новую группу цен</a>
                 </div>
                 <hr>
-                {{ form|raw }}
+                <table class="table table-bordered table-hover">
+                {% for priceGroup in priceGroups %}
+                    <tr>
+                        <td>{{ priceGroup.getTitle }} <br> <small>{{ priceGroup.getCode }}</small></td>
+                        <td>
+                            <a class="btn btn-secondary" href="{{ path('catalog/admin/pricegroup/edit', {'id': priceGroup.getId}) }}">Редактировать</a>
+                            <a class="btn btn-danger" href="{{ path('catalog/admin/pricegroup/delete', {'id': priceGroup.getId}) }}">Удалить</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
             </div>
             <!-- /.card-body -->
         </div>

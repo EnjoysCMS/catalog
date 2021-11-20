@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Models\Admin\PriceGroup;
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 
 final class PriceGroupList implements ModelInterface
 {
@@ -20,7 +21,9 @@ final class PriceGroupList implements ModelInterface
     public function getContext(): array
     {
 
-        return [];
+        return [
+            'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll()
+        ];
     }
 
 }
