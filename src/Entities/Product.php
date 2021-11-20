@@ -84,12 +84,18 @@ class Product
      */
     private $urls;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product")
+     */
+    private $prices;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->options = new ArrayCollection();
         $this->urls = new ArrayCollection();
+        $this->prices = new ArrayCollection();
     }
 
     /**
@@ -349,5 +355,13 @@ class Product
             }
         }
         throw new \InvalidArgumentException(sprintf('Not found url with this id: %d', $id));
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPrices()
+    {
+        return $this->prices;
     }
 }
