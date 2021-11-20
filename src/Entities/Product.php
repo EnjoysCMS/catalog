@@ -87,7 +87,7 @@ class Product
     /**
      * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product")
      */
-    private $prices;
+    private $prices = [];
 
     public function __construct()
     {

@@ -29,7 +29,7 @@ final class Price extends BaseController
      *     path="admin/catalog/product/prices",
      *     name="@a/catalog/product/prices",
      *     options={
-     *      "aclComment": "[ADMIN] Просмотр URLs товара"
+     *      "aclComment": "[ADMIN] Установка цен товару"
      *     }
      * )
      */

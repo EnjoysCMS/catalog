@@ -11,6 +11,8 @@ use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 /**
  * @ORM\Entity
  * @ORM\Table(name="catalog_product_prices")
+ * @ORM\MappedSuperclass
+ * @ORM\HasLifecycleCallbacks
  */
 final class ProductPrice
 {
@@ -27,9 +29,9 @@ final class ProductPrice
     private int $price;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime", )
      */
-    private \DateTimeImmutable $date;
+    private \DateTime $date;
 
     /**
      * @ORM\ManyToOne(targetEntity="PriceGroup")
@@ -62,20 +64,18 @@ final class ProductPrice
         $this->price = Normalize::toPrice($price);
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
-    public function getDate(): \DateTimeImmutable
+
+    public function getDate(): \DateTime
     {
         return $this->date;
     }
 
     /**
-     * @param \DateTimeImmutable $date
+     * @ORM\PreUpdate
      */
-    public function setDate(\DateTimeImmutable $date): void
+    public function setDate(): void
     {
-        $this->date = $date;
+        $this->date = new \DateTime();
     }
 
 
@@ -88,6 +88,22 @@ final class ProductPrice
     public function setPriceGroup(PriceGroup $priceGroup): void
     {
         $this->priceGroup = $priceGroup;
+    }
+
+    /**
+     * @return Product
+     */
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param Product $product
+     */
+    public function setProduct(Product $product): void
+    {
+        $this->product = $product;
     }
 
 
