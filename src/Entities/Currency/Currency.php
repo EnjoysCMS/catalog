@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="catalog_currency")
  */
-final class Currency
+class Currency
 {
     /**
      * @ORM\Id

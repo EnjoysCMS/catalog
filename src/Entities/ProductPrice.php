@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 
 /**
@@ -42,6 +43,11 @@ final class ProductPrice
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="prices")
      */
     private Product $product;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="EnjoysCMS\Module\Catalog\Entities\Currency\Currency")
+     */
+    private Currency $currency;
 
     public function __construct()
     {
@@ -108,6 +114,22 @@ final class ProductPrice
     public function setProduct(Product $product): void
     {
         $this->product = $product;
+    }
+
+    /**
+     * @return Currency
+     */
+    public function getCurrency(): Currency
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param Currency $currency
+     */
+    public function setCurrency(Currency $currency): void
+    {
+        $this->currency = $currency;
     }
 
 

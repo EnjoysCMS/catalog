@@ -13,6 +13,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -112,6 +113,12 @@ final class Manage implements ModelInterface
     private function doAction()
     {
 
+        $currency = $this->em->getRepository(Currency::class)->find('RUB');
+
+        if($currency === null){
+            throw new \InvalidArgumentException('Currency not found');
+        }
+
         foreach ($this->priceGroups as $priceGroup) {
             foreach ($this->serverRequest->post('price', []) as $code => $price) {
 
@@ -135,6 +142,7 @@ final class Manage implements ModelInterface
                     $priceEntity->setPrice($price);
                     $priceEntity->setProduct($this->product);
                     $priceEntity->setPriceGroup($priceGroup);
+                    $priceEntity->setCurrency($currency);
                     $this->em->persist($priceEntity);
                     continue;
                 }
@@ -145,6 +153,7 @@ final class Manage implements ModelInterface
                 }
 
                 $this->prices[$code]->setPrice($price);
+                $this->prices[$code]->setCurrency($currency);
 
             }
         }
