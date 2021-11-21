@@ -364,4 +364,15 @@ class Product
     {
         return $this->prices;
     }
+
+    public function getPrice(string $code): ?ProductPrice
+    {
+        /** @var ProductPrice $price */
+        foreach ($this->prices as $price) {
+            if($price->getPriceGroup()->getCode() === $code){
+                return $price;
+            }
+        }
+        return null;
+    }
 }

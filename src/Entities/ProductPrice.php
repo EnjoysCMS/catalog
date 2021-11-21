@@ -48,6 +48,11 @@ final class ProductPrice
         $this->date = new \DateTimeImmutable();
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->getPrice();
+    }
+
     public function getId(): int
     {
         return $this->id;
