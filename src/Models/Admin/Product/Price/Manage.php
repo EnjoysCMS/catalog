@@ -91,9 +91,15 @@ final class Manage implements ModelInterface
 
     private function getForm(): Form
     {
-
+        $priceDefaults = [];
+        foreach ($this->prices as $code => $price) {
+            $priceDefaults[$code] = $price->getPrice();
+        }
 
         $form = new Form(['method' => 'post']);
+        $form->setDefaults([
+            'price' => $priceDefaults
+        ]);
         foreach ($this->priceGroups as $priceGroup) {
             $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
                 ->setAttribute('step', '0.01')
