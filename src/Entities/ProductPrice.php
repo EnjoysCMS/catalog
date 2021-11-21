@@ -29,9 +29,9 @@ final class ProductPrice
     private int $price;
 
     /**
-     * @ORM\Column(type="datetime", )
+     * @ORM\Column(type="datetime_immutable", columnDefinition="DATETIME on update CURRENT_TIMESTAMP")
      */
-    private \DateTime $date;
+    private \DateTimeImmutable $date;
 
     /**
      * @ORM\ManyToOne(targetEntity="PriceGroup")
@@ -42,6 +42,11 @@ final class ProductPrice
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="prices")
      */
     private Product $product;
+
+    public function __construct()
+    {
+        $this->date = new \DateTimeImmutable();
+    }
 
     public function getId(): int
     {
@@ -65,18 +70,12 @@ final class ProductPrice
     }
 
 
-    public function getDate(): \DateTime
+    public function getDate(): \DateTimeImmutable
     {
         return $this->date;
     }
 
-    /**
-     * @ORM\PreUpdate
-     */
-    public function setDate(): void
-    {
-        $this->date = new \DateTime();
-    }
+
 
 
     public function getPriceGroup()

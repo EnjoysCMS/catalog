@@ -122,7 +122,6 @@ final class Manage implements ModelInterface
                     $priceEntity->setPrice($price);
                     $priceEntity->setProduct($this->product);
                     $priceEntity->setPriceGroup($priceGroup);
-                    $priceEntity->setDate();
                     $this->em->persist($priceEntity);
 
                     continue;
