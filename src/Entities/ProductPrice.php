@@ -29,9 +29,9 @@ final class ProductPrice
     private int $price;
 
     /**
-     * @ORM\Column(type="datetime_immutable", columnDefinition="DATETIME on update CURRENT_TIMESTAMP")
+     * @ORM\Column(name="updated_at", type="datetime_immutable", columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
      */
-    private \DateTimeImmutable $date;
+    private \DateTimeImmutable $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="PriceGroup")
@@ -45,7 +45,7 @@ final class ProductPrice
 
     public function __construct()
     {
-        $this->date = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -75,9 +75,9 @@ final class ProductPrice
     }
 
 
-    public function getDate(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTimeImmutable
     {
-        return $this->date;
+        return $this->updatedAt;
     }
 
 
