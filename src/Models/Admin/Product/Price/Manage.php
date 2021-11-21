@@ -123,14 +123,25 @@ final class Manage implements ModelInterface
                     continue;
                 }
 
+
                 if(!array_key_exists($code, $this->prices)){
+
+
+                    if($price == 0){
+                        continue;
+                    }
+
                     $priceEntity = new ProductPrice();
                     $priceEntity->setPrice($price);
                     $priceEntity->setProduct($this->product);
                     $priceEntity->setPriceGroup($priceGroup);
                     $this->em->persist($priceEntity);
-
                     continue;
+                }
+
+
+                if($price == 0){
+                    $this->em->remove($this->prices[$code]);
                 }
 
                 $this->prices[$code]->setPrice($price);
