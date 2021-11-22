@@ -8,12 +8,11 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="catalog_product_prices")
- * @ORM\MappedSuperclass
- * @ORM\HasLifecycleCallbacks
  */
 final class ProductPrice
 {
@@ -30,9 +29,10 @@ final class ProductPrice
     private int $price;
 
     /**
-     * @ORM\Column(name="updated_at", type="datetime_immutable", columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+     * @ORM\Column(name="updated_at", type="datetime")
+     * @Gedmo\Timestampable(on="update")
      */
-    private \DateTimeImmutable $updatedAt;
+    private \DateTime $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="PriceGroup")
@@ -51,7 +51,7 @@ final class ProductPrice
 
     public function __construct()
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTime();
     }
 
     public function __toString(): string
@@ -100,7 +100,7 @@ final class ProductPrice
     }
 
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): \DateTime
     {
         return $this->updatedAt;
     }
@@ -148,6 +148,4 @@ final class ProductPrice
     {
         $this->currency = $currency;
     }
-
-
 }
