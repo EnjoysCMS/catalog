@@ -56,7 +56,26 @@ final class ProductPrice
 
     public function __toString(): string
     {
-        return (string) $this->getPrice();
+        return $this->getFormatted();
+    }
+
+    public function getFormatted(
+        string $decimal_separator = '.',
+        string $thousands_separator = ' ',
+        string $nbsp = '&nbsp;'
+    ): string {
+        return str_replace(
+            ' ',
+            $nbsp,
+            $this->getCurrency()->getLeft() .
+            number_format(
+                $this->getPrice(),
+                $this->getCurrency()->getPrecision(),
+                $decimal_separator,
+                $thousands_separator
+            ) .
+            $this->getCurrency()->getRight()
+        );
     }
 
     public function getId(): int
@@ -85,8 +104,6 @@ final class ProductPrice
     {
         return $this->updatedAt;
     }
-
-
 
 
     public function getPriceGroup()
