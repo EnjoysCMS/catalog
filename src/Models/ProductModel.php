@@ -6,7 +6,6 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Models;
 
 
-use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -14,12 +13,11 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
-use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ProductModel implements ModelInterface
@@ -56,6 +54,7 @@ class ProductModel implements ModelInterface
                 $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
             'product' => $this->product,
+            'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
             'breadcrumbs' => $this->getBreadcrumbs()
         ];
     }

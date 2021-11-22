@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="catalog_price_groups")
  */
-final class PriceGroup
+class PriceGroup
 {
     /**
      * @ORM\Id
