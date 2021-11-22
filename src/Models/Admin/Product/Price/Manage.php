@@ -19,6 +19,7 @@ use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
+use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
@@ -46,7 +47,7 @@ final class Manage implements ModelInterface
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
         $this->priceGroups = $this->em->getRepository(PriceGroup::class)->findAll();
-        if($this->priceGroups === null){
+        if ($this->priceGroups === null) {
             $this->priceGroups = [];
         }
 
@@ -71,12 +72,9 @@ final class Manage implements ModelInterface
 
     public function getContext(): array
     {
-        //todo form set prices
-
-
         $form = $this->getForm();
 
-        if($form->isSubmitted()){
+        if ($form->isSubmitted()) {
             $this->doAction();
         }
 
@@ -97,10 +95,24 @@ final class Manage implements ModelInterface
             $priceDefaults[$code] = $price->getPrice();
         }
 
+
         $form = new Form(['method' => 'post']);
         $form->setDefaults([
-            'price' => $priceDefaults
+            'price' => $priceDefaults,
+            'currency' => $this->product->getPrices()->get(0)?->getCurrency()->getId(),
+            'unit' => $this->product->getPrices()->get(0)?->getUnit()->getName(),
         ]);
+
+        $form->select('currency', 'Валюта')->fill(function () {
+            $ret = [];
+            foreach ($this->em->getRepository(Currency::class)->findAll() as $item) {
+                $ret[$item->getId()] = $item->getName();
+            }
+            return $ret;
+        });
+
+        $form->text('unit', 'Единица измерения');
+
         foreach ($this->priceGroups as $priceGroup) {
             $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
                 ->setAttribute('step', '0.01')
@@ -112,29 +124,34 @@ final class Manage implements ModelInterface
 
     private function doAction()
     {
+        $currency = $this->em->getRepository(Currency::class)->find($this->serverRequest->post('currency'));
 
-        $currency = $this->em->getRepository(Currency::class)->find('RUB');
-
-        if($currency === null){
+        if ($currency === null) {
             throw new \InvalidArgumentException('Currency not found');
         }
 
+        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $this->serverRequest->post('unit')]);
+        if ($unit === null) {
+            $unit = new ProductUnit();
+            $unit->setName($this->serverRequest->post('unit'));
+            $this->em->persist($unit);
+            $this->em->flush();
+        }
+
+
         foreach ($this->priceGroups as $priceGroup) {
             foreach ($this->serverRequest->post('price', []) as $code => $price) {
-
-                if($priceGroup->getCode() !== $code){
+                if ($priceGroup->getCode() !== $code) {
                     continue;
                 }
 
-                if(!is_numeric($price)){
+                if (!is_numeric($price)) {
                     continue;
                 }
 
 
-                if(!array_key_exists($code, $this->prices)){
-
-
-                    if($price == 0){
+                if (!array_key_exists($code, $this->prices)) {
+                    if ($price == 0) {
                         continue;
                     }
 
@@ -143,18 +160,19 @@ final class Manage implements ModelInterface
                     $priceEntity->setProduct($this->product);
                     $priceEntity->setPriceGroup($priceGroup);
                     $priceEntity->setCurrency($currency);
+                    $priceEntity->setUnit($unit);
                     $this->em->persist($priceEntity);
                     continue;
                 }
 
 
-                if($price == 0){
+                if ($price == 0) {
                     $this->em->remove($this->prices[$code]);
                 }
 
                 $this->prices[$code]->setPrice($price);
                 $this->prices[$code]->setCurrency($currency);
-
+                $this->prices[$code]->setUnit($unit);
             }
         }
 

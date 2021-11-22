@@ -8,7 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Unit")
  * @ORM\Table(name="catalog_units")
  */
 class ProductUnit
