@@ -131,7 +131,7 @@ final class Product extends EntityRepository
         return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
     }
 
-    public function getFindByUrlBuilder(string $url, Category $category): QueryBuilder
+    public function getFindByUrlBuilder(string $url, ?Category $category = null): QueryBuilder
     {
         $dql = $this->createQueryBuilder('p')
             ->select('p', 'c', 't', 'i')
