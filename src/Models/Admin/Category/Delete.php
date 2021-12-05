@@ -64,27 +64,37 @@ final class Delete implements ModelInterface
     private function getForm(): Form
     {
         $form = new Form(['method' => 'post']);
+        $form->setDefaults([
+            'set_parent_category' => [0]
+        ]);
         $form->header('Подтвердите удаление!');
         $form->checkbox('remove_childs')->fill(['+ Удаление дочерних категорий']);
+        $form->checkbox('set_parent_category')->setPrefixId('set_parent_category')->fill(
+            [
+                sprintf(
+                    'Установить для продуктов из удаляемых категорий родительскую категорию (%s)',
+                    $this->category->getParent()?->getTitle()
+                )
+            ]
+        );
         $form->submit('delete', 'Удалить')->addClass('btn btn-danger');
         return $form;
     }
 
     private function doAction()
     {
-
-
+        $setCategory = ($this->serverRequest->post('set_parent_category') !== null) ? $this->category->getParent() : null;
 
         if ($this->serverRequest->post('remove_childs') !== null) {
             $allCategoryIds = $this->entityManager->getRepository(Category::class)->getAllIds($this->category);
             $products = $this->entityManager->getRepository(Product::class)->findByCategorysIds($allCategoryIds);
-            $this->setNullCategory($products);
+            $this->setCategory($products, $setCategory);
 
             $this->entityManager->remove($this->category);
             $this->entityManager->flush();
         } else {
             $products = $this->entityManager->getRepository(Product::class)->findByCategory($this->category);
-            $this->setNullCategory($products);
+            $this->setCategory($products, $setCategory);
 
             $this->categoryRepository->removeFromTree($this->category);
             $this->categoryRepository->updateLevelValues();
@@ -93,10 +103,10 @@ final class Delete implements ModelInterface
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
 
-    private function setNullCategory($products)
+    private function setCategory($products, ?Category $category = null)
     {
         foreach ($products as $product) {
-            $product->setCategory(null);
+            $product->setCategory($category);
         }
         $this->entityManager->flush();
     }
