@@ -8,11 +8,17 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 final class Index
 {
@@ -21,6 +27,14 @@ final class Index
     {
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws NoResultException
+     */
     #[Route(
         path: 'catalog',
         name: 'catalog/index',
@@ -48,7 +62,7 @@ final class Index
                     Setting::get('sitename'),
                     'Каталог'
                 ),
-                'categories' => $categoryRepository->getRootNodes(),
+                'categories' => $categoryRepository->getChildNodes(null, ['status' => true]),
                 'breadcrumbs' => $this->breadcrumbs->get(),
             ]
         );
