@@ -259,7 +259,15 @@ class Category
 
     public function getChildren()
     {
-        return $this->children;
+
+        $iterator = $this->children->getIterator();
+
+        /** @var ArrayCollection $c */
+        $iterator->uasort(function ($first, $second){
+            return $first->getSort() <=> $second->getSort();
+        });
+
+        return new ArrayCollection(iterator_to_array($iterator));
     }
 
 
