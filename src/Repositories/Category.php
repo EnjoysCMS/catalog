@@ -158,6 +158,9 @@ class Category extends ClosureTreeRepository
                 // параметры биндятся автоматически, чудеса )
                 // $parameters[$field] = $value;
             }
+
+            $dql->addOrderBy("c{$i}.{$orderBy}", $direction);
+
             $dql->leftJoin(
                 "{$parentAlias}.children",
                 "c{$i}",
