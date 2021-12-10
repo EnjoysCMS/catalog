@@ -90,11 +90,10 @@ final class CategoryModel implements ModelInterface
             '_title' => sprintf(
                 '%2$s #страница %3$d - %1$s',
                 Setting::get('sitename'),
-                $this->category?->getFullTitle(reverse: true) ?? 'Каталог',
+                $this->category->getFullTitle(reverse: true) ?? 'Каталог',
                 $pagination->getCurrentPage()
             ),
             'category' => $this->category,
-            'children' => $this->getChildren(),
             'pagination' => $pagination,
             'products' => $result,
             'breadcrumbs' => $this->getBreadcrumbs(),
@@ -110,23 +109,10 @@ final class CategoryModel implements ModelInterface
         return $this->categoryRepository->findByPath($slug);
     }
 
-    private function getChildren()
-    {
-        if($this->category instanceof Category){
-            return $this->category->getChildren();
-        }
-
-        return array_map(function($item){
-            if($item->getParent() === null){
-                return $item;
-            }
-        }, (array)$this->categoryRepository->getChildren());
-    }
-
     private function getBreadcrumbs(): array
     {
         $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
-        $breadcrumbs = $this->category?->getBreadcrumbs();
+        $breadcrumbs = $this->category->getBreadcrumbs();
         foreach ((array)$breadcrumbs as $breadcrumb) {
             $this->breadcrumbs->add(
                 $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
