@@ -39,14 +39,19 @@ final class Search
     {
         $this->response = $this->response->withHeader('content-type', 'application/json');
 
-        $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
-            $this->optionKeys
-        );
+        try {
+            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
+                $this->optionKeys
+            );
 
-        $this->response->getBody()->write(
-            json_encode($this->convertResultToDTO($result))
-        );
-
+            $this->response->getBody()->write(
+                json_encode($this->convertResultToDTO($result))
+            );
+        } catch (\Exception $e) {
+            $this->response->getBody()->write(
+                json_encode(['error' => $e->getMessage()])
+            );
+        }
         $this->emitter->emit($this->response);
     }
 
@@ -54,11 +59,20 @@ final class Search
         path: '/catalog/search.php',
         name: 'catalog/search'
     )]
-    public function search(Environment $twig, BreadcrumbsInterface $breadcrumbs, UrlGeneratorInterface $urlGenerator)
-    {
-        $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
-            $this->optionKeys
-        );
+    public function search(
+        Environment $twig,
+        BreadcrumbsInterface $breadcrumbs,
+        UrlGeneratorInterface $urlGenerator
+    ): string {
+        try {
+            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
+                $this->optionKeys
+            );
+        } catch (\Exception $e) {
+            $result = [
+                'error' => $e
+            ];
+        }
 
         $breadcrumbs->add($urlGenerator->generate('catalog/index'), 'Каталог');
         $breadcrumbs->add(null, 'Поиск');
@@ -89,7 +103,7 @@ final class Search
             }
 
             return $searchDto;
-        }, $result['result']);
+        }, iterator_to_array($result['result']->getIterator()));
         return $result;
     }
 }

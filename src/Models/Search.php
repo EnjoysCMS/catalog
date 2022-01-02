@@ -9,33 +9,54 @@ namespace EnjoysCMS\Module\Catalog\Models;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
+use Enjoys\Traits\Options;
+use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Container\ContainerInterface;
 
 final class Search
 {
+
+    use Options;
 
     private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
     private string $searchQuery;
     private array $optionKeys = [];
 
 
-    public function __construct(private ServerRequestInterface $serverRequest, private EntityManager $em)
-    {
-        $this->productRepository = $this->em->getRepository(Entities\Product::class);
+    public function __construct(
+        private ContainerInterface $container,
+        private ServerRequestInterface $serverRequest,
+        private EntityManager $em
+    ) {
         $this->searchQuery = \trim($this->serverRequest->get('q'));
 
+        $this->validateSearchQuery();
+
+        $this->productRepository = $this->em->getRepository(Entities\Product::class);
+
+        $this->setOptions(Config::getConfig($this->container)->getAll());
     }
 
     public function getSearchResult(array $optionKeys = []): array
     {
-        $result = $this->getFoundProducts($optionKeys);
+        $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
+
+        $qb = $this->getFoundProducts($optionKeys);
+        $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
+        $result = new Paginator($qb);
+        $pagination->setTotalItems($result->count());
+
         return [
             'searchQuery' => $this->searchQuery,
-            'countResult' => count($result),
+            'countResult' => $result->count(),
             'optionKeys' => $this->optionKeys,
+            'pagination' => $pagination,
             'result' => $result
         ];
     }
@@ -59,7 +80,15 @@ final class Search
         ;
 
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
+
+    private function validateSearchQuery()
+    {
+        if (mb_strlen($this->searchQuery) < $this->getOption('minSearchChars', 3)) {
+            throw new \InvalidArgumentException('Слишком короткое слово для поиска');
+        }
+    }
+
 
 }
