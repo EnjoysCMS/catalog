@@ -34,13 +34,12 @@ final class Search
         private ServerRequestInterface $serverRequest,
         private EntityManager $em
     ) {
+        $this->setOptions(Config::getConfig($this->container)->getAll());
         $this->searchQuery = \trim($this->serverRequest->get('q'));
 
         $this->validateSearchQuery();
 
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
-
-        $this->setOptions(Config::getConfig($this->container)->getAll());
     }
 
     public function getSearchResult(array $optionKeys = []): array
@@ -86,7 +85,7 @@ final class Search
     private function validateSearchQuery()
     {
         if (mb_strlen($this->searchQuery) < $this->getOption('minSearchChars', 3)) {
-            throw new \InvalidArgumentException('Слишком короткое слово для поиска');
+            throw new \InvalidArgumentException(sprintf('Слишком короткое слово для поиска (нужно минимум %s символа)', $this->getOption('minSearchChars', 3)));
         }
     }
 
