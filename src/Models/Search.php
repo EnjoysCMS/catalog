@@ -69,9 +69,14 @@ final class Search
         $qb->select('p', 'm', 'u', 'ov')
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
+            ->leftJoin('p.category', 'c')
             ->leftJoin('p.options', 'ov', Expr\Join::WITH, 'ov.optionKey IN (:key) ')
             ->where('p.name LIKE :option')
+            ->orWhere('p.description LIKE :option')
+            ->orWhere('c.title LIKE :option')
             ->orWhere('ov.value LIKE :option')
+            ->andWhere('p.active = true')
+            ->andWhere('c.status = true')
             ->setParameters([
                 'key' => $optionKeys,
                 'option' => '%' . $this->searchQuery . '%'
