@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="categories_closure")
+ * @ORM\Table(name="catalog_categories_closure")
  */
 class CategoryClosure extends AbstractClosure
 {

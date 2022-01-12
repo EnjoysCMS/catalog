@@ -17,7 +17,7 @@ use Doctrine\ORM\PersistentCollection;
  * Class Product
  * @package EnjoysCMS\Module\Catalog\Entities
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
- * @ORM\Table(name="products")
+ * @ORM\Table(name="catalog_products")
  */
 class Product
 {
@@ -66,7 +66,7 @@ class Product
 
     /**
      * @ORM\ManyToMany(targetEntity="ProductTag")
-     * @ORM\JoinTable(name="products_tags",
+     * @ORM\JoinTable(name="catalog_products_tags",
      *      joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
      *      )
@@ -75,7 +75,7 @@ class Product
 
     /**
      * @ORM\ManyToMany(targetEntity="OptionValue")
-     * @ORM\JoinTable(name="products_options")
+     * @ORM\JoinTable(name="catalog_products_options")
      */
     private $options;
 

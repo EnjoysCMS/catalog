@@ -15,7 +15,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @Gedmo\Tree(type="closure")
  * @Gedmo\TreeClosure(class="EnjoysCMS\Module\Catalog\Entities\CategoryClosure")
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
- * @ORM\Table(name="categories")
+ * @ORM\Table(name="catalog_categories")
  */
 class Category
 {
@@ -89,6 +89,7 @@ class Category
     /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="OptionKey")
+     * @ORM\JoinTable(name="catalog_category_optionkey")
      */
     private  $extraFields;
 

@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class Image
  * @package EnjoysCMS\Module\Catalog\Entities
  * @ORM\Entity
- * @ORM\Table(name="images")
+ * @ORM\Table(name="catalog_product_images")
  */
 class Image
 {

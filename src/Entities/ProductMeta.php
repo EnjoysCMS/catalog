@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="product_meta")
+ * @ORM\Table(name="catalog_product_meta")
  */
 final class ProductMeta
 {

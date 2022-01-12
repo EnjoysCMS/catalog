@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Table(name="product_option_values")
+ * @ORM\Table(name="catalog_product_option_values")
  * @ORM\Entity(repositoryClass="\EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository")
  */
 class OptionValue

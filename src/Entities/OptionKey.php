@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="\EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository")
- * @ORM\Table(name="product_option_keys")
+ * @ORM\Table(name="catalog_product_option_keys")
  */
 class OptionKey
 {

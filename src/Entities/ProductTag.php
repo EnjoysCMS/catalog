@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="product_tags")
+ * @ORM\Table(name="catalog_product_tags")
  */
 final class ProductTag
 {
