@@ -375,4 +375,9 @@ class Product
         }
         return null;
     }
+
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 }
