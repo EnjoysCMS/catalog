@@ -58,6 +58,7 @@ final class FillFromText
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
             foreach (explode(',', $option['value']) as $value) {
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
+                $this->entityManager->persist($optionValue);
                 $product->addOption($optionValue);
             }
         }

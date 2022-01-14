@@ -80,7 +80,7 @@ class Product
     private $options;
 
     /**
-     * @ORM\OneToMany(targetEntity="Url", mappedBy="product")
+     * @ORM\OneToMany(targetEntity="Url", mappedBy="product", cascade={"persist"})
      */
     private $urls;
 

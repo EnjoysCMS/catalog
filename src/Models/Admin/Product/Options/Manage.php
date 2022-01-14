@@ -8,6 +8,8 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
@@ -129,6 +131,10 @@ final class Manage implements ModelInterface
         return $defaults;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doSave()
     {
 //        dd($this->serverRequest->post('options', []));
@@ -140,6 +146,7 @@ final class Manage implements ModelInterface
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
             foreach (explode(',', $option['value']) as $value) {
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
+                $this->em->persist($optionValue);
                 $this->product->addOption($optionValue);
             }
         }

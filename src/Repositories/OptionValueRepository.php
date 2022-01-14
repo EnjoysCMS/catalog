@@ -49,8 +49,8 @@ final class OptionValueRepository extends EntityRepository
         $optionValue = new OptionValue();
         $optionValue->setOptionKey($optionKey);
         $optionValue->setValue($value);
-        $this->_em->persist($optionValue);
-        $this->_em->flush();
+//        $this->_em->persist($optionValue);
+//        $this->_em->flush();
         return $optionValue;
     }
 
