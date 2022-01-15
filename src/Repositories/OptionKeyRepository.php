@@ -39,7 +39,7 @@ final class OptionKeyRepository extends EntityRepository
         $optionKey->setName($name);
         $optionKey->setUnit($unit);
         $this->_em->persist($optionKey);
-        $this->_em->flush();
+        $this->_em->getUnitOfWork()->commit($optionKey);
         return $optionKey;
     }
 }
