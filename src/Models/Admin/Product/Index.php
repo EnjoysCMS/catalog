@@ -28,12 +28,12 @@ final class Index implements ModelInterface
     {
         $pagination = new Pagination($this->serverRequest->get('page', 1), 10);
         $qb = $this->productRepository->getFindAllBuilder();
-        $qb->orderBy('p.id', 'desc')
+        $query = $qb->orderBy('p.id', 'desc')
             ->getQuery()
             ->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems());
 
-        $result = new Paginator($qb);
+        $result = new Paginator($query);
         $pagination->setTotalItems($result->count());
         return [
             'products' => $result,
