@@ -22,11 +22,12 @@ final class Product extends EntityRepository
     public function getFindAllBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('p')
-            ->select('p', 'c', 't', 'i', 'm', 'u')
+            ->select('p', 'c', 't', 'i', 'm', 'u', 'q')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
+            ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
     }
 

@@ -89,6 +89,11 @@ class Product
      */
     private $prices = [];
 
+    /**
+     * @ORM\OneToOne(targetEntity="Quantity", mappedBy="product", cascade={"persist"})
+     */
+    private $quantity;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -379,5 +384,17 @@ class Product
     public function setId(int $id): void
     {
         $this->id = $id;
+    }
+
+
+    public function getQuantity(): Quantity
+    {
+        return $this->quantity;
+    }
+
+
+    public function setQuantity(Quantity $quantity): void
+    {
+        $this->quantity = $quantity;
     }
 }
