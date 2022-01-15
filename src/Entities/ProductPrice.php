@@ -40,7 +40,7 @@ final class ProductPrice
     private $priceGroup;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="prices")
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="prices", cascade={"persist"})
      */
     private Product $product;
 
