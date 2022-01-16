@@ -6,12 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Expr\Expression;
-use Doctrine\Common\Collections\Expr\Value;
-use Doctrine\Common\Collections\ExpressionBuilder;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\PersistentCollection;
 
 /**
  * Class Product
@@ -85,7 +80,7 @@ class Product
     private $urls;
 
     /**
-     * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product")
+     * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product", cascade={"persist"})
      */
     private $prices = [];
 
@@ -379,6 +374,16 @@ class Product
             }
         }
         return null;
+    }
+
+    public function addPrice(ProductPrice $productPrice = null)
+    {
+        if ($productPrice === null){
+            return;
+        }
+
+        $productPrice->setProduct($this);
+        $this->prices->set($productPrice->getPriceGroup()->getCode(), $productPrice);
     }
 
     public function setId(int $id): void

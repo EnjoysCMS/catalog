@@ -111,7 +111,7 @@ final class ProductPrice
     }
 
 
-    public function getPriceGroup()
+    public function getPriceGroup(): PriceGroup
     {
         return $this->priceGroup;
     }
