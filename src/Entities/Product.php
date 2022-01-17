@@ -394,6 +394,10 @@ class Product
 
     public function getQuantity(): Quantity
     {
+        if ($this->quantity === null){
+            $this->quantity = new Quantity();
+            $this->quantity->setProduct($this);
+        }
         return $this->quantity;
     }
 
