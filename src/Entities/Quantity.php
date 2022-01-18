@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Table(name="catalog_product_quantity")
@@ -35,6 +36,17 @@ final class Quantity
      * @ORM\Column(type="float", options={"default": 0})
      */
     private float $reserve = 0;
+
+    /**
+     * @ORM\Column(name="updated_at", type="datetime", nullable=true)
+     * @Gedmo\Timestampable(on="update")
+     */
+    private \DateTimeInterface $updatedAt;
+
+    public function __construct()
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
 
 
     public function getReserve(): float|int
@@ -66,5 +78,16 @@ final class Quantity
     public function setProduct(Product $product): void
     {
         $this->product = $product;
+    }
+
+    public function getUpdatedAt(): \DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+
+    public function getProduct(): Product
+    {
+        return $this->product;
     }
 }
