@@ -38,10 +38,33 @@ final class Quantity
     private float $reserve = 0;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private bool $updated = false;
+
+    /**
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      * @Gedmo\Timestampable(on="update")
      */
     private \DateTimeInterface $updatedAt;
+
+    /**
+     * @ORM\Column(name="arrival_date", type="datetime", nullable=true)
+     */
+    private \DateTimeInterface $arrivalDate;
+
+    public function isUpdated(): bool
+    {
+        return $this->updated;
+    }
+
+    public function setUpdated(bool $updated): void
+    {
+        $this->updated = $updated;
+    }
+
+
 
     public function __construct()
     {
@@ -89,5 +112,15 @@ final class Quantity
     public function getProduct(): Product
     {
         return $this->product;
+    }
+
+    public function getArrivalDate(): \DateTimeInterface
+    {
+        return $this->arrivalDate;
+    }
+
+    public function setArrivalDate(\DateTimeInterface $arrivalDate): void
+    {
+        $this->arrivalDate = $arrivalDate;
     }
 }
