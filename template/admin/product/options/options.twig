@@ -6,13 +6,13 @@
         'modules/catalog/node_modules/typeahead.js/dist/bloodhound.min.js',
         'modules/catalog/node_modules/typeahead.js/dist/typeahead.bundle.min.js',
         'modules/catalog/node_modules/typeahead.js/dist/typeahead.jquery.min.js',
-        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js',
+        'modules/catalog/template/admin/product/options/assets/bootstrap-tagsinput/bootstrap-tagsinput.js',
         'modules/catalog/node_modules/select2/dist/js/select2.full.min.js',
         'modules/catalog/node_modules/select2/dist/js/i18n/ru.js',
     ]) %}
     {% do asset('css', [
         'modules/catalog/node_modules/select2/dist/css/select2.min.css',
-        'modules/catalog/node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css',
+        'modules/catalog/template/admin/product/options/assets/bootstrap-tagsinput/bootstrap-tagsinput.css',
     ]) %}
 
     <style>
@@ -143,7 +143,7 @@
             $('.filter-value').tagsinput({
                 tagClass: 'badge bg-secondary',
                 trimValue: true,
-                delimiter: ',',
+                delimiter: '|',
                 confirmKeys: [13],
                 typeaheadjs: {
                     display: 'value',
