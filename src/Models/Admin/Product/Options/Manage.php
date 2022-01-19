@@ -18,6 +18,7 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -67,6 +68,7 @@ final class Manage implements ModelInterface
         return [
             'product' => $this->product,
             'form' => $form,
+            'delimiterOptions' =>Setting::get('delimiterOptions', '|'),
             'subtitle' => 'Параметры'
         ];
     }
@@ -122,7 +124,7 @@ final class Manage implements ModelInterface
             $defaults['options'][$key]['option'] = $option['key']->getName();
             $defaults['options'][$key]['unit'] = $option['key']->getUnit();
             $defaults['options'][$key]['value'] = implode(
-                ',',
+                Setting::get('delimiterOptions', '|'),
                 array_map(function ($item) {
                     return $item->getValue();
                 }, $option['values'])
@@ -144,7 +146,7 @@ final class Manage implements ModelInterface
                 continue;
             }
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
-            foreach (explode(',', $option['value']) as $value) {
+            foreach (explode(Setting::get('delimiterOptions', '|'), $option['value']) as $value) {
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
                 $this->em->persist($optionValue);
                 $this->product->addOption($optionValue);

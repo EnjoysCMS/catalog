@@ -2,6 +2,7 @@ WYSIWYG: summernote
 limitItems: 12
 minSearchChars: 3
 showSubcategoryProducts: true
+delimiterOptions: "|"
 mailer:
   from: [email, name]
   address: []
