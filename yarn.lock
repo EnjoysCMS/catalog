@@ -7,10 +7,6 @@
   resolved "https://registry.yarnpkg.com/@ttskch/select2-bootstrap4-theme/-/select2-bootstrap4-theme-1.5.2.tgz#3b4519b349f3e7831c28752a1e9617312a192656"
   integrity sha512-gAj8qNy/VYwQDBkACm0USM66kxFai8flX83ayRXPNhzZckEgSqIBB9sM74SCM3ssgeX+ZVy4BifTnLis+KpIyg==
 
-"bootstrap-tagsinput@https://github.com/bootstrap-tagsinput/bootstrap-tagsinput#0.8.0":
-  version "0.8.0"
-  resolved "https://github.com/bootstrap-tagsinput/bootstrap-tagsinput#5380ff820805a19807cd93d2da44bf9d26c5324a"
-
 jquery@>=1.7:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.0.tgz#c72a09f15c1bdce142f49dbf1170bdf8adac2470"
