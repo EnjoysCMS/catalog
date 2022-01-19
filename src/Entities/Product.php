@@ -291,6 +291,23 @@ class Product
         $this->options = new ArrayCollection();
     }
 
+    public function removeOption(OptionValue $optionValue): void
+    {
+        if ($this->options->contains($optionValue)) {
+            $this->options->removeElement($optionValue);
+        }
+
+    }
+
+    public function removeOptionByKey(OptionKey $optionKey): void
+    {
+        /** @var OptionValue $option */
+        foreach ($this->options as $option) {
+            if($option->getOptionKey() === $optionKey){
+                $this->options->removeElement($option);
+            }
+        }
+    }
 
     public function addOption(OptionValue $option): void
     {
