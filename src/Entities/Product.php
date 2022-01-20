@@ -89,6 +89,12 @@ class Product
      */
     private $quantity;
 
+    /**
+     * @var int|null
+     * @ORM\Column(name="max_discount", type="integer", nullable=true)
+     */
+    private ?int $maxDiscount = null;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -106,82 +112,63 @@ class Product
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
+
+    public function getMaxDiscount(): ?int
+    {
+        return $this->maxDiscount;
+    }
+
+    public function setMaxDiscount(?int $maxDiscount): void
+    {
+        $this->maxDiscount = $maxDiscount;
+    }
+
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
     public function setName(string $name): void
     {
         $this->name = \trim($name);
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     */
     public function setDescription(string $description): void
     {
         $this->description = $description;
     }
 
-    /**
-     * @return string|null
-     */
     public function getHashId(): ?string
     {
         return $this->hashId;
     }
 
-    /**
-     * @param string|null $hashId
-     */
     public function setHashId(?string $hashId): void
     {
         $this->hashId = $hashId;
     }
 
 
-    /**
-     * @return bool
-     */
     public function isHide(): bool
     {
         return $this->hide;
     }
 
-    /**
-     * @param bool $hide
-     */
     public function setHide(bool $hide): void
     {
         $this->hide = $hide;
     }
 
-    /**
-     * @return bool
-     */
     public function isActive(): bool
     {
         return $this->active;
     }
 
-    /**
-     * @param bool $active
-     */
     public function setActive(bool $active): void
     {
         $this->active = $active;
@@ -193,9 +180,6 @@ class Product
         return $this->category;
     }
 
-    /**
-     * @param Category|null $category
-     */
     public function setCategory(?Category $category): void
     {
         $this->category = $category;
