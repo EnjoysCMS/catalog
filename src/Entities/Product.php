@@ -33,7 +33,7 @@ class Product
     /**
      * @ORM\Column(type="string", length=64, nullable=true, unique=true, options={"default": null})
      */
-    private ?string $hashId = null;
+    private ?string $productCode = null;
 
     /**
      * @ORM\Column(type="boolean", options={"default": false})
@@ -143,14 +143,14 @@ class Product
         $this->description = $description;
     }
 
-    public function getHashId(): ?string
+    public function getProductCode(): ?string
     {
-        return $this->hashId;
+        return $this->productCode;
     }
 
-    public function setHashId(?string $hashId): void
+    public function setProductCode(?string $productCode): void
     {
-        $this->hashId = $hashId;
+        $this->productCode = $productCode;
     }
 
 
