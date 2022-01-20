@@ -69,6 +69,7 @@ final class MetaManage implements ModelInterface
 
         return [
             'product' => $this->product,
+            'subtitle' => 'Установка META данных HTML',
             'form' => $renderer->render(),
         ];
     }

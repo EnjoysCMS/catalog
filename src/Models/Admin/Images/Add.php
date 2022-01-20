@@ -82,7 +82,9 @@ final class Add implements ModelInterface
         }
 
         return [
-            'form' => $this->renderer
+            'form' => $this->renderer,
+            'product' => $this->product,
+            'subtitle' => 'Загрузка изображения для продукта'
         ];
     }
 

@@ -44,7 +44,7 @@ final class Image extends BaseController
     public function manage(): string
     {
         return $this->view(
-            $this->templatePath . '/images.twig',
+            $this->templatePath . '/product/images/manage.twig',
             $this->getContext($this->container->get(Index::class))
         );
     }
