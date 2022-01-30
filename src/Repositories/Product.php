@@ -12,8 +12,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use EnjoysCMS\Core\Components\Helpers\HelpersBase;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 
 final class Product extends EntityRepository
@@ -22,12 +20,13 @@ final class Product extends EntityRepository
     public function getFindAllBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('p')
-            ->select('p', 'c', 't', 'i', 'm', 'u', 'q')
+            ->select('p', 'c', 't', 'i', 'm', 'u', 'q', 'pr')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.quantity', 'q')
+            ->leftJoin('p.prices', 'pr')
             ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
     }
 
