@@ -7,12 +7,12 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
+use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupAdd;
+use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupDelete;
+use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupEdit;
+use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupList;
+use EnjoysCMS\Module\Catalog\Crud\PriceGroupModel;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\PriceGroup\PriceGroupAdd;
-use EnjoysCMS\Module\Catalog\Models\Admin\PriceGroup\PriceGroupDelete;
-use EnjoysCMS\Module\Catalog\Models\Admin\PriceGroup\PriceGroupEdit;
-use EnjoysCMS\Module\Catalog\Models\Admin\PriceGroup\PriceGroupList;
-use EnjoysCMS\Module\Catalog\Models\Admin\PriceGroupModel;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 

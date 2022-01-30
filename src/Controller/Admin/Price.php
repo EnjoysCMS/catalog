@@ -8,8 +8,8 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
+use EnjoysCMS\Module\Catalog\Crud\Product\Price\Manage;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Price\Manage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 

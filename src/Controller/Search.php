@@ -6,11 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Dto\SearchDto;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
-use EnjoysCMS\Module\Catalog\Models\SearchDto;
 use HttpSoft\Emitter\EmitterInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +38,7 @@ final class Search
         $this->response = $this->response->withHeader('content-type', 'application/json');
 
         try {
-            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
+            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
             );
 
@@ -65,7 +63,7 @@ final class Search
         UrlGeneratorInterface $urlGenerator
     ): string {
         try {
-            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Models\Search::class)->getSearchResult(
+            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
             );
         } catch (\Exception $e) {

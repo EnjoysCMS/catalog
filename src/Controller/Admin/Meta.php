@@ -7,8 +7,8 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
+use EnjoysCMS\Module\Catalog\Crud\Product\Meta\MetaManage;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Meta\MetaManage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 

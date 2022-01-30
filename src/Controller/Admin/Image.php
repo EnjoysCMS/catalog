@@ -8,18 +8,16 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
-use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Catalog\Crud\Images\Add;
+use EnjoysCMS\Module\Catalog\Crud\Images\Delete;
+use EnjoysCMS\Module\Catalog\Crud\Images\Index;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\Images\Add;
-use EnjoysCMS\Module\Catalog\Models\Admin\Images\Delete;
-use EnjoysCMS\Module\Catalog\Models\Admin\Images\Index;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
 
 final class Image extends BaseController
 {

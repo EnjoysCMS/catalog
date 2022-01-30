@@ -7,22 +7,17 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
-use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Crud\Category\Add;
+use EnjoysCMS\Module\Catalog\Crud\Category\Delete;
+use EnjoysCMS\Module\Catalog\Crud\Category\Edit;
+use EnjoysCMS\Module\Catalog\Crud\Category\Index;
+use EnjoysCMS\Module\Catalog\Crud\Category\SetExtraFieldsToChildren;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\Category\Add;
-use EnjoysCMS\Module\Catalog\Models\Admin\Category\Delete;
-use EnjoysCMS\Module\Catalog\Models\Admin\Category\Edit;
-use EnjoysCMS\Module\Catalog\Models\Admin\Category\Index;
-use EnjoysCMS\Module\Catalog\Models\Admin\Category\SetExtraFieldsToChildren;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Environment;
 
 final class Category extends BaseController
 {

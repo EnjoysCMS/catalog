@@ -7,20 +7,16 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
+use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use HttpSoft\Emitter\EmitterInterface;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Options as ModelOptions;
 
 final class Options extends BaseController
 {

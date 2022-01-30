@@ -7,23 +7,14 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use App\Module\Admin\BaseController;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Crud\Product\Urls\AddUrl;
+use EnjoysCMS\Module\Catalog\Crud\Product\Urls\DeleteUrl;
+use EnjoysCMS\Module\Catalog\Crud\Product\Urls\EditUrl;
+use EnjoysCMS\Module\Catalog\Crud\Product\Urls\MakeDefault;
+use EnjoysCMS\Module\Catalog\Crud\Product\Urls\Manage;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\AddUrl;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\DeleteUrl;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\EditUrl;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\MakeDefault;
-use EnjoysCMS\Module\Catalog\Models\Admin\Product\Urls\Manage;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use EnjoysCMS\Module\Catalog\Entities\Product;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Urls extends BaseController
 {
