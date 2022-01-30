@@ -63,6 +63,7 @@ final class Index
                     'Каталог'
                 ),
                 'categories' => $categoryRepository->getChildNodes(null, ['status' => true]),
+                'categoryRepository' => $categoryRepository,
                 'breadcrumbs' => $this->breadcrumbs->get(),
             ]
         );

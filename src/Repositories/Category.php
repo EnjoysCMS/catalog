@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
@@ -26,7 +25,6 @@ class Category extends ClosureTreeRepository
      */
     public function findByPath(?string $path)
     {
-
         $slugs = explode('/', $path);
         $first = array_shift($slugs);
         $alias = 'c';
@@ -76,7 +74,7 @@ class Category extends ClosureTreeRepository
             ->getChildNodesQuery($node, $criteria, $orderBy, $direction)
 //            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
             ->getResult()
-            ;
+        ;
     }
 
     /**
@@ -109,8 +107,7 @@ class Category extends ClosureTreeRepository
         $maxLevel = $this->createQueryBuilder('c')
             ->select('max(c.level)')
             ->getQuery()
-            ->getSingleScalarResult()
-        ;
+            ->getSingleScalarResult();
 
         $meta = $this->getClassMetadata();
         $config = $this->listener->getConfiguration($this->_em, $meta->name);
@@ -127,8 +124,7 @@ class Category extends ClosureTreeRepository
                 ->where('c.id = :node')
                 ->setParameter('node', $node)
                 ->getQuery()
-                ->getSingleScalarResult()
-            ;
+                ->getSingleScalarResult();
 
             $dql->select('node')
                 ->from($config['useObjectClass'], 'node')
@@ -209,6 +205,17 @@ class Category extends ClosureTreeRepository
         );
         $ids[] = $node?->getId();
         return $ids;
+    }
+
+    public function getCountProducts($node = null)
+    {
+        $nodes = $this->getAllIds($node);
+        return $this->getEntityManager()->createQueryBuilder()
+            ->select('count(p.id)')
+            ->from(\EnjoysCMS\Module\Catalog\Entities\Product::class, 'p')
+            ->where('p.category IN (:ids)')
+            ->setParameter('ids', $nodes)
+            ->getQuery()->getSingleScalarResult();
     }
 
 }

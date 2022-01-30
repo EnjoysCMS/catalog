@@ -18,11 +18,9 @@ use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
-use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class CategoryModel implements ModelInterface
@@ -94,6 +92,7 @@ final class CategoryModel implements ModelInterface
                 $pagination->getCurrentPage()
             ),
             'category' => $this->category,
+            'categoryRepository' => $this->categoryRepository,
             'pagination' => $pagination,
             'products' => $result,
             'breadcrumbs' => $this->getBreadcrumbs(),
