@@ -13,7 +13,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Http\ServerRequest;
-use EnjoysCMS\Core\Components\Helpers\Assets;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -33,16 +32,6 @@ final class Index implements ModelInterface
     {
         $this->em = $em;
         $this->categoryRepository = $this->em->getRepository(Category::class);
-        Assets::css(
-            [
-                __DIR__ . '/../../../../template/assets/css/nestable/nestable.css'
-            ]
-        );
-        Assets::js(
-            [
-                __DIR__ . '/../../../../template/assets/js/nestable/jquery.nestable.js'
-            ]
-        );
         $this->serverRequest = $serverRequest;
         $this->urlGenerator = $urlGenerator;
     }

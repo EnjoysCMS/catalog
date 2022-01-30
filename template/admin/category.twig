@@ -4,6 +4,16 @@
 
 {% block content %}
 
+    {% do asset('js', [
+        'modules/catalog/template/assets/js/nestable/jquery.nestable.js'
+    ]) %}
+
+
+    {% do asset('css', [
+        'modules/catalog/template/assets/css/nestable/nestable.css'
+    ]) %}
+
+
     {% macro recursiveCategory(category) %}
         {% import _self as self %}
 
