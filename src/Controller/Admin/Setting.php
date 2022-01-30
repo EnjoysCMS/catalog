@@ -25,11 +25,11 @@ final class Setting extends BaseController
         $this->templatePath = Template::getAdminTemplatePath();
     }
 
-    public function __invoke()
+    public function __invoke(): string
     {
         return $this->view(
             $this->templatePath . '/setting.twig',
-            $this->getContext($this->container->get(\EnjoysCMS\Module\Catalog\Models\Admin\Setting::class))
+            $this->getContext($this->container->get(\EnjoysCMS\Module\Catalog\Crud\Setting::class))
         );
     }
 
