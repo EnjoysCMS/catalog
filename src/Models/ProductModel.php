@@ -15,6 +15,8 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -54,6 +56,8 @@ class ProductModel implements ModelInterface
                 $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
             'product' => $this->product,
+            'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
+            'optionValueRepository' => $this->em->getRepository(OptionValue::class),
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
             'breadcrumbs' => $this->getBreadcrumbs()
         ];

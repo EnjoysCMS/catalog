@@ -123,4 +123,9 @@ final class Quantity
     {
         $this->arrivalDate = $arrivalDate;
     }
+
+    public function getRealQty(): float|int
+    {
+        return ($this->getQty() - $this->getReserve());
+    }
 }
