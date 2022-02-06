@@ -50,6 +50,11 @@ class Product
     private $category;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ProductGroup")
+     */
+    private $group = null;
+
+    /**
      * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
      */
     private $images;
@@ -406,5 +411,17 @@ class Product
     public function setQuantity(Quantity $quantity): void
     {
         $this->quantity = $quantity;
+    }
+
+
+    public function getGroup(): ?ProductGroup
+    {
+        return $this->group;
+    }
+
+
+    public function setGroup(?ProductGroup $group): void
+    {
+        $this->group = $group;
     }
 }
