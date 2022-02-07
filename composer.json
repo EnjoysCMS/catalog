@@ -13,7 +13,8 @@
   },
   "autoload": {
     "psr-4": {
-      "EnjoysCMS\\Module\\Catalog\\": "src/"
+      "EnjoysCMS\\Module\\Catalog\\": "src/",
+      "Build\\": "build/"
     }
   },
   "extra": {
@@ -27,5 +28,17 @@
   },
   "scripts": {
     "assets-install": "cd ./modules/catalog && yarn install"
+  },
+  "require-dev": {
+    "enjoyscms/core": "^3.0",
+    "enjoyscms/admin": "^2.0",
+    "enjoys/dotenv": "^2.0",
+    "symfony/cache": "^6.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "oomphinc/composer-installers-extender": true
+    }
   }
 }

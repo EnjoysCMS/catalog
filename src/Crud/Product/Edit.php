@@ -22,7 +22,6 @@ use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -88,6 +87,7 @@ final class Edit implements ModelInterface
             'name' => $this->product->getName(),
             'url' => $this->product->getUrl()->getPath(),
             'description' => $this->product->getDescription(),
+            'qty' => $this->product->getQuantity()->getQty(),
             'active' => [(int)$this->product->isActive()],
             'hide' => [(int)$this->product->isHide()],
         ];
@@ -107,7 +107,8 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Включен?']);
+            ->fill([1 => 'Включен?'])
+        ;
 
         $form->checkbox('hide', null)
             ->setPrefixId('hide')
@@ -115,7 +116,8 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Скрыт?']);
+            ->fill([1 => 'Скрыт?'])
+        ;
 
         $form->select('category', 'Категория')
             ->fill(
@@ -123,10 +125,12 @@ final class Edit implements ModelInterface
                     Category::class
                 )->getFormFillArray()
             )
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
 
         $form->text('name', 'Наименование')
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
 
 
         $form->text('url', 'URL')
@@ -141,21 +145,30 @@ final class Edit implements ModelInterface
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
-                    if($product === null){
+                    if ($product === null) {
                         return true;
                     }
 
                     /** @var Url $url */
                     foreach ($product->getUrls() as $url) {
-                        if($url->getProduct()->getId() === $this->product->getId()){
+                        if ($url->getProduct()->getId() === $this->product->getId()) {
                             return true;
                         }
                     }
 
                     return false;
                 }
-            );
+            )
+        ;
         $form->textarea('description', 'Описание');
+        $form->number(
+            'qty',
+            sprintf('Количество, %s', $this->product->getPrices()->first()->getUnit()->getName())
+        )->setAttributes([
+            'step' => $this->product->getQuantity()->getStep(),
+            'min' => $this->product->getQuantity()->getMin()
+        ]);
+
 
         $form->submit('add');
         return $form;
@@ -170,6 +183,7 @@ final class Edit implements ModelInterface
 
         $this->product->setName($this->serverRequest->post('name'));
         $this->product->setDescription($this->serverRequest->post('description'));
+        $this->product->setQuantity($this->product->getQuantity()->setQty($this->serverRequest->post('qty')));
         $this->product->setCategory($category);
         $this->product->setActive((bool)$this->serverRequest->post('active', false));
         $this->product->setHide((bool)$this->serverRequest->post('hide', false));
@@ -182,7 +196,7 @@ final class Edit implements ModelInterface
         /** @var Url $url */
         $urlSetFlag = false;
         foreach ($this->product->getUrls() as $url) {
-            if($url->getPath() === $urlString){
+            if ($url->getPath() === $urlString) {
                 $url->setDefault(true);
                 $urlSetFlag = true;
                 continue;
@@ -190,7 +204,7 @@ final class Edit implements ModelInterface
             $url->setDefault(false);
         }
 
-        if($urlSetFlag === false){
+        if ($urlSetFlag === false) {
             $url = new Url();
             $url->setPath($urlString);
             $url->setDefault(true);

@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+// application.php
+
+require __DIR__.'/bootstrap.php';
+
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+
+/** @var \Psr\Container\ContainerInterface $container */
+$application->add($container->get(\Build\Command\LoadStoreData::class));
+$application->add($container->get(\Build\Command\AssetsInstall::class));
+$application->add($container->get(\Build\Command\FirstInit::class));
+
+$application->run();

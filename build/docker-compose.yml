@@ -1,0 +1,41 @@
+version: '3.7'
+
+networks:
+  backend:
+services:
+
+  php:
+    build:
+      context: .
+    volumes:
+      - ./..:/opt/project
+    working_dir: /opt/project
+    entrypoint:
+      - php
+      - -S
+      - 0.0.0.0:8080
+      - -t
+      - ./build/web
+      - ./build/web/index.php
+    ports:
+      - 9006:9000
+      - 8080:8080
+    networks:
+      - backend
+
+#  mysql-5.7:
+#    image: mysql:5.7
+#    restart: unless-stopped
+#    volumes:
+#      - ./build/.data/mysql/5.7/data:/var/lib/mysql
+#      - ./build/.data/mysql/5.7/conf.d:/etc/mysql/conf.d
+#      - ./build/.data/mysql/5.7/logs:/var/log/mysql
+#    ports:
+#      - 4305:3306
+#    security_opt:
+#      - seccomp:unconfined
+#    environment:
+#      MYSQL_DATABASE: dbname
+#      MYSQL_ROOT_PASSWORD: pass
+#    networks:
+#      - backend

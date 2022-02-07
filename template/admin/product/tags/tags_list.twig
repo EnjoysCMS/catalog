@@ -2,10 +2,10 @@
 {% block content %}
 
     {% do asset('js', [
-        'modules/catalog/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js'
+        '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js'
     ]) %}
     {% do asset('css', [
-        'modules/catalog/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
+        '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
     ]) %}
 
     <script>
@@ -23,7 +23,7 @@
                     <small class="d-block">{{ subtitle }}</small>
                 </h2>
                 <div class="float-right">
-                    {% include '../modules/catalog/template/admin/products_admin_links.twig' %}
+                    {% include 'template/admin/products_admin_links.twig' %}
                 </div>
             </div>
 

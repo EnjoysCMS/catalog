@@ -2,12 +2,12 @@
 
 {% block additional %}
     {% do asset('css', [
-        {0: 'modules/catalog/node_modules/select2/dist/css/select2.css','minify': false},
-        {0: 'modules/catalog/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
+        {0: '/node_modules/select2/dist/css/select2.css','minify': false},
+        {0: '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
     ]) %}
 
     {% do asset('js', [
-        {0: 'modules/catalog/node_modules/select2/dist/js/select2.full.js','minify': false }
+        {0: '/node_modules/select2/dist/js/select2.full.js','minify': false }
     ]) %}
     <script>
 
