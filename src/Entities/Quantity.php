@@ -33,6 +33,16 @@ final class Quantity
     private float $qty = 0;
 
     /**
+     * @ORM\Column(type="float", options={"default": 1})
+     */
+    private float $step = 1;
+
+    /**
+     * @ORM\Column(type="float", options={"default": 1})
+     */
+    private float $min = 1;
+
+    /**
      * @ORM\Column(type="float", options={"default": 0})
      */
     private float $reserve = 0;
@@ -91,9 +101,12 @@ final class Quantity
     }
 
 
-    public function setQty(float|int $qty): self
+    public function setQty(float|int|string $qty): self
     {
-        $this->qty = $qty;
+        if(!is_numeric($qty)){
+            throw new \InvalidArgumentException();
+        }
+        $this->qty = (float) $qty;
         return $this;
     }
 
@@ -128,4 +141,35 @@ final class Quantity
     {
         return ($this->getQty() - $this->getReserve());
     }
+
+
+    public function getStep(): float
+    {
+        return $this->step;
+    }
+
+
+    public function setStep(float|int|string $step): void
+    {
+        if(!is_numeric($step)){
+            throw new \InvalidArgumentException();
+        }
+        $this->step = (float) $step;
+    }
+
+
+    public function getMin(): float
+    {
+        return $this->min;
+    }
+
+
+    public function setMin(float|int|string $min): void
+    {
+        if(!is_numeric($min)){
+            throw new \InvalidArgumentException();
+        }
+        $this->min = (float) $min;
+    }
+
 }
