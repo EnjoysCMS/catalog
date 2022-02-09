@@ -207,15 +207,33 @@ class Category extends ClosureTreeRepository
         return $ids;
     }
 
-    public function getCountProducts($node = null)
+    public function getChildrenWithParent($category = null)
     {
-        $nodes = $this->getAllIds($node);
-        return $this->getEntityManager()->createQueryBuilder()
+        return array_merge([$category], $this->getChildren($category));
+    }
+
+    /**
+     * @param $category
+     * @param array $params
+     * @return float|int|mixed|string
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    public function getCountProductsInCategory($category = null, array $params = [])
+    {
+        $categories = $this->getChildrenWithParent($category);
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder()
             ->select('count(p.id)')
             ->from(\EnjoysCMS\Module\Catalog\Entities\Product::class, 'p')
             ->where('p.category IN (:ids)')
-            ->setParameter('ids', $nodes)
-            ->getQuery()->getSingleScalarResult();
+            ->setParameter('ids', $categories);
+
+        foreach ($params as $key => $param) {
+            $queryBuilder->andWhere(sprintf('p.%1$s = :%1$s', $key))
+                ->setParameter($key, $param)
+            ;
+        }
+        return $queryBuilder->getQuery()->getSingleScalarResult();
     }
 
 }

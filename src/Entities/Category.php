@@ -91,7 +91,7 @@ class Category
      * @ORM\ManyToMany(targetEntity="OptionKey")
      * @ORM\JoinTable(name="catalog_category_optionkey")
      */
-    private  $extraFields;
+    private $extraFields;
 
     public function __construct()
     {
@@ -260,11 +260,10 @@ class Category
 
     public function getChildren()
     {
-
         $iterator = $this->children->getIterator();
 
         /** @var ArrayCollection $c */
-        $iterator->uasort(function ($first, $second){
+        $iterator->uasort(function ($first, $second) {
             return $first->getSort() <=> $second->getSort();
         });
 
@@ -287,7 +286,7 @@ class Category
 
     public function addExtraField(OptionKey $field)
     {
-        if ($this->extraFields->contains($field)){
+        if ($this->extraFields->contains($field)) {
             return;
         }
         $this->extraFields->add($field);
@@ -300,4 +299,7 @@ class Category
 //    {
 //        $this->extraFields = $extraFields;
 //    }
+
+
+
 }
