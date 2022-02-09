@@ -1,0 +1,20 @@
+{% if breadcrumbs %}
+    <style>
+        nav ul.breadcrumb li {
+            display: inline;
+        }
+    </style>
+    <nav>
+        <ul class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+                {% if not loop.last %}
+                    <li><a href="{{ breadcrumb.url }}">{{ breadcrumb.title }}</a></li>
+                    <li>&nbsp;/&nbsp;</li>
+                {% endif %}
+            {% endfor %}
+            <li>
+                {{ (breadcrumbs|last).title }}
+            </li>
+        </ul>
+    </nav>
+{% endif %}

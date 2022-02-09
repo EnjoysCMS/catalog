@@ -1,22 +1,31 @@
 <h1 style='color: red'>
-Copy this file to &lt;project_dir&gt;/template/modules/catalog/category.twig and there edit
+    Copy this file to &lt;project_dir&gt;/template/modules/catalog/category.twig and there edit
 </h1>
 
+{% include '@project/modules/catalog/template/_breadcrumbs.twig' %}
 
-   <h1>{{ category.getTitle }}</h1>
-            {% if category.getChildren|length %}
-            <h2>Подкатегории</h2>
-            <ul>
-            {% for children in category.getChildren %}
-                <li><a href="{{ path("catalog/category", {"slug": children.getSlug }) }}">{{ children.getTitle }}</a> </li>
-            {% endfor %}
-            </ul>
-            {%  endif %}
-            <div>
-                <h2>Продукты</h2>
-                <ul>
-                    {% for product in products %}
-                        <li><a href="{{ path("catalog/product", {"slug": product.getSlug }) }}">{{ product.getName }}</a> </li>
-                    {% endfor %}
-                </ul>
-            </div>
+<h1>{{ category.getTitle }}</h1>
+{% if category.getChildren|length %}
+    <h2>Подкатегории</h2>
+    <ul>
+        {% for child in category.getChildren %}
+            <li>
+                <a href="{{ path("catalog/category", {"slug": child.getSlug }) }}">{{ child.getTitle }}</a>
+                ({{ categoryRepository.getCountProducts(child) }})
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+{% include '@project/modules/catalog/template/_pagination.twig' %}
+
+
+<div>
+    <h2>Продукты</h2>
+    <ul>
+        {% for product in products %}
+            <li><a href="{{ path("catalog/product", {"slug": product.getSlug }) }}">{{ product.getName }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
