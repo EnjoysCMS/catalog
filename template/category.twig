@@ -11,7 +11,7 @@
         {% for child in category.getChildren %}
             <li>
                 <a href="{{ path("catalog/category", {"slug": child.getSlug }) }}">{{ child.getTitle }}</a>
-                ({{ categoryRepository.getCountProducts(child) }})
+                ({{ categoryRepository.getCountProductsInCategory(child) }})
             </li>
         {% endfor %}
     </ul>
