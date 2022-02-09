@@ -219,7 +219,7 @@ class Category extends ClosureTreeRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function getCountProductsInCategory($category = null, array $params = [])
+    public function getCountProductsInCategory($category = null, array $criteria = [])
     {
         $categories = $this->getChildrenWithParent($category);
         $queryBuilder = $this->getEntityManager()->createQueryBuilder()
@@ -228,11 +228,10 @@ class Category extends ClosureTreeRepository
             ->where('p.category IN (:ids)')
             ->setParameter('ids', $categories);
 
-        foreach ($params as $key => $param) {
-            $queryBuilder->andWhere(sprintf('p.%1$s = :%1$s', $key))
-                ->setParameter($key, $param)
-            ;
+        foreach ($criteria as $field => $value) {
+            $queryBuilder->addCriteria(Criteria::create()->where(Criteria::expr()->eq($field, $value)));
         }
+
         return $queryBuilder->getQuery()->getSingleScalarResult();
     }
 

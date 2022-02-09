@@ -5,13 +5,14 @@
 {% include '@project/modules/catalog/template/_breadcrumbs.twig' %}
 
 <h1>{{ category.getTitle }}</h1>
+
 {% if category.getChildren|length %}
     <h2>Подкатегории</h2>
     <ul>
-        {% for child in category.getChildren %}
+        {% for child in categoryRepository.getChildNodes(category, {'status' : true}) %}
             <li>
                 <a href="{{ path("catalog/category", {"slug": child.getSlug }) }}">{{ child.getTitle }}</a>
-                ({{ categoryRepository.getCountProductsInCategory(child) }})
+                ({{ categoryRepository.getCountProductsInCategory(child, {'active' : true, 'hide' : false}) }})
             </li>
         {% endfor %}
     </ul>
