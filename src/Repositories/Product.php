@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -27,7 +28,8 @@ final class Product extends EntityRepository
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.prices', 'pr')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+        ;
     }
 
 
@@ -85,7 +87,8 @@ final class Product extends EntityRepository
             ->andWhere('p.name LIKE :query')
             ->setParameter('query', '%' . $query . '%')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     public function findByCategory(Category $category)
@@ -105,31 +108,8 @@ final class Product extends EntityRepository
         }
         return $this->getFindAllBuilder()
             ->where('p.category = :category')
-            ->setParameter('category', $category);
-    }
-
-    public function getFindByCategorysIdsDQL($categoryIds)
-    {
-        $qb = $this->getFindAllBuilder();
-
-        $qb->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds);
-
-        if (false !== $null_key = array_search(null, $categoryIds)) {
-            $qb->orWhere('p.category IS NULL');
-        }
-
-        return $qb;
-    }
-
-    public function getFindByCategorysIdsQuery($categoryIds)
-    {
-        return $this->getFindByCategorysIdsDQL($categoryIds)->getQuery();
-    }
-
-    public function findByCategorysIds($categoryIds)
-    {
-        return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
+            ->setParameter('category', $category)
+        ;
     }
 
     public function getFindByUrlBuilder(string $url, ?Category $category = null): QueryBuilder
@@ -144,12 +124,41 @@ final class Product extends EntityRepository
             $dql->where('p.category IS NULL');
         } else {
             $dql->where('p.category = :category')
-                ->setParameter('category', $category);
+                ->setParameter('category', $category)
+            ;
         }
         $dql->leftJoin('p.urls', 'u')
             ->andWhere('u.path = :url')
-            ->setParameter('url', $url);
+            ->setParameter('url', $url)
+        ;
 
         return $dql;
+    }
+
+    public function getProductsFromCategories(?array $categories = null, $hydrationMode = AbstractQuery::HYDRATE_OBJECT)
+    {
+        $this->getProductsFromCategoriesQuery($categories)->getResult($hydrationMode);
+    }
+
+    public function getProductsFromCategoriesQuery(?array $categories = null)
+    {
+        return $this->getProductsFromCategoriesQueryBuilder($categories)->getQuery();
+    }
+
+    public function getProductsFromCategoriesQueryBuilder(?array $categories = null)
+    {
+        if ($categories === null) {
+            return $this->getQueryBuilderFindByCategory(null);
+        }
+        return $this->getFindAllBuilder()
+            ->where('p.category IN (:category)')
+            ->setParameter('category', $categories)
+        ;
+//
+//        if (false !== $null_key = array_search(null, $nodes)) {
+//            $qb->orWhere('p.category IS NULL');
+//        }
+
+
     }
 }
