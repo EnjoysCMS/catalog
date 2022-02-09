@@ -29,7 +29,6 @@ final class CategoryModel implements ModelInterface
     use Options;
 
     private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
-
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
 
@@ -56,9 +55,6 @@ final class CategoryModel implements ModelInterface
         }
 
         $this->category = $category;
-
-
-
         $this->setOptions($config);
     }
 
@@ -66,21 +62,12 @@ final class CategoryModel implements ModelInterface
     public function getContext(): array
     {
         $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
-
-        if ($this->getOption('showSubcategoryProducts', false)) {
-            $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);
-            $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
-        } else {
-            $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
-        }
-
+        $categories = ($this->getOption('showSubcategoryProducts', false)) ? $this->categoryRepository->getChildrenWithParent($this->category) : [$this->category];
+        $qb = $this->productRepository->getProductsFromCategoriesQueryBuilder($categories);
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
-
         $qb->orderBy('p.name', 'ASC');
-
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
-
         $result = new Paginator($qb);
         $pagination->setTotalItems($result->count());
 
