@@ -48,6 +48,8 @@ class ProductModel implements ModelInterface
             Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
         }
 
+        dd($this->product->getGroup(), $this->product->getChildren()->toArray());
+
         return [
             '_title' => sprintf(
                 '%2$s - %3$s - %1$s',
@@ -70,6 +72,7 @@ class ProductModel implements ModelInterface
     private function getProduct(): Product
     {
         $product = $this->productRepository->findBySlug($this->serverRequest->get('slug'));
+
         if ($product === null) {
             throw new NoResultException();
         }

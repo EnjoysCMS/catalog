@@ -49,10 +49,6 @@ class Product
      */
     private $category;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ProductGroup")
-     */
-    private $group = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
@@ -100,6 +96,20 @@ class Product
      */
     private ?int $maxDiscount = null;
 
+
+    /**
+     * One GroupProduct has Many SubProducts.
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="group")
+     */
+    private $children;
+
+    /**
+     * Many Products have One GroupProduct or null.
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="children")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     */
+    private $group;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -107,6 +117,7 @@ class Product
         $this->options = new ArrayCollection();
         $this->urls = new ArrayCollection();
         $this->prices = new ArrayCollection();
+        $this->children = new ArrayCollection();
     }
 
     /**
@@ -414,14 +425,19 @@ class Product
     }
 
 
-    public function getGroup(): ?ProductGroup
+    public function getGroup(): ?Product
     {
         return $this->group;
     }
 
 
-    public function setGroup(?ProductGroup $group): void
+    public function setGroup(?Product $group): void
     {
         $this->group = $group;
+    }
+
+    public function getChildren()
+    {
+        return $this->children;
     }
 }

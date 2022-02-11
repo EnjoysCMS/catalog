@@ -150,10 +150,16 @@ final class Product extends EntityRepository
         if ($categories === null) {
             return $this->getQueryBuilderFindByCategory(null);
         }
-        return $this->getFindAllBuilder()
-            ->where('p.category IN (:category)')
-            ->setParameter('category', $categories)
+        $qb = $this->getFindAllBuilder()
+            ->where('p.category IN (:categories)')
+            ->setParameter('categories', $categories)
         ;
+
+        foreach ($categories as $category) {
+            $qb->andWhere('c.status = true');
+        }
+
+        return $qb;
 //
 //        if (false !== $null_key = array_search(null, $nodes)) {
 //            $qb->orWhere('p.category IS NULL');
