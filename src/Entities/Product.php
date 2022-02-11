@@ -440,4 +440,14 @@ class Product
     {
         return $this->children;
     }
+
+    public function isGroupProduct()
+    {
+        return $this->getChildren()->count() > 0;
+    }
+
+    public function isSubProduct()
+    {
+        return $this->getGroup() !== null;
+    }
 }

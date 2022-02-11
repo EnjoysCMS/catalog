@@ -26,7 +26,13 @@
     <h2>Продукты</h2>
     <ul>
         {% for product in products %}
-            <li><a href="{{ path("catalog/product", {"slug": product.getSlug }) }}">{{ product.getName }}</a></li>
+            <li>
+                <a href="{{ path("catalog/product", {"slug": product.getSlug }) }}">{{ product.getName }}</a>
+                <br>
+                <small>
+                    Цена: {{ product.getPrice('ROZ')|raw }}
+                </small>
+            </li>
         {% endfor %}
     </ul>
 </div>

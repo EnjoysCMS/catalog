@@ -48,7 +48,7 @@ class ProductModel implements ModelInterface
             Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
         }
 
-        dd($this->product->getGroup(), $this->product->getChildren()->toArray());
+        dd($this->product->getPrices()->toArray());
 
         return [
             '_title' => sprintf(

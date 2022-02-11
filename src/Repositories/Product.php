@@ -29,6 +29,7 @@ final class Product extends EntityRepository
             ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.prices', 'pr')
             ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+            ->where('p.group IS NULL')
         ;
     }
 
@@ -104,10 +105,10 @@ final class Product extends EntityRepository
     public function getQueryBuilderFindByCategory(?Category $category): QueryBuilder
     {
         if ($category === null) {
-            return $this->getFindAllBuilder()->where('p.category IS NULL');
+            return $this->getFindAllBuilder()->andWhere('p.category IS NULL');
         }
         return $this->getFindAllBuilder()
-            ->where('p.category = :category')
+            ->andWhere('p.category = :category')
             ->setParameter('category', $category)
         ;
     }
@@ -121,9 +122,9 @@ final class Product extends EntityRepository
             ->leftJoin('p.images', 'i')
             ->orderBy('i.general', 'desc');
         if ($category === null) {
-            $dql->where('p.category IS NULL');
+            $dql->andWhere('p.category IS NULL');
         } else {
-            $dql->where('p.category = :category')
+            $dql->andWhere('p.category = :category')
                 ->setParameter('category', $category)
             ;
         }
@@ -151,13 +152,15 @@ final class Product extends EntityRepository
             return $this->getQueryBuilderFindByCategory(null);
         }
         $qb = $this->getFindAllBuilder()
-            ->where('p.category IN (:categories)')
+            ->andWhere('p.category IN (:categories)')
             ->setParameter('categories', $categories)
+
         ;
 
-        foreach ($categories as $category) {
-            $qb->andWhere('c.status = true');
-        }
+
+//        foreach ($categories as $category) {
+//            $qb->andWhere('c.status = true');
+//        }
 
         return $qb;
 //
