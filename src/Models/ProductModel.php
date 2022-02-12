@@ -44,11 +44,14 @@ class ProductModel implements ModelInterface
 
     public function getContext(): array
     {
+        if ($this->product->isSubProduct()){
+            Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getGroup()->getSlug()]), 301);
+        }
         if($this->product->getUrl() !== $this->product->getCurrentUrl()){
             Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
         }
 
-        dd($this->product->getPrices()->toArray());
+
 
         return [
             '_title' => sprintf(

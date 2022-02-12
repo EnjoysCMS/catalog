@@ -379,13 +379,16 @@ class Product
      */
     public function getPrices()
     {
+        if ($this->isGroupProduct()){
+            return new ArrayCollection();
+        }
         return $this->prices;
     }
 
     public function getPrice(string $code): ?ProductPrice
     {
         /** @var ProductPrice $price */
-        foreach ($this->prices as $price) {
+        foreach ($this->getPrices() as $price) {
             if($price->getPriceGroup()->getCode() === $code){
                 return $price;
             }
@@ -395,6 +398,9 @@ class Product
 
     public function addPrice(ProductPrice $productPrice = null)
     {
+        if ($this->isGroupProduct()){
+            return;
+        }
         if ($productPrice === null){
             return;
         }
