@@ -14,6 +14,7 @@ use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -67,6 +68,7 @@ class TagsList implements ModelInterface
             'product' => $this->product,
             'subtitle' => 'Управление тегами',
             'form' => $renderer->render(),
+            'modulePath' => Setting::getModulePath()
         ];
     }
 

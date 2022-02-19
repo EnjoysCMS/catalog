@@ -68,7 +68,8 @@ final class Manage implements ModelInterface
             'product' => $this->product,
             'form' => $form,
             'delimiterOptions' =>Setting::get('delimiterOptions', '|'),
-            'subtitle' => 'Параметры'
+            'subtitle' => 'Параметры',
+            'modulePath' => Setting::getModulePath()
         ];
     }
 

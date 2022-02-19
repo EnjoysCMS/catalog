@@ -19,4 +19,9 @@ final class Setting extends HelpersBase
                 \EnjoysCMS\Module\Catalog\Entities\Setting::class
             )->findOneBy(['key' => $key])?->getValue() ?? $moduleConfig[$key] ?? $defaults;
     }
+
+    static public function getModulePath()
+    {
+        return str_replace($_ENV['PROJECT_DIR'], '', realpath(__DIR__.'/../..'));
+    }
 }

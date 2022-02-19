@@ -23,6 +23,7 @@ final class Meta extends BaseController
     {
         parent::__construct($container);
         $this->templatePath = Template::getAdminTemplatePath();
+        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
     }
 
     public function __invoke()

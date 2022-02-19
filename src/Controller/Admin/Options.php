@@ -26,6 +26,7 @@ final class Options extends BaseController
     {
         parent::__construct($this->container);
         $this->templatePath = Template::getAdminTemplatePath();
+        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
     }
 
     /**
