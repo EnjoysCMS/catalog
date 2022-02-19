@@ -31,7 +31,7 @@
   },
   "require-dev": {
     "enjoyscms/core": "^3.0",
-    "enjoyscms/admin": "^2.0",
+    "enjoyscms/admin": "dev-test_stand",
     "enjoys/dotenv": "^2.0",
     "symfony/cache": "^6.0"
   },
