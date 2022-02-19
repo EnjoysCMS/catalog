@@ -130,7 +130,7 @@ final class Add implements ModelInterface
      * @throws ORMException
      * @throws Exception
      */
-    private function doAction()
+    private function doAction(): void
     {
         $categoryId = $this->serverRequest->post('category', 0);
         $this->cookie->set('__catalog__last_category_when_add_product', $categoryId);

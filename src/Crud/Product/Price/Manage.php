@@ -118,7 +118,7 @@ final class Manage implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $currency = $this->em->getRepository(Currency::class)->find($this->serverRequest->post('currency'));
 

@@ -55,7 +55,7 @@ final class FillFromProduct
         $this->redirectToProductOptionsPage($product);
     }
 
-    private function redirectToProductOptionsPage(Product $product)
+    private function redirectToProductOptionsPage(Product $product): void
     {
         Redirect::http($this->urlGenerator->generate('@a/catalog/product/options', ['id' => $product->getId()]));
     }

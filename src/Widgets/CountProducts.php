@@ -17,6 +17,9 @@ use Twig\Environment;
 final class CountProducts extends AbstractWidgets
 {
 
+    /**
+     * @return string
+     */
     public function view()
     {
         /** @var \EnjoysCMS\Module\Catalog\Repositories\Product $repository */

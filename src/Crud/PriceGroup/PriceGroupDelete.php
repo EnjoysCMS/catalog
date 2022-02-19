@@ -60,7 +60,7 @@ final class PriceGroupDelete implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $this->em->remove($this->priceGroup);
         $this->em->flush();

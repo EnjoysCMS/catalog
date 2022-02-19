@@ -222,7 +222,7 @@ class Product
         $this->tags->add($tag);
     }
 
-    public function clearTags()
+    public function clearTags(): void
     {
         $this->tags = new ArrayCollection();
     }
@@ -236,7 +236,7 @@ class Product
     /**
      * @param ProductTag[] $tags
      */
-    public function addTagsFromArray(array $tags)
+    public function addTagsFromArray(array $tags): void
     {
         foreach ($tags as $tag) {
             if (!($tag instanceof ProductTag)) {
@@ -252,7 +252,12 @@ class Product
     }
 
 
-    public function getOptions()
+    /**
+     * @return (OptionKey|OptionValue[])[][]
+     *
+     * @psalm-return list<array{key: OptionKey, values?: non-empty-list<OptionValue>}>
+     */
+    public function getOptions(): array
     {
         $result = [];
         /** @var OptionValue $option */
@@ -275,7 +280,7 @@ class Product
         });
     }
 
-    public function clearOptions()
+    public function clearOptions(): void
     {
         $this->options = new ArrayCollection();
     }
@@ -329,6 +334,9 @@ class Product
         $this->currentUrl = $currentUrl;
     }
 
+    /**
+     * @return void
+     */
     public function addUrl(Url $url)
     {
         if ($this->urls->contains($url)) {
@@ -382,6 +390,9 @@ class Product
         return null;
     }
 
+    /**
+     * @return void
+     */
     public function addPrice(ProductPrice $productPrice = null)
     {
         if ($productPrice === null){

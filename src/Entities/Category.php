@@ -141,22 +141,22 @@ class Category
         $this->img = $img;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setTitle($title)
+    public function setTitle($title): void
     {
         $this->title = $title;
     }
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->title;
     }
 
-    public function setParent(Category $parent = null)
+    public function setParent(Category $parent = null): void
     {
         $this->parent = $parent;
     }
@@ -169,17 +169,17 @@ class Category
         return $this->parent;
     }
 
-    public function addClosure(CategoryClosure $closure)
+    public function addClosure(CategoryClosure $closure): void
     {
         $this->closures[] = $closure;
     }
 
-    public function setLevel($level)
+    public function setLevel($level): void
     {
         $this->level = $level;
     }
 
-    public function getLevel()
+    public function getLevel(): int
     {
         return $this->level;
     }
@@ -258,7 +258,7 @@ class Category
     }
 
 
-    public function getChildren()
+    public function getChildren(): ArrayCollection
     {
 
         $iterator = $this->children->getIterator();
@@ -280,11 +280,14 @@ class Category
         return $this->extraFields;
     }
 
-    public function removeExtraFields()
+    public function removeExtraFields(): void
     {
         $this->extraFields = new ArrayCollection();
     }
 
+    /**
+     * @return void
+     */
     public function addExtraField(OptionKey $field)
     {
         if ($this->extraFields->contains($field)){

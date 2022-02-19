@@ -87,7 +87,7 @@ final class Search
         return $qb;
     }
 
-    private function validateSearchQuery()
+    private function validateSearchQuery(): void
     {
         if (mb_strlen($this->searchQuery) < $this->getOption('minSearchChars', 3)) {
             throw new \InvalidArgumentException(sprintf('Слишком короткое слово для поиска (нужно минимум %s символа)', $this->getOption('minSearchChars', 3)));

@@ -44,6 +44,9 @@ final class CategoryTree extends AbstractBlock
         return __DIR__ . '/../../blocks.yml';
     }
 
+    /**
+     * @return string
+     */
     public function view()
     {
         return $this->twig->render(

@@ -98,7 +98,7 @@ final class Urls extends BaseController
     }
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/product/urls/makedefault",
      *     name="@a/catalog/product/urls/makedefault",
      *     options={
@@ -106,7 +106,7 @@ final class Urls extends BaseController
      *     }
      * )
      */
-    public function makeDefault()
+    public function makeDefault(): void
     {
         $this->container->get(MakeDefault::class)();
     }

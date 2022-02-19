@@ -128,7 +128,7 @@ HTML
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         /** @var Category|null $parent */
         $parent = $this->categoryRepository->find($this->serverRequest->post('parent'));

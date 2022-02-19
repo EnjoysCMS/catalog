@@ -90,7 +90,7 @@ final class Setting implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         foreach ($this->setting->findAll() as $item) {
             $this->entityManager->remove($item);

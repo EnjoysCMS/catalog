@@ -81,7 +81,7 @@ final class Add implements ModelInterface
     }
 
 
-    private function doAction()
+    private function doAction(): void
     {
         $this->uploadMethod->upload($this->serverRequest);
 

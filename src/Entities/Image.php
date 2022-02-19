@@ -112,7 +112,12 @@ class Image
         $this->general = $general;
     }
 
-    public function getInfo()
+    /**
+     * @return (mixed|string)[]
+     *
+     * @psalm-return array{path: string, glob_pattern: mixed, filename: string, extension: string}
+     */
+    public function getInfo(): array
     {
         return [
             'path' => $_ENV['UPLOAD_DIR'] . '/catalog/' . $this->getFilename() . '.' . $this->getExtension(),
@@ -122,7 +127,7 @@ class Image
         ];
     }
 
-    public function getGlobPattern()
+    public function getGlobPattern(): string
     {
         return $_ENV['UPLOAD_DIR'] . '/catalog/' . $this->getFilename() . '*.' . $this->getExtension();
     }

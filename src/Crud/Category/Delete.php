@@ -81,7 +81,7 @@ final class Delete implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $setCategory = ($this->serverRequest->post('set_parent_category') !== null) ? $this->category->getParent() : null;
 
@@ -103,7 +103,7 @@ final class Delete implements ModelInterface
         Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
 
-    private function setCategory($products, ?Category $category = null)
+    private function setCategory($products, ?Category $category = null): void
     {
         foreach ($products as $product) {
             $product->setCategory($category);

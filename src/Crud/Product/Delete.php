@@ -73,7 +73,7 @@ final class Delete implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $this->removeImages();
         $this->removeUrls();
@@ -94,7 +94,7 @@ final class Delete implements ModelInterface
         }
     }
 
-    private function removeUrls()
+    private function removeUrls(): void
     {
         foreach ($this->product->getUrls() as $url) {
             $this->entityManager->remove($url);

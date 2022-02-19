@@ -62,7 +62,7 @@ final class Index implements ModelInterface
         ];
     }
 
-    private function _recursive($data, $parent = null)
+    private function _recursive($data, Category|null $parent = null): void
     {
         foreach ($data as $key => $value) {
             /** @var Category $item */

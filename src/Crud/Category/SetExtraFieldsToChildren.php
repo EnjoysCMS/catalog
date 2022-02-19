@@ -89,7 +89,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
         return $form;
     }
 
-    private function doActionRecursive(ArrayCollection|PersistentCollection $collection)
+    private function doActionRecursive(ArrayCollection|PersistentCollection $collection): void
     {
         $extraFields = $this->category->getExtraFields();
 

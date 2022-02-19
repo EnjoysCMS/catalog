@@ -88,7 +88,7 @@ final class Download implements LoadImage
         $this->loadAndSave($serverRequest->post('image'));
     }
 
-    public function loadAndSave(string $link)
+    public function loadAndSave(string $link): void
     {
         $client = new Client(
             [
@@ -110,7 +110,7 @@ final class Download implements LoadImage
         file_put_contents($this->getFullPathFileNameWithExtension(), $data);
     }
 
-    private function makeDirectory(string $directory)
+    private function makeDirectory(string $directory): void
     {
         if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
             throw new \Exception(
@@ -132,7 +132,7 @@ final class Download implements LoadImage
         }
     }
 
-    private function getExt($content_type)
+    private function getExt(string $content_type): string|null
     {
         $mime_types = array(
             // images

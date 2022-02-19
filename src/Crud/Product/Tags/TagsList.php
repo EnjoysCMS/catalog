@@ -96,7 +96,7 @@ class TagsList implements ModelInterface
         return $form;
     }
 
-    protected function doAction()
+    protected function doAction(): void
     {
         $tags = array_map('trim', array_unique(explode(',', $this->serverRequest->post('tags'))));
         $manageTags = new TagsManager($this->em);

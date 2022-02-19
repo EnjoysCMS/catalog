@@ -12,7 +12,12 @@ use EnjoysCMS\Module\Catalog\Config;
 
 final class Setting extends HelpersBase
 {
-    static public function get(string $key, $defaults = null)
+    /**
+     * @param null|string $defaults
+     *
+     * @psalm-param ''|'|'|null $defaults
+     */
+    static public function get(string $key, string|null $defaults = null)
     {
         $moduleConfig = Config::getConfig(self::$container)->getAll();
         return self::$container->get(EntityManager::class)->getRepository(
@@ -20,7 +25,7 @@ final class Setting extends HelpersBase
             )->findOneBy(['key' => $key])?->getValue() ?? $moduleConfig[$key] ?? $defaults;
     }
 
-    static public function getModulePath()
+    static public function getModulePath(): string
     {
         return str_replace($_ENV['PROJECT_DIR'], '', realpath(__DIR__.'/../..'));
     }

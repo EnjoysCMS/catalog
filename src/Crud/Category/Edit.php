@@ -210,7 +210,7 @@ HTML
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $this->category->setTitle($this->serverRequest->post('title'));
         $this->category->setDescription($this->serverRequest->post('description'));

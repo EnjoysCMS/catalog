@@ -96,7 +96,7 @@ final class MetaManage implements ModelInterface
         return $form;
     }
 
-    protected function doAction()
+    protected function doAction(): void
     {
         if (null === $meta = $this->metaRepository->findOneBy(['product' => $this->product])) {
             $meta = new ProductMeta();

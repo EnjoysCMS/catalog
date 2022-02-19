@@ -73,7 +73,7 @@ final class Manage implements ModelInterface
         ];
     }
 
-    private function getForm()
+    private function getForm(): Form
     {
         $options = $this->product->getOptions();
 
@@ -137,7 +137,7 @@ final class Manage implements ModelInterface
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doSave()
+    private function doSave(): void
     {
 //        dd($this->serverRequest->post('options', []));
         $this->product->clearOptions();

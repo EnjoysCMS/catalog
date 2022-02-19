@@ -89,9 +89,9 @@ final class ProductPrice
     }
 
     /**
-     * @return int
+     * @return float|int
      */
-    public function getPrice(): float
+    public function getPrice(): int|float
     {
         return $this->price / 100;
     }

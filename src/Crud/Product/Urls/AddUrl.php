@@ -108,7 +108,7 @@ final class AddUrl implements ModelInterface
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction()
+    private function doAction(): void
     {
         $url = new Url();
         $url->setPath($this->serverRequest->post('path'));

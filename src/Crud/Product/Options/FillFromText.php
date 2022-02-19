@@ -70,7 +70,12 @@ final class FillFromText
 
     }
 
-    private function parse(string $dataRaw)
+    /**
+     * @return string[][]
+     *
+     * @psalm-return list<array{option: string, unit: string, value: string}>
+     */
+    private function parse(string $dataRaw): array
     {
         $dataSanitize = array_filter(
             array_map('trim', explode("\n", str_replace(["\r\n", "\r"], "\n", \trim($dataRaw)))),
@@ -91,7 +96,7 @@ final class FillFromText
         return $result;
     }
 
-    private function redirectToProductOptionsPage(Product $product)
+    private function redirectToProductOptionsPage(Product $product): void
     {
         Redirect::http($this->urlGenerator->generate('@a/catalog/product/options', ['id' => $product->getId()]));
     }

@@ -71,7 +71,7 @@ final class Delete implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         $product = $this->image->getProduct();
         foreach (glob($this->image->getGlobPattern()) as $item) {

@@ -19,12 +19,12 @@ final class OptionValueRepository extends EntityRepository
         return $this->getLikeQuery($field, $value, $key)->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
-    public function getLikeQuery(string $field, string $value, ?OptionKey $key = null)
+    public function getLikeQuery(string $field, string $value, ?OptionKey $key = null): \Doctrine\ORM\Query
     {
         return $this->getLikeQueryBuilder($field, $value, $key)->getQuery();
     }
 
-    public function getLikeQueryBuilder(string $field, string $value, ?OptionKey $key = null)
+    public function getLikeQueryBuilder(string $field, string $value, ?OptionKey $key = null): \Doctrine\ORM\QueryBuilder
     {
         return $this->createQueryBuilder('v')
             ->select('v')

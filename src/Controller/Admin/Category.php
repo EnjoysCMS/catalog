@@ -109,13 +109,14 @@ final class Category extends BaseController
 
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/tools/category/get-extra-fields",
      *     name="@a/catalog/tools/category/get-extra-fields",
      *     options={
      *      "aclComment": "[JSON] Получение списка extra fields"
      *     }
      * )
+     *
      * @throws NoResultException
      */
     public function getExtraFieldsJson(
@@ -123,7 +124,7 @@ final class Category extends BaseController
         ServerRequestInterface $serverRequest,
         Response $response,
         SapiEmitter $emitter
-    ) {
+    ): void {
         $result = [];
 
         /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */

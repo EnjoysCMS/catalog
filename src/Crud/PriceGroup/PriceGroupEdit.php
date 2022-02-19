@@ -83,7 +83,7 @@ final class PriceGroupEdit implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
 
         $this->priceGroup->setTitle($this->serverRequest->post('title'));

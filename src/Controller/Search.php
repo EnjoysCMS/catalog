@@ -33,7 +33,7 @@ final class Search
         path: '/catalog/search.json',
         name: 'catalog/api/search'
     )]
-    public function apiSearch()
+    public function apiSearch(): void
     {
         $this->response = $this->response->withHeader('content-type', 'application/json');
 

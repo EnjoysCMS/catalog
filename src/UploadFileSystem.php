@@ -97,7 +97,7 @@ class UploadFileSystem extends Base
         return $this->directory;
     }
 
-    private function makeDirectory(string $directory)
+    private function makeDirectory(string $directory): void
     {
 
 

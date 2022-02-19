@@ -174,7 +174,7 @@ final class Edit implements ModelInterface
         return $form;
     }
 
-    private function doAction()
+    private function doAction(): void
     {
         /** @var Category|null $category */
         $category = $this->entityManager->getRepository(Category::class)->find(

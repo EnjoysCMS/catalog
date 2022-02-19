@@ -35,7 +35,7 @@ final class Product extends EntityRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function findBySlug(string $slugs)
+    public function findBySlug(string $slugs): \EnjoysCMS\Module\Catalog\Entities\Product|null
     {
         $slugs = explode('/', $slugs);
         $slug = array_pop($slugs);
@@ -108,7 +108,7 @@ final class Product extends EntityRepository
             ->setParameter('category', $category);
     }
 
-    public function getFindByCategorysIdsDQL($categoryIds)
+    public function getFindByCategorysIdsDQL($categoryIds): QueryBuilder
     {
         $qb = $this->getFindAllBuilder();
 
@@ -122,7 +122,7 @@ final class Product extends EntityRepository
         return $qb;
     }
 
-    public function getFindByCategorysIdsQuery($categoryIds)
+    public function getFindByCategorysIdsQuery($categoryIds): Query
     {
         return $this->getFindByCategorysIdsDQL($categoryIds)->getQuery();
     }

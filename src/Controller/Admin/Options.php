@@ -48,7 +48,7 @@ final class Options extends BaseController
     }
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/product/options/fill-from-product",
      *     name="@a/catalog/product/options/fill-from-product",
      *     options={
@@ -56,13 +56,13 @@ final class Options extends BaseController
      *     }
      * )
      */
-    public function fillFromProduct()
+    public function fillFromProduct(): void
     {
         $this->container->get(ModelOptions\FillFromProduct::class)();
     }
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/product/options/fill-from-text",
      *     name="@a/catalog/product/options/fill-from-text",
      *     options={
@@ -70,14 +70,14 @@ final class Options extends BaseController
      *     }
      * )
      */
-    public function fillFromText()
+    public function fillFromText(): void
     {
         $this->container->get(ModelOptions\FillFromText::class)();
     }
 
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/tools/find-option-keys",
      *     name="@a/catalog/tools/find-option-keys",
      *     options={
@@ -90,7 +90,7 @@ final class Options extends BaseController
         ServerRequestInterface $serverRequest,
         Response $response,
         SapiEmitter $emitter
-    ) {
+    ): void {
         $matched = $entityManager->getRepository(OptionKey::class)->like('name', $serverRequest->get('query'));
         $response = $response->withHeader('content-type', 'application/json');
         $response->getBody()->write(json_encode($matched));
@@ -98,7 +98,7 @@ final class Options extends BaseController
     }
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/tools/find-option-values",
      *     name="@a/catalog/tools/find-option-values",
      *     options={
@@ -111,7 +111,7 @@ final class Options extends BaseController
         ServerRequestInterface $serverRequest,
         Response $response,
         SapiEmitter $emitter
-    ) {
+    ): void {
         $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
             ['name' => $serverRequest->get('option'), 'unit' => $serverRequest->get('unit')]
         );

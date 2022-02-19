@@ -126,7 +126,7 @@ final class Product extends BaseController
 
 
     /**
-     * @Route(
+     * @Route (
      *     path="admin/catalog/tools/find-products",
      *     name="@a/catalog/tools/find-products",
      *     options={
@@ -139,7 +139,7 @@ final class Product extends BaseController
         ServerRequestInterface $serverRequest,
         Response $response,
         SapiEmitter $emitter
-    ) {
+    ): void {
         $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
             $serverRequest->get(
                 'query'

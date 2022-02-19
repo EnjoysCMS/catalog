@@ -112,7 +112,7 @@ final class EditUrl implements ModelInterface
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction()
+    private function doAction(): void
     {
         $this->url->setPath($this->serverRequest->post('path'));
         $this->em->flush();

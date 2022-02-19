@@ -88,7 +88,7 @@ final class DeleteUrl implements ModelInterface
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction()
+    private function doAction(): void
     {
         if($this->url->isDefault()){
             throw new \InvalidArgumentException('You cannot delete the main link');

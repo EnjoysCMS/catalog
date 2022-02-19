@@ -35,6 +35,9 @@ final class SearchBlock extends AbstractBlock
         return __DIR__ . '/../../blocks.yml';
     }
 
+    /**
+     * @return string
+     */
     public function view()
     {
         $form = $this->getForm();
