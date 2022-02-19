@@ -8,8 +8,10 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Enjoys\Forms\Form;
 use Enjoys\Http\ServerRequestInterface;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use InvalidArgumentException;
 
 final class Download implements LoadImage
 {
@@ -21,6 +23,10 @@ final class Download implements LoadImage
 
     public function __construct()
     {
+        if(!isset($_ENV['UPLOAD_DIR'])){
+            throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
+        }
+  
         $this->uploadDir = rtrim($_ENV['UPLOAD_DIR'], '/') . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR;
     }
 
@@ -113,7 +119,7 @@ final class Download implements LoadImage
     private function makeDirectory(string $directory): void
     {
         if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
-            throw new \Exception(
+            throw new Exception(
                 sprintf("Нельзя создать директорию: %s", $directory)
             );
         }
@@ -125,7 +131,7 @@ final class Download implements LoadImage
             if (@mkdir($directory, 0777, true) === false) {
                 /** @var string[] $error */
                 $error = error_get_last();
-                throw new \Exception(
+                throw new Exception(
                     sprintf("Не удалось создать директорию: %s! Причина: %s", $directory, $error['message'])
                 );
             }

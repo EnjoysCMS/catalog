@@ -10,6 +10,7 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use InvalidArgumentException;
 
 final class Index implements ModelInterface
 {
@@ -19,6 +20,10 @@ final class Index implements ModelInterface
 
     public function __construct(EntityManager $entityManager, ServerRequestInterface $serverRequest)
     {
+        if(!isset($_ENV['UPLOAD_URL'])){
+            throw new InvalidArgumentException('Not set UPLOAD_URL in .env');
+        }
+        
         $this->entityManager = $entityManager;
 
         $this->product = $entityManager->getRepository(Product::class)->find($serverRequest->get('product_id'));

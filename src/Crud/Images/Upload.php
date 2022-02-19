@@ -20,6 +20,13 @@ final class Upload implements LoadImage
     private string $extension;
     private string $fullPathFileNameWithExtension;
 
+    public function __construct()
+    {
+        if(!isset($_ENV['UPLOAD_DIR'])){
+            throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
+        }
+    }
+
     /**
      * @return string
      */

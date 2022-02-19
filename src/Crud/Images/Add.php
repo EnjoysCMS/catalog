@@ -58,7 +58,7 @@ final class Add implements ModelInterface
             $method = 'upload';
         }
 
-        $method = '\EnjoysCMS\Module\Catalog\Models\Admin\Images\\' . ucfirst($method);
+        $method = '\EnjoysCMS\Module\Catalog\Crud\Images\\' . ucfirst($method);
 
         $this->uploadMethod = new $method();
     }
