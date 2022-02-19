@@ -31,6 +31,7 @@ use EnjoysCMS\Core\Components\TwigExtension\ExtendedFunctions;
 use EnjoysCMS\Core\Components\TwigExtension\PickingCssJs;
 use EnjoysCMS\Core\Components\TwigExtension\Setting;
 use EnjoysCMS\Core\Components\TwigExtension\TwigLoader;
+use EnjoysCMS\Module\Catalog\Controller\Index;
 use Gedmo\Timestampable\TimestampableListener;
 use Gedmo\Tree\TreeListener;
 use Monolog\Formatter\LineFormatter;
@@ -220,7 +221,7 @@ $builder->addDefinitions(
 //                            ))->getRouteCollection()
 //                        );
 
-                        $routeCollection->add('system/index', new Route('/'));
+                        $routeCollection->add('system/index', new Route('/', ['_controller' => [Index::class, 'view']]));
 
                         return $routeCollection;
                     },
