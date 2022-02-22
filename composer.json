@@ -29,7 +29,9 @@
     }
   },
   "scripts": {
-    "assets-install": "cd ./modules/catalog && yarn install"
+    "assets-install": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall",
+    "post-install-cmd": "@assets-install",
+    "post-update-cmd": "@assets-install"
   },
   "require-dev": {
     "enjoys/dotenv": "^2.0",
