@@ -25,8 +25,4 @@ final class Setting extends HelpersBase
             )->findOneBy(['key' => $key])?->getValue() ?? $moduleConfig[$key] ?? $defaults;
     }
 
-    static public function getModulePath(): string
-    {
-        return str_replace($_ENV['PROJECT_DIR'], '', realpath(__DIR__.'/../..'));
-    }
 }

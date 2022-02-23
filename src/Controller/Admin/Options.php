@@ -6,28 +6,20 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
-use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
-use EnjoysCMS\Module\Catalog\Helpers\Template;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
-use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-final class Options extends BaseController
+final class Options extends AdminController
 {
-    private string $templatePath;
 
-    public function __construct(private ContainerInterface $container)
-    {
-        parent::__construct($this->container);
-        $this->templatePath = Template::getAdminTemplatePath();
-        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
-    }
 
     /**
      * @Route(
@@ -38,6 +30,8 @@ final class Options extends BaseController
      *     }
      * )
      * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function manageOptions(): string
     {

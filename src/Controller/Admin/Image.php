@@ -19,16 +19,8 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Image extends BaseController
+final class Image extends AdminController
 {
-    private string $templatePath;
-
-    public function __construct(private ContainerInterface $container)
-    {
-        parent::__construct($this->container);
-        $this->templatePath = Template::getAdminTemplatePath();
-        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
-    }
 
     /**
      * @Route(

@@ -13,20 +13,13 @@ use EnjoysCMS\Module\Catalog\Crud\Product\Urls\EditUrl;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\MakeDefault;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\Manage;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-final class Urls extends BaseController
+final class Urls extends AdminController
 {
-
-    private string $templatePath;
-
-    public function __construct(private ContainerInterface $container)
-    {
-        parent::__construct($this->container);
-        $this->templatePath = Template::getAdminTemplatePath();
-        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
-    }
 
     /**
      * @Route(
@@ -37,6 +30,8 @@ final class Urls extends BaseController
      *     }
      * )
      * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function manage(): string
     {
@@ -55,7 +50,7 @@ final class Urls extends BaseController
      *     }
      * )
      */
-    public function edit()
+    public function edit(): string
     {
         return $this->view(
             $this->templatePath . '/product/urls/edit.twig',

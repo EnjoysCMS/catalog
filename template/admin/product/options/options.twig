@@ -2,16 +2,16 @@
 {% block content %}
     {% do asset('js', [
         '//twitter.github.io/typeahead.js/js/handlebars.js',
-        modulePath ~ '/node_modules/typeahead.js/dist/bloodhound.min.js',
-        modulePath ~ '/node_modules/typeahead.js/dist/typeahead.bundle.min.js',
-        modulePath ~ '/node_modules/typeahead.js/dist/typeahead.jquery.min.js',
-        modulePath ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js',
-        modulePath ~ '/node_modules/select2/dist/js/select2.full.min.js',
-        modulePath ~ '/node_modules/select2/dist/js/i18n/ru.js',
+        module.path ~ '/node_modules/typeahead.js/dist/bloodhound.min.js',
+        module.path ~ '/node_modules/typeahead.js/dist/typeahead.bundle.min.js',
+        module.path ~ '/node_modules/typeahead.js/dist/typeahead.jquery.min.js',
+        module.path ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js',
+        module.path ~ '/node_modules/select2/dist/js/select2.full.min.js',
+        module.path ~ '/node_modules/select2/dist/js/i18n/ru.js',
     ]) %}
     {% do asset('css', [
-        modulePath ~ '/node_modules/select2/dist/css/select2.min.css',
-        modulePath ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
+        module.path ~ '/node_modules/select2/dist/css/select2.min.css',
+        module.path ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
     ]) %}
 
     <style>

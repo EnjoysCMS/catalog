@@ -2,10 +2,10 @@
 {% block content %}
 
     {% do asset('js', [
-        modulePath ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js'
+        module.path ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.js'
     ]) %}
     {% do asset('css', [
-        modulePath ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
+        module.path ~ '/template/assets/js/bootstrap-tagsinput/bootstrap-tagsinput.css'
     ]) %}
 
     <script>

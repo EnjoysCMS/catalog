@@ -5,12 +5,12 @@
 {% block content %}
 
     {% do asset('js', [
-        '/template/assets/js/nestable/jquery.nestable.js'
+        module.path ~ '/template/assets/js/nestable/jquery.nestable.js'
     ]) %}
 
 
     {% do asset('css', [
-        '/template/assets/css/nestable/nestable.css'
+        module.path ~ '/template/assets/css/nestable/nestable.css'
     ]) %}
 
 
