@@ -4,58 +4,41 @@ namespace EnjoysCMS\Module\Catalog;
 
 
 use InvalidArgumentException;
-use RuntimeException;
 use Upload\Exception\UploadException;
 use Upload\File;
 use Upload\Storage\Base;
 
+use function Enjoys\FileSystem\createDirectory;
+
 class UploadFileSystem extends Base
 {
-    /**
-     * Upload directory
-     * @var string
-     */
-    protected $directory;
 
+    protected string $directory;
     private string $fullPathFileNameWithExtension;
+    protected bool $overwrite;
 
     /**
-     * Overwrite existing files?
-     * @var bool
+     * @throws \Exception
      */
-    protected $overwrite;
-
-    /**
-     * Constructor
-     * @param  string                       $directory      Relative or absolute path to upload directory
-     * @param  bool                         $overwrite      Should this overwrite existing files?
-     * @throws InvalidArgumentException                    If directory does not exist
-     * @throws InvalidArgumentException                    If directory is not writable
-     */
-    public function __construct($directory, $overwrite = false)
+    public function __construct(string $directory, bool $overwrite = false)
     {
-        if (!is_dir($directory)) {
-            throw new InvalidArgumentException('Directory does not exist');
-        }
+        createDirectory($directory);
+
         if (!is_writable($directory)) {
-            throw new InvalidArgumentException('Directory is not writable');
+            throw new InvalidArgumentException(sprintf('Directory is not writable: %s', $directory));
         }
         $this->directory = rtrim($directory, '/') . DIRECTORY_SEPARATOR;
         $this->overwrite = $overwrite;
     }
 
+
     /**
-     * Upload
-     * @param  File $file The file object to upload
-     * @param  string $newName Give the file it a new name
-     * @return bool
-     * @throws RuntimeException   If overwrite is false and file already exists
+     * @throws \Exception
      */
-    public function upload(File $file, $newName = null)
+    public function upload(File $file, $newName = null): bool
     {
         if (is_string($newName)) {
-            $fileName = strpos($newName, '.') ? $newName : $newName.'.'.$file->getExtension();
-
+            $fileName = strpos($newName, '.') ? $newName : $newName . '.' . $file->getExtension();
         } else {
             $fileName = $file->getNameWithExtension();
         }
@@ -69,70 +52,28 @@ class UploadFileSystem extends Base
         $this->setFullPathFileNameWithExtension($newFile);
 
         $directory = pathinfo($newFile, PATHINFO_DIRNAME);
-        $this->makeDirectory($directory);
+
+        createDirectory($directory);
 
         return $this->moveUploadedFile($file->getPathname(), $newFile);
     }
 
-    /**
-     * Move uploaded file
-     *
-     * This method allows us to stub this method in unit tests to avoid
-     * hard dependency on the `move_uploaded_file` function.
-     *
-     * @param  string $source      The source file
-     * @param  string $destination The destination file
-     * @return bool
-     */
-    protected function moveUploadedFile($source, $destination)
+    protected function moveUploadedFile(string $source, string $destination): bool
     {
         return move_uploaded_file($source, $destination);
     }
 
-    /**
-     * @return string
-     */
     public function getDirectory(): string
     {
         return $this->directory;
     }
 
-    private function makeDirectory(string $directory): void
-    {
 
-
-        if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
-            throw new \Exception(
-                sprintf("Нельзя создать директорию: %s", $directory)
-            );
-        }
-
-        //Clear the most recent error
-        error_clear_last();
-
-        if (!is_dir($directory)) {
-            if (@mkdir($directory, 0777, true) === false) {
-                /** @var string[] $error */
-                $error = error_get_last();
-                throw new \Exception(
-                    sprintf("Не удалось создать директорию: %s! Причина: %s", $directory, $error['message'])
-                );
-            }
-
-        }
-    }
-
-    /**
-     * @return string
-     */
     public function getFullPathFileNameWithExtension(): string
     {
         return $this->fullPathFileNameWithExtension;
     }
 
-    /**
-     * @param string $fullPathFileNameWithExtension
-     */
     private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
     {
         $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
