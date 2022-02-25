@@ -1,0 +1,37 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    <section class="content">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Список валют</h2>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <a href="{{ url('catalog/admin/currency/add') }}" class="btn btn-primary btn-sm mb-3">Добавить
+                    валюту</a>
+
+
+
+                <table class="table">
+
+                    <tbody>
+                    {% for currency in currencies %}
+                        <tr>
+                            <td> {{ currency }}</td>
+                            <td>
+                                <a href="{{ path('catalog/admin/currency/edit', {'id': currency.getId }) }}">редактировать</a>
+                                <a href="{{ path('catalog/admin/currency/delete', {'id': currency.getId }) }}">удалить</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </section>
+
+
+{% endblock %}

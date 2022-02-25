@@ -115,4 +115,9 @@ class Currency
     {
         $this->id = strtoupper($id);
     }
+
+    public function __toString(): string
+    {
+        return $this->getName() . ', ' . $this->getLeft() . $this->getRight() . ' (' . $this->getDCode() . ')';
+    }
 }
