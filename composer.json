@@ -4,9 +4,9 @@
     "type": "enjoyscms-module",
     "require": {
         "php": ">=8.0",
-        "enjoyscms/core": "^4.0 | @dev",
-        "enjoyscms/admin": "^4.0 | @dev",
-        "enjoyscms/elfinder": "^2.0 | @dev",
+        "enjoyscms/core": "^4.0",
+        "enjoyscms/admin": "^4.0",
+        "enjoyscms/elfinder": "^4.0",
         "gedmo/doctrine-extensions": "^3.0",
         "jbroadway/urlify": "^1.2",
         "codeguy/upload": "^1.3",
