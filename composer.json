@@ -30,9 +30,8 @@
         }
     },
     "scripts": {
-        "assets-install": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall",
-        "post-install-cmd": "@assets-install",
-        "post-update-cmd": "@assets-install"
+        "post-install-cmd": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall",
+        "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall"
     },
     "require-dev": {
         "enjoys/dotenv": "^2.0",
