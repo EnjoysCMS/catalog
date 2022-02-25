@@ -14,18 +14,26 @@ use Doctrine\ORM\Query\QueryException;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class Index
+final class Index extends PublicController
 {
 
-    public function __construct(private EntityManager $entityManager, private Environment $twig, private BreadcrumbsInterface $breadcrumbs)
+    private BreadcrumbsInterface $breadcrumbs;
+    private EntityManager $entityManager;
+
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+        $this->entityManager = $this->container->get(EntityManager::class);
+        $this->breadcrumbs = $this->container->get(BreadcrumbsInterface::class);
+
     }
+
 
     /**
      * @throws SyntaxError
@@ -38,7 +46,7 @@ final class Index
     #[Route(
         path: 'catalog',
         name: 'catalog/index',
-        options: ['aclComment' => '[public] Просмотр категорий (индекс)']
+        options: ['comment' => '[PUBLIC] Просмотр категорий (индекс)']
     )]
     public function view(): string
     {

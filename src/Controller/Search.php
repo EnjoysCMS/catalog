@@ -16,14 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
-final class Search
+final class Search extends PublicController
 {
     private EmitterInterface $emitter;
     private ResponseInterface $response;
     private array $optionKeys;
 
-    public function __construct(private ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
         $this->emitter = $this->container->get(EmitterInterface::class);
         $this->response = $this->container->get(ResponseInterface::class);
         $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));

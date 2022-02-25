@@ -7,11 +7,9 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 
 use DI\DependencyException;
-use DI\FactoryInterface;
 use DI\NotFoundException;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
 use Symfony\Component\Routing\Annotation\Route;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -22,7 +20,7 @@ use Twig\Error\SyntaxError;
     requirements: ['slug' => '[^.]+'],
     options: ['aclComment' => '[public] Просмотр продуктов (товаров)']
 )]
-final class Product
+final class Product extends PublicController
 {
 
     /**
@@ -33,18 +31,18 @@ final class Product
      * @throws LoaderError
      */
 
-    public function __invoke(FactoryInterface $container, Environment $twig): string
+    public function __invoke(): string
     {
         $template_path = '@m/catalog/product.twig';
 
-        if (!$twig->getLoader()->exists($template_path)) {
+        if (!$this->twig->getLoader()->exists($template_path)) {
             $template_path = __DIR__ . '/../../template/product.twig';
         }
 
 
-        return $twig->render(
+        return $this->twig->render(
             $template_path,
-            $container->make(ProductModel::class)->getContext(),
+            $this->container->make(ProductModel::class)->getContext(),
         );
     }
 }

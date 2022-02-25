@@ -30,7 +30,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class Category
+final class Category extends PublicController
 {
 
     /**
@@ -55,24 +55,24 @@ final class Category
             'slug' => ''
         ]
     )]
-    public function view(FactoryInterface $container, Environment $twig, ServerRequestInterface $serverRequest): string
+    public function view(ServerRequestInterface $serverRequest): string
     {
         if ($serverRequest->get('slug') === '') {
-            return $container->make(Index::class)->view();
+            return $this->container->make(Index::class)->view();
         }
 
 
         $template_path = '@m/catalog/category.twig';
 
 
-        if (!$twig->getLoader()->exists($template_path)) {
+        if (!$this->twig->getLoader()->exists($template_path)) {
             $template_path = __DIR__ . '/../../template/category.twig';
         }
 
-        return $twig->render(
+        return $this->twig->render(
             $template_path,
-            $container->make(CategoryModel::class, [
-                'config' => Config::getConfig($container)->getAll()
+            $this->container->make(CategoryModel::class, [
+                'config' => Config::getConfig($this->container)->getAll()
             ])->getContext()
         );
     }

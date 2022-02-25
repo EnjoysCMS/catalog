@@ -8,19 +8,26 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
+use HttpSoft\Emitter\EmitterInterface;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-final class Tools
+final class Tools extends PublicController
 {
     private ServerRequestInterface $serverRequest;
     private SapiEmitter $emitter;
+    private ResponseInterface $response;
 
-    public function __construct(ServerRequestInterface $serverRequest)
+    public function __construct(ContainerInterface $container)
     {
-        $this->serverRequest = $serverRequest;
-        $this->emitter = new SapiEmitter();
+        parent::__construct($container);
+        $this->serverRequest = $this->container->get(ServerRequestInterface::class);
+        $this->emitter =$this->container->get(EmitterInterface::class);
+        $this->response = $this->container->get(ResponseInterface::class);
     }
 
     /**
@@ -28,14 +35,14 @@ final class Tools
      *     name="tools/translit",
      *     path="tools/translit",
      *     options={
-     *      "aclComment": "Tools - транлитерация"
+     *      "comment": "Tools - транлитерация"
      *     }
      * )
      */
-    public function translit(): \Psr\Http\Message\StreamInterface
+    public function translit(): StreamInterface
     {
         $query = $this->serverRequest->post('query');
-        $response = (new Response())
+        $response = $this->response
             ->withHeader('content-type', 'application/json')
             ->withHeader('Access-Control-Allow-Origin', '*')
         ;
