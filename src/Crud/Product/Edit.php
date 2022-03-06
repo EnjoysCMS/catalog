@@ -161,12 +161,13 @@ final class Edit implements ModelInterface
             )
         ;
         $form->textarea('description', 'Описание');
+
         $form->number(
             'qty',
-            sprintf('Количество, %s', $this->product->getPrices()->first()->getUnit()->getName())
+            sprintf('Количество')
         )->setAttributes([
             'step' => $this->product->getQuantity()->getStep(),
-            'min' => $this->product->getQuantity()->getMin()
+            'min' => 0
         ]);
 
 
