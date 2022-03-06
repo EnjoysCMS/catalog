@@ -210,6 +210,15 @@ class Product
         return $this->images;
     }
 
+    public function getDefaultImage(): ?Image
+    {
+        $image = $this->images->filter(fn($i) => $i->isGeneral())->first();
+        if (!($image instanceof Image)){
+            return null;
+        }
+        return $image;
+    }
+
 
     public function getTags()
     {
