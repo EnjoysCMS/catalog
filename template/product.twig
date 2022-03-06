@@ -1,16 +1,76 @@
 <h1 style='color: red'>
     Copy this file to &lt;project_dir&gt;/template/modules/catalog/product.twig and there edit
 </h1>
+<div>
+    Категория: {{ product.getCategory.getFullTitle }}
+</div>
 <h1>{{ product.getName }}</h1>
+<div>
+    <ul>
+        <li> productCode: {{ product.getProductCode }}</li>
+        <li> количество: {{ product.getQuantity }} (резерв: {{ product.getQuantity.getReserve }})</li>
+        <li> urls:
+            <ul>
+                {% for url in product.getUrls %}
+                    <li>
+                        <span{{ url.isDefault ? ' style="font-weight: bold"' }}>
+                            {{ path('catalog/product', {'slug': product.getSlug( url.getPath )}) }}
+                            ({{ url('catalog/product', {'slug': product.getSlug( url.getPath )}) }})
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+
+        {% if not product.getPrices.isEmpty %}
+            <li> prices:
+                <ul>
+                    {% for price in product.getPrices %}
+                        <li>
+                            {{ price.getPriceGroup.getTitle }}: {{ price.getFormatted }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endif %}
+    </ul>
+
+</div>
 <div>
     {{ product.getDescription|raw }}
 </div>
 
-<div>
-    <h3>Фото</h3>
-    <ul>
-        {% for image in product.images %}
-            <li>link: {{ image.filename }}.{{ image.extension }}</li>
-        {% endfor %}
-    </ul>
-</div>
+{% if not product.getTags.isEmpty %}
+    <div>
+        <h3>Теги</h3>
+        <ul>
+            {% for tag in product.getTags %}
+                <li>{{ tag }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if not product.getOptionsCollection.isEmpty %}
+    <div>
+        <h3>Параметры</h3>
+        <ul>
+            {% for option in product.getOptionsCollection %}
+                <li>{{ option.getOptionKey }}: {{ option.getValue }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if not product.getImages.isEmpty %}
+    <div>
+        <h3>Фото</h3>
+        <ul>
+            {% for image in product.getImages %}
+                <li><img src="{{ _ENV.UPLOAD_URL }}/catalog/{{ image.filename }}_small.{{ image.extension }}"
+                         alt="{{ image.filename }}.{{ image.extension }}"/>{{ image.filename }}.{{ image.extension }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
