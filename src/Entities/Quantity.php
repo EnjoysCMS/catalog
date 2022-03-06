@@ -75,12 +75,15 @@ final class Quantity
     }
 
 
-
     public function __construct()
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
 
+    public function __toString(): string
+    {
+        return (string)$this->getRealQty();
+    }
 
     public function getReserve(): float|int
     {
@@ -103,10 +106,10 @@ final class Quantity
 
     public function setQty(float|int|string $qty): self
     {
-        if(!is_numeric($qty)){
+        if (!is_numeric($qty)) {
             throw new \InvalidArgumentException();
         }
-        $this->qty = (float) $qty;
+        $this->qty = (float)$qty;
         return $this;
     }
 
@@ -151,10 +154,10 @@ final class Quantity
 
     public function setStep(float|int|string $step): void
     {
-        if(!is_numeric($step)){
+        if (!is_numeric($step)) {
             throw new \InvalidArgumentException();
         }
-        $this->step = (float) $step;
+        $this->step = (float)$step;
     }
 
 
@@ -166,10 +169,10 @@ final class Quantity
 
     public function setMin(float|int|string $min): void
     {
-        if(!is_numeric($min)){
+        if (!is_numeric($min)) {
             throw new \InvalidArgumentException();
         }
-        $this->min = (float) $min;
+        $this->min = (float)$min;
     }
 
 }

@@ -95,4 +95,9 @@ class OptionKey
     {
         return $this->id;
     }
+
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
 }

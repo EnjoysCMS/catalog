@@ -48,6 +48,10 @@ final class ProductTag
         $this->name = $name;
     }
 
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
 
 
 }
