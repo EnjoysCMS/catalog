@@ -367,7 +367,11 @@ class Product
         if ($url instanceof Url) {
             return $url;
         }
-        throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
+
+        $url = new Url();
+        $url->setPath(sprintf('Not set urls for product with id: %d', $this->getId()));
+        return $url;
+//        throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
     }
 
     public function getUrlById(int $id): Url
