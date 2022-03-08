@@ -44,6 +44,10 @@ class OptionValue
         $this->optionKey = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->getValue();
+    }
 
     public function getValue(): string
     {
