@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -15,12 +16,12 @@ use Symfony\Component\Routing\Annotation\Route;
 final class Setting extends AdminController
 {
 
-    public function __invoke(): string
+    public function __invoke(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/setting.twig',
             $this->getContext($this->container->get(\EnjoysCMS\Module\Catalog\Crud\Setting::class))
-        );
+        ));
     }
 
 }

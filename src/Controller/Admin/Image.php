@@ -16,6 +16,7 @@ use EnjoysCMS\Module\Catalog\Crud\Images\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Images\Index;
 use EnjoysCMS\Module\Catalog\Helpers\Template;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -32,12 +33,12 @@ final class Image extends AdminController
      * )
      * @return string
      */
-    public function manage(): string
+    public function manage(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/images/manage.twig',
             $this->getContext($this->container->get(Index::class))
-        );
+        ));
     }
 
 
@@ -51,12 +52,12 @@ final class Image extends AdminController
      * )
      * @return string
      */
-    public function add(): string
+    public function add(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Add::class))
-        );
+        ));
     }
 
     /**
@@ -100,11 +101,11 @@ final class Image extends AdminController
      * )
      * @return string
      */
-    public function delete(): string
+    public function delete(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Delete::class))
-        );
+        ));
     }
 }

@@ -16,6 +16,7 @@ use EnjoysCMS\Module\Catalog\Helpers\Template;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Urls extends AdminController
@@ -29,16 +30,15 @@ final class Urls extends AdminController
      *      "aclComment": "[ADMIN] Просмотр URLs товара"
      *     }
      * )
-     * @return string
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function manage(): string
+    public function manage(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/urls/manage.twig',
             $this->getContext($this->container->get(Manage::class))
-        );
+        ));
     }
 
     /**
@@ -50,12 +50,12 @@ final class Urls extends AdminController
      *     }
      * )
      */
-    public function edit(): string
+    public function edit(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/urls/edit.twig',
             $this->getContext($this->container->get(EditUrl::class))
-        );
+        ));
     }
 
     /**
@@ -67,12 +67,12 @@ final class Urls extends AdminController
      *     }
      * )
      */
-    public function add()
+    public function add(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/urls/add.twig',
             $this->getContext($this->container->get(AddUrl::class))
-        );
+        ));
     }
 
     /**
@@ -84,12 +84,12 @@ final class Urls extends AdminController
      *     }
      * )
      */
-    public function delete()
+    public function delete(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/urls/delete.twig',
             $this->getContext($this->container->get(DeleteUrl::class))
-        );
+        ));
     }
 
     /**

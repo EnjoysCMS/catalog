@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use EnjoysCMS\Module\Catalog\Crud\Product\Price\Manage;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Price extends AdminController
@@ -22,11 +23,11 @@ final class Price extends AdminController
      *     }
      * )
      */
-    public function manage(): string
+    public function manage(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/prices/manage.twig',
             $this->getContext($this->container->get(Manage::class))
-        );
+        ));
     }
 }

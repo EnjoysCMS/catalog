@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use DI\DependencyException;
 use DI\NotFoundException;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -31,7 +32,7 @@ final class Product extends PublicController
      * @throws LoaderError
      */
 
-    public function __invoke(): string
+    public function __invoke(): ResponseInterface
     {
         $template_path = '@m/catalog/product.twig';
 
@@ -40,9 +41,9 @@ final class Product extends PublicController
         }
 
 
-        return $this->twig->render(
+        return $this->responseText($this->twig->render(
             $template_path,
             $this->container->make(ProductModel::class)->getContext(),
-        );
+        ));
     }
 }

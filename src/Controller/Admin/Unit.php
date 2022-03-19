@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
         'aclComment' => '[JSON] Получение списка unit'
     ]
 )]
-final class Unit
+final class Unit extends AdminController
 {
     public function __invoke(
         EntityManager $entityManager,
@@ -33,7 +33,6 @@ final class Unit
                 'query'
             )
         );
-        $response = $response->withHeader('content-type', 'application/json');
 
         $result = [
             'items' => array_map(function ($item) {
@@ -45,9 +44,7 @@ final class Unit
             }, $matched),
             'total_count' => count($matched)
         ];
-        $response->getBody()->write(
-            json_encode($result)
-        );
-        $emitter->emit($response);
+
+        return $this->responseJson($result);
     }
 }

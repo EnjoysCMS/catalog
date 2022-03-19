@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 use EnjoysCMS\Module\Catalog\Crud\Product\Meta\MetaManage;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -26,11 +27,11 @@ final class Meta extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(): string
+    public function __invoke(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/meta.twig',
             $this->getContext($this->getContainer()->get(MetaManage::class))
-        );
+        ));
     }
 }

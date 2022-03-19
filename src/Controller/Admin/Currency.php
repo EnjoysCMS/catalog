@@ -12,6 +12,7 @@ use EnjoysCMS\Module\Catalog\Crud\Currency\Edit;
 use EnjoysCMS\Module\Catalog\Crud\Currency\Manage;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Currency extends AdminController
@@ -28,12 +29,12 @@ final class Currency extends AdminController
             'comment' => '[ADMIN] Просмотр списка валют в админке'
         ]
     )]
-    public function manage(): string
+    public function manage(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/currency.twig',
             $this->getContext($this->container->get(Manage::class))
-        );
+        ));
     }
 
     #[Route(
@@ -43,12 +44,12 @@ final class Currency extends AdminController
             'comment' => '[ADMIN] Добавление валюты'
         ]
     )]
-    public function add(): string
+    public function add(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Add::class))
-        );
+        ));
     }
 
     #[Route(
@@ -58,12 +59,12 @@ final class Currency extends AdminController
             'comment' => '[ADMIN] Редактирование валюты'
         ]
     )]
-    public function edit(): string
+    public function edit(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Edit::class))
-        );
+        ));
     }
 
 
@@ -74,11 +75,11 @@ final class Currency extends AdminController
             'comment' => '[ADMIN] Удаление валюты'
         ]
     )]
-    public function delete(): string
+    public function delete(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Delete::class))
-        );
+        ));
     }
 }

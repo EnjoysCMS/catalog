@@ -12,10 +12,9 @@ use EnjoysCMS\Module\Catalog\Crud\Category\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Category\Edit;
 use EnjoysCMS\Module\Catalog\Crud\Category\Index;
 use EnjoysCMS\Module\Catalog\Crud\Category\SetExtraFieldsToChildren;
-use HttpSoft\Emitter\SapiEmitter;
-use HttpSoft\Message\Response;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Category extends AdminController
@@ -33,12 +32,12 @@ final class Category extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function index(): string
+    public function index(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/category.twig',
             $this->getContext($this->container->get(Index::class))
-        );
+        ));
     }
 
 
@@ -54,12 +53,12 @@ final class Category extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function add(): string
+    public function add(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/addcategory.twig',
             $this->getContext($this->container->get(Add::class))
-        );
+        ));
     }
 
 
@@ -75,12 +74,12 @@ final class Category extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function edit(): string
+    public function edit(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/editcategory.twig',
             $this->getContext($this->container->get(Edit::class))
-        );
+        ));
     }
 
 
@@ -96,12 +95,12 @@ final class Category extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function delete(): string
+    public function delete(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(Delete::class))
-        );
+        ));
     }
 
 
@@ -119,9 +118,7 @@ final class Category extends AdminController
     public function getExtraFieldsJson(
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
-        Response $response,
-        SapiEmitter $emitter
-    ): void {
+    ): ResponseInterface {
         $result = [];
 
         /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
@@ -139,9 +136,7 @@ final class Category extends AdminController
             $result[$key->getId()] = $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : '');
         }
 
-        $response = $response->withHeader('content-type', 'application/json');
-        $response->getBody()->write(json_encode($result));
-        $emitter->emit($response);
+        return $this->responseJson($result);
     }
 
     /**
@@ -153,10 +148,11 @@ final class Category extends AdminController
      *     }
      * )
      */
-    public function setExtraFieldsToAllChildren() {
-        return $this->view(
+    public function setExtraFieldsToAllChildren(): ResponseInterface
+    {
+        return $this->responseText($this->view(
             $this->templatePath . '/form.twig',
             $this->getContext($this->container->get(SetExtraFieldsToChildren::class))
-        );
+        ));
     }
 }

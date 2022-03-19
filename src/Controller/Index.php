@@ -15,6 +15,7 @@ use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -48,7 +49,7 @@ final class Index extends PublicController
         name: 'catalog/index',
         options: ['comment' => '[PUBLIC] Просмотр категорий (индекс)']
     )]
-    public function view(): string
+    public function view(): ResponseInterface
     {
         /**
          * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository
@@ -62,7 +63,7 @@ final class Index extends PublicController
             $template_path = __DIR__ . '/../../template/category_index.twig';
         }
 
-        return $this->twig->render(
+        return $this->responseText($this->twig->render(
             $template_path,
             [
                 '_title' => sprintf(
@@ -74,6 +75,6 @@ final class Index extends PublicController
                 'categoryRepository' => $categoryRepository,
                 'breadcrumbs' => $this->breadcrumbs->get(),
             ]
-        );
+        ));
     }
 }

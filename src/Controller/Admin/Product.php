@@ -13,8 +13,7 @@ use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Product\Edit;
 use EnjoysCMS\Module\Catalog\Crud\Product\Index;
 use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
-use HttpSoft\Emitter\SapiEmitter;
-use HttpSoft\Message\Response;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Product extends AdminController
@@ -28,13 +27,14 @@ final class Product extends AdminController
      *      "aclComment": "Просмотр товаров в админке"
      *     }
      * )
-     * @return string
      */
-    public function index(): string
+    public function index(): ResponseInterface
     {
-        return $this->view(
-            $this->templatePath . '/products.twig',
-            $this->getContext($this->container->get(Index::class))
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/products.twig',
+                $this->getContext($this->container->get(Index::class))
+            )
         );
     }
 
@@ -47,13 +47,14 @@ final class Product extends AdminController
      *      "aclComment": "Добавление товара"
      *     }
      * )
-     * @return string
      */
-    public function add(): string
+    public function add(): ResponseInterface
     {
-        return $this->view(
-            $this->templatePath . '/addproduct.twig',
-            $this->getContext($this->container->get(Add::class))
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/addproduct.twig',
+                $this->getContext($this->container->get(Add::class))
+            )
         );
     }
 
@@ -66,13 +67,14 @@ final class Product extends AdminController
      *      "aclComment": "Редактирование товара"
      *     }
      * )
-     * @return string
      */
-    public function edit(): string
+    public function edit(): ResponseInterface
     {
-        return $this->view(
-            $this->templatePath . '/editproduct.twig',
-            $this->getContext($this->container->get(Edit::class))
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/editproduct.twig',
+                $this->getContext($this->container->get(Edit::class))
+            )
         );
     }
 
@@ -84,13 +86,14 @@ final class Product extends AdminController
      *      "aclComment": "Удаление товара"
      *     }
      * )
-     * @return string
      */
-    public function delete(): string
+    public function delete(): ResponseInterface
     {
-        return $this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Delete::class))
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Delete::class))
+            )
         );
     }
 
@@ -102,13 +105,14 @@ final class Product extends AdminController
      *      "aclComment": "Просмотр тегов товара"
      *     }
      * )
-     * @return string
      */
-    public function manageTags(): string
+    public function manageTags(): ResponseInterface
     {
-        return $this->view(
-            $this->templatePath . '/product/tags/tags_list.twig',
-            $this->getContext($this->container->get(TagsList::class))
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/product/tags/tags_list.twig',
+                $this->getContext($this->container->get(TagsList::class))
+            )
         );
     }
 
@@ -124,16 +128,13 @@ final class Product extends AdminController
      */
     public function findProductsByLike(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        Response $response,
-        SapiEmitter $emitter
-    ): void {
+        ServerRequestInterface $serverRequest
+    ): ResponseInterface {
         $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
             $serverRequest->get(
                 'query'
             )
         );
-        $response = $response->withHeader('content-type', 'application/json');
 
         $result = [
             'items' => array_map(function ($item) {
@@ -146,10 +147,7 @@ final class Product extends AdminController
             }, $matched),
             'total_count' => count($matched)
         ];
-        $response->getBody()->write(
-            json_encode($result)
-        );
-        $emitter->emit($response);
+        return $this->responseJson($result);
     }
 
 

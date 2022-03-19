@@ -18,40 +18,32 @@ use Twig\Environment;
 
 final class Search extends PublicController
 {
-    private EmitterInterface $emitter;
-    private ResponseInterface $response;
     private array $optionKeys;
 
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-        $this->emitter = $this->container->get(EmitterInterface::class);
-        $this->response = $this->container->get(ResponseInterface::class);
         $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));
     }
+
 
     #[Route(
         path: '/catalog/search.json',
         name: 'catalog/api/search'
     )]
-    public function apiSearch(): void
+    public function apiSearch(): ResponseInterface
     {
-        $this->response = $this->response->withHeader('content-type', 'application/json');
-
         try {
             $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
             );
 
-            $this->response->getBody()->write(
-                json_encode($this->convertResultToDTO($result))
-            );
-        } catch (\Exception $e) {
-            $this->response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
+            $response = $this->responseJson($this->convertResultToDTO($result));
+        } catch (\Exception|\Throwable $e) {
+            $response = $this->responseJson(['error' => $e->getMessage()]);
+        } finally {
+            return $response;
         }
-        $this->emitter->emit($this->response);
     }
 
     #[Route(
@@ -62,7 +54,7 @@ final class Search extends PublicController
         Environment $twig,
         BreadcrumbsInterface $breadcrumbs,
         UrlGeneratorInterface $urlGenerator
-    ): string {
+    ): ResponseInterface {
         try {
             $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
@@ -76,10 +68,10 @@ final class Search extends PublicController
         $breadcrumbs->add($urlGenerator->generate('catalog/index'), 'Каталог');
         $breadcrumbs->add(null, 'Поиск');
 
-        return $twig->render('@m/catalog/search.twig', [
+        return $this->responseText($twig->render('@m/catalog/search.twig', [
             'result' => $result,
             'breadcrumbs' => $breadcrumbs->get()
-        ]);
+        ]));
     }
 
     private function convertResultToDTO($result)

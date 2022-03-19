@@ -9,25 +9,18 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use HttpSoft\Emitter\EmitterInterface;
-use HttpSoft\Emitter\SapiEmitter;
-use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Tools extends PublicController
 {
     private ServerRequestInterface $serverRequest;
-    private SapiEmitter $emitter;
-    private ResponseInterface $response;
 
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
         $this->serverRequest = $this->container->get(ServerRequestInterface::class);
-        $this->emitter =$this->container->get(EmitterInterface::class);
-        $this->response = $this->container->get(ResponseInterface::class);
     }
 
     /**
@@ -39,22 +32,14 @@ final class Tools extends PublicController
      *     }
      * )
      */
-    public function translit(): StreamInterface
+    public function translit(EmitterInterface $emitter): ResponseInterface
     {
         $query = $this->serverRequest->post('query');
-        $response = $this->response
-            ->withHeader('content-type', 'application/json')
+        $this->response = $this->response
             ->withHeader('Access-Control-Allow-Origin', '*')
         ;
+        return $this->responseJson(URLify::slug((string)$query));
 
-        $response
-            ->getBody()
-            ->write(
-                URLify::slug((string)$query)
-            )
-        ;
-        $this->emitter->emit($response, true);
-        return $response->getBody();
     }
 
 }

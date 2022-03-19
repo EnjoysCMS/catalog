@@ -22,6 +22,7 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -55,7 +56,7 @@ final class Category extends PublicController
             'slug' => ''
         ]
     )]
-    public function view(ServerRequestInterface $serverRequest): string
+    public function view(ServerRequestInterface $serverRequest): ResponseInterface
     {
         if ($serverRequest->get('slug') === '') {
             return $this->container->make(Index::class)->view();
@@ -69,12 +70,12 @@ final class Category extends PublicController
             $template_path = __DIR__ . '/../../template/category.twig';
         }
 
-        return $this->twig->render(
+        return $this->responseText($this->twig->render(
             $template_path,
             $this->container->make(CategoryModel::class, [
                 'config' => Config::getConfig($this->container)->getAll()
             ])->getContext()
-        );
+        ));
     }
 
 }

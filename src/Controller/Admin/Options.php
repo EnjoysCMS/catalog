@@ -11,10 +11,9 @@ use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
-use HttpSoft\Emitter\SapiEmitter;
-use HttpSoft\Message\Response;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Options extends AdminController
@@ -33,12 +32,12 @@ final class Options extends AdminController
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function manageOptions(): string
+    public function manageOptions(): ResponseInterface
     {
-        return $this->view(
+        return $this->responseText($this->view(
             $this->templatePath . '/product/options/options.twig',
             $this->getContext($this->container->get(ModelOptions\Manage::class))
-        );
+        ));
     }
 
     /**
@@ -81,14 +80,11 @@ final class Options extends AdminController
      */
     public function getOptionKeys(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        Response $response,
-        SapiEmitter $emitter
-    ): void {
-        $matched = $entityManager->getRepository(OptionKey::class)->like('name', $serverRequest->get('query'));
-        $response = $response->withHeader('content-type', 'application/json');
-        $response->getBody()->write(json_encode($matched));
-        $emitter->emit($response);
+        ServerRequestInterface $serverRequest
+    ): ResponseInterface {
+        return $this->responseJson(
+            $entityManager->getRepository(OptionKey::class)->like('name', $serverRequest->get('query'))
+        );
     }
 
     /**
@@ -102,16 +98,13 @@ final class Options extends AdminController
      */
     public function getOptionValues(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        Response $response,
-        SapiEmitter $emitter
-    ): void {
+        ServerRequestInterface $serverRequest
+    ): ResponseInterface {
         $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
             ['name' => $serverRequest->get('option'), 'unit' => $serverRequest->get('unit')]
         );
-        $matched = $entityManager->getRepository(OptionValue::class)->like('value', $serverRequest->get('query'), $key);
-        $response = $response->withHeader('content-type', 'application/json');
-        $response->getBody()->write(json_encode($matched));
-        $emitter->emit($response);
+        return $this->responseJson(
+            $entityManager->getRepository(OptionValue::class)->like('value', $serverRequest->get('query'), $key)
+        );
     }
 }

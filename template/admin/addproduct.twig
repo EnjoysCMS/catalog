@@ -16,7 +16,7 @@
                             body: query
                             // body: JSON.stringify({query: $(this).prop('value')})
                         });
-                        let result = await response.text();
+                        let result = await response.json();
                         $("#url").val(result);
                     })();
                 });
