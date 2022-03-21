@@ -14,9 +14,10 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 
-abstract class PublicController extends  BaseController
+abstract class PublicController extends BaseController
 {
     protected Module $module;
     protected Environment $twig;
@@ -27,12 +28,14 @@ abstract class PublicController extends  BaseController
      */
     public function __construct(protected ContainerInterface $container)
     {
-        parent::__construct($this->container->get(ResponseInterface::class));
-        $this->module = new Module(Utils::parseComposerJson(
-            __DIR__ . '/../../composer.json'
-        ));
+        parent::__construct();
+
+        $this->module = new Module(
+            Utils::parseComposerJson(
+                __DIR__ . '/../../composer.json'
+            )
+        );
         $this->twig = $this->container->get(Environment::class);
         $this->twig->addGlobal('module', $this->module);
-
     }
 }
