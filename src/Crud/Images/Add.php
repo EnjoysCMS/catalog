@@ -10,8 +10,8 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -34,6 +34,9 @@ final class Add implements ModelInterface
      */
     private $uploadMethod;
 
+    /**
+     * @throws NotFoundException
+     */
     public function __construct(
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
@@ -47,7 +50,9 @@ final class Add implements ModelInterface
 
         $this->product = $entityManager->getRepository(Product::class)->find($serverRequest->get('product_id'));
         if ($this->product === null) {
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by product_id: %s', $this->serverRequest->get('product_id'))
+            );
         }
 
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);

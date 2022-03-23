@@ -6,16 +6,15 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
-use App\Module\Admin\BaseController;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Crud\Images\Add;
 use EnjoysCMS\Module\Catalog\Crud\Images\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Images\Index;
-use EnjoysCMS\Module\Catalog\Helpers\Template;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -68,13 +67,18 @@ final class Image extends AdminController
      *      "aclComment": "Переключение основного изображения"
      *     }
      * )
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws NotFoundException
      */
     public function makeGeneral(EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator): void
     {
         $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
         $image = $repository->find($serverRequest->get('id'));
         if ($image === null) {
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by id: %s', $serverRequest->get('id'))
+            );
         }
         $images = $repository->findBy(['product' => $image->getProduct()]);
         foreach ($images as $item) {

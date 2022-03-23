@@ -16,10 +16,10 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -39,11 +39,7 @@ final class Edit implements ModelInterface
 
 
     /**
-     * @param RendererInterface $renderer
-     * @param EntityManager $entityManager
-     * @param ServerRequestInterface $serverRequest
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ContainerInterface $container
+     * @throws NotFoundException
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -58,7 +54,9 @@ final class Edit implements ModelInterface
             $this->serverRequest->get('id', 0)
         );
         if ($this->category === null) {
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by id: %s', $this->serverRequest->get('id'))
+            );
         }
 
         $this->config = Config::getConfig($this->container);

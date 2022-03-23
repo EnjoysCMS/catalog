@@ -9,10 +9,9 @@ use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -24,6 +23,9 @@ final class Delete implements ModelInterface
     private UrlGeneratorInterface $urlGenerator;
     private ?Product $product;
 
+    /**
+     * @throws NotFoundException
+     */
     public function __construct(
         EntityManager $entityManager,
         ServerRequestInterface $serverRequest,
@@ -38,10 +40,11 @@ final class Delete implements ModelInterface
 
         $this->product = $this->entityManager->getRepository(Product::class)->find(
             $this->serverRequest->get('id', 0)
-        )
-        ;
+        );
         if ($this->product === null) {
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by id: %s', $serverRequest->get('id'))
+            );
         }
     }
 
@@ -54,8 +57,6 @@ final class Delete implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
         }
-
-
 
 
         return [

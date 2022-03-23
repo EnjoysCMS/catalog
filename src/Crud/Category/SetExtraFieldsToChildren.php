@@ -15,9 +15,9 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequestInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
@@ -41,6 +41,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
      * @param ServerRequestInterface $serverRequest
      * @param UrlGeneratorInterface $urlGenerator
      * @param ContainerInterface $container
+     * @throws NotFoundException
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -55,7 +56,9 @@ final class SetExtraFieldsToChildren implements ModelInterface
             $this->serverRequest->get('id', 0)
         );
         if ($this->category === null) {
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by id: %s', $this->serverRequest->get('id'))
+            );
         }
 
         $this->config = Config::getConfig($this->container);

@@ -15,9 +15,9 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Http\ServerRequestInterface;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -34,8 +34,9 @@ final class CategoryModel implements ModelInterface
     private Category $category;
 
     /**
-     * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws NotFoundException
      */
     public function __construct(
         private EntityManager $em,
@@ -52,7 +53,9 @@ final class CategoryModel implements ModelInterface
 
 
         if ($category === null){
-            Error::code(404);
+            throw new NotFoundException(
+                sprintf('Not found by slug: %s', $this->serverRequest->get('slug'))
+            );
         }
 
         $this->category = $category;
