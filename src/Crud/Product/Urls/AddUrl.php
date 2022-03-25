@@ -16,6 +16,7 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
@@ -32,7 +33,7 @@ final class AddUrl implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -44,7 +45,7 @@ final class AddUrl implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('product_id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('product_id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -91,7 +92,7 @@ final class AddUrl implements ModelInterface
                 function () {
                     /** @var Product $product */
                     $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->serverRequest->post('path'),
+                        $this->requestWrapper->getPostData('path'),
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
@@ -110,8 +111,8 @@ final class AddUrl implements ModelInterface
     private function doAction(): void
     {
         $url = new Url();
-        $url->setPath($this->serverRequest->post('path'));
-        $url->setDefault((bool)$this->serverRequest->post('default', false));
+        $url->setPath($this->requestWrapper->getPostData('path'));
+        $url->setDefault((bool)$this->requestWrapper->getPostData('default', false));
         $url->setProduct($this->product);
 
         if($url->isDefault()){

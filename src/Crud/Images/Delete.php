@@ -8,45 +8,35 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Image;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
 {
 
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private RendererInterface $renderer;
-    private UrlGeneratorInterface $urlGenerator;
     private ?Image $image;
 
     /**
      * @throws NotFoundException
      */
     public function __construct(
-        EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
-        RendererInterface $renderer,
-        UrlGeneratorInterface $urlGenerator
+        private EntityManager $entityManager,
+        private ServerRequestWrapper $requestWrapper,
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator
     ) {
-        $this->entityManager = $entityManager;
-        $this->serverRequest = $serverRequest;
-        $this->renderer = $renderer;
-        $this->urlGenerator = $urlGenerator;
-
-
         $this->image = $this->entityManager->getRepository(Image::class)->find(
-            $this->serverRequest->get('id', 0)
+            $this->requestWrapper->getQueryData('id', 0)
         );
 
 
 
         if ($this->image === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->serverRequest->get('id'))
+                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
             );
         }
     }

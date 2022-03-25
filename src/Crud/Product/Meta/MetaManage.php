@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductMeta;
@@ -29,7 +30,7 @@ final class MetaManage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -43,7 +44,7 @@ final class MetaManage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -100,9 +101,9 @@ final class MetaManage implements ModelInterface
         if (null === $meta = $this->metaRepository->findOneBy(['product' => $this->product])) {
             $meta = new ProductMeta();
         }
-        $meta->setTitle($this->serverRequest->post('title'));
-        $meta->setKeyword($this->serverRequest->post('keywords'));
-        $meta->setDescription($this->serverRequest->post('description'));
+        $meta->setTitle($this->requestWrapper->getPostData('title'));
+        $meta->setKeyword($this->requestWrapper->getPostData('keywords'));
+        $meta->setDescription($this->requestWrapper->getPostData('description'));
         $meta->setProduct($this->product);
         $this->em->persist($meta);
         $this->em->flush();

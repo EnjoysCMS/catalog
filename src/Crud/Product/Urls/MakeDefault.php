@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
@@ -25,10 +26,10 @@ final class MakeDefault
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $product = $this->em->getRepository(Product::class)->find($serverRequest->get('product_id'));
+        $product = $this->em->getRepository(Product::class)->find($this->requestWrapper->getQueryData('product_id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -44,7 +45,7 @@ final class MakeDefault
         $setFlag = false;
         /** @var Url $url */
         foreach ($this->product->getUrls() as $url) {
-            if ($url->getId() === (int)$this->serverRequest->get('url_id')) {
+            if ($url->getId() === (int)$this->requestWrapper->getQueryData('url_id')) {
                 $url->setDefault(true);
                 $setFlag = true;
                 continue;

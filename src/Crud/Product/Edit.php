@@ -12,6 +12,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
@@ -39,18 +40,18 @@ final class Edit implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container
     ) {
         $this->productRepository = $entityManager->getRepository(Product::class);
         $this->product = $this->productRepository->find(
-            $this->serverRequest->get('id', 0)
+            $this->requestWrapper->getQueryData('id', 0)
         );
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $serverRequest->get('id'))
+                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
             );
         }
         $this->config = Config::getConfig($this->container);
@@ -145,7 +146,7 @@ final class Edit implements ModelInterface
                 function () {
                     /** @var Product $product */
                     $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->serverRequest->post('url'),
+                        $this->requestWrapper->getPostData('url'),
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
@@ -183,20 +184,20 @@ final class Edit implements ModelInterface
     {
         /** @var Category|null $category */
         $category = $this->entityManager->getRepository(Category::class)->find(
-            $this->serverRequest->post('category', 0)
+            $this->requestWrapper->getPostData('category', 0)
         );
 
-        $this->product->setName($this->serverRequest->post('name'));
-        $this->product->setDescription($this->serverRequest->post('description'));
-        $this->product->setQuantity($this->product->getQuantity()->setQty($this->serverRequest->post('qty')));
+        $this->product->setName($this->requestWrapper->getPostData('name'));
+        $this->product->setDescription($this->requestWrapper->getPostData('description'));
+        $this->product->setQuantity($this->product->getQuantity()->setQty($this->requestWrapper->getPostData('qty')));
         $this->product->setCategory($category);
-        $this->product->setActive((bool)$this->serverRequest->post('active', false));
-        $this->product->setHide((bool)$this->serverRequest->post('hide', false));
+        $this->product->setActive((bool)$this->requestWrapper->getPostData('active', false));
+        $this->product->setHide((bool)$this->requestWrapper->getPostData('hide', false));
 
 
-        $urlString = (empty($this->serverRequest->post('url')))
+        $urlString = (empty($this->requestWrapper->getPostData('url')))
             ? URLify::slug($this->product->getName())
-            : $this->serverRequest->post('url');
+            : $this->requestWrapper->getPostData('url');
 
         /** @var Url $url */
         $urlSetFlag = false;

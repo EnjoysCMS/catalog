@@ -6,11 +6,11 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use InvalidArgumentException;
-use Psr\Http\Message\ServerRequestInterface;
 
 final class Index implements ModelInterface
 {
@@ -20,16 +20,16 @@ final class Index implements ModelInterface
     /**
      * @throws NotFoundException
      */
-    public function __construct(private EntityManager $entityManager, ServerRequestInterface $request)
+    public function __construct(private EntityManager $entityManager, ServerRequestWrapper $request)
     {
         if(!isset($_ENV['UPLOAD_URL'])){
             throw new InvalidArgumentException('Not set UPLOAD_URL in .env');
         }
 
-        $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryParams()['product_id'] ?? null);
+        $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryData('product_id'));
         if($this->product === null){
             throw new NotFoundException(
-                sprintf('Not found by product_id: %s', $request->getQueryParams()['product_id'] ?? null)
+                sprintf('Not found by product_id: %s', $request->getQueryData('product_id'))
             );
         }
 

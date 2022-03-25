@@ -13,6 +13,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -25,12 +26,12 @@ final class PriceGroupEdit implements ModelInterface
 
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
 
-        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->serverRequest->get('id'));
+        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->requestWrapper->getQueryData('id'));
         if ($priceGroup === null){
             throw new NoResultException();
         }
@@ -63,7 +64,7 @@ final class PriceGroupEdit implements ModelInterface
             ->addRule(Rules::REQUIRED)
             ->addRule(Rules::CALLBACK, 'Такой код уже существует', function () {
                 $pg = $this->em->getRepository(PriceGroup::class)->findOneBy(
-                    ['code' => $this->serverRequest->post('code')]
+                    ['code' => $this->requestWrapper->getPostData('code')]
                 );
 
                 if($pg === null){
@@ -85,8 +86,8 @@ final class PriceGroupEdit implements ModelInterface
     private function doAction(): void
     {
 
-        $this->priceGroup->setTitle($this->serverRequest->post('title'));
-        $this->priceGroup->setCode($this->serverRequest->post('code'));
+        $this->priceGroup->setTitle($this->requestWrapper->getPostData('title'));
+        $this->priceGroup->setCode($this->requestWrapper->getPostData('code'));
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));
     }

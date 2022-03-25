@@ -11,10 +11,10 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -29,11 +29,11 @@ final class Delete implements ModelInterface
         private EntityManager $entityManager,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer,
-        private ServerRequestInterface $request
+        private ServerRequestWrapper $request
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
         $this->category = $this->categoryRepository->find(
-            $this->request->getQueryParams()['id'] ?? 0
+            $this->request->getQueryData()->get('id', 0)
         );
     }
 
@@ -76,9 +76,9 @@ final class Delete implements ModelInterface
 
     private function doAction(): void
     {
-        $setCategory = (($this->request->getParsedBody()['set_parent_category'] ?? null) !== null) ? $this->category->getParent() : null;
+        $setCategory = ($this->request->getPostData()->get('set_parent_category') !== null) ? $this->category->getParent() : null;
 
-        if (($this->request->getParsedBody()['remove_childs'] ?? null) !== null) {
+        if ($this->request->getPostData()->get('remove_childs') !== null) {
             $allCategoryIds = $this->entityManager->getRepository(Category::class)->getAllIds($this->category);
             $products = $this->entityManager->getRepository(Product::class)->findByCategorysIds($allCategoryIds);
             $this->setCategory($products, $setCategory);

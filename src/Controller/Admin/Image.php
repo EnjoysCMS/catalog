@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Crud\Images\Add;
@@ -70,13 +71,13 @@ final class Image extends AdminController
      * @throws OptimisticLockException
      * @throws NotFoundException
      */
-    public function makeGeneral(EntityManager $entityManager, ServerRequestInterface $serverRequest, UrlGeneratorInterface $urlGenerator): void
+    public function makeGeneral(EntityManager $entityManager, ServerRequestWrapper $requestWrapper, UrlGeneratorInterface $urlGenerator): void
     {
         $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
-        $image = $repository->find($serverRequest->get('id'));
+        $image = $repository->find($requestWrapper->getQueryData('id'));
         if ($image === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $serverRequest->get('id'))
+                sprintf('Not found by id: %s', $requestWrapper->getQueryData('id'))
             );
         }
         $images = $repository->findBy(['product' => $image->getProduct()]);

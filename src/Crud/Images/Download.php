@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
 use Enjoys\Forms\Form;
+use Enjoys\ServerRequestWrapper;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -88,9 +89,9 @@ final class Download implements LoadImage
     }
 
 
-    public function upload(\Psr\Http\Message\ServerRequestInterface $request): void
+    public function upload(ServerRequestWrapper $requestWrapper): void
     {
-        $this->loadAndSave($request->getParsedBody()['image'] ?? null);
+        $this->loadAndSave($requestWrapper->getPostData('image'));
     }
 
     public function loadAndSave(string $link): void

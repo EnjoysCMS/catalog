@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -79,10 +80,10 @@ final class Options extends AdminController
      */
     public function getOptionKeys(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest
+        ServerRequestWrapper $requestWrapper
     ): ResponseInterface {
         return $this->responseJson(
-            $entityManager->getRepository(OptionKey::class)->like('name', $serverRequest->get('query'))
+            $entityManager->getRepository(OptionKey::class)->like('name', $requestWrapper->getQueryData('query'))
         );
     }
 
@@ -97,13 +98,13 @@ final class Options extends AdminController
      */
     public function getOptionValues(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest
+        ServerRequestWrapper $requestWrapper
     ): ResponseInterface {
         $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
-            ['name' => $serverRequest->get('option'), 'unit' => $serverRequest->get('unit')]
+            ['name' => $requestWrapper->getQueryData('option'), 'unit' => $requestWrapper->getQueryData('unit')]
         );
         return $this->responseJson(
-            $entityManager->getRepository(OptionValue::class)->like('value', $serverRequest->get('query'), $key)
+            $entityManager->getRepository(OptionValue::class)->like('value', $requestWrapper->getQueryData('query'), $key)
         );
     }
 }

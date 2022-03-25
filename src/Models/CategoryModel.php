@@ -10,6 +10,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\ServerRequestWrapper;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
@@ -18,7 +19,6 @@ use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class CategoryModel implements ModelInterface
@@ -38,7 +38,7 @@ final class CategoryModel implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         array $config = []
@@ -47,13 +47,13 @@ final class CategoryModel implements ModelInterface
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
         $category = $this->getCategory(
-            $this->request->getAttribute('slug', '')
+            $this->requestWrapper->getAttributesData()->get('slug', '')
         );
 
 
         if ($category === null){
             throw new NotFoundException(
-                sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
+                sprintf('Not found by slug: %s',$this->requestWrapper->getAttributesData()->get('slug', ''))
             );
         }
 
@@ -67,7 +67,7 @@ final class CategoryModel implements ModelInterface
 
     public function getContext(): array
     {
-        $pagination = new Pagination($this->request->getAttribute('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination($this->requestWrapper->getAttributesData()->get('page', 1), $this->getOption('limitItems'));
 
         if ($this->getOption('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);

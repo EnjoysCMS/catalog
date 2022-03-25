@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -35,7 +36,7 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
@@ -58,7 +59,7 @@ final class Manage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -119,23 +120,23 @@ final class Manage implements ModelInterface
 
     private function doAction(): void
     {
-        $currency = $this->em->getRepository(Currency::class)->find($this->serverRequest->post('currency'));
+        $currency = $this->em->getRepository(Currency::class)->find($this->requestWrapper->getPostData('currency'));
 
         if ($currency === null) {
             throw new \InvalidArgumentException('Currency not found');
         }
 
-        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $this->serverRequest->post('unit')]);
+        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $this->requestWrapper->getPostData('unit')]);
         if ($unit === null) {
             $unit = new ProductUnit();
-            $unit->setName($this->serverRequest->post('unit'));
+            $unit->setName($this->requestWrapper->getPostData('unit'));
             $this->em->persist($unit);
             $this->em->flush();
         }
 
 
         foreach ($this->priceGroups as $priceGroup) {
-            foreach ($this->serverRequest->post('price', []) as $code => $price) {
+            foreach ($this->requestWrapper->getPostData('price', []) as $code => $price) {
                 if ($priceGroup->getCode() !== $code) {
                     continue;
                 }

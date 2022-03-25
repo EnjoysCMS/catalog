@@ -13,6 +13,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -34,7 +35,7 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest
+        private ServerRequestWrapper $requestWrapper
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -48,7 +49,7 @@ final class Manage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -139,7 +140,7 @@ final class Manage implements ModelInterface
     {
 //        dd($this->serverRequest->post('options', []));
         $this->product->clearOptions();
-        foreach ($this->serverRequest->post('options', []) as $option) {
+        foreach ($this->requestWrapper->getPostData('options', []) as $option) {
             if (empty($option['option']) || empty($option['value'])) {
                 continue;
             }

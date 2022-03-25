@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Crud\Category\Add;
 use EnjoysCMS\Module\Catalog\Crud\Category\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Category\Edit;
@@ -14,7 +15,6 @@ use EnjoysCMS\Module\Catalog\Crud\Category\SetExtraFieldsToChildren;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Category extends AdminController
@@ -117,13 +117,13 @@ final class Category extends AdminController
      */
     public function getExtraFieldsJson(
         EntityManager $entityManager,
-        ServerRequestInterface $request
+        ServerRequestWrapper $requestWrapper
     ): ResponseInterface {
         $result = [];
 
         /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
         $category = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)->find(
-            $request->getParsedBody()['id'] ?? ''
+            $requestWrapper->getPostData()->get('id', '')
         );
 
         if ($category === null) {

@@ -12,6 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -24,12 +25,12 @@ final class PriceGroupDelete implements ModelInterface
 
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
 
-        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->serverRequest->get('id'));
+        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->requestWrapper->getQueryData('id'));
         if ($priceGroup === null){
             throw new NoResultException();
         }

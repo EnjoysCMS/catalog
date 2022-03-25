@@ -24,7 +24,7 @@ final class Tools extends PublicController
      */
     public function translit(): ResponseInterface
     {
-        $query = $this->request->getParsedBody()['query'] ?? null;
+        $query = $this->request->getPostData()->get('query');
         $this->response = $this->response
             ->withHeader('Access-Control-Allow-Origin', '*')
         ;

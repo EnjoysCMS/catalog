@@ -15,6 +15,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
@@ -32,12 +33,12 @@ final class DeleteUrl implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
-        $this->url = $this->product->getUrlById((int)$this->serverRequest->get('url_id'));
+        $this->url = $this->product->getUrlById((int)$this->requestWrapper->getQueryData('url_id'));
 
 
     }
@@ -47,7 +48,7 @@ final class DeleteUrl implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('product_id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('product_id'));
         if ($product === null) {
             throw new NoResultException();
         }

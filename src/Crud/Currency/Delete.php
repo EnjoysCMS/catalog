@@ -17,10 +17,10 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use InvalidArgumentException;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -31,10 +31,10 @@ final class Delete implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $currencyId = $this->request->getQueryParams['id'] ?? null;
+        $currencyId = $this->requestWrapper->getQueryData('id');
         if ($currencyId === null) {
             throw new InvalidArgumentException('Currency id was not transmitted');
         }

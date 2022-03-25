@@ -15,6 +15,7 @@ use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
@@ -23,7 +24,6 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Edit implements ModelInterface
@@ -44,18 +44,18 @@ final class Edit implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
-            $this->request->getQueryParams()['id'] ?? 0
+            $this->requestWrapper->getQueryData('id', 0)
         );
         if ($this->category === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? 0)
+                sprintf('Not found by id: %s', (string) $this->requestWrapper->getQueryData()->get('id', 0))
             );
         }
 
@@ -124,7 +124,7 @@ final class Edit implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () {
-                    $url = $this->request->getParsedBody()['url'];
+                    $url = $this->requestWrapper->getPostData('url');
 
                     if ($url === $this->category->getUrl()) {
                         return true;
@@ -210,15 +210,15 @@ HTML
 
     private function doAction(): void
     {
-        $this->category->setTitle($this->request->getParsedBody()['title']);
-        $this->category->setDescription($this->request->getParsedBody()['description']);
-        $this->category->setShortDescription($this->request->getParsedBody()['shortDescription']);
-        $this->category->setUrl($this->request->getParsedBody()['url']);
-        $this->category->setStatus((bool)$this->request->getParsedBody()['status'] ?? false);
-        $this->category->setImg($this->request->getParsedBody()['img']);
+        $this->category->setTitle($this->requestWrapper->getPostData('title'));
+        $this->category->setDescription($this->requestWrapper->getPostData('description'));
+        $this->category->setShortDescription($this->requestWrapper->getPostData('shortDescription'));
+        $this->category->setUrl($this->requestWrapper->getPostData('url'));
+        $this->category->setStatus((bool)$this->requestWrapper->getPostData('status', false));
+        $this->category->setImg($this->requestWrapper->getPostData('img'));
 
         $extraFields = $this->entityManager->getRepository(OptionKey::class)->findBy(
-            ['id' => $this->request->getParsedBody()['extraFields'] ?? []]
+            ['id' => $this->requestWrapper->getPostData('extraFields')]
         );
 
         $this->category->removeExtraFields();

@@ -12,10 +12,10 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use InvalidArgumentException;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Edit implements ModelInterface
@@ -26,10 +26,10 @@ final class Edit implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $currencyId = $this->request->getQueryParams()['id'] ?? null;
+        $currencyId = $this->requestWrapper->getQueryData('id');
         if ($currencyId === null) {
             throw new InvalidArgumentException('Currency id was not transmitted');
         }
@@ -89,12 +89,12 @@ final class Edit implements ModelInterface
      */
     private function doProcess()
     {
-        $this->currency->setId($this->request->getParsedBody()['id'] ?? null);
-        $this->currency->setName($this->request->getParsedBody()['name'] ?? null);
-        $this->currency->setDCode((int)$this->request->getParsedBody()['digital_code'] ?? null);
-        $this->currency->setRight($this->request->getParsedBody()['right'] ?? null);
-        $this->currency->setLeft($this->request->getParsedBody()['left'] ?? null);
-        $this->currency->setPrecision((int)$this->request->getParsedBody()['precision'] ?? null);
+        $this->currency->setId($this->requestWrapper->getPostData('id'));
+        $this->currency->setName($this->requestWrapper->getPostData('name'));
+        $this->currency->setDCode((int)$this->requestWrapper->getPostData('digital_code'));
+        $this->currency->setRight($this->requestWrapper->getPostData('right'));
+        $this->currency->setLeft($this->requestWrapper->getPostData('left'));
+        $this->currency->setPrecision((int)$this->requestWrapper->getPostData('precision'));
 
         $this->entityManager->flush();
 

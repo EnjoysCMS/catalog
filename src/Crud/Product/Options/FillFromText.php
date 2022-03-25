@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -27,7 +28,7 @@ final class FillFromText
 
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->entityManager->getRepository(Product::class);
@@ -41,12 +42,12 @@ final class FillFromText
     public function __invoke()
     {
         /** @var Product $product */
-        $product = $this->productRepository->find($this->serverRequest->post('id', 0));
+        $product = $this->productRepository->find($this->requestWrapper->getPostData('id', 0));
         if ($product === null) {
             throw new NoResultException();
         }
 
-        $dataRaw = $this->serverRequest->post('text');
+        $dataRaw = $this->requestWrapper->getPostData('text');
 
         $options = $this->parse($dataRaw);
 

@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 
@@ -22,7 +23,7 @@ final class Manage  implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest
+        private ServerRequestWrapper $requestWrapper
     ) {
 
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -35,7 +36,7 @@ final class Manage  implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }

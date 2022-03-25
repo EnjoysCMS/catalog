@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -27,7 +28,7 @@ class TagsList implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -40,7 +41,7 @@ class TagsList implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->serverRequest->get('id'));
+        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }
@@ -92,7 +93,7 @@ class TagsList implements ModelInterface
 
     protected function doAction(): void
     {
-        $tags = array_map('trim', array_unique(explode(',', $this->serverRequest->post('tags'))));
+        $tags = array_map('trim', array_unique(explode(',', $this->requestWrapper->getPostData('tags'))));
         $manageTags = new TagsManager($this->em);
         $this->product->clearTags();
         $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));

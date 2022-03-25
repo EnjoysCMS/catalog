@@ -9,11 +9,11 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
@@ -35,20 +35,22 @@ final class Add implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $this->product = $entityManager->getRepository(Product::class)->find($this->request->getQueryParams()['product_id'] ?? null);
+        $this->product = $entityManager->getRepository(Product::class)->find(
+            $this->requestWrapper->getQueryData('product_id')
+        );
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by product_id: %s', $this->request->getQueryParams()['product_id'] ?? null)
+                sprintf('Not found by product_id: %s', $this->requestWrapper->getQueryData('product_id'))
             );
         }
 
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
 
-        $method = $this->request->getQueryParams()['method'] ?? 'upload';
+        $method = $this->requestWrapper->getQueryData('method', 'upload');
 
         if (!in_array($method, ['upload', 'download'], true)) {
             $method = 'upload';
@@ -79,7 +81,7 @@ final class Add implements ModelInterface
 
     private function doAction(): void
     {
-        $this->uploadMethod->upload($this->request);
+        $this->uploadMethod->upload($this->requestWrapper);
 
         $manageImage = new ManageImage($this->product, $this->entityManager);
 

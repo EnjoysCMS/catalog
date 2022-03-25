@@ -14,13 +14,13 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class SetExtraFieldsToChildren implements ModelInterface
@@ -38,18 +38,18 @@ final class SetExtraFieldsToChildren implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $request,
+        private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
-            $this->request->getQueryParams()['id'] ?? 0
+            $this->requestWrapper->getQueryData('id', 0)
         );
         if ($this->category === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? 0)
+                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id', 0))
             );
         }
 
@@ -96,7 +96,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
 
 //      if(in_array($item->getId(), [34, 45, 46])){
 
-            if ($this->request->getParsedBody()['removeOldExtraFields'] ?? false) {
+            if ($this->requestWrapper->getPostData('removeOldExtraFields', false)) {
                 $item->removeExtraFields();
             }
             foreach ($extraFields->toArray() as $optionKey) {

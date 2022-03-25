@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
@@ -23,12 +24,12 @@ final class Unit extends AdminController
 {
     public function __invoke(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest,
+        ServerRequestWrapper $requestWrapper,
         Response $response,
         SapiEmitter $emitter
     ) {
         $matched = $entityManager->getRepository(ProductUnit::class)->like(
-            $serverRequest->get(
+            $requestWrapper->getQueryData(
                 'query'
             )
         );

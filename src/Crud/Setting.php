@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 
@@ -20,7 +21,7 @@ final class Setting implements ModelInterface
 
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer
     ) {
         $this->setting = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
@@ -96,7 +97,7 @@ final class Setting implements ModelInterface
         }
         $this->entityManager->flush();
 
-        foreach ($this->serverRequest->post() as $key => $value) {
+        foreach ($this->requestWrapper->getPostData() as $key => $value) {
             switch ($key) {
                 case 'minSearchChars':
                 case 'searchOptionField':

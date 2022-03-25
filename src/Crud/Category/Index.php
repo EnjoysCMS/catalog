@@ -12,9 +12,9 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
@@ -26,7 +26,7 @@ final class Index implements ModelInterface
 
 
 
-    public function __construct(private EntityManager $em, private ServerRequestInterface $request, private UrlGeneratorInterface $urlGenerator)
+    public function __construct(private EntityManager $em, private ServerRequestWrapper $requestWrapper, private UrlGeneratorInterface $urlGenerator)
     {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
@@ -43,7 +43,7 @@ final class Index implements ModelInterface
 
 
         if ($form->isSubmitted()) {
-            $this->_recursive(\json_decode($this->request->getParsedBody()['nestable-output']));
+            $this->_recursive(\json_decode($this->requestWrapper->getPostData('nestable-output')));
             $this->em->flush();
             Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
         }

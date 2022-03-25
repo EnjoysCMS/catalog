@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\ServerRequestWrapper;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
@@ -30,11 +31,11 @@ final class Search
 
     public function __construct(
         private ContainerInterface $container,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestWrapper $requestWrapper,
         private EntityManager $em
     ) {
         $this->setOptions(Config::getConfig($this->container)->getAll());
-        $this->searchQuery = \trim($this->serverRequest->get('q'));
+        $this->searchQuery = \trim($this->requestWrapper->getQueryData('q'));
 
         $this->validateSearchQuery();
 
@@ -43,7 +44,7 @@ final class Search
 
     public function getSearchResult(array $optionKeys = []): array
     {
-        $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination($this->requestWrapper->getQueryData('page', 1), $this->getOption('limitItems'));
 
         $qb = $this->getFoundProducts($optionKeys);
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());

@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
+use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Crud\Product\Add;
 use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Product\Edit;
@@ -127,10 +128,10 @@ final class Product extends AdminController
      */
     public function findProductsByLike(
         EntityManager $entityManager,
-        ServerRequestInterface $serverRequest
+        ServerRequestWrapper $requestWrapper
     ): ResponseInterface {
         $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
-            $serverRequest->get(
+            $requestWrapper->getQueryData(
                 'query'
             )
         );
