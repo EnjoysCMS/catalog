@@ -44,10 +44,9 @@ final class Category extends PublicController
     public function view(ContainerInterface $container): ResponseInterface
     {
 
-        if ($this->request->getAttribute('slug', '') === '') {
+        if ($this->request->getAttributesData()->get('slug', '') === '') {
             return $container->call([Index::class, 'view']);
         }
-
 
         $template_path = '@m/catalog/category.twig';
 
