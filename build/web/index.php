@@ -2,7 +2,6 @@
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\NoResultException;
-use Enjoys\Http\ServerRequestInterface;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
 use Psr\Container\ContainerInterface;

@@ -9,9 +9,9 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Module\Catalog\Dto\SearchDto;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
-use HttpSoft\Emitter\EmitterInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -20,9 +20,10 @@ final class Search extends PublicController
 {
     private array $optionKeys;
 
-    public function __construct(ContainerInterface $container)
+
+    public function __construct(ServerRequestInterface $request, Environment $twig, ResponseInterface $response = null)
     {
-        parent::__construct($container);
+        parent::__construct($request, $twig, $response);
         $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));
     }
 
@@ -31,10 +32,10 @@ final class Search extends PublicController
         path: '/catalog/search.json',
         name: 'catalog/api/search'
     )]
-    public function apiSearch(): ResponseInterface
+    public function apiSearch(ContainerInterface $container): ResponseInterface
     {
         try {
-            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
+            $result = $container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
             );
 
@@ -51,12 +52,12 @@ final class Search extends PublicController
         name: 'catalog/search'
     )]
     public function search(
-        Environment $twig,
+        \EnjoysCMS\Module\Catalog\Actions\Search $search,
         BreadcrumbsInterface $breadcrumbs,
         UrlGeneratorInterface $urlGenerator
     ): ResponseInterface {
         try {
-            $result = $this->container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
+            $result = $search->getSearchResult(
                 $this->optionKeys
             );
         } catch (\Exception $e) {
@@ -68,7 +69,7 @@ final class Search extends PublicController
         $breadcrumbs->add($urlGenerator->generate('catalog/index'), 'Каталог');
         $breadcrumbs->add(null, 'Поиск');
 
-        return $this->responseText($twig->render('@m/catalog/search.twig', [
+        return $this->responseText($this->twig->render('@m/catalog/search.twig', [
             'result' => $result,
             'breadcrumbs' => $breadcrumbs->get()
         ]));

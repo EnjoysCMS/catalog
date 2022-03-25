@@ -14,13 +14,13 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class SetExtraFieldsToChildren implements ModelInterface
@@ -35,29 +35,21 @@ final class SetExtraFieldsToChildren implements ModelInterface
     private ModuleConfig $config;
 
 
-    /**
-     * @param RendererInterface $renderer
-     * @param EntityManager $entityManager
-     * @param ServerRequestInterface $serverRequest
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param ContainerInterface $container
-     * @throws NotFoundException
-     */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
-            $this->serverRequest->get('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
         if ($this->category === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->serverRequest->get('id'))
+                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? 0)
             );
         }
 
@@ -104,7 +96,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
 
 //      if(in_array($item->getId(), [34, 45, 46])){
 
-            if ($this->serverRequest->post('removeOldExtraFields', false)) {
+            if ($this->request->getParsedBody()['removeOldExtraFields'] ?? false) {
                 $item->removeExtraFields();
             }
             foreach ($extraFields->toArray() as $optionKey) {

@@ -7,40 +7,33 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
-use Enjoys\Http\ServerRequest;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
 {
-    private EntityManager $entityManager;
-    private UrlGeneratorInterface $urlGenerator;
-    private RendererInterface $renderer;
-    private ServerRequest $serverRequest;
     private ?Category $category;
     /**
-     * @var \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
+     * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
      */
     private $categoryRepository;
 
     public function __construct(
-        EntityManager $entityManager,
-        UrlGeneratorInterface $urlGenerator,
-        RendererInterface $renderer,
-        ServerRequest $serverRequest
+        private EntityManager $entityManager,
+        private UrlGeneratorInterface $urlGenerator,
+        private RendererInterface $renderer,
+        private ServerRequestInterface $request
     ) {
-        $this->entityManager = $entityManager;
-        $this->urlGenerator = $urlGenerator;
-        $this->renderer = $renderer;
-        $this->serverRequest = $serverRequest;
-
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
         $this->category = $this->categoryRepository->find(
-            $this->serverRequest->get('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
     }
 
@@ -83,9 +76,9 @@ final class Delete implements ModelInterface
 
     private function doAction(): void
     {
-        $setCategory = ($this->serverRequest->post('set_parent_category') !== null) ? $this->category->getParent() : null;
+        $setCategory = (($this->request->getParsedBody()['set_parent_category'] ?? null) !== null) ? $this->category->getParent() : null;
 
-        if ($this->serverRequest->post('remove_childs') !== null) {
+        if (($this->request->getParsedBody()['remove_childs'] ?? null) !== null) {
             $allCategoryIds = $this->entityManager->getRepository(Category::class)->getAllIds($this->category);
             $products = $this->entityManager->getRepository(Product::class)->findByCategorysIds($allCategoryIds);
             $this->setCategory($products, $setCategory);

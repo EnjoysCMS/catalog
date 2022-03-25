@@ -15,35 +15,31 @@ use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\WYSIWYG\Summernote\Summernote;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add implements ModelInterface
 {
 
-    private EntityManager $entityManager;
-    private ServerRequestInterface $serverRequest;
-    private RendererInterface $renderer;
-    private UrlGeneratorInterface $urlGenerator;
     /**
      * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
     private ModuleConfig $config;
 
-    public function __construct(private ContainerInterface $container)
-    {
-        $this->entityManager = $this->container->get(EntityManager::class);
-        $this->serverRequest = $this->container->get(ServerRequestInterface::class);
-        $this->renderer = $this->container->get(RendererInterface::class);
-        $this->urlGenerator = $this->container->get(UrlGeneratorInterface::class);
+    public function __construct(
+        private EntityManager $entityManager,
+        private ServerRequestInterface $request,
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator,
+        private ContainerInterface $container
+    ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
         $this->config = Config::getConfig($this->container);
     }
@@ -58,7 +54,7 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
-      //  dd(Setting::get('WYSIWYG'));
+        //  dd(Setting::get('WYSIWYG'));
         $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
 
         return [
@@ -74,7 +70,7 @@ final class Add implements ModelInterface
 
         $form->setDefaults(
             [
-                'parent' => $this->serverRequest->get('parent_id')
+                'parent' => $this->request->getQueryParams()['parent_id'] ?? null
             ]
         );
 
@@ -99,8 +95,10 @@ final class Add implements ModelInterface
                 function () {
                     $check = $this->categoryRepository->findOneBy(
                         [
-                            'url' => $this->serverRequest->post('url'),
-                            'parent' => $this->categoryRepository->find($this->serverRequest->post('parent'))
+                            'url' => $this->request->getParsedBody()['url'] ?? null,
+                            'parent' => $this->categoryRepository->find(
+                                $this->request->getParsedBody()['parent'] ?? null
+                            )
                         ]
                     );
                     return is_null($check);
@@ -131,15 +129,15 @@ HTML
     private function doAction(): void
     {
         /** @var Category|null $parent */
-        $parent = $this->categoryRepository->find($this->serverRequest->post('parent'));
+        $parent = $this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null);
         $category = new Category();
         $category->setParent($parent);
         $category->setSort(0);
-        $category->setTitle($this->serverRequest->post('title'));
-        $category->setShortDescription($this->serverRequest->post('shortDescription'));
-        $category->setDescription($this->serverRequest->post('description'));
-        $category->setUrl($this->serverRequest->post('url'));
-        $category->setImg($this->serverRequest->post('img'));
+        $category->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
+        $category->setDescription($this->request->getParsedBody()['description'] ?? null);
+        $category->setUrl($this->request->getParsedBody()['url'] ?? null);
+        $category->setImg($this->request->getParsedBody()['img'] ?? null);
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();

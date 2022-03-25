@@ -8,10 +8,10 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\UploadFileSystem;
 use Exception;
 use InvalidArgumentException;
+use Psr\Http\Message\ServerRequestInterface;
 use Upload\File;
 
 final class Upload implements LoadImage
@@ -96,7 +96,7 @@ final class Upload implements LoadImage
     }
 
 
-    public function upload(ServerRequestInterface $serverRequest): void
+    public function upload(ServerRequestInterface $request): void
     {
         $storage = new UploadFileSystem($_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR);
         $file = new File('image', $storage);

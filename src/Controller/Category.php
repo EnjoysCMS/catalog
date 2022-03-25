@@ -6,27 +6,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 use DI\DependencyException;
-use DI\FactoryInterface;
 use DI\NotFoundException;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Http\ServerRequestInterface;
-use Enjoys\Traits\Options;
-use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Error;
-use EnjoysCMS\Core\Components\Helpers\Setting;
-use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Yaml\Yaml;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -56,10 +41,11 @@ final class Category extends PublicController
             'slug' => ''
         ]
     )]
-    public function view(ServerRequestInterface $serverRequest): ResponseInterface
+    public function view(ContainerInterface $container): ResponseInterface
     {
-        if ($serverRequest->get('slug') === '') {
-            return $this->container->make(Index::class)->view();
+
+        if ($this->request->getAttribute('slug', '') === '') {
+            return $container->call([Index::class, 'view']);
         }
 
 
@@ -72,8 +58,8 @@ final class Category extends PublicController
 
         return $this->responseText($this->twig->render(
             $template_path,
-            $this->container->make(CategoryModel::class, [
-                'config' => Config::getConfig($this->container)->getAll()
+            $container->make(CategoryModel::class, [
+                'config' => Config::getConfig($container)->getAll(),
             ])->getContext()
         ));
     }

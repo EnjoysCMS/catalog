@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;

@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-
 namespace EnjoysCMS\Module\Catalog\Models;
-
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -12,7 +10,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Http\ServerRequestInterface;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
@@ -21,6 +18,7 @@ use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class CategoryModel implements ModelInterface
@@ -40,21 +38,22 @@ final class CategoryModel implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestInterface $request,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         array $config = []
     ) {
+
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
         $category = $this->getCategory(
-            $this->serverRequest->get('slug')
+            $this->request->getAttribute('slug', '')
         );
 
 
         if ($category === null){
             throw new NotFoundException(
-                sprintf('Not found by slug: %s', $this->serverRequest->get('slug'))
+                sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
             );
         }
 
@@ -68,7 +67,7 @@ final class CategoryModel implements ModelInterface
 
     public function getContext(): array
     {
-        $pagination = new Pagination($this->serverRequest->get('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination($this->request->getAttribute('page', 1), $this->getOption('limitItems'));
 
         if ($this->getOption('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);
@@ -114,8 +113,7 @@ final class CategoryModel implements ModelInterface
     private function getBreadcrumbs(): array
     {
         $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
-        $breadcrumbs = $this->category->getBreadcrumbs();
-        foreach ((array)$breadcrumbs as $breadcrumb) {
+        foreach ($this->category->getBreadcrumbs() as $breadcrumb) {
             $this->breadcrumbs->add(
                 $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
                 $breadcrumb['title']

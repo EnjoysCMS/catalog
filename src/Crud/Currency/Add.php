@@ -12,9 +12,9 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\RendererInterface;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add implements ModelInterface
@@ -22,7 +22,7 @@ final class Add implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
     }
@@ -51,12 +51,12 @@ final class Add implements ModelInterface
     private function doProcess()
     {
         $currency = new Currency();
-        $currency->setId($this->serverRequest->post('id'));
-        $currency->setName($this->serverRequest->post('name'));
-        $currency->setDCode((int) $this->serverRequest->post('digital_code'));
-        $currency->setRight($this->serverRequest->post('right'));
-        $currency->setLeft($this->serverRequest->post('left'));
-        $currency->setPrecision((int) $this->serverRequest->post('precision'));
+        $currency->setId($this->request->getParsedBody()['id'] ?? null);
+        $currency->setName($this->request->getParsedBody()['name'] ?? null);
+        $currency->setDCode((int) $this->request->getParsedBody()['digital_code'] ?? null);
+        $currency->setRight($this->request->getParsedBody()['right'] ?? null);
+        $currency->setLeft($this->request->getParsedBody()['left'] ?? null);
+        $currency->setPrecision((int) $this->request->getParsedBody()['precision'] ?? null);
 
         $this->entityManager->persist($currency);
         $this->entityManager->flush();

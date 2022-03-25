@@ -19,7 +19,6 @@ use Enjoys\Cookie\Options;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Forms\Renderer\RendererInterface;
 use Enjoys\Http\ServerRequest;
-use Enjoys\Http\ServerRequestInterface;
 use Enjoys\Session\Session;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Composer\Utils;

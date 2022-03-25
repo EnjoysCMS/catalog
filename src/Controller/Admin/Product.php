@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Add;
 use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Product\Edit;

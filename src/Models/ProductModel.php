@@ -11,7 +11,6 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
@@ -20,6 +19,7 @@ use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ProductModel implements ModelInterface
@@ -34,10 +34,11 @@ class ProductModel implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestInterface $serverRequest,
+        private ServerRequestInterface $request,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
     ) {
+
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
     }
@@ -69,7 +70,7 @@ class ProductModel implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->findBySlug($this->serverRequest->get('slug'));
+        $product = $this->productRepository->findBySlug($this->request->getAttribute('slug', ''));
         if ($product === null) {
             throw new NoResultException();
         }

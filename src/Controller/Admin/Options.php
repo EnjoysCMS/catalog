@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;

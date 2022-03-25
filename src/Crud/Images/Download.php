@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
 use Enjoys\Forms\Form;
-use Enjoys\Http\ServerRequestInterface;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -26,7 +25,7 @@ final class Download implements LoadImage
         if(!isset($_ENV['UPLOAD_DIR'])){
             throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
         }
-  
+
         $this->uploadDir = rtrim($_ENV['UPLOAD_DIR'], '/') . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR;
     }
 
@@ -89,9 +88,9 @@ final class Download implements LoadImage
     }
 
 
-    public function upload(ServerRequestInterface $serverRequest): void
+    public function upload(\Psr\Http\Message\ServerRequestInterface $request): void
     {
-        $this->loadAndSave($serverRequest->post('image'));
+        $this->loadAndSave($request->getParsedBody()['image'] ?? null);
     }
 
     public function loadAndSave(string $link): void

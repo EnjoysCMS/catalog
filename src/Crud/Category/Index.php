@@ -12,28 +12,23 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
-use Enjoys\Http\ServerRequest;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
 {
-    private EntityManager $em;
     /**
      * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
      */
     private $categoryRepository;
-    private ServerRequest $serverRequest;
-    private UrlGeneratorInterface $urlGenerator;
 
 
-    public function __construct(EntityManager $em, ServerRequest $serverRequest, UrlGeneratorInterface $urlGenerator)
+
+    public function __construct(private EntityManager $em, private ServerRequestInterface $request, private UrlGeneratorInterface $urlGenerator)
     {
-        $this->em = $em;
         $this->categoryRepository = $this->em->getRepository(Category::class);
-        $this->serverRequest = $serverRequest;
-        $this->urlGenerator = $urlGenerator;
     }
 
     public function getContext(): array
@@ -48,7 +43,7 @@ final class Index implements ModelInterface
 
 
         if ($form->isSubmitted()) {
-            $this->_recursive(\json_decode($this->serverRequest->post('nestable-output')));
+            $this->_recursive(\json_decode($this->request->getParsedBody()['nestable-output']));
             $this->em->flush();
             Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
         }

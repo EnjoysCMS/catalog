@@ -6,22 +6,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use Enjoys\Http\ServerRequestInterface;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use HttpSoft\Emitter\EmitterInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class Tools extends PublicController
 {
-    private ServerRequestInterface $serverRequest;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-        $this->serverRequest = $this->container->get(ServerRequestInterface::class);
-    }
 
     /**
      * @Route(
@@ -32,9 +22,9 @@ final class Tools extends PublicController
      *     }
      * )
      */
-    public function translit(EmitterInterface $emitter): ResponseInterface
+    public function translit(): ResponseInterface
     {
-        $query = $this->serverRequest->post('query');
+        $query = $this->request->getParsedBody()['query'] ?? null;
         $this->response = $this->response
             ->withHeader('Access-Control-Allow-Origin', '*')
         ;
