@@ -29,7 +29,7 @@ final class Search extends PublicController
 
 
     #[Route(
-        path: '/catalog/search.json',
+        path: '/api/search/',
         name: 'catalog/api/search'
     )]
     public function apiSearch(ContainerInterface $container): ResponseInterface
@@ -48,7 +48,7 @@ final class Search extends PublicController
     }
 
     #[Route(
-        path: '/catalog/search.php',
+        path: '/search/',
         name: 'catalog/search'
     )]
     public function search(
@@ -60,7 +60,7 @@ final class Search extends PublicController
             $result = $search->getSearchResult(
                 $this->optionKeys
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $result = [
                 'error' => $e
             ];
@@ -69,7 +69,13 @@ final class Search extends PublicController
         $breadcrumbs->add($urlGenerator->generate('catalog/index'), 'Каталог');
         $breadcrumbs->add(null, 'Поиск');
 
-        return $this->responseText($this->twig->render('@m/catalog/search.twig', [
+        $template_path = '@m/catalog/search.twig';
+
+        if (!$this->twig->getLoader()->exists($template_path)) {
+            $template_path = __DIR__ . '/../../template/search.twig';
+        }
+
+        return $this->responseText($this->twig->render($template_path, [
             'result' => $result,
             'breadcrumbs' => $breadcrumbs->get()
         ]));

@@ -35,15 +35,14 @@ final class Search
         private EntityManager $em
     ) {
         $this->setOptions(Config::getConfig($this->container)->getAll());
-        $this->searchQuery = \trim($this->requestWrapper->getQueryData('q'));
-
-        $this->validateSearchQuery();
-
+        $this->searchQuery = \trim($this->requestWrapper->getQueryData('q', $this->requestWrapper->getPostData('q', '')));
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
     }
 
     public function getSearchResult(array $optionKeys = []): array
     {
+        $this->validateSearchQuery();
+
         $pagination = new Pagination($this->requestWrapper->getQueryData('page', 1), $this->getOption('limitItems'));
 
         $qb = $this->getFoundProducts($optionKeys);
@@ -56,7 +55,7 @@ final class Search
             'countResult' => $result->count(),
             'optionKeys' => $this->optionKeys,
             'pagination' => $pagination,
-            'result' => $result
+            'products' => $result
         ];
     }
 

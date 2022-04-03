@@ -41,11 +41,14 @@ final class SearchBlock extends AbstractBlock
     public function view()
     {
         $form = $this->getForm();
-
+        /** @var Bootstrap4 $renderer */
+        $renderer = $this->container->get(Bootstrap4::class);
+        $renderer->setForm($form);
         return $this->twig->render(
             $this->templatePath,
             [
-                'form' => $form->render($this->container->get(Bootstrap4::class)),
+                'form' => $form,
+                'formRenderer' => $renderer,
                 'blockOptions' => $this->getOptions()
             ]
         );
