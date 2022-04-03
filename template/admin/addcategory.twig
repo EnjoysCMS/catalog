@@ -14,9 +14,8 @@
                             method: 'POST',
                            headers: {'Content-Type':'application/x-www-form-urlencoded'},
                             body: query
-                            // body: JSON.stringify({query: $(this).prop('value')})
                         });
-                        let result = await response.text();
+                        let result = await response.json();
                         $("#url").val(result);
                     })();
                 });
