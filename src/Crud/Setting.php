@@ -52,18 +52,19 @@ final class Setting implements ModelInterface
             foreach ($setting as $item) {
                 $defaults[$item->getKey()] = explode(',', $item->getValue());
             }
+
             return $defaults;
         });
 
-        $form->number('minSearchChars', 'minSearchChars');
+//        $form->number('minSearchChars', 'minSearchChars');
 
         $form->select(
             'searchOptionField',
-            "Дополнительные поля"
+            "Опции по которым также будет идти поиск"
         )
             ->setAttribute('id', 'searchOptionField')
             ->setDescription(
-                'Дополнительные поля, которые можно отображать в списке продуктов.
+                'Опции по которым также будет идти поиск, наряду с названием, описанием и названием категории.
                 Берутся из параметров товара (опций)'
             )
             ->setMultiple()
@@ -97,7 +98,8 @@ final class Setting implements ModelInterface
         }
         $this->entityManager->flush();
 
-        foreach ($this->requestWrapper->getPostData() as $key => $value) {
+        foreach ($this->requestWrapper->getPostData()->getAll() as $key => $value) {
+
             switch ($key) {
                 case 'minSearchChars':
                 case 'searchOptionField':
