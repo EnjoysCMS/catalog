@@ -11,6 +11,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\ServerRequestWrapper;
@@ -76,38 +77,38 @@ final class Manage implements ModelInterface
     {
         $options = $this->product->getOptions();
 
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->setDefaults($this->getDefaultsOptions($options));
 
 
         foreach ($options as $key => $option) {
-            $form->group()->setAttribute('id', 'group')->add([
+            $form->group()->setAttr(AttributeFactory::create('id', 'group'))->add([
                 (new Text(
                     'options[' . $key . '][option]'
-                ))->setAttributes(
-                    [
-                        'class' => 'filter-option form-control',
-                        'placeholder' => 'Опция',
-                        'grid' => 'col-md-3'
-                    ]
+                ))->setAttrs(
+                   AttributeFactory::createFromArray( [
+                       'class' => 'filter-option form-control',
+                       'placeholder' => 'Опция',
+                       'grid' => 'col-md-3'
+                   ])
                 ),
                 (new Text(
                     'options[' . $key . '][unit]'
-                ))->setAttributes(
-                    [
+                ))->setAttrs(
+                    AttributeFactory::createFromArray([
                         'class' => 'filter-unit form-control',
                         'placeholder' => 'ед.изм.',
                         'grid' => 'col-md-1'
-                    ]
+                    ])
                 ),
                 (new Text(
                     'options[' . $key . '][value]'
-                ))->setAttributes(
-                    [
-                        'class' => 'filter-value form-control',
-                        'placeholder' => 'Значение',
-                        'grid' => 'col-md-7'
-                    ]
+                ))->setAttrs(
+                   AttributeFactory::createFromArray( [
+                       'class' => 'filter-value form-control',
+                       'placeholder' => 'Значение',
+                       'grid' => 'col-md-7'
+                   ])
                 ),
             ]);
         }

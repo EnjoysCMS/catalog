@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -31,7 +31,8 @@ final class MetaManage implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->metaRepository = $this->em->getRepository(ProductMeta::class);
@@ -60,22 +61,20 @@ final class MetaManage implements ModelInterface
             $this->doAction();
         }
 
-        $renderer = new Bootstrap4();
-        $renderer->setForm($form);
+
+        $this->renderer->setForm($form);
 
 
         return [
             'product' => $this->product,
             'subtitle' => 'Установка META данных HTML',
-            'form' => $renderer->render(),
+            'form' => $this->renderer->output(),
         ];
     }
 
     protected function getForm(): Form
     {
         $form = new Form();
-
-        $form->setMethod('post');
 
         $form->setDefaults(
             [
@@ -107,6 +106,6 @@ final class MetaManage implements ModelInterface
         $meta->setProduct($this->product);
         $this->em->persist($meta);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+        Redirect::http();
     }
 }

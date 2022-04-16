@@ -9,8 +9,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -29,7 +30,7 @@ class TagsList implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -57,13 +58,12 @@ class TagsList implements ModelInterface
             $this->doAction();
         }
 
-        $renderer = new Bootstrap4();
-        $renderer->setForm($form);
+        $this->renderer->setForm($form);
 
         return [
             'product' => $this->product,
             'subtitle' => 'Управление тегами',
-            'form' => $renderer->render()
+            'form' => $this->renderer->output()
         ];
     }
 
@@ -82,8 +82,8 @@ class TagsList implements ModelInterface
                                )
                            ]);
 
-        $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttributes(
-            ['placeholder' => '']
+        $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttrs(
+            AttributeFactory::createFromArray(['placeholder' => ''])
         );
 
         $form->submit('submit1', 'Изменить');
@@ -99,7 +99,7 @@ class TagsList implements ModelInterface
         $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));
         $this->em->flush();
 
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+        Redirect::http();
     }
 
 

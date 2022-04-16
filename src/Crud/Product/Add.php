@@ -14,7 +14,7 @@ use Enjoys\Cookie\Cookie;
 use Enjoys\Cookie\Exception;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -83,7 +83,7 @@ final class Add implements ModelInterface
      */
     private function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
 
         $form->setDefaults(
             [

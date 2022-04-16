@@ -14,7 +14,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -35,7 +35,8 @@ final class EditUrl implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -66,18 +67,18 @@ final class EditUrl implements ModelInterface
             $this->doAction();
         }
 
-        $renderer = new Bootstrap4([], $form);
+        $this->renderer->setForm($form);
 
         return [
             'product' => $this->product,
-            'form' => $renderer->render(),
+            'form' => $this->renderer->output(),
             'subtitle' => 'Редактирование URL'
         ];
     }
 
     private function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->setDefaults([
             'path' => $this->url->getPath()
         ]);

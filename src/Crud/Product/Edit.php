@@ -8,9 +8,10 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -102,7 +103,7 @@ final class Edit implements ModelInterface
             $defaults['category'] = $category->getId();
         }
 
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
 
         $form->setDefaults($defaults);
 
@@ -170,10 +171,10 @@ final class Edit implements ModelInterface
         $form->number(
             'qty',
             sprintf('Количество')
-        )->setAttributes([
+        )->setAttrs(AttributeFactory::createFromArray([
             'step' => $this->product->getQuantity()->getStep(),
             'min' => 0
-        ]);
+        ]));
 
 
         $form->submit('add');

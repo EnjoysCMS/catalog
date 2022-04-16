@@ -9,8 +9,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
@@ -79,7 +80,7 @@ final class Manage implements ModelInterface
 
         return [
             'product' => $this->product,
-            'form' => $this->renderer->render(),
+            'form' => $this->renderer->output(),
             'subtitle' => 'Установка цен'
         ];
     }
@@ -92,7 +93,7 @@ final class Manage implements ModelInterface
         }
 
 
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->setDefaults([
             'price' => $priceDefaults,
             'currency' => $this->product->getPrices()->get(0)?->getCurrency()->getId(),
@@ -111,7 +112,7 @@ final class Manage implements ModelInterface
 
         foreach ($this->priceGroups as $priceGroup) {
             $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
-                ->setAttribute('step', '0.01')
+                ->setAttr(AttributeFactory::create('step', '0.01'))
                 ->setDescription($priceGroup->getCode());
         }
         $form->submit('set', 'Установить');
