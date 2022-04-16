@@ -80,7 +80,7 @@ final class Download implements LoadImage
 
     public function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
 
         $form->text('image', 'Ссылка на изображение');
 

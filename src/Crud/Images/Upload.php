@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
@@ -77,7 +78,7 @@ final class Upload implements LoadImage
 
     public function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
 
         $form->file('image', 'Изображение')
             ->addRule(
@@ -89,7 +90,7 @@ final class Upload implements LoadImage
                     'extensions' => 'jpg, png, jpeg',
                 ]
             )
-            ->setAttribute('accept', '.png, .jpg, .jpeg');
+            ->setAttr(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
 
         $form->submit('upload');
         return $form;
