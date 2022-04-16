@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
@@ -64,7 +64,7 @@ final class Edit implements ModelInterface
 
     private function getForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->setDefaults([
             'id' => $this->currency->getId(),
             'name' => $this->currency->getName(),
