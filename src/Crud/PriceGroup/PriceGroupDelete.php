@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -45,7 +45,7 @@ final class PriceGroupDelete implements ModelInterface
         }
         $this->renderer->setForm($form);
         return [
-            'form' => $this->renderer->render()
+            'form' => $this->renderer->output()
         ];
     }
 
@@ -54,7 +54,7 @@ final class PriceGroupDelete implements ModelInterface
      */
     private function getAddForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->header(sprintf('Удалить категорию цен: <b>%s</b>', $this->priceGroup->getTitle()));
         $form->submit('delete', 'Удалить');
         return $form;

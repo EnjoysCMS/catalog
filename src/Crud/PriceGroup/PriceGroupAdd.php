@@ -10,7 +10,7 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\RendererInterface;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -36,7 +36,7 @@ final class PriceGroupAdd implements ModelInterface
         }
         $this->renderer->setForm($form);
         return [
-            'form' => $this->renderer->render()
+            'form' => $this->renderer->output()
         ];
     }
 
@@ -45,7 +45,7 @@ final class PriceGroupAdd implements ModelInterface
      */
     private function getAddForm(): Form
     {
-        $form = new Form(['method' => 'post']);
+        $form = new Form();
         $form->text('code', 'Идентификатор цены (внутренний), например ROZ, OPT и тд')
             ->addRule(Rules::REQUIRED)
             ->addRule(Rules::CALLBACK, 'Такой код уже существует', function () {
