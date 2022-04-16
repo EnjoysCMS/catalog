@@ -10,8 +10,10 @@ use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
+use Enjoys\Forms\Renderer\Html\HtmlRenderer;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -33,12 +35,8 @@ final class Index implements ModelInterface
 
     public function getContext(): array
     {
-        $form = new Form(
-            [
-                'method' => 'post'
-            ]
-        );
-        $form->hidden('nestable-output')->setAttribute('id', 'nestable-output');
+        $form = new Form();
+        $form->hidden('nestable-output')->setAttr(AttributeFactory::create('id', 'nestable-output'));
         $form->submit('save', 'Сохранить');
 
 
@@ -47,12 +45,12 @@ final class Index implements ModelInterface
             $this->em->flush();
             Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
         }
-        $renderer = new Bootstrap4();
+        $renderer = new HtmlRenderer();
         $renderer->setForm($form);
 
 
         return [
-            'form' => $renderer->render(),
+            'form' => $renderer->output(),
             'categories' => $this->categoryRepository->getChildNodes()
         ];
     }

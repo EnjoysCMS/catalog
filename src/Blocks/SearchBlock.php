@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 use Enjoys\Forms\Elements\Search;
 use Enjoys\Forms\Elements\Submit;
 use Enjoys\Forms\Form;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
@@ -41,8 +42,8 @@ final class SearchBlock extends AbstractBlock
     public function view()
     {
         $form = $this->getForm();
-        /** @var Bootstrap4 $renderer */
-        $renderer = $this->container->get(Bootstrap4::class);
+        /** @var RendererInterface $renderer */
+        $renderer = $this->container->get(RendererInterface::class);
         $renderer->setForm($form);
         return $this->twig->render(
             $this->templatePath,
@@ -56,12 +57,7 @@ final class SearchBlock extends AbstractBlock
 
     private function getForm(): Form
     {
-        $form = new Form(
-            [
-                'method' => 'get',
-                'action' => $this->container->get(UrlGeneratorInterface::class)->generate('catalog/search')
-            ]
-        );
+        $form = new Form('get', $this->container->get(UrlGeneratorInterface::class)->generate('catalog/search'));
         $form->group()->add([
             (new Search('q'))->addRule(Rules::LENGTH, null, ['>=' =>  3]),
             new Submit('search', 'Искать')
