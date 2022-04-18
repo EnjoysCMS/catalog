@@ -15,8 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "EnjoysCMS\\Module\\Catalog\\": "src/",
-            "Build\\": "build/"
+            "EnjoysCMS\\Module\\Catalog\\": "src/"
         }
     },
     "extra": {
@@ -34,11 +33,6 @@
         "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall"
     },
     "require-dev": {
-        "enjoys/dotenv": "^2.0",
-        "symfony/cache": "^6.0",
-        "codeception/codeception": "^4.1",
-        "codeception/module-phpbrowser": "^1.0.0",
-        "codeception/module-asserts": "^1.0.0",
         "vimeo/psalm": "^4.20"
     },
     "config": {
