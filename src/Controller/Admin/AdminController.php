@@ -6,13 +6,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
-use App\Module\Admin\BaseController;
 use EnjoysCMS\Core\Components\Composer\Utils;
 use EnjoysCMS\Core\Components\Modules\Module;
+use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Catalog\Config;
 use Psr\Container\ContainerInterface;
 
-abstract class AdminController extends BaseController
+abstract class AdminController extends AdminBaseController
 {
     protected Module $module;
     protected string $templatePath;

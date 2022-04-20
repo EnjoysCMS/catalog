@@ -6,10 +6,10 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 
-use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
+use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 
 final class Manage implements ModelInterface

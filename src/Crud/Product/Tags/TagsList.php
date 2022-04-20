@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product\Tags;
 
-use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
@@ -14,9 +13,9 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class TagsList implements ModelInterface
 {

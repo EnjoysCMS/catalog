@@ -6,8 +6,8 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 
 
-use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
+use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 
 final class PriceGroupList implements ModelInterface

@@ -6,16 +6,15 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
-use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4;
-use Enjoys\Forms\Renderer\Html\HtmlRenderer;
+use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -28,7 +27,8 @@ final class Index implements ModelInterface
 
 
 
-    public function __construct(private EntityManager $em, private ServerRequestWrapper $requestWrapper, private UrlGeneratorInterface $urlGenerator)
+    public function __construct(private EntityManager $em,
+        private ServerRequestWrapper $requestWrapper, private UrlGeneratorInterface $urlGenerator, private RendererInterface $renderer)
     {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
@@ -45,12 +45,11 @@ final class Index implements ModelInterface
             $this->em->flush();
             Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
         }
-        $renderer = new HtmlRenderer();
-        $renderer->setForm($form);
+        $this->renderer->setForm($form);
 
 
         return [
-            'form' => $renderer->output(),
+            'form' => $this->renderer->output(),
             'categories' => $this->categoryRepository->getChildNodes()
         ];
     }

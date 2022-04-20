@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
-use App\Module\Admin\Core\ModelInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 

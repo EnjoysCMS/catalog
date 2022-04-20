@@ -6,15 +6,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
-use App\Module\Admin\BaseController;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\AddUrl;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\DeleteUrl;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\EditUrl;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\MakeDefault;
 use EnjoysCMS\Module\Catalog\Crud\Product\Urls\Manage;
-use EnjoysCMS\Module\Catalog\Helpers\Template;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
