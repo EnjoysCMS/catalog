@@ -43,7 +43,7 @@ final class SearchBlock extends AbstractBlock
     {
         $form = $this->getForm();
         /** @var RendererInterface $renderer */
-        $renderer = $this->container->get(RendererInterface::class);
+        $renderer = clone $this->container->get(RendererInterface::class);
         $renderer->setForm($form);
         return $this->twig->render(
             $this->templatePath,
