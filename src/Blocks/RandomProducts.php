@@ -6,13 +6,16 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Blocks;
 
 
+use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use DoctrineExtensions\Query\Mysql\Rand;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -30,9 +33,15 @@ final class RandomProducts extends AbstractBlock
     private ?string $templatePath;
 
 
-    public function __construct(ContainerInterface $container, Entity $block)
+    /**
+     * @param ContainerInterface&FactoryInterface $container
+     * @param Entity $block
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function __construct(private  ContainerInterface $container, Entity $block)
     {
-        parent::__construct($container, $block);
+        parent::__construct($block);
 
         $em = $this->container->get(EntityManager::class);
         $em->getConfiguration()->addCustomStringFunction('RAND', Rand::class);
