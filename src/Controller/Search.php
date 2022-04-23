@@ -77,6 +77,7 @@ final class Search extends PublicController
 
         return $this->responseText($this->twig->render($template_path, [
             'result' => $result,
+            '_title' => $result['_title'],
             'breadcrumbs' => $breadcrumbs->get()
         ]));
     }

@@ -13,6 +13,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Traits\Options;
+use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
@@ -55,7 +56,14 @@ final class Search
             'countResult' => $result->count(),
             'optionKeys' => $this->optionKeys,
             'pagination' => $pagination,
-            'products' => $result
+            'products' => $result,
+            '_title' => sprintf(
+                'Поиск: %2$s #страница %3$d - Найдено: %4$d - %1$s',
+                Setting::get('sitename'),
+                $this->searchQuery,
+                $pagination->getCurrentPage(),
+                $result->count()
+            ),
         ];
     }
 
