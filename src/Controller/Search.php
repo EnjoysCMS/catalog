@@ -38,7 +38,6 @@ final class Search extends PublicController
             $result = $container->get(\EnjoysCMS\Module\Catalog\Actions\Search::class)->getSearchResult(
                 $this->optionKeys
             );
-
             $response = $this->responseJson($this->convertResultToDTO($result));
         } catch (\Exception|\Throwable $e) {
             $response = $this->responseJson(['error' => $e->getMessage()]);
@@ -102,7 +101,7 @@ final class Search extends PublicController
             }
 
             return $searchDto;
-        }, iterator_to_array($result['result']->getIterator()));
+        }, iterator_to_array($result['products']->getIterator()));
         return $result;
     }
 }
