@@ -53,9 +53,11 @@ class ProductModel implements ModelInterface
             '_title' => sprintf(
                 '%2$s - %3$s - %1$s',
                 Setting::get('sitename'),
-                $this->product->getName(),
+                $this->product->getMeta()?->getTitle() ?? $this->product->getName(),
                 $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
+            '_keywords' => $this->product->getMeta()?->getKeyword() ?? Setting::get('site-keywords'),
+            '_description' => $this->product->getMeta()?->getDescription() ?? Setting::get('site-description'),
             'product' => $this->product,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
             'optionValueRepository' => $this->em->getRepository(OptionValue::class),
