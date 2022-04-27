@@ -4,6 +4,11 @@
            href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}"
            title="Редактирование"><i class="fa fa-edit"></i></a>
     {% endif %}
+    {% if access2route('@a/catalog/product/quantity') %}
+        <a class="btn btn-default"
+           href="{{ path('@a/catalog/product/quantity', {"id": product.getId}) }}" title="Количество"><i
+                class="fa fa-cubes"></i></a>
+    {% endif %}
     {% if access2route('catalog/admin/product/images') %}
         <a class="btn btn-default"
            href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"

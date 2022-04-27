@@ -64,6 +64,11 @@ final class Quantity
      */
     private \DateTimeInterface $arrivalDate;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductUnit")
+     */
+    private ?ProductUnit $unit = null;
+
     public function isUpdated(): bool
     {
         return $this->updated;
@@ -173,6 +178,16 @@ final class Quantity
             throw new \InvalidArgumentException();
         }
         $this->min = (float)$min;
+    }
+
+    public function getUnit(): ?ProductUnit
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(?ProductUnit $unit): void
+    {
+        $this->unit = $unit;
     }
 
 }
