@@ -19,6 +19,7 @@ use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Helpers\MetaHelpers;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -38,15 +39,17 @@ class ProductModel implements ModelInterface
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
     ) {
-
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
     }
 
     public function getContext(): array
     {
-        if($this->product->getUrl() !== $this->product->getCurrentUrl()){
-            Redirect::http($this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]), 301);
+        if ($this->product->getUrl() !== $this->product->getCurrentUrl()) {
+            Redirect::http(
+                $this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]),
+                301
+            );
         }
 
         return [
@@ -56,8 +59,13 @@ class ProductModel implements ModelInterface
                 $this->product->getMeta()?->getTitle() ?? $this->product->getName(),
                 $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
-            '_keywords' => $this->product->getMeta()?->getKeyword() ?? Setting::get('site-keywords'),
-            '_description' => $this->product->getMeta()?->getDescription() ?? Setting::get('site-description'),
+            '_keywords' => $this->product->getMeta()?->getKeyword() ?? MetaHelpers::generateKeywords(
+                    $this->product
+                ) ?? Setting::get('site-keywords'),
+            '_description' => $this->product->getMeta()?->getDescription() ?? MetaHelpers::generateDescription(
+                    $this->product
+                ) ?? Setting::get('site-description'),
+
             'product' => $this->product,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
             'optionValueRepository' => $this->em->getRepository(OptionValue::class),
