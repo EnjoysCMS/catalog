@@ -100,6 +100,11 @@ class Product
      */
     private ?int $maxDiscount = null;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductUnit")
+     */
+    private ?ProductUnit $unit = null;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -447,5 +452,16 @@ class Product
     public function setGroup(?ProductGroup $group): void
     {
         $this->group = $group;
+    }
+
+
+    public function getUnit(): ?ProductUnit
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(?ProductUnit $unit): void
+    {
+        $this->unit = $unit;
     }
 }

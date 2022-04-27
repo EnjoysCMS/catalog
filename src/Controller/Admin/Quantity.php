@@ -28,21 +28,21 @@ final class Quantity extends AdminController
             )
         );
     }
-
-    #[Route(
-        path: "admin/catalog/product/quantity-params",
-        name: "@a/catalog/product/quantity-params",
-        options: [
-            "aclComment" => "[ADMIN] Установка параметров для количества"
-        ]
-    )]
-    public function setParams(): ResponseInterface
-    {
-        return $this->responseText(
-            $this->view(
-                $this->templatePath . '/product/quantity/params.twig',
-                $this->getContext($this->container->get(Params::class))
-            )
-        );
-    }
+//
+//    #[Route(
+//        path: "admin/catalog/product/quantity-params",
+//        name: "@a/catalog/product/quantity-params",
+//        options: [
+//            "aclComment" => "[ADMIN] Установка параметров для количества"
+//        ]
+//    )]
+//    public function setParams(): ResponseInterface
+//    {
+//        return $this->responseText(
+//            $this->view(
+//                $this->templatePath . '/product/quantity/params.twig',
+//                $this->getContext($this->container->get(Params::class))
+//            )
+//        );
+//    }
 }

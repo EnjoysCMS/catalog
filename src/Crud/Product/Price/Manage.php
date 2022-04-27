@@ -18,7 +18,6 @@ use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
-use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -97,7 +96,6 @@ final class Manage implements ModelInterface
         $form->setDefaults([
             'price' => $priceDefaults,
             'currency' => $this->product->getPrices()->get(0)?->getCurrency()->getId(),
-            'unit' => $this->product->getPrices()->get(0)?->getUnit()->getName(),
         ]);
 
         $form->select('currency', 'Валюта')->fill(function () {
@@ -108,7 +106,7 @@ final class Manage implements ModelInterface
             return $ret;
         });
 
-        $form->text('unit', 'Единица измерения');
+        $form->header(sprintf('Единица измерения: %s', $this->product->getUnit()?->getName() ?? '-'));
 
         foreach ($this->priceGroups as $priceGroup) {
             $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
@@ -119,20 +117,17 @@ final class Manage implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     */
     private function doAction(): void
     {
+        dd($this->requestWrapper->getPostData());
         $currency = $this->em->getRepository(Currency::class)->find($this->requestWrapper->getPostData('currency'));
 
         if ($currency === null) {
             throw new \InvalidArgumentException('Currency not found');
-        }
-
-        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $this->requestWrapper->getPostData('unit')]);
-        if ($unit === null) {
-            $unit = new ProductUnit();
-            $unit->setName($this->requestWrapper->getPostData('unit'));
-            $this->em->persist($unit);
-            $this->em->flush();
         }
 
 
@@ -157,7 +152,6 @@ final class Manage implements ModelInterface
                     $priceEntity->setProduct($this->product);
                     $priceEntity->setPriceGroup($priceGroup);
                     $priceEntity->setCurrency($currency);
-                    $priceEntity->setUnit($unit);
                     $this->em->persist($priceEntity);
                     continue;
                 }

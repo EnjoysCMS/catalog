@@ -49,10 +49,6 @@ final class ProductPrice
      */
     private Currency $currency;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ProductUnit")
-     */
-    private ProductUnit $unit;
 
     public function __construct()
     {
@@ -154,19 +150,5 @@ final class ProductPrice
         $this->currency = $currency;
     }
 
-    /**
-     * @return ProductUnit
-     */
-    public function getUnit(): ProductUnit
-    {
-        return $this->unit;
-    }
 
-    /**
-     * @param ProductUnit $unit
-     */
-    public function setUnit(ProductUnit $unit): void
-    {
-        $this->unit = $unit;
-    }
 }

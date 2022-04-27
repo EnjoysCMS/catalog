@@ -5,29 +5,22 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Product\Quantity;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
-use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
-use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use EnjoysCMS\Module\Catalog\Entities\Quantity;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
-    protected Product $product;
-    /**
-     * @var array|PriceGroup[]
-     */
-    private array $priceGroups;
-    private array $prices = [];
+    private Product $product;
+    private Quantity $quantity;
 
     /**
      * @throws NoResultException
@@ -38,8 +31,8 @@ final class Manage implements ModelInterface
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
+        $this->quantity =  $this->product->getQuantity();
     }
 
 
@@ -48,13 +41,17 @@ final class Manage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product =  $this->em->getRepository(Product::class)->find($this->requestWrapper->getQueryData('id'));
         if ($product === null) {
             throw new NoResultException();
         }
         return $product;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -75,39 +72,35 @@ final class Manage implements ModelInterface
 
     private function getForm(): Form
     {
-
-
-
         $form = new Form();
         $form->setDefaults([
-            'qty' => $this->product->getQuantity()->getQty(),
-            'unit' => $this->product->getQuantity()->getUnit()?->getName(),
+            'qty' => $this->quantity->getQty(),
+            'min' => $this->quantity->getMin(),
+            'step' => $this->quantity->getStep()
         ]);
 
-        $form->text('unit', 'Единица измерения');
+        $form->header(sprintf('Единица измерения: %s', $this->product->getUnit()?->getName() ?? '-'));
+
         $form->text('qty', 'Количество');
+        $form->header('Дополнительные параметры');
+        $form->text('min', 'Минимальное кол-во для заказа');
+        $form->text('step', 'Шаг');
+
 
 
         $form->submit('set', 'Установить');
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
-        $unitValue = $this->requestWrapper->getPostData('unit');
-        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
-        if ($unit === null) {
-            $unit = new ProductUnit();
-            $unit->setName($unitValue);
-            $this->em->persist($unit);
-            $this->em->flush();
-        }
-
-        $quantity = $this->product->getQuantity();
-        $quantity->setQty($this->requestWrapper->getPostData('qty'));
-        $quantity->setUnit($unit);
-        $this->product->setQuantity($quantity);
-
+        $this->quantity->setQty($this->requestWrapper->getPostData('qty'));
+        $this->quantity->setStep($this->requestWrapper->getPostData('step'));
+        $this->quantity->setMin($this->requestWrapper->getPostData('min'));
         $this->em->flush();
 
         Redirect::http($this->urlGenerator->generate('@a/catalog/product/quantity', ['id' => $this->product->getId()]));

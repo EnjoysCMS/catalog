@@ -6,8 +6,9 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
@@ -21,6 +22,7 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Container\ContainerInterface;
@@ -93,7 +95,7 @@ final class Edit implements ModelInterface
             'name' => $this->product->getName(),
             'url' => $this->product->getUrl()->getPath(),
             'description' => $this->product->getDescription(),
-            'qty' => $this->product->getQuantity()->getQty(),
+            'unit' => $this->product->getUnit()?->getName(),
             'active' => [(int)$this->product->isActive()],
             'hide' => [(int)$this->product->isHide()],
         ];
@@ -113,8 +115,7 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Включен?'])
-        ;
+            ->fill([1 => 'Включен?']);
 
         $form->checkbox('hide', null)
             ->setPrefixId('hide')
@@ -122,8 +123,7 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Скрыт?'])
-        ;
+            ->fill([1 => 'Скрыт?']);
 
         $form->select('category', 'Категория')
             ->fill(
@@ -131,12 +131,10 @@ final class Edit implements ModelInterface
                     Category::class
                 )->getFormFillArray()
             )
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('name', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
 
         $form->text('url', 'URL')
@@ -164,23 +162,20 @@ final class Edit implements ModelInterface
 
                     return false;
                 }
-            )
-        ;
+            );
         $form->textarea('description', 'Описание');
 
-        $form->number(
-            'qty',
-            sprintf('Количество')
-        )->setAttrs(AttributeFactory::createFromArray([
-            'step' => $this->product->getQuantity()->getStep(),
-            'min' => 0
-        ]));
+        $form->text('unit', 'Единица измерения');
 
 
         $form->submit('add');
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         /** @var Category|null $category */
@@ -190,7 +185,18 @@ final class Edit implements ModelInterface
 
         $this->product->setName($this->requestWrapper->getPostData('name'));
         $this->product->setDescription($this->requestWrapper->getPostData('description'));
-        $this->product->setQuantity($this->product->getQuantity()->setQty($this->requestWrapper->getPostData('qty')));
+
+
+        $unitValue = $this->requestWrapper->getPostData('unit');
+        $unit = $this->entityManager->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
+        if ($unit === null) {
+            $unit = new ProductUnit();
+            $unit->setName($unitValue);
+            $this->entityManager->persist($unit);
+            $this->entityManager->flush();
+        }
+        $this->product->setUnit($unit);
+
         $this->product->setCategory($category);
         $this->product->setActive((bool)$this->requestWrapper->getPostData('active', false));
         $this->product->setHide((bool)$this->requestWrapper->getPostData('hide', false));
