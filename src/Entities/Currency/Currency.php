@@ -33,19 +33,19 @@ class Currency
 
     /**
      * @var string|null
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", name="left_char", length=50, nullable=true)
      */
     private ?string $left = null;
 
     /**
      * @var string|null
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", name="right_char", length=50, nullable=true)
      */
     private ?string $right = null;
 
     /**
      * Количество знаков для округления в большую сторону
-     * @ORM\Column(type="integer", options={"default": 0})
+     * @ORM\Column(type="integer", name="precisions", options={"default": 0})
      */
     private int $precision = 0;
 
