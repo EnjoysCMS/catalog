@@ -70,6 +70,9 @@ final class Edit implements ModelInterface
         $form = $this->getForm();
 
         $this->renderer->setForm($form);
+        $this->renderer->setOptions([
+            'custom-switch' => true
+        ]);
 
         if ($form->isSubmitted()) {
             $this->doAction();
