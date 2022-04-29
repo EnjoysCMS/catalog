@@ -79,7 +79,11 @@ final class CategoryModel implements ModelInterface
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
-        $qb->orderBy('p.name', 'ASC');
+        if (false !== $o = $this->getOption('withImageFirst', false)){
+            $qb->orderBy('i.filename', strtoupper($o));
+        }
+
+        $qb->addOrderBy('p.name', 'ASC');
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
 
