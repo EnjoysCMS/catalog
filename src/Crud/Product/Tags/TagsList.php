@@ -81,7 +81,7 @@ class TagsList implements ModelInterface
                                )
                            ]);
 
-        $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttrs(
+        $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttributes(
             AttributeFactory::createFromArray(['placeholder' => ''])
         );
 

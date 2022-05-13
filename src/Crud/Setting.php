@@ -62,7 +62,7 @@ final class Setting implements ModelInterface
             'searchOptionField',
             "Опции по которым также будет идти поиск"
         )
-            ->setAttr(AttributeFactory::create('id', 'searchOptionField'))
+            ->setAttribute(AttributeFactory::create('id', 'searchOptionField'))
             ->setDescription(
                 'Опции по которым также будет идти поиск, наряду с названием, описанием и названием категории.
                 Берутся из параметров товара (опций)'

@@ -90,7 +90,7 @@ final class Upload implements LoadImage
                     'extensions' => 'jpg, png, jpeg',
                 ]
             )
-            ->setAttr(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
+            ->setAttribute(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
 
         $form->submit('upload');
         return $form;

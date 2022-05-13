@@ -82,10 +82,10 @@ final class Manage implements ModelInterface
 
 
         foreach ($options as $key => $option) {
-            $form->group()->setAttr(AttributeFactory::create('id', 'group'))->add([
+            $form->group()->setAttribute(AttributeFactory::create('id', 'group'))->add([
                 (new Text(
                     'options[' . $key . '][option]'
-                ))->setAttrs(
+                ))->setAttributes(
                    AttributeFactory::createFromArray( [
                        'class' => 'filter-option form-control',
                        'placeholder' => 'Опция',
@@ -94,7 +94,7 @@ final class Manage implements ModelInterface
                 ),
                 (new Text(
                     'options[' . $key . '][unit]'
-                ))->setAttrs(
+                ))->setAttributes(
                     AttributeFactory::createFromArray([
                         'class' => 'filter-unit form-control',
                         'placeholder' => 'ед.изм.',
@@ -103,7 +103,7 @@ final class Manage implements ModelInterface
                 ),
                 (new Text(
                     'options[' . $key . '][value]'
-                ))->setAttrs(
+                ))->setAttributes(
                    AttributeFactory::createFromArray( [
                        'class' => 'filter-value form-control',
                        'placeholder' => 'Значение',

@@ -36,7 +36,7 @@ final class Index implements ModelInterface
     public function getContext(): array
     {
         $form = new Form();
-        $form->hidden('nestable-output')->setAttr(AttributeFactory::create('id', 'nestable-output'));
+        $form->hidden('nestable-output')->setAttribute(AttributeFactory::create('id', 'nestable-output'));
         $form->submit('save', 'Сохранить');
 
 

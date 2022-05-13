@@ -110,7 +110,7 @@ final class Manage implements ModelInterface
 
         foreach ($this->priceGroups as $priceGroup) {
             $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
-                ->setAttr(AttributeFactory::create('step', '0.01'))
+                ->setAttribute(AttributeFactory::create('step', '0.01'))
                 ->setDescription($priceGroup->getCode());
         }
         $form->submit('set', 'Установить');
