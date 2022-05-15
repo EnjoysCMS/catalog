@@ -60,6 +60,11 @@ class Product
     private $images;
 
     /**
+     * @ORM\OneToMany(targetEntity="ProductFiles", mappedBy="product")
+     */
+    private $files;
+
+    /**
      * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product", cascade={"persist", "remove"})
      */
     private ?ProductMeta $meta = null;
@@ -112,6 +117,7 @@ class Product
         $this->options = new ArrayCollection();
         $this->urls = new ArrayCollection();
         $this->prices = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     /**
@@ -222,6 +228,11 @@ class Product
             return null;
         }
         return $image;
+    }
+
+    public function getFiles()
+    {
+        return $this->files;
     }
 
 
@@ -464,4 +475,6 @@ class Product
     {
         $this->unit = $unit;
     }
+
+
 }

@@ -1,0 +1,73 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{{ title ?? product.getName }}
+                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i
+                            class="fas fa-external-link-alt"></i></a>
+                    <small class="d-block">{{ subtitle }}</small>
+                </h2>
+                <div class="float-right">
+                    {% include '@catalog_admin/products_admin_links.twig' %}
+                </div>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <a class="btn btn-primary mb-3" href="{{ path('@a/catalog/product/files/upload', {"id": product.getId}) }}">Загрузить файл</a>
+
+
+                <table class="table table-hover color-table inverse-table">
+                    <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Расположение</th>
+                        <th>Размер</th>
+                        <th>Статус</th>
+                        <th>Скачиваний</th>
+                        <th>Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for file in product.getFiles %}
+                        <tr>
+                            <td><b>{{ file.getTitle }}</b>
+                            </td>
+
+                            <td><code>{{ file.getFilename }}</code></td>
+                            <td>{{ file.getFilesize|bytes2iniSize }}</td>
+
+                            <td>{{ file.isStatus ? 'доступен' : 'не доступен' }}</td>
+                            <td>{{ file.getDownloads }}</td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{{ path('@a/catalog/product/files/delete', {"id": file.getId, "product": product.getId }) }}">Удалить</a>
+                                <a class="btn btn-primary"
+                                   href="/module/catalog/?app=download&amp;file=227/catalogo_freesun.pdf">Скачать</a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td>Нет загруженных файлов</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+                {#                     {{ form|raw }} #}
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}

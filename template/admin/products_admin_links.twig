@@ -28,9 +28,9 @@
         <a class="btn btn-default"
            href="{{ path('@a/catalog/product/urls', {"id": product.getId}) }}" title="URLs"><i class="fas fa-link"></i></a>
     {% endif %}
-    {% if access2route('catalog/admin/product/edit') %}
+    {% if access2route('@a/catalog/product/files') %}
         <a class="btn btn-default"
-           href="{{ path('catalog/admin/product/edit', {"id": product.getId}) }}" title="Файлы"><i
+           href="{{ path('@a/catalog/product/files', {"id": product.getId}) }}" title="Файлы"><i
                     class="fa fa-file"></i></a>
     {% endif %}
     {% if access2route('@a/catalog/product/prices') %}
