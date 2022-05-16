@@ -123,7 +123,7 @@ final class Manage implements ModelInterface
      */
     private function doAction(): void
     {
-        dd($this->requestWrapper->getPostData());
+
         $currency = $this->em->getRepository(Currency::class)->find($this->requestWrapper->getPostData('currency'));
 
         if ($currency === null) {
