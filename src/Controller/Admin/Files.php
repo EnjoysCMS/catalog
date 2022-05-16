@@ -103,7 +103,11 @@ final class Files extends AdminController
         $em->remove($file);
         $em->flush();
 
-        unlink($_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog_files' . DIRECTORY_SEPARATOR . $file->getFilename());
+        $filePath = $_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog_files' . DIRECTORY_SEPARATOR . $file->getFilename();
+        if (file_exists($filePath)){
+            unlink($filePath);
+        }
+
 
         Redirect::http(
             $this->getContainer()->get(UrlGeneratorInterface::class)->generate('@a/catalog/product/files', [

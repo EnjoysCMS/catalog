@@ -47,7 +47,7 @@ class ProductFiles
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="images")
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="files")
      */
     private Product $product;
 
