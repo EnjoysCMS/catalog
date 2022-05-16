@@ -68,7 +68,9 @@ final class Delete implements ModelInterface
     {
         $this->removeImages();
         $this->removeUrls();
-
+        $this->removePrices();
+        $this->removeFiles();
+        $this->entityManager->remove($this->product->getQuantity());
         $this->entityManager->remove($this->product);
 
         $this->entityManager->flush();
@@ -82,6 +84,23 @@ final class Delete implements ModelInterface
                 @unlink($item);
             }
             $this->entityManager->remove($image);
+        }
+    }
+
+    private function removeFiles(): void
+    {
+        foreach ($this->product->getFiles() as $file) {
+//            foreach (glob($image->getGlobPattern()) as $item) {
+//                @unlink($item);
+//            }
+            $this->entityManager->remove($file);
+        }
+    }
+
+    private function removePrices(): void
+    {
+        foreach ($this->product->getPrices() as $price) {
+            $this->entityManager->remove($price);
         }
     }
 
