@@ -96,7 +96,7 @@ final class Upload implements ModelInterface
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);
             $productFile->setFilename($file->getNameWithExtension());
-            $productFile->setFilesize($this->requestWrapper->getFilesData('file')->getSize());
+            $productFile->setFilesize($file->getSize());
             $productFile->setTitle(
                 empty($this->requestWrapper->getPostData('title'))
                     ? $this->requestWrapper->getFilesData('file')->getClientFilename()
