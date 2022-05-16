@@ -135,10 +135,11 @@ final class Product extends EntityRepository
     public function getFindByUrlBuilder(string $url, ?Category $category = null): QueryBuilder
     {
         $dql = $this->createQueryBuilder('p')
-            ->select('p', 'c', 't', 'i')
+            ->select('p', 'c', 't', 'i', 'f')
             ->leftJoin('p.category', 'c')
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.images', 'i')
+            ->leftJoin('p.files', 'f')
             ->orderBy('i.general', 'desc');
         if ($category === null) {
             $dql->where('p.category IS NULL');

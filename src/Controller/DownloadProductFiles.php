@@ -29,7 +29,7 @@ final class DownloadProductFiles extends BaseController
     public function __invoke(EntityManagerInterface $em, ServerRequestWrapper $request): ResponseInterface
     {
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
-            'filename' => $request->getAttributesData('filepath')
+            'filePath' => $request->getAttributesData('filepath')
         ]);
 
         if ($file === null) {
@@ -46,11 +46,11 @@ final class DownloadProductFiles extends BaseController
             ->withAddedHeader('Expires', 0)
             ->withAddedHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->withAddedHeader('Pragma', 'public')
-            ->withAddedHeader('Content-Length', $file->getFilesize())
+            ->withAddedHeader('Content-Length', $file->getFileSize())
         ;
         $response->getBody()->write(
             file_get_contents(
-                $_ENV['UPLOAD_DIR'] . '/catalog_files/' . $file->getFilename()
+                $_ENV['UPLOAD_DIR'] . '/catalog_files/' . $file->getFilePath()
             )
         );
         return $response;

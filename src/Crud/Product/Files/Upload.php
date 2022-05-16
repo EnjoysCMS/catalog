@@ -77,6 +77,7 @@ final class Upload implements ModelInterface
     {
         $form = new Form();
         $form->text('title', 'Наименование')->setDescription('Не обязательно');
+        $form->text('description', 'Описание')->setDescription('Не обязательно');
         $form->file('file', 'Выберите файл')->addRule(Rules::UPLOAD, null, ['required']);
         $form->submit(uniqid('submit'));
         return $form;
@@ -89,19 +90,22 @@ final class Upload implements ModelInterface
         );
 
         $file = new File('file', $storage);
-        $file->setName($this->product->getId() . '/' . $file->getName());
+//        dd($file->getExtension());
+        $originalName = $file->getName();
+        $extension = $file->getExtension();
+        $newName = md5((string)microtime(true));
+        $file->setName($newName[0] . '/' . $newName);
         try {
             $file->upload();
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);
-            $productFile->setFilename($file->getNameWithExtension());
-            $productFile->setFilesize($file->getSize());
-            $productFile->setTitle(
-                empty($this->requestWrapper->getPostData('title'))
-                    ? $this->requestWrapper->getFilesData('file')->getClientFilename()
-                    : $this->requestWrapper->getPostData('title')
-            );
+            $productFile->setFilePath($file->getNameWithExtension());
+            $productFile->setFileSize($file->getSize());
+            $productFile->setFileExtension($extension);
+            $productFile->setOriginalFilename($originalName);
+            $productFile->setDescription($this->requestWrapper->getPostData('description'));
+            $productFile->setTitle($this->requestWrapper->getPostData('title'));
 
             $this->em->persist($productFile);
             $this->em->flush();

@@ -103,7 +103,7 @@ final class Files extends AdminController
         $em->remove($file);
         $em->flush();
 
-        $filePath = $_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog_files' . DIRECTORY_SEPARATOR . $file->getFilename();
+        $filePath = $_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog_files' . DIRECTORY_SEPARATOR . $file->getFilePath();
         if (file_exists($filePath)){
             unlink($filePath);
         }

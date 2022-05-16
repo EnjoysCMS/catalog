@@ -26,14 +26,29 @@ class ProductFiles
     private ?string $title = null;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      */
-    private string $filename;
+    private ?string $description = null;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", name="file_path")
      */
-    private int $filesize;
+    private string $filePath;
+
+    /**
+     * @ORM\Column(type="string", name="original_filename")
+     */
+    private string $originalFilename;
+
+    /**
+     * @ORM\Column(type="string", name="file_extension")
+     */
+    private string $fileExtension;
+
+    /**
+     * @ORM\Column(type="integer", name="file_size")
+     */
+    private int $fileSize;
 
     /**
      * @ORM\Column(type="boolean", options={"default": true})
@@ -105,39 +120,39 @@ class ProductFiles
      */
     public function setTitle(?string $title): void
     {
-        $this->title = $title;
+        $this->title = (empty($title)) ? null : $title;
     }
 
     /**
      * @return string
      */
-    public function getFilename(): string
+    public function getFilePath(): string
     {
-        return $this->filename;
+        return $this->filePath;
     }
 
     /**
-     * @param string $filename
+     * @param string $filePath
      */
-    public function setFilename(string $filename): void
+    public function setFilePath(string $filePath): void
     {
-        $this->filename = $filename;
+        $this->filePath = $filePath;
     }
 
     /**
      * @return int
      */
-    public function getFilesize(): int
+    public function getFileSize(): int
     {
-        return $this->filesize;
+        return $this->fileSize;
     }
 
     /**
-     * @param int $filesize
+     * @param int $fileSize
      */
-    public function setFilesize(int $filesize): void
+    public function setFileSize(int $fileSize): void
     {
-        $this->filesize = $filesize;
+        $this->fileSize = $fileSize;
     }
 
     /**
@@ -154,5 +169,62 @@ class ProductFiles
     public function setStatus(bool $status): void
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOriginalFilename(): string
+    {
+        return $this->originalFilename;
+    }
+
+    /**
+     * @param string $originalFilename
+     */
+    public function setOriginalFilename(string $originalFilename): void
+    {
+        $this->originalFilename = $originalFilename;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string|null $description
+     */
+    public function setDescription(?string $description): void
+    {
+        $this->description = (empty($description)) ? null : $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileExtension(): string
+    {
+        return $this->fileExtension;
+    }
+
+    /**
+     * @param string $fileExtension
+     */
+    public function setFileExtension(string $fileExtension): void
+    {
+        $this->fileExtension = $fileExtension;
+    }
+
+    public function getFilename(): string
+    {
+        return str_replace(
+            ' ',
+            '_',
+            ($this->getTitle() ?? $this->getOriginalFilename()) . '.' . $this->getFileExtension()
+        );
     }
 }

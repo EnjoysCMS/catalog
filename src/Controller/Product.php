@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use DI\DependencyException;
 use DI\NotFoundException;
+use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -36,6 +37,8 @@ final class Product extends PublicController
     public function __invoke(ContainerInterface $container): ResponseInterface
     {
         $template_path = '@m/catalog/product.twig';
+
+        $this->twig->addExtension($container->get(ConvertSize::class));
 
         if (!$this->twig->getLoader()->exists($template_path)) {
             $template_path = __DIR__ . '/../../template/product.twig';

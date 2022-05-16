@@ -35,19 +35,23 @@
                     <tbody>
                     {% for file in product.getFiles %}
                         <tr>
-                            <td><b>{{ file.getTitle }}</b>
+                            <td><b>{{ file.getTitle ?? '-' }}</b>
+                                <small class="d-block">{{ file.getDescription }}</small>
                             </td>
 
-                            <td><code>{{ file.getFilename }}</code></td>
+                            <td>
+                                <code>{{ file.getFilename }}</code>
+                                <small class="d-block">{{ file.getFilePath }}</small>
+                            </td>
                             <td>{{ file.getFilesize|bytes2iniSize }}</td>
 
                             <td>{{ file.isStatus ? 'доступен' : 'не доступен' }}</td>
-                            <td>{{ file.getDownloads }}</td>
+                            <td><span class="badge bg-dark">{{ file.getDownloads }}</span></td>
                             <td>
                                 <a class="btn btn-primary"
                                    href="{{ path('@a/catalog/product/files/delete', {"id": file.getId, "product": product.getId }) }}">Удалить</a>
                                 <a class="btn btn-primary"
-                                   href="{{ path('@a/catalog/download-file', {'filepath': file.getFilename}) }}">Скачать</a>
+                                   href="{{ path('@a/catalog/download-file', {'filepath': file.getFilePath}) }}">Скачать</a>
                             </td>
                         </tr>
                     {% else %}
