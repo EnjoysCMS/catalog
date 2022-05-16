@@ -47,7 +47,7 @@
                                 <a class="btn btn-primary"
                                    href="{{ path('@a/catalog/product/files/delete', {"id": file.getId, "product": product.getId }) }}">Удалить</a>
                                 <a class="btn btn-primary"
-                                   href="/module/catalog/?app=download&amp;file=227/catalogo_freesun.pdf">Скачать</a>
+                                   href="{{ path('@a/catalog/download-file', {'filepath': file.getFilename}) }}">Скачать</a>
                             </td>
                         </tr>
                     {% else %}
