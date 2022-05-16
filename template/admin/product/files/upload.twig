@@ -1,9 +1,0 @@
-{% extends '@catalog_admin/form.twig' %}
-{% do asset('js', ['modules/admin/node_modules/bs-custom-file-input/dist/bs-custom-file-input.min.js']) %}
-{% block additional %}
-    <script>
-        $(document).ready(function () {
-          bsCustomFileInput.init()
-        })
-    </script>
-{% endblock %}

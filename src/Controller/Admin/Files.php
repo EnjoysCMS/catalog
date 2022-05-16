@@ -61,7 +61,7 @@ final class Files extends AdminController
     {
         return $this->responseText(
             $this->view(
-                $this->templatePath . '/product/files/upload.twig',
+                $this->templatePath . '/form.twig',
                 $this->getContext($this->container->get(Upload::class))
             )
         );

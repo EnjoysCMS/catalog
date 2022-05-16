@@ -1,5 +1,11 @@
 {% extends '@a/layout.twig' %}
 {% block content %}
+    {% do asset('js', ['modules/admin/node_modules/bs-custom-file-input/dist/bs-custom-file-input.min.js']) %}
+    <script>
+        $(document).ready(function () {
+          bsCustomFileInput.init()
+        })
+    </script>
 
     <section class="content">
 
