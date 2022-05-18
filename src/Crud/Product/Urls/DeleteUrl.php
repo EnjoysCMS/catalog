@@ -73,7 +73,15 @@ final class DeleteUrl implements ModelInterface
         return [
             'product' => $this->product,
             'form' => $this->renderer->output(),
-            'subtitle' => 'Редактирование URL'
+            'subtitle' => 'Удаление URL',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]
+                ) => 'Менеджер URLs',
+                'Удаление ссылки',
+            ],
         ];
     }
 

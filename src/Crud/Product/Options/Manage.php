@@ -23,6 +23,7 @@ use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
 {
@@ -36,7 +37,8 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper
+        private ServerRequestWrapper $requestWrapper,
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -69,7 +71,13 @@ final class Manage implements ModelInterface
             'product' => $this->product,
             'form' => $form,
             'delimiterOptions' =>Setting::get('delimiterOptions', '|'),
-            'subtitle' => 'Параметры'
+            'subtitle' => 'Параметры',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Характеристики: %s', $this->product->getName()),
+            ],
         ];
     }
 

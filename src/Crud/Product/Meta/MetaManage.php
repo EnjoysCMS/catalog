@@ -69,6 +69,12 @@ final class MetaManage implements ModelInterface
             'product' => $this->product,
             'subtitle' => 'Установка META данных HTML',
             'form' => $this->renderer->output(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('META-данные: %s', $this->product->getName()),
+            ],
         ];
     }
 

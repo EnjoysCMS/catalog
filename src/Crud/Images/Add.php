@@ -74,7 +74,13 @@ final class Add implements ModelInterface
         return [
             'form' => $this->renderer,
             'product' => $this->product,
-            'subtitle' => 'Загрузка изображения для продукта'
+            'subtitle' => 'Загрузка изображения для продукта',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Добавление нового изображения: `%s`', $this->product->getName()),
+            ],
         ];
     }
 

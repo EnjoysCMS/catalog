@@ -70,7 +70,15 @@ final class AddUrl implements ModelInterface
         return [
             'product' => $this->product,
             'form' => $this->renderer->output(),
-            'subtitle' => 'Добавление URL'
+            'subtitle' => 'Добавление URL',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]
+                ) => 'Менеджер URLs',
+                'Добавление ссылки',
+            ],
         ];
     }
 
@@ -83,8 +91,7 @@ final class AddUrl implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Сделать основным?'])
-        ;
+            ->fill([1 => 'Сделать основным?']);
 
         $form->text('path', 'Путь')->addRule(Rules::REQUIRED)
             ->addRule(
@@ -99,8 +106,7 @@ final class AddUrl implements ModelInterface
 
                     return is_null($product);
                 }
-            )
-        ;
+            );
         $form->submit('save', 'Добавить');
         return $form;
     }
@@ -116,7 +122,7 @@ final class AddUrl implements ModelInterface
         $url->setDefault((bool)$this->requestWrapper->getPostData('default', false));
         $url->setProduct($this->product);
 
-        if($url->isDefault()){
+        if ($url->isDefault()) {
             foreach ($this->product->getUrls() as $item) {
                 $item->setDefault(false);
             }

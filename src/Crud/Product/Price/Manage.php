@@ -80,7 +80,13 @@ final class Manage implements ModelInterface
         return [
             'product' => $this->product,
             'form' => $this->renderer->output(),
-            'subtitle' => 'Установка цен'
+            'subtitle' => 'Установка цен',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Менеджер цен: %s', $this->product->getName()),
+            ],
         ];
     }
 

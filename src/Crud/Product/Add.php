@@ -75,6 +75,12 @@ final class Add implements ModelInterface
         return [
             'form' => $this->renderer,
             'wysiwyg' => $wysiwyg->selector('#description'),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                'Добавление товара',
+            ],
         ];
     }
 

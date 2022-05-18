@@ -86,6 +86,12 @@ final class Edit implements ModelInterface
             'product' => $this->product,
             'subtitle' => 'Редактирование',
             'wysiwyg' => $wysiwyg->selector('#description'),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Редактирование общей информации `%s`', $this->product->getName()),
+            ],
         ];
     }
 

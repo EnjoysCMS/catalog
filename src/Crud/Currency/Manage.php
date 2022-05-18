@@ -11,13 +11,15 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
 {
     private ObjectRepository|EntityRepository $currencyRepository;
 
     public function __construct(
-        private EntityManager $em
+        private EntityManager $em,
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->currencyRepository = $this->em->getRepository(Currency::class);
     }
@@ -25,7 +27,12 @@ final class Manage implements ModelInterface
     public function getContext(): array
     {
         return [
-            'currencies' => $this->currencyRepository->findAll()
+            'currencies' => $this->currencyRepository->findAll(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют'
+            ],
         ];
     }
 }

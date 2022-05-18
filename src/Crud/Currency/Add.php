@@ -40,7 +40,13 @@ final class Add implements ModelInterface
         return [
             'title' => 'Добавление Валюты',
             'subtitle' => '',
-            'form' => $this->renderer
+            'form' => $this->renderer,
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
+                'Добавление валюты'
+            ],
         ];
     }
 

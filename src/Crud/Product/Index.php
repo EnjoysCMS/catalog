@@ -13,14 +13,18 @@ use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
 {
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
 
-    public function __construct(private EntityManager $em, private ServerRequestWrapper $requestWrapper)
-    {
+    public function __construct(
+        private EntityManager $em,
+        private ServerRequestWrapper $requestWrapper,
+        private UrlGeneratorInterface $urlGenerator
+    ) {
         $this->productRepository = $this->em->getRepository(Product::class);
     }
 
@@ -38,6 +42,11 @@ final class Index implements ModelInterface
         return [
             'products' => $result,
             'pagination' => $pagination,
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                'Список товаров (продуктов)',
+            ],
         ];
     }
 }

@@ -14,6 +14,7 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Setting implements ModelInterface
 {
@@ -23,7 +24,8 @@ final class Setting implements ModelInterface
     public function __construct(
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->setting = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
     }
@@ -37,7 +39,12 @@ final class Setting implements ModelInterface
 
         $this->renderer->setForm($form);
         return [
-            'form' => $this->renderer->output()
+            'form' => $this->renderer->output(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                'Настройки',
+            ],
         ];
     }
 

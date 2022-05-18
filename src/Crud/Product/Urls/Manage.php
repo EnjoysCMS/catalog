@@ -12,6 +12,7 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage  implements ModelInterface
 {
@@ -23,7 +24,8 @@ final class Manage  implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper
+        private ServerRequestWrapper $requestWrapper,
+        private UrlGeneratorInterface $urlGenerator
     ) {
 
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -47,7 +49,13 @@ final class Manage  implements ModelInterface
     {
         return [
             'product' => $this->product,
-            'subtitle' => 'URLs'
+            'subtitle' => 'URLs',
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Менеджер ссылок: %s', $this->product->getName()),
+            ],
         ];
     }
 }

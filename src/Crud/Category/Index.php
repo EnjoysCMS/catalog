@@ -50,7 +50,12 @@ final class Index implements ModelInterface
 
         return [
             'form' => $this->renderer->output(),
-            'categories' => $this->categoryRepository->getChildNodes()
+            'categories' => $this->categoryRepository->getChildNodes(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                'Категории',
+            ],
         ];
     }
 

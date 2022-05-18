@@ -16,6 +16,7 @@ use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class TagsList implements ModelInterface
 {
@@ -29,7 +30,8 @@ class TagsList implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -62,7 +64,13 @@ class TagsList implements ModelInterface
         return [
             'product' => $this->product,
             'subtitle' => 'Управление тегами',
-            'form' => $this->renderer->output()
+            'form' => $this->renderer->output(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                sprintf('Менеджер тегов: %s', $this->product->getName()),
+            ],
         ];
     }
 

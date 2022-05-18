@@ -73,7 +73,13 @@ final class Delete implements ModelInterface
         return [
             'title' => 'Удаление Валюты',
             'subtitle' => $this->currency->getName(),
-            'form' => $this->renderer
+            'form' => $this->renderer,
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
+                sprintf('Удаление валюты: %s', $this->currency->getName())
+            ],
         ];
     }
 

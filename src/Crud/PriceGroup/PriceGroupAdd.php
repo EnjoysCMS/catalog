@@ -36,7 +36,13 @@ final class PriceGroupAdd implements ModelInterface
         }
         $this->renderer->setForm($form);
         return [
-            'form' => $this->renderer->output()
+            'form' => $this->renderer->output(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/pricegroup') =>'Группы цен',
+                'Добавление новой группы цен'
+            ],
         ];
     }
 

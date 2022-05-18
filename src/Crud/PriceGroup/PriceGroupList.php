@@ -9,11 +9,12 @@ namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class PriceGroupList implements ModelInterface
 {
 
-    public function __construct(private EntityManager $em)
+    public function __construct(private EntityManager $em, private UrlGeneratorInterface $urlGenerator)
     {
     }
 
@@ -21,7 +22,12 @@ final class PriceGroupList implements ModelInterface
     {
 
         return [
-            'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll()
+            'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('admin/index') => 'Главная',
+                '#' => 'Каталог',
+                'Группы цен',
+            ],
         ];
     }
 
