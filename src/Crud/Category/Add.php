@@ -63,7 +63,7 @@ final class Add implements ModelInterface
             'wysiwyg' => $wysiwyg->selector('#description'),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
                 'Добавление новой категории',
             ],

@@ -61,7 +61,7 @@ final class Edit implements ModelInterface
             'form' => $this->renderer,
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
                 sprintf('Редактирование валюты: %s', $this->currency->getName())
             ],

@@ -44,7 +44,7 @@ final class Index implements ModelInterface
             'pagination' => $pagination,
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 'Список товаров (продуктов)',
             ],
         ];

@@ -69,7 +69,7 @@ final class Manage implements ModelInterface
             'subtitle' => 'Установка количества',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Настройка количества: `%s`', $this->product->getName()),
             ],

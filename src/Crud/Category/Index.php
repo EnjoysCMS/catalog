@@ -53,7 +53,7 @@ final class Index implements ModelInterface
             'categories' => $this->categoryRepository->getChildNodes(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 'Категории',
             ],
         ];

@@ -54,7 +54,7 @@ final class Delete implements ModelInterface
             'form' => $this->renderer,
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Удаление товара: `%s`', $this->product->getName()),
             ],

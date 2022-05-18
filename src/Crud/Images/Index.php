@@ -45,7 +45,7 @@ final class Index implements ModelInterface
             'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $this->product]),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер изображений: `%s`', $this->product->getName()),
             ],

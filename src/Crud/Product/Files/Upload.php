@@ -72,7 +72,7 @@ final class Upload implements ModelInterface
             'subtitle' => 'Загрузка файла',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 $this->urlGenerator->generate('@a/catalog/product/files', ['id' => $this->product->getId()]
                 ) => 'Менеджер файлов',

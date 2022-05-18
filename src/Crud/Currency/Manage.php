@@ -30,7 +30,7 @@ final class Manage implements ModelInterface
             'currencies' => $this->currencyRepository->findAll(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют'
             ],
         ];

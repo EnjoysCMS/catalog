@@ -77,7 +77,7 @@ final class Add implements ModelInterface
             'subtitle' => 'Загрузка изображения для продукта',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Добавление нового изображения: `%s`', $this->product->getName()),
             ],

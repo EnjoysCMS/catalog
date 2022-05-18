@@ -42,7 +42,7 @@ final class Setting implements ModelInterface
             'form' => $this->renderer->output(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
-                '#' => 'Каталог',
+                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 'Настройки',
             ],
         ];
