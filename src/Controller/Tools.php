@@ -21,6 +21,7 @@ final class Tools extends PublicController
      *      "comment": "Tools - транлитерация"
      *     }
      * )
+     * @deprecated
      */
     public function translit(): ResponseInterface
     {

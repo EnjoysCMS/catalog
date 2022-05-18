@@ -1,25 +1,23 @@
 {% extends '@catalog_admin/form.twig' %}
 
 {% block additional %}
+    {% do asset('js', [
+        'modules/catalog/node_modules/urlify/dist/urlify.js'
+    ]) %}
+
     <script>
+    let urlify = Urlify.create({
+      spaces:"-",
+      trim:true,
+      toLower:true
+    });
 
-
-        $(document).ready(
-            function () {
-                $("#name").on('click keyup', function () {
-                    let query = 'query=' + $(this).prop('value');
-
-                    (async () => {
-                        let response = await fetch('{{ path('tools/translit') }}', {
-                            method: 'POST',
-                           headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                            body: query
-                        });
-                        let result = await response.json();
-                        $("#url").val(result);
-                    })();
-                });
-            }
-        );
+    $(document).ready(
+        function () {
+            $("#name").on('click keyup', function () {
+                $("#url").val(urlify($(this).prop('value')));
+            });
+        }
+    );
     </script>
 {% endblock %}
