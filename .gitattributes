@@ -1,0 +1,6 @@
+.* export-ignore
+infection/ export-ignore
+phpunit.xml.dist export-ignore
+psalm.xml export-ignore
+tests/ export-ignore
+build/ export-ignore
