@@ -75,7 +75,7 @@ final class SearchBlock extends AbstractBlock
     {
         $form = new Form('get', $this->container->get(UrlGeneratorInterface::class)->generate('catalog/search'));
         $form->group()->add([
-            (new Search('q'))->addRule(Rules::LENGTH, null, ['>=' =>  3]),
+            (new Search('q'))->addRule(Rules::LENGTH, ['>=' =>  3]),
             new Submit('search', 'Искать')
         ]);
         return $form;
