@@ -86,7 +86,7 @@ final class Upload implements ModelInterface
         $form = new Form();
         $form->text('title', 'Наименование')->setDescription('Не обязательно');
         $form->text('description', 'Описание')->setDescription('Не обязательно');
-        $form->file('file', 'Выберите файл')->addRule(Rules::UPLOAD, null, ['required']);
+        $form->file('file', 'Выберите файл')->addRule(Rules::UPLOAD, ['required']);
         $form->submit(uniqid('submit'));
         return $form;
     }
