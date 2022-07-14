@@ -87,15 +87,15 @@ final class Add implements ModelInterface
 
     private function doAction(): void
     {
-        $this->uploadMethod->upload($this->requestWrapper);
+        foreach ($this->uploadMethod->upload($this->requestWrapper) as $item) {
+            $manageImage = new ManageImage($this->product, $this->entityManager);
+            $manageImage->addToDB(
+                $item->getName(),
+                $item->getExtension(),
+                $item->getFullPathFileNameWithExtension()
+            );
+        }
 
-        $manageImage = new ManageImage($this->product, $this->entityManager);
-
-        $manageImage->addToDB(
-            $this->uploadMethod->getName(),
-            $this->uploadMethod->getExtension(),
-            $this->uploadMethod->getFullPathFileNameWithExtension()
-        );
 
         Redirect::http(
             $this->urlGenerator->generate(

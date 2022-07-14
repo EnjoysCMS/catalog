@@ -89,9 +89,10 @@ final class Download implements LoadImage
     }
 
 
-    public function upload(ServerRequestWrapper $requestWrapper): void
+    public function upload(ServerRequestWrapper $requestWrapper): \Generator
     {
         $this->loadAndSave($requestWrapper->getPostData('image'));
+        yield $this;
     }
 
     public function loadAndSave(string $link): void

@@ -13,6 +13,7 @@ use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
 use Enjoys\Upload\Storage\FileSystem;
 use InvalidArgumentException;
+use Psr\Http\Message\UploadedFileInterface;
 
 final class Upload implements LoadImage
 {
@@ -80,6 +81,7 @@ final class Upload implements LoadImage
         $form = new Form();
 
         $form->file('image', 'Изображение')
+            ->setMultiple()
             ->addRule(
                 Rules::UPLOAD,
                 [
@@ -97,23 +99,40 @@ final class Upload implements LoadImage
     /**
      * @throws \Exception
      */
-    public function upload(ServerRequestWrapper $requestWrapper): void
+    public function upload(ServerRequestWrapper $requestWrapper): \Generator
     {
-        $filename = md5((string)microtime(true));
-        $subDirectory = $filename[0] . '/x/' . $filename[1];
+        $uploadedFiles = $this->getUploadedFiles($requestWrapper);
+        foreach ($uploadedFiles as $uploadedFile) {
+            $filename = md5((string)microtime(true));
+            $subDirectory = $filename[0] . '/x/' . $filename[1];
 
-        $storage = new FileSystem($_ENV['UPLOAD_DIR'] . '/catalog/' . $subDirectory);
-        $file = new File($requestWrapper->getFilesData('image'), $storage);
+            $storage = new FileSystem($_ENV['UPLOAD_DIR'] . '/catalog/' . $subDirectory);
+            $file = new File($uploadedFile, $storage);
 
-        $file->setFilename($filename);
-        try {
-            $path = $file->upload();
-            $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
-            $this->setExtension($file->getExtension());
-            $this->setFullPathFileNameWithExtension($path);
-        } catch (\Throwable $e) {
-            throw $e;
+            $file->setFilename($filename);
+            try {
+                $path = $file->upload();
+                $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
+                $this->setExtension($file->getExtension());
+                $this->setFullPathFileNameWithExtension($path);
+                yield $this;
+            } catch (\Throwable $e) {
+                throw $e;
+            }
         }
+    }
+
+    /**
+     * @param ServerRequestWrapper $request
+     * @return UploadedFileInterface[]
+     */
+    private function getUploadedFiles(ServerRequestWrapper $request): array
+    {
+        $images = $request->getFilesData('image');
+        if (is_array($images)){
+            return $images;
+        }
+        return [$images];
     }
 
 
