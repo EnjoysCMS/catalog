@@ -10,10 +10,9 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
-use EnjoysCMS\Module\Catalog\UploadFileSystem;
-use Exception;
+use Enjoys\Upload\File;
+use Enjoys\Upload\Storage\FileSystem;
 use InvalidArgumentException;
-use Upload\File;
 
 final class Upload implements LoadImage
 {
@@ -23,7 +22,7 @@ final class Upload implements LoadImage
 
     public function __construct()
     {
-        if(!isset($_ENV['UPLOAD_DIR'])){
+        if (!isset($_ENV['UPLOAD_DIR'])) {
             throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
         }
     }
@@ -88,27 +87,32 @@ final class Upload implements LoadImage
                     'maxsize' => 1024 * 1024 * 2,
                     'extensions' => 'jpg, png, jpeg',
                 ]
-            )
-            ->setAttribute(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
+            )->setAttribute(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
 
         $form->submit('upload');
         return $form;
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function upload(ServerRequestWrapper $requestWrapper): void
     {
-        $storage = new UploadFileSystem($_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR);
-        $file = new File('image', $storage);
-        $newName = md5((string)microtime(true));
-        $file->setName($newName[0] . '/' . $newName[1] . '/' . $newName);
+        $filename = md5((string)microtime(true));
+        $subDirectory = $filename[0] . '/x/' . $filename[1];
+
+        $storage = new FileSystem($_ENV['UPLOAD_DIR'] . '/catalog/' . $subDirectory);
+        $file = new File($requestWrapper->getFilesData('image'), $storage);
+
+        $file->setFilename($filename);
         try {
-            $file->upload();
-            $this->setName($file->getName());
+            $path = $file->upload();
+            $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
             $this->setExtension($file->getExtension());
-            $this->setFullPathFileNameWithExtension($storage->getFullPathFileNameWithExtension());
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage() . ' ' . implode(", ", $file->getErrors()));
+            $this->setFullPathFileNameWithExtension($path);
+        } catch (\Throwable $e) {
+            throw $e;
         }
     }
 
