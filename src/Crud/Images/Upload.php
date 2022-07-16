@@ -12,7 +12,7 @@ use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
 use Enjoys\Upload\Storage\FileSystem;
-use InvalidArgumentException;
+use EnjoysCMS\Module\Catalog\FileSystemAdapterInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
 final class Upload implements LoadImage
@@ -20,12 +20,14 @@ final class Upload implements LoadImage
     private string $name;
     private string $extension;
     private string $fullPathFileNameWithExtension;
+    private FileSystemAdapterInterface $filesystemAdapter;
 
-    public function __construct()
+    public function __construct($config)
     {
-        if (!isset($_ENV['UPLOAD_DIR'])) {
-            throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
-        }
+        $configFilesystem = $config['image'] ?? throw new \RuntimeException('Not set config `manageUploads.image`');
+        /** @var class-string $fileSystemClass */
+        $fileSystemClass = key($configFilesystem);
+        $this->filesystemAdapter = new $fileSystemClass(...current($configFilesystem));
     }
 
     /**
@@ -103,18 +105,18 @@ final class Upload implements LoadImage
     {
         $uploadedFiles = $this->getUploadedFiles($requestWrapper);
         foreach ($uploadedFiles as $uploadedFile) {
-            $filename = md5((string)microtime(true));
-            $subDirectory = $filename[0] . '/x/' . $filename[1];
+            $newFilename = md5((string)microtime(true));
+            $subDirectory = '/test/' . $newFilename[0] . '/' . $newFilename[1] .'/';
 
-            $storage = new FileSystem($_ENV['UPLOAD_DIR'] . '/catalog/' . $subDirectory);
-            $file = new File($uploadedFile, $storage);
 
-            $file->setFilename($filename);
+            $file = new File($uploadedFile, $this->filesystemAdapter->getFileSystem());
+
+            $file->setFilename($newFilename);
             try {
-                $path = $file->upload();
-                $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
+                $path = $file->upload($subDirectory);
+                $this->setName($subDirectory . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());
-                $this->setFullPathFileNameWithExtension($path);
+                $this->setFullPathFileNameWithExtension($this->filesystemAdapter->getFullPath($path));
                 yield $this;
             } catch (\Throwable $e) {
                 throw $e;
@@ -129,7 +131,7 @@ final class Upload implements LoadImage
     private function getUploadedFiles(ServerRequestWrapper $request): array
     {
         $images = $request->getFilesData('image');
-        if (is_array($images)){
+        if (is_array($images)) {
             return $images;
         }
         return [$images];

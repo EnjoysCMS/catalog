@@ -12,8 +12,10 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
@@ -37,7 +39,8 @@ final class Add implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        ContainerInterface $container
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
             $this->requestWrapper->getQueryData('product_id')
@@ -58,7 +61,7 @@ final class Add implements ModelInterface
 
         $method = '\EnjoysCMS\Module\Catalog\Crud\Images\\' . ucfirst($method);
 
-        $this->uploadMethod = new $method();
+        $this->uploadMethod = new $method(Config::getConfig($container)->get('manageUploads'));
     }
 
     public function getContext(): array

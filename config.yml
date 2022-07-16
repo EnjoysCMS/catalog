@@ -9,3 +9,11 @@ mailer:
 formSendRequest:
   useCaptcha: true
   captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
+manageUploads:
+  image:
+    EnjoysCMS\Module\Catalog\LocalUpload:
+      rootDirectory: /public/upload/catalog
+
+  files:
+    EnjoysCMS\Module\Catalog\LocalUpload:
+      rootDirectory: /upload/files
