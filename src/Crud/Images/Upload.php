@@ -12,6 +12,7 @@ use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
 use Enjoys\Upload\Storage\FileSystem;
+use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService;
 use EnjoysCMS\Module\Catalog\FileSystemAdapterInterface;
 use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -115,34 +116,11 @@ final class Upload implements LoadImage
             $file->setFilename($newFilename);
             try {
                 $file->upload($subDirectory);
-                Thumbnail::generateAndSave(
-                    $subDirectory . $file->getFilenameWithoutExtension() . '_small' . $file->getExtensionWithDot(),
-                    $file,
-                    [
-                        'resize' => [
-                            300,
-                            300,
-                            function ($constraint) {
-                                $constraint->aspectRatio();
-                                $constraint->upsize();
-                            }
-                        ]
-                    ]
-                );
-                Thumbnail::generateAndSave(
-                    $subDirectory . $file->getFilenameWithoutExtension() . '_large' . $file->getExtensionWithDot(),
-                    $file,
-                    [
-                        'resize' => [
-                            900,
-                            900,
-                            function ($constraint) {
-                                $constraint->aspectRatio();
-                                $constraint->upsize();
-                            }
-                        ]
-                    ]
-                );
+
+                $thumbnailService = new DefaultThumbnailService();
+                $thumbnailService->make($file);
+
+
 
                 $this->setName($subDirectory . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());

@@ -18,29 +18,6 @@ final class Thumbnail
             $img->$method(...$param);
         }
         $file->getFilesystem()->write($path, $img->encode()->getEncoded());
-//        $imgSmall->save(
-//            str_replace(
-//                $filename,
-//                $filename . '_small',
-//                $path
-//            )
-//        );
-//
-//        $imgLarge = ImageManagerStatic::make($path);
-//        $imgLarge->resize(
-//            900,
-//            900,
-//            function ($constraint) {
-//                $constraint->aspectRatio();
-//                $constraint->upsize();
-//            }
-//        );
-//        $imgLarge->save(
-//            str_replace(
-//                $filename,
-//                $filename . '_large',
-//                $path
-//            )
-//        );
+
     }
 }

@@ -10,6 +10,8 @@ formSendRequest:
   useCaptcha: true
   captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
 manageUploads:
+  thumbnail:
+    EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService:
   image:
     EnjoysCMS\Module\Catalog\StorageUpload\Local:
       rootDirectory: /public/upload/catalog/xx
