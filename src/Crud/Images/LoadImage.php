@@ -14,6 +14,6 @@ interface LoadImage
     public function getForm(): Form;
     public function getName(): string;
     public function getExtension(): string;
-    public function getFullPathFileNameWithExtension(): string;
+  //  public function getFullPathFileNameWithExtension(): string;
     public function upload(ServerRequestWrapper $requestWrapper): \Generator;
 }

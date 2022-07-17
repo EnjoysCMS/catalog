@@ -11,13 +11,17 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
+use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
 {
 
     private ?Image $image;
+    private StorageUploadInterface $storageUpload;
 
     /**
      * @throws NotFoundException
@@ -26,8 +30,17 @@ final class Delete implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        ContainerInterface $container
     ) {
+        $config = Config::getConfig($container)->get('manageUploads')['image'] ?? throw new \RuntimeException(
+                'Not set config `manageUploads.image`'
+            );
+        $fileSystemClass = key($config);
+        $this->storageUpload = new $fileSystemClass(...current($config));
+
+
+
         $this->image = $this->entityManager->getRepository(Image::class)->find(
             $this->requestWrapper->getQueryData('id', 0)
         );
@@ -74,10 +87,18 @@ final class Delete implements ModelInterface
 
     private function doAction(): void
     {
+        $filesystem = $this->storageUpload->getFileSystem();
+
+
         $product = $this->image->getProduct();
-        foreach (glob($this->image->getGlobPattern()) as $item) {
-            @unlink($item);
-        }
+
+        $filesystem->delete( $this->image->getFilename() . '.' . $this->image->getExtension());
+        $filesystem->delete( $this->image->getFilename() . '_small.' . $this->image->getExtension());
+        $filesystem->delete( $this->image->getFilename() . '_large.' . $this->image->getExtension());
+
+//        foreach (glob($this->image->getGlobPattern()) as $item) {
+//            @unlink($item);
+//        }
         $this->entityManager->remove($this->image);
         $this->entityManager->flush();
 

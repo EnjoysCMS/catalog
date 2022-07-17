@@ -13,6 +13,7 @@ use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
 use Enjoys\Upload\Storage\FileSystem;
 use EnjoysCMS\Module\Catalog\FileSystemAdapterInterface;
+use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
 final class Upload implements LoadImage
@@ -20,14 +21,14 @@ final class Upload implements LoadImage
     private string $name;
     private string $extension;
     private string $fullPathFileNameWithExtension;
-    private FileSystemAdapterInterface $filesystemAdapter;
+    private StorageUploadInterface $storageUpload;
 
     public function __construct($config)
     {
-        $configFilesystem = $config['image'] ?? throw new \RuntimeException('Not set config `manageUploads.image`');
+        //$configFilesystem = $config['image'] ?? throw new \RuntimeException('Not set config `manageUploads.image`');
         /** @var class-string $fileSystemClass */
-        $fileSystemClass = key($configFilesystem);
-        $this->filesystemAdapter = new $fileSystemClass(...current($configFilesystem));
+        $fileSystemClass = key($config);
+        $this->storageUpload = new $fileSystemClass(...current($config));
     }
 
     /**
@@ -65,18 +66,18 @@ final class Upload implements LoadImage
     /**
      * @return string
      */
-    public function getFullPathFileNameWithExtension(): string
-    {
-        return $this->fullPathFileNameWithExtension;
-    }
+//    public function getFullPathFileNameWithExtension(): string
+//    {
+//        return $this->fullPathFileNameWithExtension;
+//    }
 
-    /**
-     * @param string $fullPathFileNameWithExtension
-     */
-    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
-    {
-        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
-    }
+//    /**
+//     * @param string $fullPathFileNameWithExtension
+//     */
+//    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
+//    {
+//        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
+//    }
 
     public function getForm(): Form
     {
@@ -106,17 +107,46 @@ final class Upload implements LoadImage
         $uploadedFiles = $this->getUploadedFiles($requestWrapper);
         foreach ($uploadedFiles as $uploadedFile) {
             $newFilename = md5((string)microtime(true));
-            $subDirectory = '/test/' . $newFilename[0] . '/' . $newFilename[1] .'/';
+            $subDirectory = 'test/' . $newFilename[0] . '/' . $newFilename[1] . '/';
 
 
-            $file = new File($uploadedFile, $this->filesystemAdapter->getFileSystem());
+            $file = new File($uploadedFile, $this->storageUpload->getFileSystem());
 
             $file->setFilename($newFilename);
             try {
-                $path = $file->upload($subDirectory);
+                $file->upload($subDirectory);
+                Thumbnail::generateAndSave(
+                    $subDirectory . $file->getFilenameWithoutExtension() . '_small' . $file->getExtensionWithDot(),
+                    $file,
+                    [
+                        'resize' => [
+                            300,
+                            300,
+                            function ($constraint) {
+                                $constraint->aspectRatio();
+                                $constraint->upsize();
+                            }
+                        ]
+                    ]
+                );
+                Thumbnail::generateAndSave(
+                    $subDirectory . $file->getFilenameWithoutExtension() . '_large' . $file->getExtensionWithDot(),
+                    $file,
+                    [
+                        'resize' => [
+                            900,
+                            900,
+                            function ($constraint) {
+                                $constraint->aspectRatio();
+                                $constraint->upsize();
+                            }
+                        ]
+                    ]
+                );
+
                 $this->setName($subDirectory . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());
-                $this->setFullPathFileNameWithExtension($this->filesystemAdapter->getFullPath($path));
+
                 yield $this;
             } catch (\Throwable $e) {
                 throw $e;

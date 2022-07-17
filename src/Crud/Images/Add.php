@@ -61,7 +61,11 @@ final class Add implements ModelInterface
 
         $method = '\EnjoysCMS\Module\Catalog\Crud\Images\\' . ucfirst($method);
 
-        $this->uploadMethod = new $method(Config::getConfig($container)->get('manageUploads'));
+        $this->uploadMethod = new $method(
+            Config::getConfig($container)->get('manageUploads')['image'] ?? throw new \RuntimeException(
+                'Not set config `manageUploads.image`'
+            )
+        );
     }
 
     public function getContext(): array
@@ -95,7 +99,7 @@ final class Add implements ModelInterface
             $manageImage->addToDB(
                 $item->getName(),
                 $item->getExtension(),
-                $item->getFullPathFileNameWithExtension()
+           //     $item->getFullPathFileNameWithExtension()
             );
         }
 

@@ -9,7 +9,6 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use Intervention\Image\ImageManagerStatic;
 
 final class ManageImage
 {
@@ -23,7 +22,7 @@ final class ManageImage
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
     }
 
-    public function addToDB(string $filename, string $extension, string $path): void
+    public function addToDB(string $filename, string $extension): void
     {
         $image = new Image();
         $image->setProduct($this->product);
@@ -33,40 +32,6 @@ final class ManageImage
 
         $this->entityManager->persist($image);
         $this->entityManager->flush();
-
-        $imgSmall = ImageManagerStatic::make($path);
-        $imgSmall->resize(
-            300,
-            300,
-            function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            }
-        );
-        $imgSmall->save(
-            str_replace(
-                $filename,
-                $filename . '_small',
-                $path
-            )
-        );
-
-        $imgLarge = ImageManagerStatic::make($path);
-        $imgLarge->resize(
-            900,
-            900,
-            function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            }
-        );
-        $imgLarge->save(
-            str_replace(
-                $filename,
-                $filename . '_large',
-                $path
-            )
-        );
     }
 
 }
