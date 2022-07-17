@@ -27,8 +27,11 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 final class DownloadProductFiles extends BaseController
 {
-    public function __invoke(EntityManagerInterface $em, ServerRequestWrapper $request, Config $config): ResponseInterface
-    {
+    public function __invoke(
+        EntityManagerInterface $em,
+        ServerRequestWrapper $request,
+        Config $config
+    ): ResponseInterface {
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
             'filePath' => $request->getAttributesData('filepath')
         ]);
@@ -36,6 +39,10 @@ final class DownloadProductFiles extends BaseController
         if ($file === null) {
             throw new NoResultException();
         }
+
+        /** @var ProductFiles $file */
+        $filesystem = $config->getFileStorageUpload($file->getStorage())->getFileSystem();
+
         /** @var ProductFiles $file */
         $file->setDownloads($file->getDownloads() + 1);
         $em->flush();
@@ -49,11 +56,7 @@ final class DownloadProductFiles extends BaseController
             ->withAddedHeader('Pragma', 'public')
             ->withAddedHeader('Content-Length', $file->getFileSize())
         ;
-        $response->getBody()->write(
-            file_get_contents(
-                $_ENV['UPLOAD_DIR'] . '/catalog_files/' . $file->getFilePath()
-            )
-        );
+        $response->getBody()->write($filesystem->read($file->getFilePath()));
         return $response;
     }
 }
