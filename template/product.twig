@@ -67,8 +67,8 @@
         <h3>Фото</h3>
         <ul>
             {% for image in product.getImages %}
-                <li><img src="{{ _ENV.UPLOAD_URL }}/catalog/{{ image.filename }}_small.{{ image.extension }}"
-                         alt="{{ image.filename }}.{{ image.extension }}"/>{{ image.filename }}.{{ image.extension }}
+                <li><img src="{{ config.getImageStorageUpload(image.storage).url(image.getFilename ~ '_small.' ~ image.getExtension) }}"
+                         alt="{{ image.filename }}.{{ image.extension }}"/>{{ config.getImageStorageUpload(image.storage).url(image.getFilename ~ '.' ~ image.getExtension) }}
                 </li>
             {% endfor %}
         </ul>

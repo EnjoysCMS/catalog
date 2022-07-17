@@ -11,7 +11,6 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use InvalidArgumentException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
@@ -28,10 +27,6 @@ final class Index implements ModelInterface
         private UrlGeneratorInterface $urlGenerator,
         private Config $config
     ) {
-        if (!isset($_ENV['UPLOAD_URL'])) {
-            throw new InvalidArgumentException('Not set UPLOAD_URL in .env');
-        }
-
         $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryData('product_id'));
         if ($this->product === null) {
             throw new NotFoundException(

@@ -43,7 +43,6 @@
                                 <!-- /.box-header -->
                                 <div class="card-body">
                                     <img
-{#                                        src="{{ _ENV.UPLOAD_URL ~ '/catalog/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}"/>#}
                                         src="{{ config.getImageStorageUpload(image.storage).url(image.getFilename ~ '_small.' ~ image.getExtension) }}"/>
                                 </div>
                                 <!-- /.box-body -->
