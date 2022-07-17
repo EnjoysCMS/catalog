@@ -42,6 +42,18 @@ final class Config
         return new $storageUploadClass(...current($storageUploadConfig));
     }
 
+    public function getFileStorageUpload($storageName = null): StorageUploadInterface
+    {
+        $storageName = $storageName ?? $this->config->get('productFileStorage');
+
+        $storageUploadConfig = $this->config->get('storageUploads')[$storageName] ?? throw new \RuntimeException(
+                sprintf('Not set config `storageUploads.%s`', $storageName)
+            );
+        /** @var class-string $storageUploadClass */
+        $storageUploadClass = key($storageUploadConfig);
+        return new $storageUploadClass(...current($storageUploadConfig));
+    }
+
     public function getThumbnailService(): ThumbnailServiceInterface
     {
         $thumbnailServiceConfig = $this->config->get('thumbnailService');

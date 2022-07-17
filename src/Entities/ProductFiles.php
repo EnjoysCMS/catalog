@@ -66,6 +66,11 @@ class ProductFiles
      */
     private Product $product;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, options={"default": "file_default"})
+     */
+    private string $storage;
 
     /**
      * @return Product
@@ -226,5 +231,21 @@ class ProductFiles
             '_',
             ($this->getTitle() ?? $this->getOriginalFilename()) . '.' . $this->getFileExtension()
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorage(): string
+    {
+        return $this->storage;
+    }
+
+    /**
+     * @param string $storage
+     */
+    public function setStorage(string $storage): void
+    {
+        $this->storage = $storage;
     }
 }

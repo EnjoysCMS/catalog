@@ -10,6 +10,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -25,7 +26,8 @@ final class Manage implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -48,6 +50,7 @@ final class Manage implements ModelInterface
     {
         return [
             'product' => $this->product,
+            'config' => $this->config,
             'subtitle' => 'Управление файлами',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',

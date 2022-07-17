@@ -16,12 +16,11 @@ use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
-use EnjoysCMS\Module\Catalog\UploadFileSystem;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Upload\File;
 
 final class Upload implements ModelInterface
 {
@@ -36,7 +35,8 @@ final class Upload implements ModelInterface
         private EntityManager $em,
         private RendererInterface $renderer,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -93,25 +93,24 @@ final class Upload implements ModelInterface
 
     private function doAction()
     {
-        $storage = new UploadFileSystem(
-            $_ENV['UPLOAD_DIR'] . DIRECTORY_SEPARATOR . 'catalog_files' . DIRECTORY_SEPARATOR, true
-        );
 
-        $file = new File('file', $storage);
-//        dd($file->getExtension());
-        $originalName = $file->getName();
-        $extension = $file->getExtension();
+        $uploadedFile = $this->requestWrapper->getFilesData('file');
+        $storage = $this->config->getFileStorageUpload();
+        $filesystem = $storage->getFileSystem();
+
+        $file = new \Enjoys\Upload\File($uploadedFile, $filesystem);
+
         $newName = md5((string)microtime(true));
-        $file->setName($newName[0] . '/' . $newName);
+        $file->setFilename($newName[0] . '/' . $newName);
         try {
             $file->upload();
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);
-            $productFile->setFilePath($file->getNameWithExtension());
+            $productFile->setFilePath($file->getFilename());
             $productFile->setFileSize($file->getSize());
-            $productFile->setFileExtension($extension);
-            $productFile->setOriginalFilename($originalName);
+            $productFile->setFileExtension($file->getExtension());
+            $productFile->setOriginalFilename($file->getOriginalFilename());
             $productFile->setDescription($this->requestWrapper->getPostData('description'));
             $productFile->setTitle($this->requestWrapper->getPostData('title'));
 
@@ -124,7 +123,7 @@ final class Upload implements ModelInterface
                 ])
             );
         } catch (\Exception $e) {
-            throw new \InvalidArgumentException($e->getMessage() . ' ' . implode(", ", $file->getErrors()));
+            throw $e;
         }
     }
 }

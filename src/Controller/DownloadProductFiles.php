@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\BaseController;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 final class DownloadProductFiles extends BaseController
 {
-    public function __invoke(EntityManagerInterface $em, ServerRequestWrapper $request): ResponseInterface
+    public function __invoke(EntityManagerInterface $em, ServerRequestWrapper $request, Config $config): ResponseInterface
     {
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
             'filePath' => $request->getAttributesData('filepath')
