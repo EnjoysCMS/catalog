@@ -34,13 +34,8 @@ final class Local implements StorageUploadInterface
         );
     }
 
-    public function getFullPath(string $relativePath): string
+    public function getUrl(string $path): string
     {
-        return $this->rootDirectory . $relativePath;
-    }
-
-    public function getUrl(string $relativePath): string
-    {
-        return $this->publicUrl . $relativePath;
+        return $this->publicUrl . $path;
     }
 }

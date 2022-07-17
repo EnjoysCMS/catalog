@@ -11,5 +11,5 @@ use League\Flysystem\FilesystemOperator;
 interface StorageUploadInterface
 {
     public function getFileSystem(): FilesystemOperator;
-    public function getFullPath(string $relativePath): string;
+    public function getUrl(string $path): string;
 }
