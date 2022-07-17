@@ -6,7 +6,6 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
 
 
-use Enjoys\Upload\File;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManagerStatic;
 use League\Flysystem\FilesystemException;
@@ -15,18 +14,18 @@ use League\Flysystem\FilesystemOperator;
 final class DefaultThumbnailService implements ThumbnailServiceInterface
 {
 
+
     /**
      * @throws FilesystemException
      */
-    public function make(File $file): void
+    public function make(FilesystemOperator $filesystem, string $filename, $data): void
     {
-        $data = $file->getUploadedFile()->getStream()->getContents();
 
         $this->save(
             str_replace(
-                $file->getExtensionWithDot(),
-                '_small' . $file->getExtensionWithDot(),
-                $file->getTargetPath()
+                '.',
+                '_small.',
+                $filename
             ),
             $this->generate($data, [
                 'resize' => [
@@ -38,14 +37,14 @@ final class DefaultThumbnailService implements ThumbnailServiceInterface
                     }
                 ]
             ]),
-            $file->getFilesystem()
+            $filesystem
         );
 
         $this->save(
             str_replace(
-                $file->getExtensionWithDot(),
-                '_large' . $file->getExtensionWithDot(),
-                $file->getTargetPath()
+                '.',
+                '_large.',
+                $filename
             ),
             $this->generate($data, [
                 'resize' => [
@@ -57,7 +56,7 @@ final class DefaultThumbnailService implements ThumbnailServiceInterface
                     }
                 ]
             ]),
-            $file->getFilesystem()
+            $filesystem
         );
     }
 

@@ -8,26 +8,25 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Enjoys\Forms\Form;
 use Enjoys\ServerRequestWrapper;
+use EnjoysCMS\Module\Catalog\Config;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
-use InvalidArgumentException;
+use League\Flysystem\FilesystemOperator;
 
 final class Download implements LoadImage
 {
     private string $name;
     private string $extension;
     private string $fullPathFileNameWithExtension;
-    private string $uploadDir;
+    private FilesystemOperator $filesystem;
+    private ThumbnailService\ThumbnailServiceInterface $thumbnailService;
 
 
-    public function __construct()
+    public function __construct(private Config $config)
     {
-        if(!isset($_ENV['UPLOAD_DIR'])){
-            throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
-        }
-
-        $this->uploadDir = rtrim($_ENV['UPLOAD_DIR'], '/') . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR;
+        $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
+        $this->thumbnailService = $this->config->getThumbnailService();
     }
 
     /**
@@ -62,21 +61,6 @@ final class Download implements LoadImage
         $this->extension = $extension;
     }
 
-    /**
-     * @return string
-     */
-    public function getFullPathFileNameWithExtension(): string
-    {
-        return $this->fullPathFileNameWithExtension;
-    }
-
-    /**
-     * @param string $fullPathFileNameWithExtension
-     */
-    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
-    {
-        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
-    }
 
     public function getForm(): Form
     {
@@ -106,15 +90,14 @@ final class Download implements LoadImage
         $response = $client->get($link);
         $data = $response->getBody()->getContents();
         $ext = $this->getExt($response->getHeaderLine('Content-Type'));
-        $newName = md5((string)microtime(true));
-        $this->setName($newName[0] . '/' . $newName[1] . '/' . $newName);
+        $newFilename = md5((string)microtime(true));
+        $subDirectory = $newFilename[0] . '/' . $newFilename[1];
+        $this->setName($subDirectory . '/' . $newFilename);
         $this->setExtension($ext);
-        $this->setFullPathFileNameWithExtension($this->uploadDir . $this->getName() . '.' . $this->getExtension());
 
-        $directory = pathinfo($this->getFullPathFileNameWithExtension(), PATHINFO_DIRNAME);
-        $this->makeDirectory($directory);
-
-        file_put_contents($this->getFullPathFileNameWithExtension(), $data);
+        $targetPath = $this->getName() . '.' . $this->getExtension();
+        $this->filesystem->write($targetPath, $data);
+        $this->thumbnailService->make($this->filesystem, $targetPath, $data);
     }
 
     private function makeDirectory(string $directory): void

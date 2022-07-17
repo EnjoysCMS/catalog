@@ -111,7 +111,11 @@ final class Upload implements LoadImage
             $file->setFilename($newFilename);
             try {
                 $file->upload($subDirectory);
-                $this->thumbnailService->make($file);
+                $this->thumbnailService->make(
+                    $this->filesystem,
+                    $file->getTargetPath(),
+                    $file->getUploadedFile()->getStream()->getContents()
+                );
 
                 $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());

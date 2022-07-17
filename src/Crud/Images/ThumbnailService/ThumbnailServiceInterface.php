@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
 
-use Enjoys\Upload\File;
+use League\Flysystem\FilesystemOperator;
 
 interface ThumbnailServiceInterface
 {
-    public function make(File $file): void;
+    public function make(FilesystemOperator $filesystem, string $filename, $data): void;
 }
