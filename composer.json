@@ -13,7 +13,7 @@
         "league/flysystem": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.0",
         "intervention/image": "^2.5",
-        "enjoys/upload": "dev-dev",
+        "enjoys/upload": "^2.0",
         "beberlei/doctrineextensions": "^1.3",
         "enjoys/forms": ">= 5.4.2"
     },
