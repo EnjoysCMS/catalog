@@ -31,6 +31,13 @@ class Image
     private string $extension;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", length=50, options={"default": "image_default"})
+     */
+    private string $storage;
+
+
+    /**
      * @ORM\Column(type="boolean", options={"default": false})
      */
     private bool $general = false;
@@ -94,6 +101,16 @@ class Image
     public function setProduct(Product $product): void
     {
         $this->product = $product;
+    }
+
+    public function getStorage(): string
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(string $storage): void
+    {
+        $this->storage = $storage;
     }
 
     /**

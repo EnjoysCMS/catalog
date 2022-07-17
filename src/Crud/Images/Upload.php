@@ -11,21 +11,20 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
-use Enjoys\Upload\Storage\FileSystem;
-use InvalidArgumentException;
+use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\UploadedFileInterface;
 
 final class Upload implements LoadImage
 {
     private string $name;
     private string $extension;
-    private string $fullPathFileNameWithExtension;
+    private ThumbnailService\ThumbnailServiceInterface $thumbnailService;
+    private \League\Flysystem\FilesystemOperator $filesystem;
 
-    public function __construct()
+    public function __construct(private Config $config)
     {
-        if (!isset($_ENV['UPLOAD_DIR'])) {
-            throw new InvalidArgumentException('Not set UPLOAD_DIR in .env');
-        }
+        $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
+        $this->thumbnailService = $this->config->getThumbnailService();
     }
 
     /**
@@ -63,18 +62,18 @@ final class Upload implements LoadImage
     /**
      * @return string
      */
-    public function getFullPathFileNameWithExtension(): string
-    {
-        return $this->fullPathFileNameWithExtension;
-    }
+//    public function getFullPathFileNameWithExtension(): string
+//    {
+//        return $this->fullPathFileNameWithExtension;
+//    }
 
-    /**
-     * @param string $fullPathFileNameWithExtension
-     */
-    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
-    {
-        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
-    }
+//    /**
+//     * @param string $fullPathFileNameWithExtension
+//     */
+//    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
+//    {
+//        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
+//    }
 
     public function getForm(): Form
     {
@@ -103,18 +102,20 @@ final class Upload implements LoadImage
     {
         $uploadedFiles = $this->getUploadedFiles($requestWrapper);
         foreach ($uploadedFiles as $uploadedFile) {
-            $filename = md5((string)microtime(true));
-            $subDirectory = $filename[0] . '/x/' . $filename[1];
+            $newFilename = md5((string)microtime(true));
+            $subDirectory = $newFilename[0] . '/' . $newFilename[1];
 
-            $storage = new FileSystem($_ENV['UPLOAD_DIR'] . '/catalog/' . $subDirectory);
-            $file = new File($uploadedFile, $storage);
 
-            $file->setFilename($filename);
+            $file = new File($uploadedFile, $this->filesystem);
+
+            $file->setFilename($newFilename);
             try {
-                $path = $file->upload();
+                $file->upload($subDirectory);
+                $this->thumbnailService->make($file);
+
                 $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());
-                $this->setFullPathFileNameWithExtension($path);
+
                 yield $this;
             } catch (\Throwable $e) {
                 throw $e;
@@ -129,7 +130,7 @@ final class Upload implements LoadImage
     private function getUploadedFiles(ServerRequestWrapper $request): array
     {
         $images = $request->getFilesData('image');
-        if (is_array($images)){
+        if (is_array($images)) {
             return $images;
         }
         return [$images];
