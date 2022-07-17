@@ -14,6 +14,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
+use Enjoys\Upload\File;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
@@ -98,7 +99,7 @@ final class Upload implements ModelInterface
         $storage = $this->config->getFileStorageUpload();
         $filesystem = $storage->getFileSystem();
 
-        $file = new \Enjoys\Upload\File($uploadedFile, $filesystem);
+        $file = new File($uploadedFile, $filesystem);
 
         $newName = md5((string)microtime(true));
         $file->setFilename($newName[0] . '/' . $newName);
