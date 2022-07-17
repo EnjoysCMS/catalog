@@ -9,12 +9,27 @@ mailer:
 formSendRequest:
   useCaptcha: true
   captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
-manageUploads:
-  thumbnail:
-    EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService:
-  image:
+
+thumbnailService:
+  EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService: []
+
+storageUploads:
+  image_default: &im_storage
     EnjoysCMS\Module\Catalog\StorageUpload\Local:
-      rootDirectory: /public/upload/catalog/xx
+      rootDirectory: /public/upload/catalog
+      publicUrl: /upload/catalog
       permissionMap:
         dir:
           private: 0755
+
+  file_default:
+    EnjoysCMS\Module\Catalog\StorageUpload\Local:
+      rootDirectory: /public/upload/catalog_files
+      publicUrl: /upload/catalog_files
+      permissionMap:
+        dir:
+          private: 0755
+
+productImageStorage: image_default
+productFileStorage: file_default
+

@@ -13,15 +13,12 @@ use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
-use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
 {
 
     private ?Image $image;
-    private StorageUploadInterface $storageUpload;
 
     /**
      * @throws NotFoundException
@@ -31,15 +28,8 @@ final class Delete implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        ContainerInterface $container
+        private Config $config
     ) {
-        $config = Config::getConfig($container)->get('manageUploads')['image'] ?? throw new \RuntimeException(
-                'Not set config `manageUploads.image`'
-            );
-        $fileSystemClass = key($config);
-        $this->storageUpload = new $fileSystemClass(...current($config));
-
-
 
         $this->image = $this->entityManager->getRepository(Image::class)->find(
             $this->requestWrapper->getQueryData('id', 0)
@@ -87,7 +77,7 @@ final class Delete implements ModelInterface
 
     private function doAction(): void
     {
-        $filesystem = $this->storageUpload->getFileSystem();
+        $filesystem = $this->config->getImageStorageUpload($this->image->getStorage())->getFileSystem();
 
 
         $product = $this->image->getProduct();

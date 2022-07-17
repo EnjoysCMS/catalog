@@ -11,6 +11,7 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -23,7 +24,8 @@ final class Index implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
     }
@@ -41,6 +43,7 @@ final class Index implements ModelInterface
         $pagination->setTotalItems($result->count());
         return [
             'products' => $result,
+            'config' => $this->config,
             'pagination' => $pagination,
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',

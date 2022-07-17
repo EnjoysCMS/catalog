@@ -69,7 +69,7 @@
                             <td>
                                 {% if image %}
                                     <img class="w-50"
-                                         src="{{ _ENV.UPLOAD_URL ~ '/catalog/' ~ image.getFilename ~ '_small.' ~ image.getExtension }}">
+                                         src="{{ config.getImageStorageUpload(image.storage).url(image.getFilename ~ '_small.' ~ image.getExtension) }}">
                                 {% endif %}
                             </td>
                             <td>

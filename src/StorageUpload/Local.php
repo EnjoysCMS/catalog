@@ -14,10 +14,12 @@ use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 final class Local implements StorageUploadInterface
 {
     private string $rootDirectory;
+    private string $publicUrl;
 
-    public function __construct(string $rootDirectory, private array $permissionMap = [])
+    public function __construct(string $rootDirectory, string $publicUrl, private array $permissionMap = [])
     {
         $this->rootDirectory = $_ENV['PROJECT_DIR'] . rtrim($rootDirectory, '/') . '/';
+        $this->publicUrl = rtrim($publicUrl, '/') . '/';
     }
 
     public function getFileSystem(): FilesystemOperator
@@ -35,5 +37,10 @@ final class Local implements StorageUploadInterface
     public function getFullPath(string $relativePath): string
     {
         return $this->rootDirectory . $relativePath;
+    }
+
+    public function getUrl(string $relativePath): string
+    {
+        return $this->publicUrl . $relativePath;
     }
 }

@@ -11,25 +11,20 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
-use Enjoys\Upload\Storage\FileSystem;
-use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService;
-use EnjoysCMS\Module\Catalog\FileSystemAdapterInterface;
-use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\UploadedFileInterface;
 
 final class Upload implements LoadImage
 {
     private string $name;
     private string $extension;
-    private string $fullPathFileNameWithExtension;
-    private StorageUploadInterface $storageUpload;
+    private ThumbnailService\ThumbnailServiceInterface $thumbnailService;
+    private \League\Flysystem\FilesystemOperator $filesystem;
 
-    public function __construct($config)
+    public function __construct(private Config $config)
     {
-        //$configFilesystem = $config['image'] ?? throw new \RuntimeException('Not set config `manageUploads.image`');
-        /** @var class-string $fileSystemClass */
-        $fileSystemClass = key($config);
-        $this->storageUpload = new $fileSystemClass(...current($config));
+        $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
+        $this->thumbnailService = $this->config->getThumbnailService();
     }
 
     /**
@@ -108,21 +103,17 @@ final class Upload implements LoadImage
         $uploadedFiles = $this->getUploadedFiles($requestWrapper);
         foreach ($uploadedFiles as $uploadedFile) {
             $newFilename = md5((string)microtime(true));
-            $subDirectory = 'test/' . $newFilename[0] . '/' . $newFilename[1] . '/';
+            $subDirectory = $newFilename[0] . '/' . $newFilename[1];
 
 
-            $file = new File($uploadedFile, $this->storageUpload->getFileSystem());
+            $file = new File($uploadedFile, $this->filesystem);
 
             $file->setFilename($newFilename);
             try {
                 $file->upload($subDirectory);
+                $this->thumbnailService->make($file);
 
-                $thumbnailService = new DefaultThumbnailService();
-                $thumbnailService->make($file);
-
-
-
-                $this->setName($subDirectory . $file->getFilenameWithoutExtension());
+                $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
                 $this->setExtension($file->getExtension());
 
                 yield $this;
