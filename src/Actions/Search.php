@@ -32,11 +32,12 @@ final class Search
 
     public function __construct(
         private ContainerInterface $container,
-        private ServerRequestWrapper $requestWrapper,
-        private EntityManager $em
+        private ServerRequestWrapper $request,
+        private EntityManager $em,
+        Config $config
     ) {
-        $this->setOptions(Config::getConfig($this->container)->getAll());
-        $this->searchQuery = \trim($this->requestWrapper->getQueryData('q', $this->requestWrapper->getPostData('q', '')));
+        $this->setOptions($config->getModuleConfig()->getAll());
+        $this->searchQuery = \trim($this->request->getQueryData('q', $this->request->getPostData('q', '')));
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
     }
 
@@ -44,7 +45,7 @@ final class Search
     {
         $this->validateSearchQuery();
 
-        $pagination = new Pagination($this->requestWrapper->getQueryData('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination($this->request->getQueryData('page', 1), $this->getOption('limitItems'));
 
         $qb = $this->getFoundProducts($optionKeys);
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());

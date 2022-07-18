@@ -16,7 +16,6 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -35,7 +34,6 @@ final class Edit implements ModelInterface
      * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
-    private ModuleConfig $config;
 
 
     /**
@@ -46,7 +44,8 @@ final class Edit implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private Config $config
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
@@ -55,11 +54,9 @@ final class Edit implements ModelInterface
         );
         if ($this->category === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', (string) $this->requestWrapper->getQueryData()->get('id', 0))
+                sprintf('Not found by id: %s', (string)$this->requestWrapper->getQueryData()->get('id', 0))
             );
         }
-
-        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array
@@ -117,12 +114,10 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Статус категории'])
-        ;
+            ->fill([1 => 'Статус категории']);
 
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -144,8 +139,7 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
         $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
 
@@ -162,8 +156,7 @@ final class Edit implements ModelInterface
 HTML
                     ),
                 ]
-            )
-        ;
+            );
 
         $linkFillFromParent = $this->category->getParent() ? '<a class="align-top btn btn-xs btn-warning"
                 id="fill-from-parent"
@@ -207,8 +200,7 @@ HTML
                     ];
                 }
                 return $result;
-            })
-        ;
+            });
 
         $form->submit('add');
         return $form;

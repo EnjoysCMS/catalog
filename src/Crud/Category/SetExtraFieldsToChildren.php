@@ -15,12 +15,9 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class SetExtraFieldsToChildren implements ModelInterface
@@ -32,15 +29,12 @@ final class SetExtraFieldsToChildren implements ModelInterface
      * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
-    private ModuleConfig $config;
-
 
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
-        private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
@@ -52,8 +46,6 @@ final class SetExtraFieldsToChildren implements ModelInterface
                 sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id', 0))
             );
         }
-
-        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array

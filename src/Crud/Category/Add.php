@@ -16,7 +16,6 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
@@ -31,17 +30,16 @@ final class Add implements ModelInterface
      * @var EntityRepository|ObjectRepository
      */
     private $categoryRepository;
-    private ModuleConfig $config;
 
     public function __construct(
         private EntityManager $entityManager,
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private Config $config
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
-        $this->config = Config::getConfig($this->container);
     }
 
     public function getContext(): array

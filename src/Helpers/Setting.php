@@ -12,14 +12,10 @@ use EnjoysCMS\Module\Catalog\Config;
 
 final class Setting extends HelpersBase
 {
-    /**
-     * @param null|string $defaults
-     *
-     * @psalm-param ''|'|'|null $defaults
-     */
-    static public function get(string $key, string|null $defaults = null)
+
+    public static function get(string $key, string|null $defaults = null)
     {
-        $moduleConfig = Config::getConfig(self::$container)->getAll();
+        $moduleConfig = self::$container->get(Config::class)->getModuleConfig()->getAll();
         return self::$container->get(EntityManager::class)->getRepository(
                 \EnjoysCMS\Module\Catalog\Entities\Setting::class
             )->findOneBy(['key' => $key])?->getValue() ?? $moduleConfig[$key] ?? $defaults;

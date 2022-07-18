@@ -12,7 +12,6 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Functions\TwigExtension\ConvertSize;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Manage;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Upload;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
@@ -82,7 +81,7 @@ final class Files extends AdminController
             "aclComment" => "[ADMIN] Удалить загруженный файл"
         ]
     )]
-    public function delete(Config $config)
+    public function delete()
     {
         /** @var EntityManager $em */
         $em = $this->getContainer()->get(EntityManager::class);
@@ -104,7 +103,7 @@ final class Files extends AdminController
         $em->remove($file);
         $em->flush();
 
-        $filesystem = $config->getFileStorageUpload($file->getStorage())->getFileSystem();
+        $filesystem = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
         $filesystem->delete($file->getFilePath());
 
         Redirect::http(

@@ -15,7 +15,6 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -38,8 +37,7 @@ class ProductModel implements ModelInterface
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator,
-        private Config $config
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
@@ -69,7 +67,6 @@ class ProductModel implements ModelInterface
                 ) ?? Setting::get('site-description'),
 
             'product' => $this->product,
-            'config' => $this->config,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
             'optionValueRepository' => $this->em->getRepository(OptionValue::class),
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),

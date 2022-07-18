@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Dto\SearchDto;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use Psr\Container\ContainerInterface;
@@ -21,9 +22,13 @@ final class Search extends PublicController
     private array $optionKeys;
 
 
-    public function __construct(ServerRequestWrapper $request, Environment $twig, ResponseInterface $response = null)
-    {
-        parent::__construct($request, $twig, $response);
+    public function __construct(
+        ServerRequestWrapper $request,
+        Environment $twig,
+        Config $config,
+        ResponseInterface $response = null
+    ) {
+        parent::__construct($request, $twig, $config, $response);
         $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));
     }
 
@@ -74,11 +79,13 @@ final class Search extends PublicController
             $template_path = __DIR__ . '/../../template/search.twig';
         }
 
-        return $this->responseText($this->twig->render($template_path, [
-            'result' => $result,
-            '_title' => $result['_title'],
-            'breadcrumbs' => $breadcrumbs->get()
-        ]));
+        return $this->responseText(
+            $this->twig->render($template_path, [
+                'result' => $result,
+                '_title' => $result['_title'],
+                'breadcrumbs' => $breadcrumbs->get()
+            ])
+        );
     }
 
     private function convertResultToDTO($result)

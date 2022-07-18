@@ -10,24 +10,30 @@ use DI\FactoryInterface;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 final class Config
 {
 
     private ModuleConfig $config;
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function __construct(ContainerInterface $container)
     {
-        $this->config = self::getConfig($container);
+        $this->config = $container
+            ->get(FactoryInterface::class)
+            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog']);
     }
 
-    public static function getConfig(ContainerInterface $container): ModuleConfig
+
+    public function getModuleConfig(): ModuleConfig
     {
-        return $container
-            ->get(FactoryInterface::class)
-            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog'])
-        ;
+        return $this->config;
     }
 
     public function getImageStorageUpload($storageName = null): StorageUploadInterface
@@ -62,12 +68,16 @@ final class Config
         return new $thumbnailServiceClass(...current($thumbnailServiceConfig));
     }
 
-    public static function getAdminTemplatePath(ContainerInterface $container): string
+    public function getAdminTemplatePath(): string
     {
-        $config = self::getConfig($container)->getAll();
-//        dd( $config['adminTemplateDir'] ??=  __DIR__ . '/../template/admin');
-        $templatePath = isset($config['adminTemplateDir']) ? $_ENV['PROJECT_DIR'] . $config['adminTemplateDir'] : __DIR__ . '/../template/admin';
+        try {
+            $templatePath = $_ENV['PROJECT_DIR'] . $this->config->get('adminTemplateDir');
+        } catch (\InvalidArgumentException) {
+            $templatePath = __DIR__ . '/../template/admin';
+        }
+
         $realpath = realpath($templatePath);
+
         if ($realpath === false) {
             throw new \InvalidArgumentException(
                 sprintf(
@@ -84,4 +94,5 @@ final class Config
     {
         return $this->config->get($key);
     }
+
 }

@@ -17,7 +17,6 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
@@ -36,7 +35,6 @@ final class Add implements ModelInterface
 
     private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
     private ObjectRepository|EntityRepository $categoryRepository;
-    private ModuleConfig $config;
 
     public function __construct(
         private EntityManager $em,
@@ -44,12 +42,12 @@ final class Add implements ModelInterface
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private ContainerInterface $container,
+        private Config $config,
         private Cookie $cookie
     ) {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
 
-        $this->config = Config::getConfig($this->container);
     }
 
     /**

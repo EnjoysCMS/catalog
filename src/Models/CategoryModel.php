@@ -16,6 +16,7 @@ use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -41,7 +42,7 @@ final class CategoryModel implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
-        array $config = []
+        private Config $config
     ) {
 
         $this->categoryRepository = $this->em->getRepository(Category::class);
@@ -61,7 +62,7 @@ final class CategoryModel implements ModelInterface
 
 
 
-        $this->setOptions($config);
+        $this->setOptions($this->config->getModuleConfig()->getAll());
     }
 
 

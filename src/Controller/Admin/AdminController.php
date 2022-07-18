@@ -18,10 +18,10 @@ abstract class AdminController extends AdminBaseController
     protected string $templatePath;
 
 
-    public function __construct(protected ContainerInterface $container)
+    public function __construct(protected ContainerInterface $container, protected Config $config)
     {
         parent::__construct($container);
-        $this->templatePath = Config::getAdminTemplatePath($container);
+        $this->templatePath = $this->config->getAdminTemplatePath();
         $this->module = new Module(
             Utils::parseComposerJson(
                 __DIR__ . '/../../../composer.json'
@@ -29,6 +29,7 @@ abstract class AdminController extends AdminBaseController
         );
         $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
         $this->getTwig()->addGlobal('module', $this->module);
+        $this->getTwig()->addGlobal('config', $this->config);
     }
 
 }

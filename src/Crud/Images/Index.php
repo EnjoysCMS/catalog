@@ -8,7 +8,6 @@ use Doctrine\ORM\EntityManager;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -24,8 +23,7 @@ final class Index implements ModelInterface
     public function __construct(
         private EntityManager $entityManager,
         ServerRequestWrapper $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private Config $config
+        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryData('product_id'));
         if ($this->product === null) {
@@ -39,7 +37,6 @@ final class Index implements ModelInterface
     {
         return [
             'product' => $this->product,
-            'config' => $this->config,
             'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $this->product]),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',

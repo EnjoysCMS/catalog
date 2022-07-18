@@ -15,7 +15,6 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -36,7 +35,7 @@ final class Edit implements ModelInterface
 
     private ?Product $product;
     private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
-    private ModuleConfig $config;
+
 
     /**
      * @throws NotFoundException
@@ -46,7 +45,8 @@ final class Edit implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container
+        private ContainerInterface $container,
+        private Config $config
     ) {
         $this->productRepository = $entityManager->getRepository(Product::class);
         $this->product = $this->productRepository->find(
@@ -57,7 +57,7 @@ final class Edit implements ModelInterface
                 sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
             );
         }
-        $this->config = Config::getConfig($this->container);
+
     }
 
     /**

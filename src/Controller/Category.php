@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use DI\DependencyException;
 use DI\NotFoundException;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -57,9 +56,7 @@ final class Category extends PublicController
 
         return $this->responseText($this->twig->render(
             $template_path,
-            $container->make(CategoryModel::class, [
-                'config' => Config::getConfig($container)->getAll(),
-            ])->getContext()
+            $container->get(CategoryModel::class)->getContext()
         ));
     }
 
