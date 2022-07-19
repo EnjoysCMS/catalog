@@ -90,7 +90,12 @@ final class Config
     }
 
 
-    public function get(string $key)
+    /**
+     * @deprecated
+     * @param string $key
+     * @return mixed
+     */
+    public function get(string $key): mixed
     {
         return $this->config->get($key);
     }
