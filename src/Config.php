@@ -6,13 +6,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog;
 
 
+use DI\DependencyException;
 use DI\FactoryInterface;
+use DI\NotFoundException;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 final class Config
 {
@@ -20,14 +19,12 @@ final class Config
     private ModuleConfig $config;
 
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws DependencyException
+     * @throws NotFoundException
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(FactoryInterface $factory)
     {
-        $this->config = $container
-            ->get(FactoryInterface::class)
-            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog']);
+        $this->config = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog']);
     }
 
 
