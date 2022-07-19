@@ -8,8 +8,8 @@ namespace EnjoysCMS\Module\Catalog;
 
 use DI\FactoryInterface;
 use EnjoysCMS\Core\Components\Modules\ModuleConfig;
+use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
-use EnjoysCMS\Module\Catalog\StorageUpload\StorageUploadInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;

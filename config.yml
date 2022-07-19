@@ -14,8 +14,8 @@ thumbnailService:
   EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService: []
 
 storageUploads:
-  image_default: &im_storage
-    EnjoysCMS\Module\Catalog\StorageUpload\Local:
+  image_default:
+    EnjoysCMS\Core\StorageUpload\Local:
       rootDirectory: /public/upload/catalog
       publicUrl: /upload/catalog
       permissionMap:
@@ -23,7 +23,7 @@ storageUploads:
           private: 0755
 
   file_default:
-    EnjoysCMS\Module\Catalog\StorageUpload\Local:
+    EnjoysCMS\Core\StorageUpload\Local:
       rootDirectory: /public/upload/catalog_files
       publicUrl: /upload/catalog_files
       permissionMap:
