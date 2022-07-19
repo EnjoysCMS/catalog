@@ -29,7 +29,7 @@ final class ManageImage
         $image->setProduct($this->product);
         $image->setFilename($filename);
         $image->setExtension($extension);
-        $image->setStorage($this->config->get('productImageStorage'));
+        $image->setStorage($this->config->getModuleConfig()->get('productImageStorage'));
         $image->setGeneral(empty($this->productImages));
 
         $this->entityManager->persist($image);

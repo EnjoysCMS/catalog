@@ -68,7 +68,7 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
-        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
+        $wysiwyg = WYSIWYG::getInstance($this->config->getModuleConfig()->get('WYSIWYG'), $this->container);
 
         return [
             'form' => $this->renderer,

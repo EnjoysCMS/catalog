@@ -53,7 +53,7 @@ final class Add implements ModelInterface
         }
 
         //  dd(Setting::get('WYSIWYG'));
-        $wysiwyg = WYSIWYG::getInstance($this->config->get('WYSIWYG'), $this->container);
+        $wysiwyg = WYSIWYG::getInstance($this->config->getModuleConfig()->get('WYSIWYG'), $this->container);
 
         return [
             'subtitle' => 'Добавление категории',
