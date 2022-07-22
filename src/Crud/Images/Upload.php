@@ -10,7 +10,7 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
-use Enjoys\Upload\File;
+use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -106,7 +106,7 @@ final class Upload implements LoadImage
             $subDirectory = $newFilename[0] . '/' . $newFilename[1];
 
 
-            $file = new File($uploadedFile, $this->filesystem);
+            $file = new UploadProcessing($uploadedFile, $this->filesystem);
 
             $file->setFilename($newFilename);
             try {
@@ -117,8 +117,8 @@ final class Upload implements LoadImage
                     $file->getUploadedFile()->getStream()->getContents()
                 );
 
-                $this->setName($subDirectory . '/' . $file->getFilenameWithoutExtension());
-                $this->setExtension($file->getExtension());
+                $this->setName($subDirectory . '/' . $file->getFileInfo()->getFilenameWithoutExtension());
+                $this->setExtension($file->getFileInfo()->getExtension());
 
                 yield $this;
             } catch (\Throwable $e) {
