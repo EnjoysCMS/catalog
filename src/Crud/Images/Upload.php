@@ -6,25 +6,22 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
-use Enjoys\Upload\UploadProcessing;
-use EnjoysCMS\Module\Catalog\Config;
-use Psr\Http\Message\UploadedFileInterface;
+use League\Flysystem\FilesystemException;
 
 final class Upload implements LoadImage
 {
     private string $name;
     private string $extension;
-    private ThumbnailService\ThumbnailServiceInterface $thumbnailService;
-    private \League\Flysystem\FilesystemOperator $filesystem;
 
-    public function __construct(private Config $config)
+    public function __construct(private UploadHandler $uploadHandler)
     {
-        $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
-        $this->thumbnailService = $this->config->getThumbnailService();
     }
 
     /**
@@ -59,34 +56,19 @@ final class Upload implements LoadImage
         $this->extension = $extension;
     }
 
+
     /**
-     * @return string
+     * @throws ExceptionRule
      */
-//    public function getFullPathFileNameWithExtension(): string
-//    {
-//        return $this->fullPathFileNameWithExtension;
-//    }
-
-//    /**
-//     * @param string $fullPathFileNameWithExtension
-//     */
-//    private function setFullPathFileNameWithExtension(string $fullPathFileNameWithExtension): void
-//    {
-//        $this->fullPathFileNameWithExtension = $fullPathFileNameWithExtension;
-//    }
-
     public function getForm(): Form
     {
         $form = new Form();
 
         $form->file('image', 'Изображение')
-            ->setMultiple()
             ->addRule(
                 Rules::UPLOAD,
                 [
                     'required',
-                    'maxsize' => 1024 * 1024 * 2,
-                    'extensions' => 'jpg, png, jpeg',
                 ]
             )->setAttribute(AttributeFactory::create('accept', '.png, .jpg, .jpeg'));
 
@@ -96,49 +78,26 @@ final class Upload implements LoadImage
 
 
     /**
-     * @throws \Exception
+     * @param ServerRequestWrapper $requestWrapper
+     * @return \Generator
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws FilesystemException
+     * @throws \Throwable
      */
     public function upload(ServerRequestWrapper $requestWrapper): \Generator
     {
-        $uploadedFiles = $this->getUploadedFiles($requestWrapper);
-        foreach ($uploadedFiles as $uploadedFile) {
-            $newFilename = md5((string)microtime(true));
-            $subDirectory = $newFilename[0] . '/' . $newFilename[1];
-
-
-            $file = new UploadProcessing($uploadedFile, $this->filesystem);
-
-            $file->setFilename($newFilename);
             try {
-                $file->upload($subDirectory);
-                $this->thumbnailService->make(
-                    $this->filesystem,
-                    $file->getTargetPath(),
-                    $file->getUploadedFile()->getStream()->getContents()
-                );
-
-                $this->setName($subDirectory . '/' . $file->getFileInfo()->getFilenameWithoutExtension());
+                $file = $this->uploadHandler->uploadFile($requestWrapper->getFilesData('image'));
+                $this->setName( str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()));
                 $this->setExtension($file->getFileInfo()->getExtension());
-
                 yield $this;
             } catch (\Throwable $e) {
                 throw $e;
             }
-        }
     }
 
-    /**
-     * @param ServerRequestWrapper $request
-     * @return UploadedFileInterface[]
-     */
-    private function getUploadedFiles(ServerRequestWrapper $request): array
-    {
-        $images = $request->getFilesData('image');
-        if (is_array($images)) {
-            return $images;
-        }
-        return [$images];
-    }
 
 
 }

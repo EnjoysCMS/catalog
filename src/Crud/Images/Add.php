@@ -6,7 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
+use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
@@ -39,7 +41,8 @@ final class Add implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private Config $config
+        private Config $config,
+        private FactoryInterface $factory
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
             $this->requestWrapper->getQueryData('product_id')
@@ -60,7 +63,7 @@ final class Add implements ModelInterface
 
         $method = '\EnjoysCMS\Module\Catalog\Crud\Images\\' . ucfirst($method);
 
-        $this->uploadMethod = new $method($this->config);
+        $this->uploadMethod = $factory->make($method);
     }
 
     public function getContext(): array
@@ -70,7 +73,22 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-            $this->doAction();
+
+            try {
+                $this->doAction();
+
+                Redirect::http(
+                    $this->urlGenerator->generate(
+                        'catalog/admin/product/images',
+                        ['product_id' => $this->product->getId()]
+                    )
+                );
+
+            } catch (\Throwable $e) {
+                /** @var File $image */
+                $image = $form->getElement('image');
+                $image->setRuleError(htmlspecialchars(sprintf('%s: %s', get_class($e), $e->getMessage())));
+            }
         }
 
         return [
@@ -98,12 +116,6 @@ final class Add implements ModelInterface
         }
 
 
-        Redirect::http(
-            $this->urlGenerator->generate(
-                'catalog/admin/product/images',
-                ['product_id' => $this->product->getId()]
-            )
-        );
     }
 
 }
