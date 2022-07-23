@@ -1,0 +1,66 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+    {% do asset('js', [
+        'modules/admin/node_modules/bs-custom-file-input/dist/bs-custom-file-input.min.js',
+        'modules/catalog/node_modules/dropzone/dist/dropzone-min.js',
+    ]) %}
+    {% do asset('css', [
+        'modules/catalog/node_modules/dropzone/dist/dropzone.css',
+    ]) %}
+    <script>
+        $(document).ready(function () {
+            bsCustomFileInput.init()
+        })
+
+        const dropzone = new Dropzone("#upload-dropzone", {
+            'paramName': 'image',
+            'dictDefaultMessage': 'Перетащите сюда файлы для загрузки или нажмите для выбора',
+            'acceptedFiles': 'image/*',
+        });
+    </script>
+
+
+    <section class="content">
+
+
+        <div class="card">
+
+            <div class="card-header">
+                <h2 class="card-title">{{ title ?? product.getName }}
+                    {% if product %}
+                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i class="fas fa-external-link-alt"></i></a>
+                    {% endif %}
+                    <small class="d-block">{{ subtitle }}</small>
+                </h2>
+                {% if product %}
+                <div class="float-right">
+                    {% include '@catalog_admin/products_admin_links.twig' %}
+                </div>
+                {% endif %}
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="my-3">
+                    <h4>Мультизагрузка (рекомендуется)</h4>
+                    <form action="{{ path('catalog/admin/product/images/upload-dropzone', {"product_id": product.id}) }}" class="dropzone" id="upload-dropzone">
+                    </form>
+                </div>
+                <div class="my-3">
+                    <h4>...или загрузить по одному файлу</h4>
+                    {{ form.output|raw }}
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}
+
+{% block scripts %}
+    {{ wysiwyg|raw }}
+{% endblock %}

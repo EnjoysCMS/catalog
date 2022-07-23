@@ -29,6 +29,11 @@ final class Download implements LoadImage
         $this->thumbnailService = $this->config->getThumbnailService();
     }
 
+    public function getTemplatePath(string $templateRootPath): string
+    {
+        return $templateRootPath . '/form.twig';
+    }
+
     /**
      * @return string
      */

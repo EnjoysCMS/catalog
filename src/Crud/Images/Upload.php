@@ -24,6 +24,11 @@ final class Upload implements LoadImage
     {
     }
 
+    public function getTemplatePath(string $templateRootPath): string
+    {
+        return $templateRootPath .'/product/images/upload.twig';
+    }
+
     /**
      * @return string
      */

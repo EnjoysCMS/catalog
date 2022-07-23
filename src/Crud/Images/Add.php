@@ -42,7 +42,7 @@ final class Add implements ModelInterface
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
-        private FactoryInterface $factory
+        FactoryInterface $factory
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
             $this->requestWrapper->getQueryData('product_id')
@@ -64,6 +64,11 @@ final class Add implements ModelInterface
         $method = '\EnjoysCMS\Module\Catalog\Crud\Images\\' . ucfirst($method);
 
         $this->uploadMethod = $factory->make($method);
+    }
+
+    public function getTemplatePath(string $templateRootPath): string
+    {
+        return $this->uploadMethod->getTemplatePath($templateRootPath);
     }
 
     public function getContext(): array
