@@ -15,6 +15,7 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use Enjoys\Upload\File;
+use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
@@ -99,7 +100,7 @@ final class Upload implements ModelInterface
         $storage = $this->config->getFileStorageUpload();
         $filesystem = $storage->getFileSystem();
 
-        $file = new File($uploadedFile, $filesystem);
+        $file = new UploadProcessing($uploadedFile, $filesystem);
 
         $newName = md5((string)microtime(true));
         $file->setFilename($newName[0] . '/' . $newName);
@@ -108,10 +109,10 @@ final class Upload implements ModelInterface
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);
-            $productFile->setFilePath($file->getFilename());
-            $productFile->setFileSize($file->getSize());
-            $productFile->setFileExtension($file->getExtension());
-            $productFile->setOriginalFilename($file->getOriginalFilename());
+            $productFile->setFilePath($file->getFileInfo()->getFilename());
+            $productFile->setFileSize($file->getFileInfo()->getSize());
+            $productFile->setFileExtension($file->getFileInfo()->getExtension());
+            $productFile->setOriginalFilename($file->getFileInfo()->getOriginalFilename());
             $productFile->setDescription($this->requestWrapper->getPostData('description'));
             $productFile->setTitle($this->requestWrapper->getPostData('title'));
             $productFile->setStorage($this->config->getModuleConfig()->get('productFileStorage'));

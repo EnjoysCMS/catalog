@@ -229,7 +229,11 @@ class ProductFiles
         return str_replace(
             ' ',
             '_',
-            ($this->getTitle() ?? $this->getOriginalFilename()) . '.' . $this->getFileExtension()
+            ($this->getTitle() ?? str_replace(
+                    '.' . $this->getFileExtension(),
+                    '',
+                    $this->getOriginalFilename()
+                )) . '.' . $this->getFileExtension()
         );
     }
 
