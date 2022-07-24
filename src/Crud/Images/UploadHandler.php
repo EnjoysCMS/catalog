@@ -8,7 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Enjoys\Upload\Rule\Extension;
+use Enjoys\Upload\Rule\MediaType;
 use Enjoys\Upload\Rule\Size;
 use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Module\Catalog\Config;
@@ -37,26 +37,20 @@ final class UploadHandler
      */
     public function uploadFile(UploadedFileInterface $uploadedFile): UploadProcessing
     {
-        $sizeRule = new Size();
-        $sizeRule->setMaxSize(10 * 1024 * 1024);
-
-        $extensionRule = new Extension();
-        $extensionRule->allow('jpg, png, jpeg, svg');
-
         $file = new UploadProcessing($uploadedFile, $this->filesystem);
-
         try {
             $newFilename = md5((string)microtime(true));
             $subDirectory = $newFilename[0] . '/' . $newFilename[1];
 
             $file->setFilename($newFilename);
             $file->addRules([
-                $sizeRule,
-                $extensionRule
+                (new Size())->setMaxSize(10 * 1024 * 1024),
+                (new MediaType())->allow('image/*'),
+//                (new Extension())->allow('jpg, png, jpeg, svg'),
             ]);
             $file->upload($subDirectory);
 
-            $this->checkMemory($fileContent = $file->getUploadedFile()->getStream()->getContents());
+            $this->checkMemory($fileContent = $this->filesystem->read($file->getTargetPath()));
 
             $this->thumbnailService->make(
                 $this->filesystem,
@@ -65,9 +59,8 @@ final class UploadHandler
             );
 
             return $file;
-
         } catch (\Throwable $e) {
-            if (null !== $location = $file->getTargetPath()){
+            if (null !== $location = $file->getTargetPath()) {
                 $this->filesystem->delete($location);
             }
 
