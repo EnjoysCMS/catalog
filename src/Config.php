@@ -68,7 +68,7 @@ final class Config
     public function getAdminTemplatePath(): string
     {
         try {
-            $templatePath = $_ENV['PROJECT_DIR'] . $this->config->get('adminTemplateDir');
+            $templatePath = getenv('ROOT_PATH'). $this->config->get('adminTemplateDir');
         } catch (\InvalidArgumentException) {
             $templatePath = __DIR__ . '/../template/admin';
         }
