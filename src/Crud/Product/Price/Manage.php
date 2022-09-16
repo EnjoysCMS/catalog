@@ -169,7 +169,6 @@ final class Manage implements ModelInterface
 
                 $this->prices[$code]->setPrice($price);
                 $this->prices[$code]->setCurrency($currency);
-                $this->prices[$code]->setUnit($unit);
             }
         }
 
