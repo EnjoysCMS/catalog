@@ -57,10 +57,11 @@ final class ProductPrice
 
     public function __toString(): string
     {
-        return $this->getFormatted();
+        return $this->getFormatted($this->getPrice());
     }
 
     public function getFormatted(
+        $number,
         string $decimal_separator = '.',
         string $thousands_separator = ' ',
         string $nbsp = '&nbsp;'
@@ -70,7 +71,7 @@ final class ProductPrice
             $nbsp,
             $this->getCurrency()->getLeft() .
             number_format(
-                $this->getPrice(),
+                $number,
                 $this->getCurrency()->getPrecision(),
                 $decimal_separator,
                 $thousands_separator
@@ -148,6 +149,15 @@ final class ProductPrice
     public function setCurrency(Currency $currency): void
     {
         $this->currency = $currency;
+    }
+
+    public function getComputedPriceBasedQuantity(int|float $count)
+    {
+        $rawPrice = $this->getPrice() * $count;
+        return [
+            'rawPrice' => $rawPrice,
+            'formattedPrice' => $this->getFormatted($rawPrice)
+        ];
     }
 
 
