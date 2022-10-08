@@ -57,9 +57,17 @@ final class ProductPrice
 
     public function __toString(): string
     {
-        return $this->getFormatted($this->getPrice());
+        return $this->format();
     }
 
+    public function format(): string
+    {
+        return $this->getCurrency()->format($this->getPrice());
+    }
+
+    /**
+     * @deprecated
+     */
     public function getFormatted(
         $number,
         string $decimal_separator = '.',
@@ -156,7 +164,7 @@ final class ProductPrice
         $rawPrice = $this->getPrice() * $count;
         return [
             'rawPrice' => $rawPrice,
-            'formattedPrice' => $this->getFormatted($rawPrice)
+            'formattedPrice' => $this->getCurrency()->format($rawPrice)
         ];
     }
 

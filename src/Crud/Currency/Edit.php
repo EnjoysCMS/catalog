@@ -75,16 +75,30 @@ final class Edit implements ModelInterface
             'id' => $this->currency->getId(),
             'name' => $this->currency->getName(),
             'digital_code' => $this->currency->getDCode(),
-            'right' => $this->currency->getRight(),
-            'left' => $this->currency->getLeft(),
-            'precision' => $this->currency->getPrecision(),
+            'fraction_digits' => $this->currency->getFractionDigits(),
+            'monetary_separator' => $this->currency->getMonetarySeparator(),
+            'monetary_group_separator' => $this->currency->getMonetaryGroupSeparator(),
+            'symbol' => $this->currency->getSymbol(),
+            'pattern' => $this->currency->getPattern(),
         ]);
         $form->text('id', 'ID');
         $form->text('name', 'Name');
         $form->number('digital_code', 'DCode');
-        $form->text('right', 'right');
-        $form->text('left', 'left');
-        $form->number('precision', 'precision');
+        $form->number('fraction_digits', 'Fraction Digits')->setDescription(
+            'Число цифр после запятой. Если пусто - будет использовано значение по-умолчанию для валют - это 2'
+        );
+        $form->text('monetary_separator', 'Monetary Separator')->setDescription(
+            'Денежный разделитель. Если пусто - будет использовано значение по-умолчанию для этой валюты в зависимости от локали.'
+        );
+        $form->text('monetary_group_separator', 'Monetary Group Separator')->setDescription(
+            'Разделитель групп для денежного формата. Если пусто - будет использовано значение по-умолчанию для этой валюты в зависимости от локали.'
+        );
+        $form->text('symbol', 'Currency Symbol')->setDescription(
+            'Символ обозначения денежной единицы. Если пусто - будет использовано значение по-умолчанию для этой валюты в зависимости от локали.'
+        );
+        $form->text('pattern', 'Pattern')->setDescription(
+            'Устанавливает шаблон средства форматирования. Шаблон в синтаксисе, описанном в » документации ICU DecimalFormat. Если пусто - будет использован шаблон по-умолчанию для этой валюты в зависимости от локали.'
+        );
         $form->submit('edit', 'Редактировать');
         return $form;
     }
@@ -98,9 +112,35 @@ final class Edit implements ModelInterface
         $this->currency->setId($this->requestWrapper->getPostData('id'));
         $this->currency->setName($this->requestWrapper->getPostData('name'));
         $this->currency->setDCode((int)$this->requestWrapper->getPostData('digital_code'));
-        $this->currency->setRight($this->requestWrapper->getPostData('right'));
-        $this->currency->setLeft($this->requestWrapper->getPostData('left'));
-        $this->currency->setPrecision((int)$this->requestWrapper->getPostData('precision'));
+        $this->currency->setPattern(
+            $this->requestWrapper->getPostData('pattern') === '' ? null : $this->requestWrapper->getPostData(
+                'pattern'
+            )
+        );
+        $this->currency->setSymbol(
+            $this->requestWrapper->getPostData('symbol') === '' ? null : $this->requestWrapper->getPostData(
+                'symbol'
+            )
+        );
+        $this->currency->setFractionDigits(
+            $this->requestWrapper->getPostData(
+                'fraction_digits'
+            ) === '' ? null : (int)$this->requestWrapper->getPostData(
+                'fraction_digits'
+            )
+        );
+        $this->currency->setMonetaryGroupSeparator(
+            $this->requestWrapper->getPostData(
+                'monetary_group_separator'
+            ) === '' ? null : $this->requestWrapper->getPostData(
+                'monetary_group_separator'
+            )
+        );
+        $this->currency->setMonetarySeparator(
+            $this->requestWrapper->getPostData('monetary_separator') === '' ? null : $this->requestWrapper->getPostData(
+                'monetary_separator'
+            )
+        );
 
         $this->entityManager->flush();
 
