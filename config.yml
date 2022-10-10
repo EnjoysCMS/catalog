@@ -33,3 +33,7 @@ storageUploads:
 productImageStorage: image_default
 productFileStorage: file_default
 allocatedMemoryDynamically: true
+
+currency:
+  ratio:
+#    USDRUB: 1.15

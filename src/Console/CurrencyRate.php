@@ -8,13 +8,12 @@ namespace EnjoysCMS\Module\Catalog\Console;
 
 use ArrayIterator;
 use Doctrine\ORM\EntityManager;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use PatchRanger\CartesianIterator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -26,7 +25,7 @@ final class CurrencyRate extends Command
 
     private array $rates;
 
-    public function __construct(private EntityManager $em)
+    public function __construct(private EntityManager $em, private Config $config)
     {
         $this->rates = json_decode(file_get_contents('https://www.cbr-xml-daily.ru/latest.js'), true);
         parent::__construct();
@@ -56,8 +55,9 @@ final class CurrencyRate extends Command
                 $currencyRate->setCurrencyMain($_currencyMain);
                 $currencyRate->setCurrencyConvert($_currencyConvert);
             }
+            $ratio = $this->getRatio($currencyRate);
             $rate = $this->getRate($_currencyMain, $_currencyConvert);
-            $currencyRate->setRate($rate);
+            $currencyRate->setRate($rate * $ratio);
 
             $this->em->persist($currencyRate);
 
@@ -74,6 +74,7 @@ final class CurrencyRate extends Command
      */
     protected function getRate(Currency $_currencyMain, Currency $_currencyConvert): float
     {
+
         if ($_currencyMain->getId() === $_currencyConvert->getId()) {
             return 1;
         }
@@ -87,6 +88,12 @@ final class CurrencyRate extends Command
         }
 
         return (float)$this->rates['rates'][$_currencyConvert->getId()] / (float)$this->rates['rates'][$_currencyMain->getId()];
+    }
+
+    private function getRatio(\EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate $currencyRate)
+    {
+        $ratio = $this->config->getModuleConfig()->get('currency')['ratio'];
+        return $ratio[$currencyRate->__toString()] ?? 1;
     }
 
 
