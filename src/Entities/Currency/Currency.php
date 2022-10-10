@@ -153,6 +153,15 @@ class Currency
     }
 
     /**
+     * Alias for getId
+     * @see getId
+     */
+    public function getCode(): string
+    {
+        return $this->getId();
+    }
+
+    /**
      * @param string $id
      */
     public function setId(string $id): void
@@ -162,7 +171,7 @@ class Currency
 
     public function __toString(): string
     {
-        return $this->getName() . ', ' . $this->getLeft() . $this->getRight() . ' (' . $this->getDCode() . ')';
+        return $this->getName() . ', (' . $this->getDCode() . ')';
     }
 
     public function getSymbol(): ?string
