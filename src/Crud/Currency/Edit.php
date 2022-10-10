@@ -9,8 +9,10 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
+use Enjoys\Forms\Rules;
 use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -81,9 +83,18 @@ final class Edit implements ModelInterface
             'symbol' => $this->currency->getSymbol(),
             'pattern' => $this->currency->getPattern(),
         ]);
-        $form->text('id', 'ID');
-        $form->text('name', 'Name');
-        $form->number('digital_code', 'DCode');
+        $form->text('id', 'ID')
+            ->setDescription(
+                'Буквенный код ISO 4217. Изменять нельзя, чтобы изменить, нужно удалить и добавить новую'
+            )
+            ->setAttribute(AttributeFactory::create('disabled'))
+        ;
+        $form->text('name', 'Name')->setDescription(
+            'Наименование валюты'
+        )->addRule(Rules::REQUIRED);
+        $form->number('digital_code', 'DCode')->setDescription(
+            'Числовой код ISO 4217. Не обязательно, но желательно'
+        );
         $form->number('fraction_digits', 'Fraction Digits')->setDescription(
             'Число цифр после запятой. Если пусто - будет использовано значение по-умолчанию для валют - это 2'
         );
@@ -109,9 +120,12 @@ final class Edit implements ModelInterface
      */
     private function doProcess()
     {
-        $this->currency->setId($this->requestWrapper->getPostData('id'));
         $this->currency->setName($this->requestWrapper->getPostData('name'));
-        $this->currency->setDCode((int)$this->requestWrapper->getPostData('digital_code'));
+        $this->currency->setDCode(
+            $this->requestWrapper->getPostData('digital_code') === '' ? null : (int)$this->requestWrapper->getPostData(
+                'digital_code'
+            )
+        );
         $this->currency->setPattern(
             $this->requestWrapper->getPostData('pattern') === '' ? null : $this->requestWrapper->getPostData(
                 'pattern'
@@ -142,7 +156,11 @@ final class Edit implements ModelInterface
             )
         );
 
+
+
         $this->entityManager->flush();
+
+        exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
 
         Redirect::http($this->urlGenerator->generate('catalog/admin/currency'));
     }

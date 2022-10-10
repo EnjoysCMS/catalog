@@ -12,13 +12,14 @@
                     валюту</a>
 
 
-
                 <table class="table">
 
                     <tbody>
                     {% for currency in currencies %}
                         <tr>
-                            <td> {{ currency }}</td>
+                            <td> {{ currency.name }}
+                                <br><small>{{ currency.code }} {{ currency.dCode ? '('~currency.dCode~')' }}</small>
+                            </td>
                             <td>
                                 <a href="{{ path('catalog/admin/currency/edit', {'id': currency.getId }) }}">редактировать</a>
                                 <a href="{{ path('catalog/admin/currency/delete', {'id': currency.getId }) }}">удалить</a>

@@ -8,7 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Entities\Currency;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository")
  * @ORM\Table(name="catalog_currency_rate")
  */
 class CurrencyRate
@@ -30,6 +30,10 @@ class CurrencyRate
      * @ORM\Column(type="float")
      */
     private float $rate;
+
+    public function __toString() {
+        return $this->currencyMain->getCode().$this->currencyConvert->getCode();
+    }
 
     /**
      * @return mixed

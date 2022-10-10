@@ -171,7 +171,7 @@ class Currency
 
     public function __toString(): string
     {
-        return $this->getName() . ', (' . $this->getDCode() . ')';
+        return $this->getName() . ', ' . $this->getCode() . ' (' . $this->getDCode() . ')';
     }
 
     public function getSymbol(): ?string

@@ -20,6 +20,7 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
 use InvalidArgumentException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -61,7 +62,14 @@ final class Delete implements ModelInterface
         $rule = $form->getElement('rule');
 
         if ($form->isSubmitted()) {
-            $this->doProcess();
+            try {
+                $this->doProcess();
+            } catch (\Throwable $e) {
+                if ($e->getCode() !== 1451){
+                    throw $e;
+                }
+                $rule->setRuleError('Эта валюта используется в ценах на товары, поэтому удалить нельзя. Сначала нужно удалить все товары с этой валютой');
+            }
         }
 
         if ($rule->isRuleError()){
@@ -104,6 +112,7 @@ final class Delete implements ModelInterface
      */
     private function doProcess()
     {
+        $this->entityManager->getRepository(CurrencyRate::class)->removeAllRatesByCurrency($this->currency);
         $this->entityManager->remove($this->currency);
         $this->entityManager->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/currency'));
