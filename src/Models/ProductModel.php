@@ -15,10 +15,12 @@ use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Helpers\MetaHelpers;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -37,10 +39,17 @@ class ProductModel implements ModelInterface
         private EntityManager $em,
         private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        Config $config,
     ) {
+        $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
+        $entityListenerResolver->register(new ProductPriceEntityListener($config));
+
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
+
+
+
     }
 
     public function getContext(): array
@@ -51,7 +60,8 @@ class ProductModel implements ModelInterface
                 301
             );
         }
-
+        // $this->em->flush();
+        //dd($this->product->getPrice('ROZ')->format());
         return [
             '_title' => sprintf(
                 '%2$s - %3$s - %1$s',

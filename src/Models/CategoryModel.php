@@ -19,6 +19,7 @@ use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -60,7 +61,8 @@ final class CategoryModel implements ModelInterface
 
         $this->category = $category;
 
-
+        $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
+        $entityListenerResolver->register(new ProductPriceEntityListener($config));
 
         $this->setOptions($this->config->getModuleConfig()->getAll());
     }

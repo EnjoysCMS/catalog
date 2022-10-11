@@ -12,6 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity
+ * @ORM\EntityListeners({"ProductPriceEntityListener"})
  * @ORM\Table(name="catalog_product_prices")
  */
 final class ProductPrice
@@ -49,6 +50,8 @@ final class ProductPrice
      */
     private Currency $currency;
 
+    private ?Currency $currentCurrency = null;
+
 
     public function __construct()
     {
@@ -62,7 +65,7 @@ final class ProductPrice
 
     public function format(): string
     {
-        return $this->getCurrency()->format($this->getPrice());
+        return  $this->getCurrentCurrency()->format($this->getPrice());
     }
 
     /**
@@ -164,8 +167,22 @@ final class ProductPrice
         $rawPrice = $this->getPrice() * $count;
         return [
             'rawPrice' => $rawPrice,
-            'formattedPrice' => $this->getCurrency()->format($rawPrice)
+            'formattedPrice' => $this->getCurrentCurrency()->format($rawPrice)
         ];
+    }
+
+
+    public function getCurrentCurrency(): Currency
+    {
+        return $this->currentCurrency ?? $this->getCurrency();
+    }
+
+    /**
+     * @param Currency|null $currentCurrency
+     */
+    public function setCurrentCurrency(?Currency $currentCurrency): void
+    {
+        $this->currentCurrency = $currentCurrency;
     }
 
 

@@ -35,5 +35,6 @@ productFileStorage: file_default
 allocatedMemoryDynamically: true
 
 currency:
+  default: RUB
   ratio:
 #    USDRUB: 1.15
