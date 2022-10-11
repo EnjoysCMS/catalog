@@ -7,7 +7,8 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\Persistence\ObjectManager;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
@@ -18,14 +19,30 @@ final class ProductPriceEntityListener
     {
     }
 
-    /** @ORM\PostLoad */
-    public function postLoadHandler(ProductPrice $productPrice, LifecycleEventArgs $event)
+    public function preUpdate(ProductPrice $productPrice, 	PreUpdateEventArgs $eventArgs)
+    {
+        if ($this->config === null){
+            return;
+        }
+        $eventArgs->setNewValue('price', $eventArgs->getOldValue('price'));
+        $eventArgs->setNewValue('updatedAt', $eventArgs->getOldValue('updatedAt'));
+
+    }
+
+
+    public function postLoad(ProductPrice $productPrice, LifecycleEventArgs $event)
+    {
+        $em = $event->getObjectManager();
+        $this->convertPrice($productPrice, $em);
+    }
+
+
+    private function convertPrice(ProductPrice $productPrice, ObjectManager $em)
     {
         if ($this->config === null){
             return;
         }
 
-        $em = $event->getObjectManager();
         $currentCurrency = $em->getRepository(Currency::class)->find(
             $this->config->getModuleConfig()->get('currency')['default'] ?? 'RUB'
         );
