@@ -27,7 +27,7 @@ final class DynamicConfig
 
     public function getCurrentCurrencyCode(): string
     {
-        return $this->session->get('currency') ?? $this->moduleConfig->get(
+        return $this->session->get('catalog')['currency'] ?? $this->moduleConfig->get(
             'currency'
         )['default'] ?? throw new \InvalidArgumentException(
             'Default currency value not valid'

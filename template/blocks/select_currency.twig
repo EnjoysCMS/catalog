@@ -1,0 +1,12 @@
+<form>
+    <select name="currency" onchange="this.form.submit();">
+        {% for currency in currencies %}
+            <option
+                value="{{ currency.code }}"
+                {{ currentCurrencyCode == currency.code ? 'selected' }}
+            >
+                {{ currency.name }} ({{ currency.code }})
+            </option>
+        {% endfor %}
+    </select>
+</form>
