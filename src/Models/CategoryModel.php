@@ -17,6 +17,7 @@ use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
@@ -44,7 +45,8 @@ final class CategoryModel implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
-        private Config $config
+        private Config $config,
+        private DynamicConfig $dynamicConfig,
     ) {
 
         $this->categoryRepository = $this->em->getRepository(Category::class);
@@ -63,7 +65,7 @@ final class CategoryModel implements ModelInterface
         $this->category = $category;
 
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
-        $entityListenerResolver->register(new ProductPriceEntityListener($config));
+        $entityListenerResolver->register(new ProductPriceEntityListener($dynamicConfig));
 
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
@@ -93,7 +95,7 @@ final class CategoryModel implements ModelInterface
         }
 
         $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN cprice');
-        $qb->setParameter('current_currency', 'USD');
+        $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
         $qb->addOrderBy('cprice', 'DESC');
 
 

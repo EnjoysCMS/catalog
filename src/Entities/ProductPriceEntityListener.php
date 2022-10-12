@@ -9,13 +9,13 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
-use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
 
 final class ProductPriceEntityListener
 {
-    public function __construct(private ?Config $config = null)
+    public function __construct(private ?DynamicConfig $config = null)
     {
     }
 
@@ -42,11 +42,7 @@ final class ProductPriceEntityListener
             return;
         }
 
-        $currentCurrency = $em->getRepository(Currency::class)->find(
-            $this->config->getModuleConfig()->get('currency')['default'] ?? null
-        ) ?? throw new \InvalidArgumentException(
-            'Default currency value not valid'
-        );
+        $currentCurrency = $this->config->getCurrentCurrency();
 
         $currencyRate = $em->getRepository(CurrencyRate::class)->find(
             ['currencyMain' => $productPrice->getCurrency(), 'currencyConvert' => $currentCurrency]
@@ -56,9 +52,9 @@ final class ProductPriceEntityListener
     }
 
     /**
-     * @param Config|null $config
+     * @param DynamicConfig|null $config
      */
-    public function setConfig(?Config $config): void
+    public function setConfig(?DynamicConfig $config): void
     {
         $this->config = $config;
     }

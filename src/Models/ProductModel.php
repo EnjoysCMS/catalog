@@ -16,6 +16,7 @@ use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -40,7 +41,7 @@ class ProductModel implements ModelInterface
         private ServerRequestWrapper $requestWrapper,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
-        Config $config,
+        DynamicConfig $config
     ) {
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
         $entityListenerResolver->register(new ProductPriceEntityListener($config));
