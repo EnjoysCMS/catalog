@@ -34,7 +34,7 @@ final class CategoryModel implements ModelInterface
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
-    private ?string $sortMode;
+    private ?string $currentSortMode;
 
     /**
      * @throws NoResultException
@@ -69,7 +69,7 @@ final class CategoryModel implements ModelInterface
 
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
-        $this->sortMode = $this->getAndSetSortMode();
+        $this->currentSortMode = $this->getAndSetSortMode();
         $this->setOptions($this->config->getModuleConfig()->getAll());
 
 //        $this->dynamicConfig->setCurrencyCode($this->requestWrapper->getQueryData('currency'));
@@ -100,7 +100,7 @@ final class CategoryModel implements ModelInterface
         $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
         $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
 
-        switch ($this->sortMode) {
+        switch ($this->getCurrentSortMode()) {
             case 'price.desc':
                 $qb->addOrderBy('converted_price', 'DESC');
                 break;
@@ -133,6 +133,7 @@ final class CategoryModel implements ModelInterface
             'categoryRepository' => $this->categoryRepository,
             'pagination' => $pagination,
             'products' => $result,
+            'currentSortMode' => $this->getCurrentSortMode(),
             'breadcrumbs' => $this->getBreadcrumbs(),
         ];
     }
@@ -174,5 +175,12 @@ final class CategoryModel implements ModelInterface
         }
 
         return $this->dynamicConfig->getSortMode();
+    }
+
+
+
+    public function getCurrentSortMode(): string
+    {
+        return $this->dynamicConfig->getSortMode() ?? 'name.asc';
     }
 }
