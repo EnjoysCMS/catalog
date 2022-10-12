@@ -1,5 +1,6 @@
 WYSIWYG: summernote
 limitItems: 12
+sort: name.asc
 minSearchChars: 3
 showSubcategoryProducts: true
 delimiterOptions: "|"

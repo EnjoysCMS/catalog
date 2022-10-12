@@ -34,6 +34,7 @@ final class DynamicConfig
         );
     }
 
+
     public function getCurrentCurrency(): Currency
     {
         return $this->em->getRepository(Currency::class)->find(
@@ -42,4 +43,33 @@ final class DynamicConfig
             'Default currency value not valid'
         );
     }
+
+    public function getSortMode(): ?string
+    {
+        return $this->session->get('catalog')['sort'] ?? $this->moduleConfig->get(
+            'sort'
+        );
+    }
+
+    public function setCurrencyCode(?string $code)
+    {
+        $this->session->set([
+            'catalog' => array_merge(
+                $this->session->get('catalog', []),
+                ['currency' => $code],
+            )
+        ]);
+    }
+
+    public function setSortMode(string $mode = null): void
+    {
+        $this->session->set([
+            'catalog' => array_merge(
+                $this->session->get('catalog', []),
+                ['sort' => $mode],
+            )
+        ]);
+    }
+
+
 }

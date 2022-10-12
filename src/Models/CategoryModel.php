@@ -34,6 +34,7 @@ final class CategoryModel implements ModelInterface
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
+    private ?string $sortMode;
 
     /**
      * @throws NoResultException
@@ -48,7 +49,6 @@ final class CategoryModel implements ModelInterface
         private Config $config,
         private DynamicConfig $dynamicConfig,
     ) {
-
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
         $category = $this->getCategory(
@@ -56,9 +56,9 @@ final class CategoryModel implements ModelInterface
         );
 
 
-        if ($category === null){
+        if ($category === null) {
             throw new NotFoundException(
-                sprintf('Not found by slug: %s',$this->requestWrapper->getAttributesData()->get('slug', ''))
+                sprintf('Not found by slug: %s', $this->requestWrapper->getAttributesData()->get('slug', ''))
             );
         }
 
@@ -69,13 +69,19 @@ final class CategoryModel implements ModelInterface
 
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
+        $this->sortMode = $this->getAndSetSortMode();
         $this->setOptions($this->config->getModuleConfig()->getAll());
+
+//        $this->dynamicConfig->setCurrencyCode($this->requestWrapper->getQueryData('currency'));
     }
 
 
     public function getContext(): array
     {
-        $pagination = new Pagination($this->requestWrapper->getAttributesData()->get('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination(
+            $this->requestWrapper->getAttributesData()->get('page', 1),
+            $this->getOption('limitItems')
+        );
 
         if ($this->getOption('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);
@@ -84,22 +90,31 @@ final class CategoryModel implements ModelInterface
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
         }
 
-
-
-
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
-        if (false !== $o = $this->getOption('withImageFirst', false)){
+        if (false !== $o = $this->getOption('withImageFirst', false)) {
             $qb->orderBy('i.filename', strtoupper($o));
         }
 
-        $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN cprice');
+        $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
         $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
-        $qb->addOrderBy('cprice', 'DESC');
 
-
-        $qb->addOrderBy('p.name', 'ASC');
+        switch ($this->sortMode) {
+            case 'price.desc':
+                $qb->addOrderBy('converted_price', 'DESC');
+                break;
+            case 'price.asc':
+                $qb->addOrderBy('converted_price', 'ASC');
+                break;
+            case 'name.desc':
+                $qb->addOrderBy('p.name', 'DESC');
+                break;
+            case 'name.asc':
+            default:
+                $qb->addOrderBy('p.name', 'ASC');
+                break;
+        }
 
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
@@ -142,5 +157,22 @@ final class CategoryModel implements ModelInterface
         }
 
         return $this->breadcrumbs->get();
+    }
+
+    /**
+     * Allowed sort mode:
+     * - price.desc
+     * - price.asc
+     * - name.desc
+     * - name.asc [default]
+     */
+    private function getAndSetSortMode(): ?string
+    {
+        $mode = $this->requestWrapper->getQueryData('sort');
+        if ($mode !== null){
+            $this->dynamicConfig->setSortMode($mode);
+        }
+
+        return $this->dynamicConfig->getSortMode();
     }
 }

@@ -54,11 +54,7 @@ final class CurrencySelect extends AbstractBlock
     public function view()
     {
         if (null !== $currentCurrency = ($this->request->getQueryParams()['currency'] ?? null)) {
-            $this->session->set([
-                'catalog' => [
-                    'currency' => $currentCurrency
-                ]
-            ]);
+            $this->config->setCurrencyCode($currentCurrency);
         }
 
 
