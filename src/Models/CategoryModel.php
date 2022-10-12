@@ -20,6 +20,7 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
+use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -64,6 +65,8 @@ final class CategoryModel implements ModelInterface
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
         $entityListenerResolver->register(new ProductPriceEntityListener($config));
 
+        $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
+
         $this->setOptions($this->config->getModuleConfig()->getAll());
     }
 
@@ -79,6 +82,9 @@ final class CategoryModel implements ModelInterface
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
         }
 
+
+
+
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
@@ -86,7 +92,13 @@ final class CategoryModel implements ModelInterface
             $qb->orderBy('i.filename', strtoupper($o));
         }
 
+        $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN cprice');
+        $qb->setParameter('current_currency', 'USD');
+        $qb->addOrderBy('cprice', 'DESC');
+
+
         $qb->addOrderBy('p.name', 'ASC');
+
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
 

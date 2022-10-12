@@ -19,14 +19,13 @@ final class ProductPriceEntityListener
     {
     }
 
-    public function preUpdate(ProductPrice $productPrice, 	PreUpdateEventArgs $eventArgs)
+    public function preUpdate(ProductPrice $productPrice, PreUpdateEventArgs $eventArgs)
     {
-        if ($this->config === null){
+        if ($this->config === null) {
             return;
         }
         $eventArgs->setNewValue('price', $eventArgs->getOldValue('price'));
         $eventArgs->setNewValue('updatedAt', $eventArgs->getOldValue('updatedAt'));
-
     }
 
 
@@ -39,13 +38,16 @@ final class ProductPriceEntityListener
 
     private function convertPrice(ProductPrice $productPrice, ObjectManager $em)
     {
-        if ($this->config === null){
+        if ($this->config === null) {
             return;
         }
 
         $currentCurrency = $em->getRepository(Currency::class)->find(
-            $this->config->getModuleConfig()->get('currency')['default'] ?? 'RUB'
+            $this->config->getModuleConfig()->get('currency')['default'] ?? null
+        ) ?? throw new \InvalidArgumentException(
+            'Default currency value not valid'
         );
+
         $currencyRate = $em->getRepository(CurrencyRate::class)->find(
             ['currencyMain' => $productPrice->getCurrency(), 'currencyConvert' => $currentCurrency]
         );
