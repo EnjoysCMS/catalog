@@ -39,7 +39,7 @@ class ConvertPrice extends FunctionNode
 
 /*
 
-CREATE DEFINER=`root`@`%` FUNCTION `CONVERT_PRICE`(
+CREATE FUNCTION `arowana-dev`.CONVERT_PRICE(
     `price` INT,
 	`main_currency` VARCHAR(3),
 	`convert_currency` VARCHAR(3)
@@ -59,6 +59,7 @@ BEGIN
 RETURN @result;
 
 END;
+
 
 
  */

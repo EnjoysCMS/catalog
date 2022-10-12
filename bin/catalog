@@ -1,8 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-use EnjoysCMS\Module\Sitemap\Command\Generate;
-use EnjoysCMS\Module\Sitemap\Command\Status;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application;
 
