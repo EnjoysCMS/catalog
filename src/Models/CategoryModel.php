@@ -34,8 +34,6 @@ final class CategoryModel implements ModelInterface
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
-    private ?string $currentSortMode;
-    private ?string $currentPerPage;
 
     /**
      * @throws NoResultException
@@ -70,10 +68,8 @@ final class CategoryModel implements ModelInterface
 
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
-        $this->currentSortMode = $this->getAndSetSortMode();
-        $this->currentPerPage = $this->getAndSetPerPage();
+        $this->updateDynamicConfig();
         $this->setOptions($this->config->getModuleConfig()->getAll());
-
 //        $this->dynamicConfig->setCurrencyCode($this->requestWrapper->getQueryData('currency'));
     }
 
@@ -82,7 +78,7 @@ final class CategoryModel implements ModelInterface
     {
         $pagination = new Pagination(
             $this->requestWrapper->getAttributesData('page', 1),
-            $this->getCurrentPerPage()
+            $this->dynamicConfig->getPerPage()
         );
 
         if ($this->getOption('showSubcategoryProducts', false)) {
@@ -102,7 +98,7 @@ final class CategoryModel implements ModelInterface
         $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
         $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
 
-        switch ($this->getCurrentSortMode()) {
+        switch ($this->dynamicConfig->getSortMode()) {
             case 'price.desc':
                 $qb->addOrderBy('converted_price', 'DESC');
                 break;
@@ -135,8 +131,7 @@ final class CategoryModel implements ModelInterface
             'categoryRepository' => $this->categoryRepository,
             'pagination' => $pagination,
             'products' => $result,
-            'currentSortMode' => $this->getCurrentSortMode(),
-            'currentPerPage' => $this->getCurrentPerPage(),
+            'config' => $this->dynamicConfig,
             'breadcrumbs' => $this->getBreadcrumbs(),
         ];
     }
@@ -163,43 +158,29 @@ final class CategoryModel implements ModelInterface
         return $this->breadcrumbs->get();
     }
 
-    /**
-     * Allowed sort mode:
-     * - price.desc
-     * - price.asc
-     * - name.desc
-     * - name.asc [default]
-     */
-    private function getAndSetSortMode(): ?string
+    private function updateDynamicConfig()
+    {
+        $this->updatePerPage();
+        $this->updateSortMode();
+    }
+
+    private function updateSortMode(): void
     {
         $mode = $this->requestWrapper->getQueryData('sort');
         if ($mode !== null){
             $this->dynamicConfig->setSortMode($mode);
         }
-
-        return $this->dynamicConfig->getSortMode();
     }
 
-
-
-    public function getCurrentSortMode(): string
-    {
-        return $this->dynamicConfig->getSortMode() ?? 'name.asc';
-    }
-
-    private function getAndSetPerPage(): string
+    private function updatePerPage(): void
     {
         $perpage = $this->requestWrapper->getQueryData('perpage');
         if ($perpage !== null){
             $this->dynamicConfig->setPerPage($perpage);
         }
-
-        return $this->dynamicConfig->getPerPage();
     }
 
-    public function getCurrentPerPage(): string
-    {
-        return $this->dynamicConfig->getPerPage();
-    }
+
+
 
 }

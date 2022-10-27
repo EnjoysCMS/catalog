@@ -71,6 +71,7 @@ final class DynamicConfig
         ]);
     }
 
+
     public function getPerPage(): string
     {
         return $this->session->get('catalog')['limitItems'] ?? $this->moduleConfig->get(
@@ -80,6 +81,14 @@ final class DynamicConfig
 
     public function setPerPage(string $perpage = null): void
     {
+        $allowedPerPage = $this->moduleConfig->get(
+            'allowedPerPage'
+        ) ?? throw new \InvalidArgumentException('allowedPerPage not set');
+
+        if (!in_array((int)$perpage, $allowedPerPage, true)){
+            return;
+        }
+
         $this->session->set([
             'catalog' => array_merge(
                 $this->session->get('catalog', []),

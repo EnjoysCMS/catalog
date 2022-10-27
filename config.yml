@@ -1,5 +1,9 @@
 WYSIWYG: summernote
 limitItems: 12
+allowedPerPage:
+  - 12
+  - 24
+  - 36
 sort: name.asc
 minSearchChars: 3
 showSubcategoryProducts: true
