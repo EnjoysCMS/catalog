@@ -44,13 +44,6 @@ final class DynamicConfig
         );
     }
 
-    public function getSortMode(): ?string
-    {
-        return $this->session->get('catalog')['sort'] ?? $this->moduleConfig->get(
-            'sort'
-        );
-    }
-
     public function setCurrencyCode(?string $code)
     {
         $this->session->set([
@@ -59,6 +52,13 @@ final class DynamicConfig
                 ['currency' => $code],
             )
         ]);
+    }
+
+    public function getSortMode(): ?string
+    {
+        return $this->session->get('catalog')['sort'] ?? $this->moduleConfig->get(
+            'sort'
+        );
     }
 
     public function setSortMode(string $mode = null): void
@@ -71,5 +71,21 @@ final class DynamicConfig
         ]);
     }
 
+    public function getPerPage(): string
+    {
+        return $this->session->get('catalog')['limitItems'] ?? $this->moduleConfig->get(
+            'limitItems'
+        ) ?? throw new \InvalidArgumentException('limitItems not set');
+    }
+
+    public function setPerPage(string $perpage = null): void
+    {
+        $this->session->set([
+            'catalog' => array_merge(
+                $this->session->get('catalog', []),
+                ['limitItems' => $perpage],
+            )
+        ]);
+    }
 
 }

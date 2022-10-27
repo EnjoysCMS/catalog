@@ -35,6 +35,7 @@ final class CategoryModel implements ModelInterface
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
     private ?string $currentSortMode;
+    private ?string $currentPerPage;
 
     /**
      * @throws NoResultException
@@ -70,6 +71,7 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->currentSortMode = $this->getAndSetSortMode();
+        $this->currentPerPage = $this->getAndSetPerPage();
         $this->setOptions($this->config->getModuleConfig()->getAll());
 
 //        $this->dynamicConfig->setCurrencyCode($this->requestWrapper->getQueryData('currency'));
@@ -79,8 +81,8 @@ final class CategoryModel implements ModelInterface
     public function getContext(): array
     {
         $pagination = new Pagination(
-            $this->requestWrapper->getAttributesData()->get('page', 1),
-            $this->getOption('limitItems')
+            $this->requestWrapper->getAttributesData('page', 1),
+            $this->getCurrentPerPage()
         );
 
         if ($this->getOption('showSubcategoryProducts', false)) {
@@ -134,6 +136,7 @@ final class CategoryModel implements ModelInterface
             'pagination' => $pagination,
             'products' => $result,
             'currentSortMode' => $this->getCurrentSortMode(),
+            'currentPerPage' => $this->getCurrentPerPage(),
             'breadcrumbs' => $this->getBreadcrumbs(),
         ];
     }
@@ -183,4 +186,20 @@ final class CategoryModel implements ModelInterface
     {
         return $this->dynamicConfig->getSortMode() ?? 'name.asc';
     }
+
+    private function getAndSetPerPage(): string
+    {
+        $perpage = $this->requestWrapper->getQueryData('perpage');
+        if ($perpage !== null){
+            $this->dynamicConfig->setPerPage($perpage);
+        }
+
+        return $this->dynamicConfig->getPerPage();
+    }
+
+    public function getCurrentPerPage(): string
+    {
+        return $this->dynamicConfig->getPerPage();
+    }
+
 }
