@@ -38,8 +38,9 @@ class ConvertPrice extends FunctionNode
 }
 
 /*
-
-CREATE FUNCTION `arowana-dev`.CONVERT_PRICE(
+//insert to migration
+$this->addSql(<<<SQL
+CREATE FUNCTION CONVERT_PRICE(
     `price` INT,
 	`main_currency` VARCHAR(3),
 	`convert_currency` VARCHAR(3)
@@ -59,7 +60,5 @@ BEGIN
 RETURN @result;
 
 END;
-
-
-
- */
+SQL);
+*/
