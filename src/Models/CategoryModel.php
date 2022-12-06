@@ -174,7 +174,7 @@ final class CategoryModel implements ModelInterface
 
     private function updatePerPage(): void
     {
-        $perpage = $this->request->getQueryParams()['perpage'];
+        $perpage = $this->request->getQueryParams()['perpage'] ?? null;
         if ($perpage !== null){
             $this->dynamicConfig->setPerPage($perpage);
         }

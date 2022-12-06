@@ -15,6 +15,7 @@ use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+
 final class Product extends AdminController
 {
 

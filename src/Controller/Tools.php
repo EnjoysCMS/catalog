@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ResponseInterface;
 
+
 final class Tools extends PublicController
 {
 
