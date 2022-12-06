@@ -14,12 +14,12 @@ use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class DeleteUrl implements ModelInterface
@@ -33,13 +33,13 @@ final class DeleteUrl implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
-        $this->url = $this->product->getUrlById((int)$this->requestWrapper->getQueryData('url_id'));
+        $this->url = $this->product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? null));
 
 
     }
@@ -49,7 +49,7 @@ final class DeleteUrl implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('product_id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }

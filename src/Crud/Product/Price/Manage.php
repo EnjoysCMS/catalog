@@ -6,12 +6,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Price;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
@@ -19,6 +20,7 @@ use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
@@ -36,7 +38,7 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
@@ -59,13 +61,17 @@ final class Manage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
         return $product;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -129,8 +135,9 @@ final class Manage implements ModelInterface
      */
     private function doAction(): void
     {
-
-        $currency = $this->em->getRepository(Currency::class)->find($this->requestWrapper->getPostData('currency'));
+        $currency = $this->em->getRepository(Currency::class)->find(
+            $this->request->getParsedBody()['currency'] ?? null
+        );
 
         if ($currency === null) {
             throw new \InvalidArgumentException('Currency not found');
@@ -138,7 +145,7 @@ final class Manage implements ModelInterface
 
 
         foreach ($this->priceGroups as $priceGroup) {
-            foreach ($this->requestWrapper->getPostData('price', []) as $code => $price) {
+            foreach (($this->request->getParsedBody()['price'] ?? []) as $code => $price) {
                 if ($priceGroup->getCode() !== $code) {
                     continue;
                 }
@@ -174,7 +181,6 @@ final class Manage implements ModelInterface
 
 
         $this->em->flush();
-//        exit;
         Redirect::http($this->urlGenerator->generate('@a/catalog/product/prices', ['id' => $this->product->getId()]));
     }
 }

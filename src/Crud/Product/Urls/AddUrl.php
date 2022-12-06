@@ -12,15 +12,16 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class AddUrl implements ModelInterface
@@ -33,7 +34,7 @@ final class AddUrl implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer
     ) {
@@ -46,7 +47,7 @@ final class AddUrl implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('product_id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -82,6 +83,9 @@ final class AddUrl implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -100,7 +104,7 @@ final class AddUrl implements ModelInterface
                 function () {
                     /** @var Product $product */
                     $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->requestWrapper->getPostData('path'),
+                        $this->request->getParsedBody()['path'] ?? null,
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
@@ -118,8 +122,8 @@ final class AddUrl implements ModelInterface
     private function doAction(): void
     {
         $url = new Url();
-        $url->setPath($this->requestWrapper->getPostData('path'));
-        $url->setDefault((bool)$this->requestWrapper->getPostData('default', false));
+        $url->setPath($this->request->getParsedBody()['path'] ?? null);
+        $url->setDefault((bool)($this->request->getParsedBody()['default'] ?? false));
         $url->setProduct($this->product);
 
         if ($url->isDefault()) {

@@ -8,10 +8,10 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage  implements ModelInterface
@@ -24,7 +24,7 @@ final class Manage  implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
 
@@ -38,7 +38,7 @@ final class Manage  implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }

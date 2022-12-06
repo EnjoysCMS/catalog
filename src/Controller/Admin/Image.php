@@ -9,7 +9,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Crud\Images\Add;
@@ -38,10 +37,12 @@ final class Image extends AdminController
      */
     public function manage(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/product/images/manage.twig',
-            $this->getContext($this->container->get(Index::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/product/images/manage.twig',
+                $this->getContext($this->container->get(Index::class))
+            )
+        );
     }
 
 
@@ -59,10 +60,12 @@ final class Image extends AdminController
     {
         /** @var Add $addImageService */
         $addImageService = $this->container->get(Add::class);
-        return $this->responseText($this->view(
-            $addImageService->getTemplatePath($this->templatePath),
-            $this->getContext($addImageService)
-        ));
+        return $this->responseText(
+            $this->view(
+                $addImageService->getTemplatePath($this->templatePath),
+                $this->getContext($addImageService)
+            )
+        );
     }
 
     /**
@@ -77,13 +80,16 @@ final class Image extends AdminController
      * @throws OptimisticLockException
      * @throws NotFoundException
      */
-    public function makeGeneral(EntityManager $entityManager, ServerRequestWrapper $requestWrapper, UrlGeneratorInterface $urlGenerator): void
-    {
+    public function makeGeneral(
+        EntityManager $entityManager,
+        ServerRequestInterface $request,
+        UrlGeneratorInterface $urlGenerator
+    ): void {
         $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
-        $image = $repository->find($requestWrapper->getQueryData('id'));
+        $image = $repository->find($request->getQueryParams()['id'] ?? null);
         if ($image === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $requestWrapper->getQueryData('id'))
+                sprintf('Not found by id: %s', $request->getQueryParams()['id'] ?? null)
             );
         }
         $images = $repository->findBy(['product' => $image->getProduct()]);
@@ -113,10 +119,12 @@ final class Image extends AdminController
      */
     public function delete(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Delete::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Delete::class))
+            )
+        );
     }
 
     #[Route(
@@ -126,10 +134,11 @@ final class Image extends AdminController
             'aclComment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js'
         ]
     )]
-    public function uploadDropzone(EntityManager $entityManager, ServerRequestInterface $request, UploadHandler $uploadHandler): ResponseInterface
-    {
-
-
+    public function uploadDropzone(
+        EntityManager $entityManager,
+        ServerRequestInterface $request,
+        UploadHandler $uploadHandler
+    ): ResponseInterface {
         try {
             $product = $entityManager->getRepository(Product::class)->find(
                 $request->getQueryParams()['product_id'] ?? 0

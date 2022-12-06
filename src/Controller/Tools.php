@@ -8,7 +8,6 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Routing\Annotation\Route;
 
 final class Tools extends PublicController
 {
@@ -25,7 +24,7 @@ final class Tools extends PublicController
      */
     public function translit(): ResponseInterface
     {
-        $query = $this->request->getPostData()->get('query');
+        $query = $this->request->getParsedBody()['query'] ?? null;
         $this->response = $this->response
             ->withHeader('Access-Control-Allow-Origin', '*')
         ;

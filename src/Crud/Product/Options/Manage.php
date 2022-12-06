@@ -13,7 +13,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -23,6 +22,7 @@ use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
@@ -37,7 +37,7 @@ final class Manage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
@@ -52,7 +52,7 @@ final class Manage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -149,7 +149,7 @@ final class Manage implements ModelInterface
     {
 //        dd($this->serverRequest->post('options', []));
         $this->product->clearOptions();
-        foreach ($this->requestWrapper->getPostData('options', []) as $option) {
+        foreach (($this->request->getParsedBody()['options'] ?? []) as $option) {
             if (empty($option['option']) || empty($option['value'])) {
                 continue;
             }

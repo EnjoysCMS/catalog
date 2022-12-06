@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
+use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -15,7 +18,6 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -24,7 +26,7 @@ use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -38,25 +40,28 @@ final class Add implements ModelInterface
 
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container,
+        private Container $container,
         private Config $config,
         private Cookie $cookie
     ) {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
-
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws SyntaxError
+     * @return array
+     * @throws Exception
      * @throws ExceptionRule
-     * @throws ORMException
-     * @throws RuntimeError
      * @throws LoaderError
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function getContext(): array
     {
@@ -91,21 +96,19 @@ final class Add implements ModelInterface
 
         $form->setDefaults(
             [
-                'category' => $this->requestWrapper->getQueryData(
-                    'category_id',
-                    Cookie::get('__catalog__last_category_when_add_product')
-                )
+                'category' => $this->request->getQueryParams()['category_id']
+                    ?? Cookie::get('__catalog__last_category_when_add_product')
             ]
         );
 
 
         $form->select('category', 'Категория')
+            ->addRule(Rules::REQUIRED)
             ->fill(
                 ['0' => '_без категории_'] + $this->em->getRepository(
                     Category::class
                 )->getFormFillArray()
-            )
-            ->addRule(Rules::REQUIRED);
+            );
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
@@ -117,8 +120,8 @@ final class Add implements ModelInterface
                 'Ошибка, такой url уже существует',
                 function () {
                     $check = $this->productRepository->getFindByUrlBuilder(
-                        $this->requestWrapper->getPostData('url'),
-                        $this->categoryRepository->find($this->requestWrapper->getPostData('category', 0))
+                        $this->request->getParsedBody()['url'] ?? null,
+                        $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0)
                     )->getQuery()->getOneOrNullResult();
                     return is_null($check);
                 }
@@ -136,15 +139,15 @@ final class Add implements ModelInterface
      */
     private function doAction(): void
     {
-        $categoryId = $this->requestWrapper->getPostData('category', 0);
+        $categoryId = $this->request->getParsedBody()['category'] ?? 0;
         $this->cookie->set('__catalog__last_category_when_add_product', $categoryId);
 
         /** @var Category|null $category */
         $category = $this->em->getRepository(Category::class)->find($categoryId);
 
         $product = new Product();
-        $product->setName($this->requestWrapper->getPostData('name'));
-        $product->setDescription($this->requestWrapper->getPostData('description'));
+        $product->setName($this->request->getParsedBody()['name'] ?? null);
+        $product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
         $product->setCategory($category);
 
@@ -158,9 +161,9 @@ final class Add implements ModelInterface
         $url->setProduct($product);
         $url->setDefault(true);
         $url->setPath(
-            (empty($this->requestWrapper->getPostData('url')))
+            (empty($this->request->getParsedBody()['url'] ?? null))
                 ? URLify::slug($product->getName())
-                : $this->requestWrapper->getPostData('url')
+                : $this->request->getParsedBody()['url'] ?? null
         );
 
         $this->em->persist($url);

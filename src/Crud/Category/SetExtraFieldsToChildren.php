@@ -9,15 +9,17 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class SetExtraFieldsToChildren implements ModelInterface
@@ -30,20 +32,23 @@ final class SetExtraFieldsToChildren implements ModelInterface
      */
     private $categoryRepository;
 
+    /**
+     * @throws NotFoundException
+     */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
-            $this->requestWrapper->getQueryData('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
         if ($this->category === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id', 0))
+                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? '0')
             );
         }
     }
@@ -76,6 +81,10 @@ final class SetExtraFieldsToChildren implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doActionRecursive(ArrayCollection|PersistentCollection $collection): void
     {
         $extraFields = $this->category->getExtraFields();
@@ -86,9 +95,8 @@ final class SetExtraFieldsToChildren implements ModelInterface
                 $this->doActionRecursive($item->getChildren());
             }
 
-//      if(in_array($item->getId(), [34, 45, 46])){
 
-            if ($this->requestWrapper->getPostData('removeOldExtraFields', false)) {
+            if ($this->request->getParsedBody()['removeOldExtraFields'] ?? false) {
                 $item->removeExtraFields();
             }
             foreach ($extraFields->toArray() as $optionKey) {
@@ -97,7 +105,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
 
             $this->entityManager->persist($item);
             $this->entityManager->flush();
-//      }
+
         }
     }
 }

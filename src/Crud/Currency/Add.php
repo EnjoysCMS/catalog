@@ -13,10 +13,10 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add implements ModelInterface
@@ -24,7 +24,7 @@ final class Add implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
     }
@@ -59,41 +59,31 @@ final class Add implements ModelInterface
     private function doProcess()
     {
         $currency = new Currency();
-        $currency->setId(strtoupper($this->requestWrapper->getPostData('id')));
-        $currency->setName($this->requestWrapper->getPostData('name'));
+        $currency->setId(strtoupper($this->request->getParsedBody()['id'] ?? null));
+        $currency->setName($this->request->getParsedBody()['name'] ?? null);
         $currency->setDCode(
-            $this->requestWrapper->getPostData('digital_code') === '' ? null : (int)$this->requestWrapper->getPostData(
-                'digital_code'
-            )
+            ($this->request->getParsedBody()['digital_code'] ?? null) === ''
+                ? null : (int)($this->request->getParsedBody()['digital_code'] ?? null)
         );
         $currency->setPattern(
-            $this->requestWrapper->getPostData('pattern') === '' ? null : $this->requestWrapper->getPostData(
-                'pattern'
-            )
+            ($this->request->getParsedBody()['pattern'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['pattern'] ?? null
         );
         $currency->setSymbol(
-            $this->requestWrapper->getPostData('symbol') === '' ? null : $this->requestWrapper->getPostData(
-                'symbol'
-            )
+            ($this->request->getParsedBody()['symbol'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['symbol'] ?? null
         );
         $currency->setFractionDigits(
-            $this->requestWrapper->getPostData(
-                'fraction_digits'
-            ) === '' ? null : (int)$this->requestWrapper->getPostData(
-                'fraction_digits'
-            )
+            ($this->request->getParsedBody()['fraction_digits'] ?? null) === ''
+                ? null : (int)($this->request->getParsedBody()['fraction_digits'] ?? null)
         );
         $currency->setMonetaryGroupSeparator(
-            $this->requestWrapper->getPostData(
-                'monetary_group_separator'
-            ) === '' ? null : $this->requestWrapper->getPostData(
-                'monetary_group_separator'
-            )
+            ($this->request->getParsedBody()['monetary_group_separator'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['monetary_group_separator'] ?? null
         );
         $currency->setMonetarySeparator(
-            $this->requestWrapper->getPostData('monetary_separator') === '' ? null : $this->requestWrapper->getPostData(
-                'monetary_separator'
-            )
+            ($this->request->getParsedBody()['monetary_separator'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['monetary_separator'] ?? null
         );
 
         $this->entityManager->persist($currency);
@@ -118,18 +108,17 @@ final class Add implements ModelInterface
             ->addRule(Rules::CALLBACK, 'Такая валюта уже зарегистрирована', function () {
                 return is_null(
                     $this->entityManager->getRepository(Currency::class)->find(
-                        strtoupper($this->requestWrapper->getPostData('id') )
+                        strtoupper($this->request->getParsedBody()['id'] ?? null)
                     )
                 );
             })
             ->addRule(Rules::CALLBACK, 'Валюту с таким кодом невозможно добавить', function () {
                 return in_array(
-                    strtoupper($this->requestWrapper->getPostData('id')),
+                    strtoupper($this->request->getParsedBody()['id'] ?? null),
                     array_keys(json_decode(file_get_contents('https://www.cbr-xml-daily.ru/latest.js'), true)['rates']),
                     true
                 );
-            })
-        ;
+            });
         $form->text('name', 'Name')->setDescription(
             'Наименование валюты'
         )->addRule(Rules::REQUIRED);

@@ -7,15 +7,17 @@ namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class PriceGroupEdit implements ModelInterface
@@ -24,20 +26,29 @@ final class PriceGroupEdit implements ModelInterface
 
     private PriceGroup $priceGroup;
 
+    /**
+     * @throws NoResultException
+     */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
 
-        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->requestWrapper->getQueryData('id'));
+        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->request->getQueryParams()['id'] ?? null);
         if ($priceGroup === null){
             throw new NoResultException();
         }
         $this->priceGroup = $priceGroup;
     }
 
+    /**
+     * @return array
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
     public function getContext(): array
     {
         $form = $this->getAddForm();
@@ -70,7 +81,7 @@ final class PriceGroupEdit implements ModelInterface
             ->addRule(Rules::REQUIRED)
             ->addRule(Rules::CALLBACK, 'Такой код уже существует', function () {
                 $pg = $this->em->getRepository(PriceGroup::class)->findOneBy(
-                    ['code' => $this->requestWrapper->getPostData('code')]
+                    ['code' => $this->request->getParsedBody()['code'] ?? null]
                 );
 
                 if($pg === null){
@@ -89,11 +100,15 @@ final class PriceGroupEdit implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
 
-        $this->priceGroup->setTitle($this->requestWrapper->getPostData('title'));
-        $this->priceGroup->setCode($this->requestWrapper->getPostData('code'));
+        $this->priceGroup->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $this->priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));
     }

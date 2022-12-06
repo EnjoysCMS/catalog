@@ -6,16 +6,18 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Meta;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductMeta;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
@@ -30,7 +32,7 @@ final class MetaManage implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer
     ) {
@@ -45,7 +47,7 @@ final class MetaManage implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -53,6 +55,10 @@ final class MetaManage implements ModelInterface
     }
 
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -101,14 +107,18 @@ final class MetaManage implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     protected function doAction(): void
     {
         if (null === $meta = $this->metaRepository->findOneBy(['product' => $this->product])) {
             $meta = new ProductMeta();
         }
-        $meta->setTitle($this->requestWrapper->getPostData('title'));
-        $meta->setKeyword($this->requestWrapper->getPostData('keywords'));
-        $meta->setDescription($this->requestWrapper->getPostData('description'));
+        $meta->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['keywords'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['description'] ?? null);
         $meta->setProduct($this->product);
         $this->em->persist($meta);
         $this->em->flush();

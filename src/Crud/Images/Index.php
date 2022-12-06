@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
@@ -22,13 +22,13 @@ final class Index implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        ServerRequestWrapper $request,
+        ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryData('product_id'));
+        $this->product = $entityManager->getRepository(Product::class)->find($request->getQueryParams()['product_id'] ?? null);
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by product_id: %s', $request->getQueryData('product_id'))
+                sprintf('Not found by product_id: %s', $request->getQueryParams()['product_id'] ?? null)
             );
         }
     }

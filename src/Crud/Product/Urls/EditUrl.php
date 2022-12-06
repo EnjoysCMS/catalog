@@ -12,15 +12,16 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class EditUrl implements ModelInterface
@@ -34,13 +35,13 @@ final class EditUrl implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
-        $this->url = $this->product->getUrlById((int)$this->requestWrapper->getQueryData('url_id'));
+        $this->url = $this->product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
     }
 
     /**
@@ -48,7 +49,7 @@ final class EditUrl implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('product_id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -56,8 +57,10 @@ final class EditUrl implements ModelInterface
     }
 
     /**
-     * @throws OptimisticLockException
+     * @return array
+     * @throws ExceptionRule
      * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function getContext(): array
     {
@@ -84,6 +87,9 @@ final class EditUrl implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -97,7 +103,7 @@ final class EditUrl implements ModelInterface
                 function () {
                     /** @var Product $product */
                     $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->requestWrapper->getPostData('path'),
+                        $this->request->getParsedBody()['path'] ?? null,
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
@@ -105,7 +111,7 @@ final class EditUrl implements ModelInterface
                         return true;
                     }
 
-                    if ($this->url->getPath() === $this->requestWrapper->getPostData('path')){
+                    if ($this->url->getPath() === ($this->request->getParsedBody()['path'] ?? null)){
                         return true;
                     }
 
@@ -123,7 +129,7 @@ final class EditUrl implements ModelInterface
      */
     private function doAction(): void
     {
-        $this->url->setPath($this->requestWrapper->getPostData('path'));
+        $this->url->setPath($this->request->getParsedBody()['path'] ?? null);
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]));
     }

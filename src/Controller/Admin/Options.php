@@ -7,14 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Crud\Product\Options as ModelOptions;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Options extends AdminController
 {
@@ -34,10 +33,12 @@ final class Options extends AdminController
      */
     public function manageOptions(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/product/options/options.twig',
-            $this->getContext($this->container->get(ModelOptions\Manage::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/product/options/options.twig',
+                $this->getContext($this->container->get(ModelOptions\Manage::class))
+            )
+        );
     }
 
     /**
@@ -80,10 +81,10 @@ final class Options extends AdminController
      */
     public function getOptionKeys(
         EntityManager $entityManager,
-        ServerRequestWrapper $requestWrapper
+        ServerRequestInterface $request
     ): ResponseInterface {
         return $this->responseJson(
-            $entityManager->getRepository(OptionKey::class)->like('name', $requestWrapper->getQueryData('query'))
+            $entityManager->getRepository(OptionKey::class)->like('name', $request->getQueryParams()['query'])
         );
     }
 
@@ -98,13 +99,20 @@ final class Options extends AdminController
      */
     public function getOptionValues(
         EntityManager $entityManager,
-        ServerRequestWrapper $requestWrapper
+        ServerRequestInterface $request
     ): ResponseInterface {
         $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
-            ['name' => $requestWrapper->getQueryData('option'), 'unit' => $requestWrapper->getQueryData('unit')]
+            [
+                'name' => $request->getQueryParams()['option'] ?? null,
+                'unit' => $request->getQueryParams()['unit'] ?? null
+            ]
         );
         return $this->responseJson(
-            $entityManager->getRepository(OptionValue::class)->like('value', $requestWrapper->getQueryData('query'), $key)
+            $entityManager->getRepository(OptionValue::class)->like(
+                'value',
+                $request->getQueryParams()['query'] ?? null,
+                $key
+            )
         );
     }
 }

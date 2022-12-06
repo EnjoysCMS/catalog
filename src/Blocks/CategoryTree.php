@@ -11,7 +11,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entities;
@@ -19,6 +18,7 @@ use EnjoysCMS\Module\Catalog\Repositories;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -32,7 +32,7 @@ final class CategoryTree extends AbstractBlock
 
     private Environment $twig;
 
-    private ServerRequestWrapper $requestWrapper;
+    private ServerRequestInterface $request;
     private string $templatePath;
 
     /**
@@ -48,7 +48,7 @@ final class CategoryTree extends AbstractBlock
             Entities\Category::class
         );
         $this->twig = $this->container->get(Environment::class);
-        $this->requestWrapper = $this->container->get(ServerRequestWrapper::class);
+        $this->request = $this->container->get(ServerRequestInterface::class);
         $this->templatePath = (string)$this->getOption('template');
     }
 
@@ -74,7 +74,7 @@ final class CategoryTree extends AbstractBlock
             [
                 'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
                 'blockOptions' => $this->getOptions(),
-                'currentSlug' => $this->requestWrapper->getAttributesData()->get('slug')
+                'currentSlug' => $this->request->getAttribute('slug')
             ]
         );
     }

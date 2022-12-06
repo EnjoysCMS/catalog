@@ -8,11 +8,12 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Index implements ModelInterface
@@ -22,15 +23,18 @@ final class Index implements ModelInterface
 
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
     }
 
+    /**
+     * @throws NotFoundException
+     */
     public function getContext(): array
     {
-        $pagination = new Pagination($this->requestWrapper->getQueryData('page', 1), 10);
+        $pagination = new Pagination($this->request->getQueryParams()['page'] ?? 1, 10);
         $qb = $this->productRepository->getFindAllBuilder();
         $query = $qb->orderBy('p.id', 'desc')
             ->getQuery()

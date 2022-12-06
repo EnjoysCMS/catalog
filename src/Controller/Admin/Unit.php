@@ -7,10 +7,10 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Message\Response;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -24,14 +24,12 @@ final class Unit extends AdminController
 {
     public function __invoke(
         EntityManager $entityManager,
-        ServerRequestWrapper $requestWrapper,
+        ServerRequestInterface $request,
         Response $response,
         SapiEmitter $emitter
     ) {
         $matched = $entityManager->getRepository(ProductUnit::class)->like(
-            $requestWrapper->getQueryData(
-                'query'
-            )
+            $request->getQueryParams()['query'] ?? null
         );
 
         $result = [

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
+use DI\Container;
+use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
@@ -13,7 +15,6 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Exception\NotFoundException;
@@ -24,7 +25,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -42,28 +43,33 @@ final class Edit implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container,
+        private Container $container,
         private Config $config
     ) {
         $this->productRepository = $entityManager->getRepository(Product::class);
         $this->product = $this->productRepository->find(
-            $this->requestWrapper->getQueryData('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
+                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
             );
         }
-
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
+     * @return array
+     * @throws ExceptionRule
      * @throws LoaderError
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
      */
     public function getContext(): array
     {
@@ -97,6 +103,7 @@ final class Edit implements ModelInterface
 
     /**
      * @throws ExceptionRule
+     * @throws \Exception
      */
     private function getForm(): Form
     {
@@ -135,12 +142,12 @@ final class Edit implements ModelInterface
             ->fill([1 => 'Скрыт?']);
 
         $form->select('category', 'Категория')
+            ->addRule(Rules::REQUIRED)
             ->fill(
                 $this->entityManager->getRepository(
                     Category::class
                 )->getFormFillArray()
-            )
-            ->addRule(Rules::REQUIRED);
+            );
 
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
@@ -154,7 +161,7 @@ final class Edit implements ModelInterface
                 function () {
                     /** @var Product $product */
                     $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->requestWrapper->getPostData('url'),
+                        $this->request->getParsedBody()['url'] ?? null,
                         $this->product->getCategory()
                     )->getQuery()->getOneOrNullResult();
 
@@ -189,14 +196,14 @@ final class Edit implements ModelInterface
     {
         /** @var Category|null $category */
         $category = $this->entityManager->getRepository(Category::class)->find(
-            $this->requestWrapper->getPostData('category', 0)
+            $this->request->getParsedBody()['category'] ?? 0
         );
 
-        $this->product->setName($this->requestWrapper->getPostData('name'));
-        $this->product->setDescription($this->requestWrapper->getPostData('description'));
+        $this->product->setName($this->request->getParsedBody()['name'] ?? null);
+        $this->product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
-        $unitValue = $this->requestWrapper->getPostData('unit');
+        $unitValue = $this->request->getParsedBody()['unit'] ?? null;
         $unit = $this->entityManager->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
         if ($unit === null) {
             $unit = new ProductUnit();
@@ -207,13 +214,13 @@ final class Edit implements ModelInterface
         $this->product->setUnit($unit);
 
         $this->product->setCategory($category);
-        $this->product->setActive((bool)$this->requestWrapper->getPostData('active', false));
-        $this->product->setHide((bool)$this->requestWrapper->getPostData('hide', false));
+        $this->product->setActive((bool)($this->request->getParsedBody()['active'] ?? false));
+        $this->product->setHide((bool)($this->request->getParsedBody()['hide'] ?? false));
 
 
-        $urlString = (empty($this->requestWrapper->getPostData('url')))
+        $urlString = (empty($this->request->getParsedBody()['url'] ?? null))
             ? URLify::slug($this->product->getName())
-            : $this->requestWrapper->getPostData('url');
+            : $this->request->getParsedBody()['url'] ?? null;
 
         /** @var Url $url */
         $urlSetFlag = false;

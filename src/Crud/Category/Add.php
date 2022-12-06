@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
+use DI\Container;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
@@ -14,13 +15,12 @@ use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Add implements ModelInterface
@@ -33,10 +33,10 @@ final class Add implements ModelInterface
 
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container,
+        private Container $container,
         private Config $config
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
@@ -74,7 +74,7 @@ final class Add implements ModelInterface
 
         $form->setDefaults(
             [
-                'parent' => $this->requestWrapper->getQueryData()->get('parent_id')
+                'parent' => $this->request->getQueryParams()['parent_id'] ?? null
             ]
         );
 
@@ -99,9 +99,9 @@ final class Add implements ModelInterface
                 function () {
                     $check = $this->categoryRepository->findOneBy(
                         [
-                            'url' => $this->requestWrapper->getPostData()->get('url'),
+                            'url' => $this->request->getParsedBody()['url'] ?? null,
                             'parent' => $this->categoryRepository->find(
-                                $this->requestWrapper->getPostData()->get('parent')
+                                $this->request->getParsedBody()['parent'] ?? null
                             )
                         ]
                     );
@@ -133,15 +133,15 @@ HTML
     private function doAction(): void
     {
         /** @var Category|null $parent */
-        $parent = $this->categoryRepository->find($this->requestWrapper->getPostData()->get('parent'));
+        $parent = $this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null);
         $category = new Category();
         $category->setParent($parent);
         $category->setSort(0);
-        $category->setTitle($this->requestWrapper->getPostData()->get('title'));
-        $category->setShortDescription($this->requestWrapper->getPostData()->get('shortDescription'));
-        $category->setDescription($this->requestWrapper->getPostData()->get('description'));
-        $category->setUrl($this->requestWrapper->getPostData()->get('url'));
-        $category->setImg($this->requestWrapper->getPostData()->get('img'));
+        $category->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
+        $category->setDescription($this->request->getParsedBody()['description'] ?? null);
+        $category->setUrl($this->request->getParsedBody()['url'] ?? null);
+        $category->setImg($this->request->getParsedBody()['img'] ?? null);
 
         $this->entityManager->persist($category);
         $this->entityManager->flush();

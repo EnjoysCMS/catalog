@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -24,20 +26,24 @@ final class Delete implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->product = $this->entityManager->getRepository(Product::class)->find(
-            $this->requestWrapper->getQueryData('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
+                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? 0)
             );
         }
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -70,6 +76,10 @@ final class Delete implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         $this->removeImages();
@@ -83,6 +93,9 @@ final class Delete implements ModelInterface
         Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
     }
 
+    /**
+     * @throws ORMException
+     */
     private function removeImages(): void
     {
         foreach ($this->product->getImages() as $image) {
@@ -93,6 +106,9 @@ final class Delete implements ModelInterface
         }
     }
 
+    /**
+     * @throws ORMException
+     */
     private function removeFiles(): void
     {
         foreach ($this->product->getFiles() as $file) {

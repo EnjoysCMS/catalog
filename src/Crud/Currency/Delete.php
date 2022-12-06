@@ -16,12 +16,12 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
 use InvalidArgumentException;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -32,10 +32,10 @@ final class Delete implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $currencyId = $this->requestWrapper->getQueryData('id');
+        $currencyId = $this->request->getQueryParams()['id'] ?? null;
         if ($currencyId === null) {
             throw new InvalidArgumentException('Currency id was not transmitted');
         }
@@ -65,14 +65,17 @@ final class Delete implements ModelInterface
             try {
                 $this->doProcess();
             } catch (\Throwable $e) {
-                if ($e->getCode() !== 1451){
+                if ($e->getCode() !== 1451) {
                     throw $e;
                 }
-                $rule->setRuleError('Эта валюта используется в ценах на товары, поэтому удалить нельзя. Сначала нужно удалить все товары с этой валютой');
+                $rule->setRuleError(
+                    'Эта валюта используется в ценах на товары, поэтому удалить нельзя.
+                    Сначала нужно удалить все товары с этой валютой'
+                );
             }
         }
 
-        if ($rule->isRuleError()){
+        if ($rule->isRuleError()) {
             $form->header($rule->getRuleErrorMessage())->addClass('text-danger');
         }
 
@@ -98,9 +101,13 @@ final class Delete implements ModelInterface
     {
         $form = new Form();
 
-        $form->hidden('rule')->addRule(Rules::CALLBACK, 'Нельзя удалять все валюты из системы', function () {
-            return $this->repo->count([]) > 1;
-        });
+        $form->hidden('rule')->addRule(
+            Rules::CALLBACK,
+            'Нельзя удалять все валюты из системы',
+            function () {
+                return $this->repo->count([]) > 1;
+            }
+        );
 
         $form->submit('delete', 'Удалить');
         return $form;

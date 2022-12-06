@@ -8,13 +8,14 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Files;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
-use Enjoys\Upload\File;
 use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -22,6 +23,8 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use League\Flysystem\FilesystemException;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Upload implements ModelInterface
@@ -36,7 +39,7 @@ final class Upload implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private RendererInterface $renderer,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config
     ) {
@@ -50,13 +53,19 @@ final class Upload implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
         return $product;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws FilesystemException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -83,6 +92,9 @@ final class Upload implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -93,10 +105,16 @@ final class Upload implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws FilesystemException
+     * @throws ORMException
+     */
     private function doAction()
     {
-
-        $uploadedFile = $this->requestWrapper->getFilesData('file');
+        $uploadedFile = $this->request->getUploadedFiles()['file'] ?? throw new \InvalidArgumentException(
+            'File not choose or send'
+        );
         $storage = $this->config->getFileStorageUpload();
         $filesystem = $storage->getFileSystem();
 
@@ -113,8 +131,8 @@ final class Upload implements ModelInterface
             $productFile->setFileSize($file->getFileInfo()->getSize());
             $productFile->setFileExtension($file->getFileInfo()->getExtension());
             $productFile->setOriginalFilename($file->getFileInfo()->getOriginalFilename());
-            $productFile->setDescription($this->requestWrapper->getPostData('description'));
-            $productFile->setTitle($this->requestWrapper->getPostData('title'));
+            $productFile->setDescription($this->request->getParsedBody()['description'] ?? null);
+            $productFile->setTitle($this->request->getParsedBody()['title'] ?? null);
             $productFile->setStorage($this->config->getModuleConfig()->get('productFileStorage'));
 
             $this->em->persist($productFile);

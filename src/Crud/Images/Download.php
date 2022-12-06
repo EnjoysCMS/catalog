@@ -7,12 +7,12 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
 use Enjoys\Forms\Form;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Config;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use League\Flysystem\FilesystemOperator;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Download implements LoadImage
 {
@@ -78,9 +78,9 @@ final class Download implements LoadImage
     }
 
 
-    public function upload(ServerRequestWrapper $requestWrapper): \Generator
+    public function upload(ServerRequestInterface $request): \Generator
     {
-        $this->loadAndSave($requestWrapper->getPostData('image'));
+        $this->loadAndSave($request->getParsedBody()['image'] ?? null);
         yield $this;
     }
 

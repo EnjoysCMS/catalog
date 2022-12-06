@@ -10,10 +10,10 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class MakeDefault
@@ -26,10 +26,10 @@ final class MakeDefault
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $product = $this->em->getRepository(Product::class)->find($this->requestWrapper->getQueryData('product_id'));
+        $product = $this->em->getRepository(Product::class)->find($this->request->getQueryParams()['product_id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -40,12 +40,12 @@ final class MakeDefault
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function __invoke()
+    public function __invoke(): void
     {
         $setFlag = false;
         /** @var Url $url */
         foreach ($this->product->getUrls() as $url) {
-            if ($url->getId() === (int)$this->requestWrapper->getQueryData('url_id')) {
+            if ($url->getId() === (int)($this->request->getQueryParams()['url_id'] ?? null)) {
                 $url->setDefault(true);
                 $setFlag = true;
                 continue;

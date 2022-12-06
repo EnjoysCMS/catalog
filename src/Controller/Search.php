@@ -6,13 +6,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Dto\SearchDto;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
@@ -23,7 +23,7 @@ final class Search extends PublicController
 
 
     public function __construct(
-        ServerRequestWrapper $request,
+        ServerRequestInterface $request,
         Environment $twig,
         Config $config,
         ResponseInterface $response = null

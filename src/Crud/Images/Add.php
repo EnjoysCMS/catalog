@@ -6,17 +6,18 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use DI\DependencyException;
 use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
@@ -34,28 +35,36 @@ final class Add implements ModelInterface
     private $uploadMethod;
 
     /**
+     * @param EntityManager $entityManager
+     * @param ServerRequestInterface $request
+     * @param RendererInterface $renderer
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param Config $config
+     * @param FactoryInterface $factory
      * @throws NotFoundException
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
         FactoryInterface $factory
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
-            $this->requestWrapper->getQueryData('product_id')
+            $this->request->getQueryParams()['product_id'] ?? null
         );
         if ($this->product === null) {
             throw new NotFoundException(
-                sprintf('Not found by product_id: %s', $this->requestWrapper->getQueryData('product_id'))
+                sprintf('Not found by product_id: %s', $this->request->getQueryParams()['product_id'] ?? null)
             );
         }
 
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
 
-        $method = $this->requestWrapper->getQueryData('method', 'upload');
+        $method = $this->request->getQueryParams()['method'] ?? 'upload';
 
         if (!in_array($method, ['upload', 'download'], true)) {
             $method = 'upload';
@@ -112,7 +121,7 @@ final class Add implements ModelInterface
 
     private function doAction(): void
     {
-        foreach ($this->uploadMethod->upload($this->requestWrapper) as $item) {
+        foreach ($this->uploadMethod->upload($this->request) as $item) {
             $manageImage = new ManageImage($this->product, $this->entityManager, $this->config);
             $manageImage->addToDB(
                 $item->getName(),

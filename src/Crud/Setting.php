@@ -10,10 +10,10 @@ use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Setting implements ModelInterface
@@ -23,7 +23,7 @@ final class Setting implements ModelInterface
 
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
@@ -105,7 +105,7 @@ final class Setting implements ModelInterface
         }
         $this->entityManager->flush();
 
-        foreach ($this->requestWrapper->getPostData()->getAll() as $key => $value) {
+        foreach ($this->request->getParsedBody() as $key => $value) {
 
             switch ($key) {
                 case 'minSearchChars':

@@ -10,7 +10,6 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Functions\TwigExtension\ConvertSize;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Manage;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Upload;
@@ -18,6 +17,7 @@ use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -85,14 +85,14 @@ final class Files extends AdminController
     {
         /** @var EntityManager $em */
         $em = $this->getContainer()->get(EntityManager::class);
-        /** @var ServerRequestWrapper $request */
-        $request = $this->getContainer()->get(ServerRequestWrapper::class);
+        /** @var ServerRequestInterface $request */
+        $request = $this->getContainer()->get(ServerRequestInterface::class);
         $product = $em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->find(
-            $request->getQueryData('product', 0)
+            $request->getQueryParams()['product'] ?? 0
         );
         /** @var ProductFiles $file */
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
-            'id' => $request->getQueryData('id', 0),
+            'id' => $request->getQueryParams()['id'] ?? 0,
             'product' => $product,
         ]);
 

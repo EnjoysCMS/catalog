@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Image;
+use League\Flysystem\FilesystemException;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
@@ -25,21 +28,21 @@ final class Delete implements ModelInterface
      */
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config
     ) {
 
         $this->image = $this->entityManager->getRepository(Image::class)->find(
-            $this->requestWrapper->getQueryData('id', 0)
+            $this->request->getQueryParams()['id'] ?? 0
         );
 
 
 
         if ($this->image === null) {
             throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->requestWrapper->getQueryData('id'))
+                sprintf('Not found by id: %s',  $this->request->getQueryParams()['id'] ?? 0)
             );
         }
     }
@@ -75,6 +78,11 @@ final class Delete implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws FilesystemException
+     */
     private function doAction(): void
     {
         $filesystem = $this->config->getImageStorageUpload($this->image->getStorage())->getFileSystem();

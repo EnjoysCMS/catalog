@@ -5,10 +5,10 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Controller;
 
+use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
@@ -40,10 +40,10 @@ final class Category extends PublicController
             'slug' => ''
         ]
     )]
-    public function view(ContainerInterface $container): ResponseInterface
+    public function view(Container $container): ResponseInterface
     {
 
-        if ($this->request->getAttributesData()->get('slug', '') === '') {
+        if ($this->request->getAttribute('slug', '') === '') {
             return $container->call([Index::class, 'view']);
         }
 

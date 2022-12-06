@@ -6,16 +6,19 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Tags;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class TagsList implements ModelInterface
@@ -29,7 +32,7 @@ class TagsList implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
@@ -43,7 +46,7 @@ class TagsList implements ModelInterface
      */
     private function getProduct(): Product
     {
-        $product = $this->productRepository->find($this->requestWrapper->getQueryData('id'));
+        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
         if ($product === null) {
             throw new NoResultException();
         }
@@ -51,6 +54,11 @@ class TagsList implements ModelInterface
     }
 
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -74,6 +82,9 @@ class TagsList implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     protected function getForm(): Form
     {
         $form = new Form();
@@ -98,9 +109,13 @@ class TagsList implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     protected function doAction(): void
     {
-        $tags = array_map('trim', array_unique(explode(',', $this->requestWrapper->getPostData('tags'))));
+        $tags = array_map('trim', array_unique(explode(',', $this->request->getParsedBody()['tags'] ?? null)));
         $manageTags = new TagsManager($this->em);
         $this->product->clearTags();
         $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));

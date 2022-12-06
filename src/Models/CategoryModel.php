@@ -10,7 +10,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\ServerRequestWrapper;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Helpers\Setting;
@@ -23,6 +22,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class CategoryModel implements ModelInterface
@@ -42,7 +42,7 @@ final class CategoryModel implements ModelInterface
      */
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
@@ -51,13 +51,13 @@ final class CategoryModel implements ModelInterface
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
         $category = $this->getCategory(
-            $this->requestWrapper->getAttributesData()->get('slug', '')
+            $this->request->getAttribute('slug', '')
         );
 
 
         if ($category === null) {
             throw new NotFoundException(
-                sprintf('Not found by slug: %s', $this->requestWrapper->getAttributesData()->get('slug', ''))
+                sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
             );
         }
 
@@ -69,15 +69,15 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->updateDynamicConfig();
-        $this->setOptions($this->config->getModuleConfig()->getAll());
-//        $this->dynamicConfig->setCurrencyCode($this->requestWrapper->getQueryData('currency'));
+        $this->setOptions($this->config->getModuleConfig()->asArray());
+//        $this->dynamicConfig->setCurrencyCode($this->request->getQueryParams()['currency'] ?? null);
     }
 
 
     public function getContext(): array
     {
         $pagination = new Pagination(
-            $this->requestWrapper->getAttributesData('page', 1),
+            $this->request->getAttribute('page', 1),
             $this->dynamicConfig->getPerPage()
         );
 
@@ -166,7 +166,7 @@ final class CategoryModel implements ModelInterface
 
     private function updateSortMode(): void
     {
-        $mode = $this->requestWrapper->getQueryData('sort');
+        $mode = $this->request->getQueryParams()['sort'] ?? null;
         if ($mode !== null){
             $this->dynamicConfig->setSortMode($mode);
         }
@@ -174,7 +174,7 @@ final class CategoryModel implements ModelInterface
 
     private function updatePerPage(): void
     {
-        $perpage = $this->requestWrapper->getQueryData('perpage');
+        $perpage = $this->request->getQueryParams()['perpage'];
         if ($perpage !== null){
             $this->dynamicConfig->setPerPage($perpage);
         }

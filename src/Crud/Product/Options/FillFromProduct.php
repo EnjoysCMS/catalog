@@ -8,12 +8,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Options;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class FillFromProduct
@@ -22,7 +23,7 @@ final class FillFromProduct
 
     public function __construct(
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->entityManager->getRepository(Product::class);
@@ -30,17 +31,18 @@ final class FillFromProduct
 
     /**
      * @throws NoResultException
+     * @throws ORMException
      */
-    public function __invoke()
+    public function __invoke(): void
     {
         /** @var Product $product */
-        $product = $this->productRepository->find($this->requestWrapper->getPostData('id', 0));
+        $product = $this->productRepository->find($this->request->getParsedBody()['id'] ?? 0);
         if ($product === null) {
             throw new NoResultException();
         }
 
         /** @var Product $from */
-        $from = $this->productRepository->find($this->requestWrapper->getPostData('fillFromProduct', 0));
+        $from = $this->productRepository->find($this->request->getParsedBody()['fillFromProduct'] ?? 0);
         if ($from === null) {
             $this->redirectToProductOptionsPage($product);
         }

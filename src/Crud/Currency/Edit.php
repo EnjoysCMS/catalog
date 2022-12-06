@@ -13,11 +13,11 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use InvalidArgumentException;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Edit implements ModelInterface
@@ -28,10 +28,10 @@ final class Edit implements ModelInterface
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator
     ) {
-        $currencyId = $this->requestWrapper->getQueryData('id');
+        $currencyId = $this->request->getQueryParams()['id'] ?? null;
         if ($currencyId === null) {
             throw new InvalidArgumentException('Currency id was not transmitted');
         }
@@ -87,8 +87,7 @@ final class Edit implements ModelInterface
             ->setDescription(
                 'Буквенный код ISO 4217. Изменять нельзя, чтобы изменить, нужно удалить и добавить новую'
             )
-            ->setAttribute(AttributeFactory::create('disabled'))
-        ;
+            ->setAttribute(AttributeFactory::create('disabled'));
         $form->text('name', 'Name')->setDescription(
             'Наименование валюты'
         )->addRule(Rules::REQUIRED);
@@ -120,42 +119,31 @@ final class Edit implements ModelInterface
      */
     private function doProcess()
     {
-        $this->currency->setName($this->requestWrapper->getPostData('name'));
+        $this->currency->setName($this->request->getParsedBody()['name'] ?? null);
         $this->currency->setDCode(
-            $this->requestWrapper->getPostData('digital_code') === '' ? null : (int)$this->requestWrapper->getPostData(
-                'digital_code'
-            )
+            ($this->request->getParsedBody()['digital_code'] ?? null) === ''
+                ? null : (int)($this->request->getParsedBody()['digital_code'] ?? null)
         );
         $this->currency->setPattern(
-            $this->requestWrapper->getPostData('pattern') === '' ? null : $this->requestWrapper->getPostData(
-                'pattern'
-            )
+            ($this->request->getParsedBody()['pattern'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['pattern'] ?? null
         );
         $this->currency->setSymbol(
-            $this->requestWrapper->getPostData('symbol') === '' ? null : $this->requestWrapper->getPostData(
-                'symbol'
-            )
+            ($this->request->getParsedBody()['symbol'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['symbol'] ?? null
         );
         $this->currency->setFractionDigits(
-            $this->requestWrapper->getPostData(
-                'fraction_digits'
-            ) === '' ? null : (int)$this->requestWrapper->getPostData(
-                'fraction_digits'
-            )
+            ($this->request->getParsedBody()['fraction_digits'] ?? null) === ''
+                ? null : (int)($this->request->getParsedBody()['fraction_digits'] ?? null)
         );
         $this->currency->setMonetaryGroupSeparator(
-            $this->requestWrapper->getPostData(
-                'monetary_group_separator'
-            ) === '' ? null : $this->requestWrapper->getPostData(
-                'monetary_group_separator'
-            )
+            ($this->request->getParsedBody()['monetary_group_separator'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['monetary_group_separator'] ?? null
         );
         $this->currency->setMonetarySeparator(
-            $this->requestWrapper->getPostData('monetary_separator') === '' ? null : $this->requestWrapper->getPostData(
-                'monetary_separator'
-            )
+            ($this->request->getParsedBody()['monetary_separator'] ?? null) === ''
+                ? null : $this->request->getParsedBody()['monetary_separator'] ?? null
         );
-
 
 
         $this->entityManager->flush();

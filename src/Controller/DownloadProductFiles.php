@@ -8,11 +8,11 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -29,11 +29,11 @@ final class DownloadProductFiles extends BaseController
 {
     public function __invoke(
         EntityManagerInterface $em,
-        ServerRequestWrapper $request,
+        ServerRequestInterface $request,
         Config $config
     ): ResponseInterface {
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
-            'filePath' => $request->getAttributesData('filepath')
+            'filePath' => $request->getAttribute('filepath')
         ]);
 
         if ($file === null) {

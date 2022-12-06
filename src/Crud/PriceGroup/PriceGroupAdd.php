@@ -11,10 +11,10 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class PriceGroupAdd implements ModelInterface
@@ -22,7 +22,7 @@ final class PriceGroupAdd implements ModelInterface
 
     public function __construct(
         private EntityManager $em,
-        private ServerRequestWrapper $requestWrapper,
+        private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator
     ) {
@@ -57,7 +57,7 @@ final class PriceGroupAdd implements ModelInterface
             ->addRule(Rules::CALLBACK, 'Такой код уже существует', function () {
                 return is_null(
                     $this->em->getRepository(PriceGroup::class)->findOneBy(
-                        ['code' => $this->requestWrapper->getPostData('code')]
+                        ['code' => $this->request->getParsedBody()['code'] ?? null]
                     )
                 );
             });
@@ -70,8 +70,8 @@ final class PriceGroupAdd implements ModelInterface
     private function doAction(): void
     {
         $priceGroup = new PriceGroup();
-        $priceGroup->setTitle($this->requestWrapper->getPostData('title'));
-        $priceGroup->setCode($this->requestWrapper->getPostData('code'));
+        $priceGroup->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->persist($priceGroup);
         $this->em->flush();
         Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));

@@ -9,16 +9,18 @@ namespace EnjoysCMS\Module\Catalog\Actions;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\ServerRequestWrapper;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Search
 {
@@ -32,20 +34,23 @@ final class Search
 
     public function __construct(
         private ContainerInterface $container,
-        private ServerRequestWrapper $request,
+        private ServerRequestInterface $request,
         private EntityManager $em,
         Config $config
     ) {
-        $this->setOptions($config->getModuleConfig()->getAll());
-        $this->searchQuery = \trim($this->request->getQueryData('q', $this->request->getPostData('q', '')));
+        $this->setOptions($config->getModuleConfig()->asArray());
+        $this->searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
     }
 
+    /**
+     * @throws NotFoundException
+     */
     public function getSearchResult(array $optionKeys = []): array
     {
         $this->validateSearchQuery();
 
-        $pagination = new Pagination($this->request->getQueryData('page', 1), $this->getOption('limitItems'));
+        $pagination = new Pagination($this->request->getQueryParams()['page'] ?? 1, $this->getOption('limitItems'));
 
         $qb = $this->getFoundProducts($optionKeys);
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
@@ -69,7 +74,7 @@ final class Search
     }
 
 
-    private function getFoundProducts(array $optionKeys = [])
+    private function getFoundProducts(array $optionKeys = []): QueryBuilder
     {
         $this->optionKeys = $optionKeys;
         $qb = $this->productRepository->createQueryBuilder('p');

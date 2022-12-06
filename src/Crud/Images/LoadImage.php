@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
 use Enjoys\Forms\Form;
-use Enjoys\ServerRequestWrapper;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface LoadImage
 {
@@ -15,5 +15,5 @@ interface LoadImage
     public function getName(): string;
     public function getExtension(): string;
     public function getTemplatePath(string $templateRootPath): string;
-    public function upload(ServerRequestWrapper $requestWrapper): \Generator;
+    public function upload(ServerRequestInterface $request): \Generator;
 }

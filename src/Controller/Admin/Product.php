@@ -7,14 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use Enjoys\ServerRequestWrapper;
 use EnjoysCMS\Module\Catalog\Crud\Product\Add;
 use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Product\Edit;
 use EnjoysCMS\Module\Catalog\Crud\Product\Index;
 use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Product extends AdminController
 {
@@ -128,12 +127,10 @@ final class Product extends AdminController
      */
     public function findProductsByLike(
         EntityManager $entityManager,
-        ServerRequestWrapper $requestWrapper
+        ServerRequestInterface $request
     ): ResponseInterface {
         $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
-            $requestWrapper->getQueryData(
-                'query'
-            )
+            $request->getQueryParams()['query'] ?? null
         );
 
         $result = [

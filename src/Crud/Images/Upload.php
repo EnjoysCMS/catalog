@@ -12,8 +12,8 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
-use Enjoys\ServerRequestWrapper;
 use League\Flysystem\FilesystemException;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class Upload implements LoadImage
 {
@@ -83,18 +83,18 @@ final class Upload implements LoadImage
 
 
     /**
-     * @param ServerRequestWrapper $requestWrapper
+     * @param ServerRequestInterface $request
      * @return \Generator
-     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws FilesystemException
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws FilesystemException
+     * @throws \Doctrine\ORM\Exception\ORMException
      * @throws \Throwable
      */
-    public function upload(ServerRequestWrapper $requestWrapper): \Generator
+    public function upload(ServerRequestInterface $request): \Generator
     {
             try {
-                $file = $this->uploadHandler->uploadFile($requestWrapper->getFilesData('image'));
+                $file = $this->uploadHandler->uploadFile($request->getUploadedFiles()['image'] ?? null);
                 $this->setName( str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()));
                 $this->setExtension($file->getFileInfo()->getExtension());
                 yield $this;
