@@ -52,7 +52,6 @@ final class Add implements ModelInterface
     }
 
     /**
-     * @return array
      * @throws Exception
      * @throws ExceptionRule
      * @throws LoaderError

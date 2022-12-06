@@ -31,7 +31,7 @@ class CurrencyRate
      */
     private float $rate;
 
-    public function __toString() {
+    public function __toString(): string {
         return $this->currencyMain->getCode().$this->currencyConvert->getCode();
     }
 
@@ -43,10 +43,7 @@ class CurrencyRate
         return $this->currencyMain;
     }
 
-    /**
-     * @param mixed $currencyMain
-     */
-    public function setCurrencyMain($currencyMain): void
+    public function setCurrencyMain(mixed $currencyMain): void
     {
         $this->currencyMain = $currencyMain;
     }
@@ -59,25 +56,16 @@ class CurrencyRate
         return $this->currencyConvert;
     }
 
-    /**
-     * @param mixed $currencyConvert
-     */
-    public function setCurrencyConvert($currencyConvert): void
+    public function setCurrencyConvert(mixed $currencyConvert): void
     {
         $this->currencyConvert = $currencyConvert;
     }
 
-    /**
-     * @return float
-     */
     public function getRate(): float
     {
         return $this->rate;
     }
 
-    /**
-     * @param float $rate
-     */
     public function setRate(float $rate): void
     {
         $this->rate = $rate;

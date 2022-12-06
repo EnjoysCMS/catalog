@@ -44,7 +44,6 @@ final class PriceGroupEdit implements ModelInterface
     }
 
     /**
-     * @return array
      * @throws ExceptionRule
      * @throws ORMException
      * @throws OptimisticLockException

@@ -21,7 +21,6 @@ final class Options extends AdminController
 
 
     /**
-     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */

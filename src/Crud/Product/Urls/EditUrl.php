@@ -57,7 +57,6 @@ final class EditUrl implements ModelInterface
     }
 
     /**
-     * @return array
      * @throws ExceptionRule
      * @throws ORMException
      * @throws OptimisticLockException

@@ -144,9 +144,6 @@ class Currency
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
     public function getId(): string
     {
         return $this->id;
@@ -161,9 +158,6 @@ class Currency
         return $this->getId();
     }
 
-    /**
-     * @param string $id
-     */
     public function setId(string $id): void
     {
         $this->id = strtoupper($id);
@@ -196,50 +190,32 @@ class Currency
         $this->symbol = $symbol;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMonetarySeparator(): ?string
     {
         return $this->monetarySeparator;
     }
 
-    /**
-     * @param string|null $monetarySeparator
-     */
     public function setMonetarySeparator(?string $monetarySeparator): void
     {
         $this->monetarySeparator = $monetarySeparator;
     }
 
 
-    /**
-     * @return string|null
-     */
     public function getMonetaryGroupSeparator(): ?string
     {
         return $this->monetaryGroupSeparator;
     }
 
-    /**
-     * @param string|null $monetaryGroupSeparator
-     */
     public function setMonetaryGroupSeparator(?string $monetaryGroupSeparator): void
     {
         $this->monetaryGroupSeparator = $monetaryGroupSeparator;
     }
 
-    /**
-     * @return int|null
-     */
     public function getFractionDigits(): ?int
     {
         return $this->fractionDigits;
     }
 
-    /**
-     * @param int|null $fractionDigits
-     */
     public function setFractionDigits(?int $fractionDigits): void
     {
         $this->fractionDigits = $fractionDigits;

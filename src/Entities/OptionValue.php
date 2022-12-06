@@ -59,9 +59,6 @@ class OptionValue
         $this->value = $value;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
@@ -75,10 +72,7 @@ class OptionValue
         return $this->optionKey;
     }
 
-    /**
-     * @param mixed $optionKey
-     */
-    public function setOptionKey($optionKey): void
+    public function setOptionKey(mixed $optionKey): void
     {
         $this->optionKey = $optionKey;
     }

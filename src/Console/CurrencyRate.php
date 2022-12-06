@@ -8,6 +8,8 @@ namespace EnjoysCMS\Module\Catalog\Console;
 
 use ArrayIterator;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use PatchRanger\CartesianIterator;
@@ -31,6 +33,10 @@ final class CurrencyRate extends Command
         parent::__construct();
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var Currency[] $currencies */
@@ -66,12 +72,6 @@ final class CurrencyRate extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * @param Currency $_currencyMain
-     * @param Currency $_currencyConvert
-     * @param $rates
-     * @return float
-     */
     protected function getRate(Currency $_currencyMain, Currency $_currencyConvert): float
     {
 

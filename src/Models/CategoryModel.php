@@ -98,21 +98,12 @@ final class CategoryModel implements ModelInterface
         $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
         $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
 
-        switch ($this->dynamicConfig->getSortMode()) {
-            case 'price.desc':
-                $qb->addOrderBy('converted_price', 'DESC');
-                break;
-            case 'price.asc':
-                $qb->addOrderBy('converted_price', 'ASC');
-                break;
-            case 'name.desc':
-                $qb->addOrderBy('p.name', 'DESC');
-                break;
-            case 'name.asc':
-            default:
-                $qb->addOrderBy('p.name', 'ASC');
-                break;
-        }
+        match ($this->dynamicConfig->getSortMode()) {
+            'price.desc' => $qb->addOrderBy('converted_price', 'DESC'),
+            'price.asc' => $qb->addOrderBy('converted_price', 'ASC'),
+            'name.desc' => $qb->addOrderBy('p.name', 'DESC'),
+            default => $qb->addOrderBy('p.name', 'ASC'),
+        };
 
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());

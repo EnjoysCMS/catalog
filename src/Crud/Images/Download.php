@@ -34,33 +34,21 @@ final class Download implements LoadImage
         return $templateRootPath . '/form.twig';
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
     private function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
     public function getExtension(): string
     {
         return $this->extension;
     }
 
-    /**
-     * @param string $extension
-     */
     private function setExtension(string $extension): void
     {
         $this->extension = $extension;

@@ -48,7 +48,6 @@ final class SearchBlock extends AbstractBlock
     }
 
     /**
-     * @return string
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      * @throws LoaderError

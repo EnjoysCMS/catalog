@@ -47,57 +47,36 @@ class Image
      */
     private Product $product;
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function getFilename(): string
     {
         return $this->filename;
     }
 
-    /**
-     * @param string $filename
-     */
     public function setFilename(string $filename): void
     {
         $this->filename = $filename;
     }
 
-    /**
-     * @return string
-     */
     public function getExtension(): string
     {
         return $this->extension;
     }
 
-    /**
-     * @param string $extension
-     */
     public function setExtension(string $extension): void
     {
         $this->extension = $extension;
     }
 
-    /**
-     * @return Product
-     */
     public function getProduct(): Product
     {
         return $this->product;
     }
 
-    /**
-     * @param Product $product
-     */
     public function setProduct(Product $product): void
     {
         $this->product = $product;
@@ -113,17 +92,11 @@ class Image
         $this->storage = $storage;
     }
 
-    /**
-     * @return bool
-     */
     public function isGeneral(): bool
     {
         return $this->general;
     }
 
-    /**
-     * @param bool $general
-     */
     public function setGeneral(bool $general): void
     {
         $this->general = $general;

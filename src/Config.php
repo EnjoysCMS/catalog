@@ -89,8 +89,6 @@ final class Config
 
     /**
      * @deprecated
-     * @param string $key
-     * @return mixed
      */
     public function get(string $key): mixed
     {

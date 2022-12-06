@@ -96,9 +96,6 @@ final class ProductPrice
         return $this->id;
     }
 
-    /**
-     * @return float|int
-     */
     public function getPrice(): int|float
     {
         return $this->price / 100;
@@ -130,33 +127,21 @@ final class ProductPrice
         $this->priceGroup = $priceGroup;
     }
 
-    /**
-     * @return Product
-     */
     public function getProduct(): Product
     {
         return $this->product;
     }
 
-    /**
-     * @param Product $product
-     */
     public function setProduct(Product $product): void
     {
         $this->product = $product;
     }
 
-    /**
-     * @return Currency
-     */
     public function getCurrency(): Currency
     {
         return $this->currency;
     }
 
-    /**
-     * @param Currency $currency
-     */
     public function setCurrency(Currency $currency): void
     {
         $this->currency = $currency;
@@ -177,9 +162,6 @@ final class ProductPrice
         return $this->currentCurrency ?? $this->getCurrency();
     }
 
-    /**
-     * @param Currency|null $currentCurrency
-     */
     public function setCurrentCurrency(?Currency $currentCurrency): void
     {
         $this->currentCurrency = $currentCurrency;

@@ -120,9 +120,6 @@ class Product
         $this->files = new ArrayCollection();
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
@@ -371,7 +368,6 @@ class Product
     }
 
     /**
-     * @return Url
      * @throws \Exception
      */
     public function getUrl(): Url

@@ -51,9 +51,6 @@ final class ProductPriceEntityListener
         $productPrice->setCurrentCurrency($currentCurrency);
     }
 
-    /**
-     * @param DynamicConfig|null $config
-     */
     public function setConfig(?DynamicConfig $config): void
     {
         $this->config = $config;

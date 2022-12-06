@@ -61,7 +61,6 @@ final class Edit implements ModelInterface
     }
 
     /**
-     * @return array
      * @throws ExceptionRule
      * @throws LoaderError
      * @throws ORMException

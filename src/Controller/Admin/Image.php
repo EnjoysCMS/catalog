@@ -28,7 +28,6 @@ final class Image extends AdminController
 {
 
     /**
-     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -51,7 +50,6 @@ final class Image extends AdminController
 
 
     /**
-     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -114,7 +112,6 @@ final class Image extends AdminController
 
 
     /**
-     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -165,7 +162,7 @@ final class Image extends AdminController
             );
         } catch (\Throwable $e) {
             $this->response = $this->response->withStatus(500);
-            $errorMessage = htmlspecialchars(sprintf('%s: %s', get_class($e), $e->getMessage()));
+            $errorMessage = htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage()));
         }
         return $this->responseJson($errorMessage ?? 'uploaded');
     }

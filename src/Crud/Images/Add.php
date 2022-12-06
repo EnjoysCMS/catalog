@@ -35,12 +35,6 @@ final class Add implements ModelInterface
     private $uploadMethod;
 
     /**
-     * @param EntityManager $entityManager
-     * @param ServerRequestInterface $request
-     * @param RendererInterface $renderer
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param Config $config
-     * @param FactoryInterface $factory
      * @throws NotFoundException
      * @throws DependencyException
      * @throws \DI\NotFoundException
@@ -101,7 +95,7 @@ final class Add implements ModelInterface
             } catch (\Throwable $e) {
                 /** @var File $image */
                 $image = $form->getElement('image');
-                $image->setRuleError(htmlspecialchars(sprintf('%s: %s', get_class($e), $e->getMessage())));
+                $image->setRuleError(htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage())));
             }
         }
 

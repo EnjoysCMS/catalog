@@ -42,7 +42,6 @@ final class PriceGroupDelete implements ModelInterface
     }
 
     /**
-     * @return array
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -64,9 +63,6 @@ final class PriceGroupDelete implements ModelInterface
         ];
     }
 
-    /**
-     * @return Form
-     */
     private function getAddForm(): Form
     {
         $form = new Form();
