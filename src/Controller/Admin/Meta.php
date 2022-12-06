@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
     path: 'admin/catalog/product/meta',
     name: '@a/catalog/product/meta',
     options: [
-        'aclComment' => 'Управление Meta-tags'
+        'comment' => 'Управление Meta-tags'
     ]
 )]
 final class Meta extends AdminController

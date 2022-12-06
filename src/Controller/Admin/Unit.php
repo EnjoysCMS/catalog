@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
     path: 'admin/catalog/tools/find-product-units',
     name: '@a/catalog/tools/find-product-units',
     options: [
-        'aclComment' => '[JSON] Получение списка unit'
+        'comment' => '[JSON] Получение списка unit'
     ]
 )]
 final class Unit extends AdminController

@@ -14,24 +14,24 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
+use Symfony\Component\Routing\Annotation\Route;
 
 final class Options extends AdminController
 {
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/product/options",
-     *     name="@a/catalog/product/options",
-     *     options={
-     *      "aclComment": "Просмотр опций товара"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/product/options',
+        name: '@a/catalog/product/options',
+        options: [
+            'comment' => 'Просмотр опций товара'
+        ]
+    )]
     public function manageOptions(): ResponseInterface
     {
         return $this->responseText(
@@ -42,44 +42,38 @@ final class Options extends AdminController
         );
     }
 
-    /**
-     * @Route (
-     *     path="admin/catalog/product/options/fill-from-product",
-     *     name="@a/catalog/product/options/fill-from-product",
-     *     options={
-     *      "aclComment": "[ADMIN] Заполнение опций из другого продукта"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/options/fill-from-product',
+        name: '@a/catalog/product/options/fill-from-product',
+        options: [
+            'comment' => '[ADMIN] Заполнение опций из другого продукта'
+        ]
+    )]
     public function fillFromProduct(): void
     {
         $this->container->get(ModelOptions\FillFromProduct::class)();
     }
 
-    /**
-     * @Route (
-     *     path="admin/catalog/product/options/fill-from-text",
-     *     name="@a/catalog/product/options/fill-from-text",
-     *     options={
-     *      "aclComment": "[ADMIN] Заполнение опций из текста"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/options/fill-from-text',
+        name: '@a/catalog/product/options/fill-from-text',
+        options: [
+            'comment' => '[ADMIN] Заполнение опций из текста'
+        ]
+    )]
     public function fillFromText(): void
     {
         $this->container->get(ModelOptions\FillFromText::class)();
     }
 
 
-    /**
-     * @Route (
-     *     path="admin/catalog/tools/find-option-keys",
-     *     name="@a/catalog/tools/find-option-keys",
-     *     options={
-     *      "aclComment": "[JSON] Получение списка названий опций (поиск)"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/tools/find-option-keys',
+        name: '@a/catalog/tools/find-option-keys',
+        options: [
+            'comment' => '[JSON] Получение списка названий опций (поиск)'
+        ]
+    )]
     public function getOptionKeys(
         EntityManager $entityManager,
         ServerRequestInterface $request
@@ -89,15 +83,13 @@ final class Options extends AdminController
         );
     }
 
-    /**
-     * @Route (
-     *     path="admin/catalog/tools/find-option-values",
-     *     name="@a/catalog/tools/find-option-values",
-     *     options={
-     *      "aclComment": "[JSON] Получение списка значений опций (поиск)"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/tools/find-option-values',
+        name: '@a/catalog/tools/find-option-values',
+        options: [
+            'comment' => '[JSON] Получение списка значений опций (поиск)'
+        ]
+    )]
     public function getOptionValues(
         EntityManager $entityManager,
         ServerRequestInterface $request

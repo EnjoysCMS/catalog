@@ -31,7 +31,7 @@ final class Files extends AdminController
         path: "admin/catalog/product/files",
         name: "@a/catalog/product/files",
         options: [
-            "aclComment" => "[ADMIN] Менеджер файлов"
+            "comment" => "[ADMIN] Менеджер файлов"
         ]
     )]
     public function manage(): ResponseInterface
@@ -54,7 +54,7 @@ final class Files extends AdminController
         path: "admin/catalog/product/files/upload",
         name: "@a/catalog/product/files/upload",
         options: [
-            "aclComment" => "[ADMIN] Загрузить файл для продукта"
+            "comment" => "[ADMIN] Загрузить файл для продукта"
         ]
     )]
     public function upload()
@@ -78,7 +78,7 @@ final class Files extends AdminController
         path: "admin/catalog/product/files/delete",
         name: "@a/catalog/product/files/delete",
         options: [
-            "aclComment" => "[ADMIN] Удалить загруженный файл"
+            "comment" => "[ADMIN] Удалить загруженный файл"
         ]
     )]
     public function delete()

@@ -15,22 +15,23 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 final class Category extends AdminController
 {
 
     /**
-     * @Route(
-     *     path="admin/catalog/category",
-     *     name="catalog/admin/category",
-     *     options={
-     *      "aclComment": "Просмотр списка категорий в админке"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/category',
+        name: 'catalog/admin/category',
+        options: [
+            'comment' => 'Просмотр списка категорий в админке'
+        ]
+    )]
     public function index(): ResponseInterface
     {
         return $this->responseText($this->view(
@@ -41,17 +42,17 @@ final class Category extends AdminController
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/category/add",
-     *     name="catalog/admin/category/add",
-     *     options={
-     *      "aclComment": "Добавление категорий"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/category/add',
+        name: 'catalog/admin/category/add',
+        options: [
+            'comment' => 'Добавление категорий'
+        ]
+    )]
     public function add(): ResponseInterface
     {
         return $this->responseText($this->view(
@@ -62,17 +63,17 @@ final class Category extends AdminController
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/category/edit",
-     *     name="catalog/admin/category/edit",
-     *     options={
-     *      "aclComment": "Редактирование категорий"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/category/edit',
+        name: 'catalog/admin/category/edit',
+        options: [
+            'comment' => 'Редактирование категорий'
+        ]
+    )]
     public function edit(): ResponseInterface
     {
         return $this->responseText($this->view(
@@ -83,17 +84,17 @@ final class Category extends AdminController
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/category/delete",
-     *     name="catalog/admin/category/delete",
-     *     options={
-     *      "aclComment": "Удаление категорий"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/category/delete',
+        name: 'catalog/admin/category/delete',
+        options: [
+            'comment' => 'Удаление категорий'
+        ]
+    )]
     public function delete(): ResponseInterface
     {
         return $this->responseText($this->view(
@@ -104,16 +105,15 @@ final class Category extends AdminController
 
 
     /**
-     * @Route (
-     *     path="admin/catalog/tools/category/get-extra-fields",
-     *     name="@a/catalog/tools/category/get-extra-fields",
-     *     options={
-     *      "aclComment": "[JSON] Получение списка extra fields"
-     *     }
-     * )
-     *
      * @throws NoResultException
      */
+    #[Route(
+        path: 'admin/catalog/tools/category/get-extra-fields',
+        name: '@a/catalog/tools/category/get-extra-fields',
+        options: [
+            'comment' => '[JSON] Получение списка extra fields'
+        ]
+    )]
     public function getExtraFieldsJson(
         EntityManager $entityManager,
         ServerRequestInterface $request
@@ -138,15 +138,13 @@ final class Category extends AdminController
         return $this->responseJson($result);
     }
 
-    /**
-     * @Route(
-     *     path="admin/catalog/tools/category/set-extra-fields-to-children",
-     *     name="@a/catalog/tools/category/set-extra-fields-to-children",
-     *     options={
-     *      "aclComment": "[ADMIN] Установка extra fields всем дочерним категориям"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/tools/category/set-extra-fields-to-children',
+        name: '@a/catalog/tools/category/set-extra-fields-to-children',
+        options: [
+            'comment' => '[ADMIN] Установка extra fields всем дочерним категориям'
+        ]
+    )]
     public function setExtraFieldsToAllChildren(): ResponseInterface
     {
         return $this->responseText($this->view(

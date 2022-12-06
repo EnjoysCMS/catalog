@@ -33,7 +33,7 @@ final class Category extends PublicController
             'page' => '\d+'
         ],
         options: [
-            'aclComment' => '[public] Просмотр категорий'
+            'comment' => '[public] Просмотр категорий'
         ],
         defaults: [
             'page' => 1,

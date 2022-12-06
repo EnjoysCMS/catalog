@@ -14,20 +14,18 @@ use EnjoysCMS\Module\Catalog\Crud\Product\Index;
 use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
+use Symfony\Component\Routing\Annotation\Route;
 
 final class Product extends AdminController
 {
 
-    /**
-     * @Route(
-     *     path="admin/catalog/products",
-     *     name="catalog/admin/products",
-     *     options={
-     *      "aclComment": "Просмотр товаров в админке"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/products',
+        name: 'catalog/admin/products',
+        options: [
+            'comment' => 'Просмотр товаров в админке'
+        ]
+    )]
     public function index(): ResponseInterface
     {
         return $this->responseText(
@@ -39,15 +37,13 @@ final class Product extends AdminController
     }
 
 
-    /**
-     * @Route(
-     *     path="admin/catalog/product/add",
-     *     name="catalog/admin/product/add",
-     *     options={
-     *      "aclComment": "Добавление товара"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/add',
+        name: 'catalog/admin/product/add',
+        options: [
+            'comment' => 'Добавление товара'
+        ]
+    )]
     public function add(): ResponseInterface
     {
         return $this->responseText(
@@ -59,15 +55,13 @@ final class Product extends AdminController
     }
 
 
-    /**
-     * @Route(
-     *     path="admin/catalog/product/edit",
-     *     name="catalog/admin/product/edit",
-     *     options={
-     *      "aclComment": "Редактирование товара"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/edit',
+        name: 'catalog/admin/product/edit',
+        options: [
+            'comment' => 'Редактирование товара'
+        ]
+    )]
     public function edit(): ResponseInterface
     {
         return $this->responseText(
@@ -78,15 +72,13 @@ final class Product extends AdminController
         );
     }
 
-    /**
-     * @Route(
-     *     path="admin/catalog/product/delete",
-     *     name="catalog/admin/product/delete",
-     *     options={
-     *      "aclComment": "Удаление товара"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/delete',
+        name: 'catalog/admin/product/delete',
+        options: [
+            'comment' => 'Удаление товара'
+        ]
+    )]
     public function delete(): ResponseInterface
     {
         return $this->responseText(
@@ -97,15 +89,13 @@ final class Product extends AdminController
         );
     }
 
-    /**
-     * @Route(
-     *     path="admin/catalog/product/tags",
-     *     name="@a/catalog/product/tags",
-     *     options={
-     *      "aclComment": "Просмотр тегов товара"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/product/tags',
+        name: '@a/catalog/product/tags',
+        options: [
+            'comment' => 'Просмотр тегов товара'
+        ]
+    )]
     public function manageTags(): ResponseInterface
     {
         return $this->responseText(
@@ -117,15 +107,13 @@ final class Product extends AdminController
     }
 
 
-    /**
-     * @Route (
-     *     path="admin/catalog/tools/find-products",
-     *     name="@a/catalog/tools/find-products",
-     *     options={
-     *      "aclComment": "[JSON] Получение списка продукции (поиск)"
-     *     }
-     * )
-     */
+    #[Route(
+        path: 'admin/catalog/tools/find-products',
+        name: '@a/catalog/tools/find-products',
+        options: [
+            'comment' => '[JSON] Получение списка продукции (поиск)'
+        ]
+    )]
     public function findProductsByLike(
         EntityManager $entityManager,
         ServerRequestInterface $request

@@ -16,7 +16,7 @@ final class Quantity extends AdminController
         path: "admin/catalog/product/quantity",
         name: "@a/catalog/product/quantity",
         options: [
-            "aclComment" => "[ADMIN] Установка количества на товар"
+            "comment" => "[ADMIN] Установка количества на товар"
         ]
     )]
     public function manage(): ResponseInterface
@@ -33,7 +33,7 @@ final class Quantity extends AdminController
 //        path: "admin/catalog/product/quantity-params",
 //        name: "@a/catalog/product/quantity-params",
 //        options: [
-//            "aclComment" => "[ADMIN] Установка параметров для количества"
+//            "comment" => "[ADMIN] Установка параметров для количества"
 //        ]
 //    )]
 //    public function setParams(): ResponseInterface

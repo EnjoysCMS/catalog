@@ -21,7 +21,7 @@ use Twig\Error\SyntaxError;
     path: 'catalog/{slug}.html',
     name: 'catalog/product',
     requirements: ['slug' => '[^.]+'],
-    options: ['aclComment' => '[public] Просмотр продуктов (товаров)']
+    options: ['comment' => '[public] Просмотр продуктов (товаров)']
 )]
 final class Product extends PublicController
 {

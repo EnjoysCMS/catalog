@@ -8,21 +8,22 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 final class Tools extends PublicController
 {
 
     /**
-     * @Route(
-     *     name="tools/translit",
-     *     path="tools/translit",
-     *     options={
-     *      "comment": "Tools - транлитерация"
-     *     }
-     * )
-     * @deprecated
+     * @deprecated remove in 5.0
      */
+    #[Route(
+        path: 'tools/translit',
+        name: 'tools/translit',
+        options: [
+            'comment' => 'Tools - транлитерация'
+        ]
+    )]
     public function translit(): ResponseInterface
     {
         $query = $this->request->getParsedBody()['query'] ?? null;

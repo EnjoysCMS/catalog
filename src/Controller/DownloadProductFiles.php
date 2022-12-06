@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
         'filepath' => '.+'
     ],
     options: [
-        "aclComment" => "[PUBLIC] Скачивание файлов"
+        "comment" => "[PUBLIC] Скачивание файлов"
     ]
 )]
 final class DownloadProductFiles extends BaseController

@@ -17,6 +17,8 @@ use EnjoysCMS\Module\Catalog\Crud\Images\Index;
 use EnjoysCMS\Module\Catalog\Crud\Images\ManageImage;
 use EnjoysCMS\Module\Catalog\Crud\Images\UploadHandler;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,15 +28,17 @@ final class Image extends AdminController
 {
 
     /**
-     * @Route(
-     *     path="admin/catalog/product/images",
-     *     name="catalog/admin/product/images",
-     *     options={
-     *      "aclComment": "Управление изображениями товара"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/product/images',
+        name: 'catalog/admin/product/images',
+        options: [
+            'comment' => 'Управление изображениями товара'
+        ]
+    )]
     public function manage(): ResponseInterface
     {
         return $this->responseText(
@@ -47,15 +51,17 @@ final class Image extends AdminController
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/product/images/add",
-     *     name="catalog/admin/product/images/add",
-     *     options={
-     *      "aclComment": "Загрузка изображения к товару"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/product/images/add',
+        name: 'catalog/admin/product/images/add',
+        options: [
+            'comment' => 'Загрузка изображения к товару'
+        ]
+    )]
     public function add(): ResponseInterface
     {
         /** @var Add $addImageService */
@@ -69,17 +75,17 @@ final class Image extends AdminController
     }
 
     /**
-     * @Route(
-     *     path="admin/catalog/product/images/make_general",
-     *     name="catalog/admin/product/images/make_general",
-     *     options={
-     *      "aclComment": "Переключение основного изображения"
-     *     }
-     * )
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws NotFoundException
      */
+    #[Route(
+        path: 'admin/catalog/product/images/make_general',
+        name: 'catalog/admin/product/images/make_general',
+        options: [
+            'comment' => 'Переключение основного изображения'
+        ]
+    )]
     public function makeGeneral(
         EntityManager $entityManager,
         ServerRequestInterface $request,
@@ -108,15 +114,17 @@ final class Image extends AdminController
 
 
     /**
-     * @Route(
-     *     path="admin/catalog/product/images/delete",
-     *     name="catalog/admin/product/images/delete",
-     *     options={
-     *      "aclComment": "Удаление изображения к товару"
-     *     }
-     * )
-     * @return string
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
+    #[Route(
+        path: 'admin/catalog/product/images/delete',
+        name: 'catalog/admin/product/images/delete',
+        options: [
+            'comment' => 'Удаление изображения к товару'
+        ]
+    )]
     public function delete(): ResponseInterface
     {
         return $this->responseText(
@@ -131,7 +139,7 @@ final class Image extends AdminController
         path: '/admin/catalog/product/images/upload-dropzone',
         name: 'catalog/admin/product/images/upload-dropzone',
         options: [
-            'aclComment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js'
+            'comment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js'
         ]
     )]
     public function uploadDropzone(
