@@ -122,7 +122,7 @@ final class CategoryModel implements ModelInterface
             'categoryRepository' => $this->categoryRepository,
             'pagination' => $pagination,
             'products' => $result,
-            'config' => $this->dynamicConfig,
+            'dynamicConfig' => $this->dynamicConfig,
             'breadcrumbs' => $this->getBreadcrumbs(),
         ];
     }
