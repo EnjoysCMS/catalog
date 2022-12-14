@@ -10,6 +10,7 @@ use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Core\Components\Composer\Utils;
 use EnjoysCMS\Core\Components\Modules\Module;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Helpers\ProductOptions;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
@@ -37,7 +38,8 @@ abstract class PublicController extends BaseController
         $this->twig->addGlobal('config', $this->config);
 
         $this->twig->addFunction(
-            new TwigFunction('callstatic', function ($class, $method, ...$args) {
+            new TwigFunction('callstatic', function ($class_method_string, ...$args) {
+                list($class, $method) = explode('::', $class_method_string);
                 if (!class_exists($class)) {
                     throw new \Exception("Cannot call static method $method on Class $class: Invalid Class");
                 }
