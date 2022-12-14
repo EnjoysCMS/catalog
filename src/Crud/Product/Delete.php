@@ -12,7 +12,9 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -28,7 +30,8 @@ final class Delete implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private Config $config
     ) {
         $this->product = $this->entityManager->getRepository(Product::class)->find(
             $this->request->getQueryParams()['id'] ?? 0
@@ -95,13 +98,15 @@ final class Delete implements ModelInterface
 
     /**
      * @throws ORMException
+     * @throws FilesystemException
      */
     private function removeImages(): void
     {
         foreach ($this->product->getImages() as $image) {
-            foreach (glob($image->getGlobPattern()) as $item) {
-                @unlink($item);
-            }
+            $fs = $this->config->getImageStorageUpload($image->getStorage())->getFileSystem();
+            $fs->delete($image->getFilename().'.'.$image->getExtension());
+            $fs->delete($image->getFilename().'_large.'.$image->getExtension());
+            $fs->delete($image->getFilename().'_small.'.$image->getExtension());
             $this->entityManager->remove($image);
         }
     }

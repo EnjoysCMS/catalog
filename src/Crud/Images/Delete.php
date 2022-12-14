@@ -94,9 +94,6 @@ final class Delete implements ModelInterface
         $filesystem->delete( $this->image->getFilename() . '_small.' . $this->image->getExtension());
         $filesystem->delete( $this->image->getFilename() . '_large.' . $this->image->getExtension());
 
-//        foreach (glob($this->image->getGlobPattern()) as $item) {
-//            @unlink($item);
-//        }
         $this->entityManager->remove($this->image);
         $this->entityManager->flush();
 
