@@ -281,7 +281,7 @@
                             {% if group is instanceof('\\Enjoys\\Forms\\Elements\\Group') %}
                                 <div class="form-row pb-1">
                                     {% for element in group.getElements %}
-                                        <div class="{{ element.getAttribute('grid') }}">
+                                        <div class="{{ element.getAttribute('grid').getValueString() }}">
                                             {{ element.baseHtml|raw }}
                                         </div>
                                     {% endfor %}
