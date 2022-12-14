@@ -9,8 +9,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class Product
- * @package EnjoysCMS\Module\Catalog\Entities
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
  * @ORM\Table(name="catalog_products")
  */
@@ -47,7 +45,7 @@ class Product
     /**
      * @ORM\ManyToOne(targetEntity="Category")
      */
-    private $category;
+    private Category $category;
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductGroup")
@@ -55,14 +53,16 @@ class Product
     private $group = null;
 
     /**
+     * @var ArrayCollection<Image>
      * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
      */
-    private $images;
+    private ArrayCollection $images;
 
     /**
+     * @var ArrayCollection<ProductFiles>
      * @ORM\OneToMany(targetEntity="ProductFiles", mappedBy="product")
      */
-    private $files;
+    private ArrayCollection $files;
 
     /**
      * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product", cascade={"persist", "remove"})
@@ -70,13 +70,14 @@ class Product
     private ?ProductMeta $meta = null;
 
     /**
+     * @var ArrayCollection<ProductTag>
      * @ORM\ManyToMany(targetEntity="ProductTag")
      * @ORM\JoinTable(name="catalog_products_tags",
      *      joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
      *      )
      */
-    private $tags;
+    private ArrayCollection $tags;
 
     /**
      * @ORM\ManyToMany(targetEntity="OptionValue")
@@ -85,19 +86,21 @@ class Product
     private $options;
 
     /**
+     * @var ArrayCollection<Url>
      * @ORM\OneToMany(targetEntity="Url", mappedBy="product", cascade={"persist"})
      */
-    private $urls;
+    private ArrayCollection $urls;
 
     /**
+     * @var ArrayCollection<ProductPrice>
      * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product", cascade={"persist"})
      */
-    private $prices = [];
+    private ArrayCollection $prices;
 
     /**
      * @ORM\OneToOne(targetEntity="Quantity", mappedBy="product", cascade={"persist"})
      */
-    private $quantity;
+    private Quantity $quantity;
 
     /**
      * @var int|null
@@ -213,7 +216,10 @@ class Product
         return $slug . ($lastPartSlug ?? $this->getUrl()->getPath());
     }
 
-    public function getImages()
+    /**
+     * @return ArrayCollection<Image>
+     */
+    public function getImages(): ArrayCollection
     {
         return $this->images;
     }
@@ -221,19 +227,25 @@ class Product
     public function getDefaultImage(): ?Image
     {
         $image = $this->images->filter(fn($i) => $i->isGeneral())->first();
-        if (!($image instanceof Image)){
+        if (!($image instanceof Image)) {
             return null;
         }
         return $image;
     }
 
-    public function getFiles()
+    /**
+     * @return ArrayCollection<ProductFiles>
+     */
+    public function getFiles(): ArrayCollection
     {
         return $this->files;
     }
 
 
-    public function getTags()
+    /**
+     * @return ArrayCollection<ProductTag>
+     */
+    public function getTags(): ArrayCollection
     {
         return $this->tags;
     }
@@ -268,6 +280,7 @@ class Product
         }
     }
 
+
     public function getOptionsCollection()
     {
         return $this->options;
@@ -295,11 +308,12 @@ class Product
 
     public function getValuesByOptionKey($optionKey): array
     {
-        return array_filter($this->options->toArray(), function ($item) use ($optionKey) {
-            if ($item->getOptionKey() === $optionKey) {
-                return $item;
+        return array_filter(
+            $this->options->toArray(),
+            function ($item) use ($optionKey) {
+                return $item->getOptionKey() === $optionKey;
             }
-        });
+        );
     }
 
     public function clearOptions(): void
@@ -312,14 +326,13 @@ class Product
         if ($this->options->contains($optionValue)) {
             $this->options->removeElement($optionValue);
         }
-
     }
 
     public function removeOptionByKey(OptionKey $optionKey): void
     {
         /** @var OptionValue $option */
         foreach ($this->options as $option) {
-            if($option->getOptionKey() === $optionKey){
+            if ($option->getOptionKey() === $optionKey) {
                 $this->options->removeElement($option);
             }
         }
@@ -389,7 +402,7 @@ class Product
     public function getUrlById(int $id): Url
     {
         foreach ($this->getUrls() as $url) {
-            if($url->getId() === $id){
+            if ($url->getId() === $id) {
                 return $url;
             }
         }
@@ -408,7 +421,7 @@ class Product
     {
         /** @var ProductPrice $price */
         foreach ($this->prices as $price) {
-            if($price->getPriceGroup()->getCode() === $code){
+            if ($price->getPriceGroup()->getCode() === $code) {
                 return $price;
             }
         }
@@ -420,7 +433,7 @@ class Product
      */
     public function addPrice(ProductPrice $productPrice = null)
     {
-        if ($productPrice === null){
+        if ($productPrice === null) {
             return;
         }
 
@@ -436,7 +449,7 @@ class Product
 
     public function getQuantity(): Quantity
     {
-        if ($this->quantity === null){
+        if ($this->quantity === null) {
             $this->quantity = new Quantity();
             $this->quantity->setProduct($this);
         }

@@ -46,6 +46,7 @@ final class Delete implements ModelInterface
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws FilesystemException
      */
     public function getContext(): array
     {
@@ -82,6 +83,7 @@ final class Delete implements ModelInterface
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws FilesystemException
      */
     private function doAction(): void
     {
@@ -113,17 +115,20 @@ final class Delete implements ModelInterface
 
     /**
      * @throws ORMException
+     * @throws FilesystemException
      */
     private function removeFiles(): void
     {
         foreach ($this->product->getFiles() as $file) {
-//            foreach (glob($image->getGlobPattern()) as $item) {
-//                @unlink($item);
-//            }
+            $fs = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
+            $fs->delete($file->getFilePath());
             $this->entityManager->remove($file);
         }
     }
 
+    /**
+     * @throws ORMException
+     */
     private function removePrices(): void
     {
         foreach ($this->product->getPrices() as $price) {
@@ -131,6 +136,9 @@ final class Delete implements ModelInterface
         }
     }
 
+    /**
+     * @throws ORMException
+     */
     private function removeUrls(): void
     {
         foreach ($this->product->getUrls() as $url) {
