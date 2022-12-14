@@ -46,7 +46,7 @@ class Product
     /**
      * @ORM\ManyToOne(targetEntity="Category")
      */
-    private Category $category;
+    private ?Category $category = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductGroup")
@@ -81,10 +81,11 @@ class Product
     private Collection $tags;
 
     /**
+     * @var Collection<OptionValue>
      * @ORM\ManyToMany(targetEntity="OptionValue")
      * @ORM\JoinTable(name="catalog_products_options")
      */
-    private $options;
+    private Collection $options;
 
     /**
      * @var Collection<Url>
@@ -281,8 +282,10 @@ class Product
         }
     }
 
-
-    public function getOptionsCollection()
+    /**
+     * @return Collection<OptionValue>
+     */
+    public function getOptionsCollection(): Collection
     {
         return $this->options;
     }
@@ -348,7 +351,7 @@ class Product
     }
 
     /**
-     * @return Collection
+     * @return Collection<Url>
      */
     public function getUrls(): Collection
     {
@@ -411,7 +414,7 @@ class Product
     }
 
     /**
-     * @return Collection
+     * @return Collection<ProductPrice>
      */
     public function getPrices(): Collection
     {
@@ -429,10 +432,7 @@ class Product
         return null;
     }
 
-    /**
-     * @return void
-     */
-    public function addPrice(ProductPrice $productPrice = null)
+    public function addPrice(ProductPrice $productPrice = null): void
     {
         if ($productPrice === null) {
             return;
@@ -446,7 +446,6 @@ class Product
     {
         $this->id = $id;
     }
-
 
     public function getQuantity(): Quantity
     {
