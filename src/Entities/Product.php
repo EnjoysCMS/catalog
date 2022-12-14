@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -53,16 +54,16 @@ class Product
     private $group = null;
 
     /**
-     * @var ArrayCollection<Image>
+     * @var Collection<Image>
      * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
      */
-    private ArrayCollection $images;
+    private Collection $images;
 
     /**
-     * @var ArrayCollection<ProductFiles>
+     * @var Collection<ProductFiles>
      * @ORM\OneToMany(targetEntity="ProductFiles", mappedBy="product")
      */
-    private ArrayCollection $files;
+    private Collection $files;
 
     /**
      * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product", cascade={"persist", "remove"})
@@ -70,14 +71,14 @@ class Product
     private ?ProductMeta $meta = null;
 
     /**
-     * @var ArrayCollection<ProductTag>
+     * @var Collection<ProductTag>
      * @ORM\ManyToMany(targetEntity="ProductTag")
      * @ORM\JoinTable(name="catalog_products_tags",
      *      joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
      *      )
      */
-    private ArrayCollection $tags;
+    private Collection $tags;
 
     /**
      * @ORM\ManyToMany(targetEntity="OptionValue")
@@ -86,21 +87,21 @@ class Product
     private $options;
 
     /**
-     * @var ArrayCollection<Url>
+     * @var Collection<Url>
      * @ORM\OneToMany(targetEntity="Url", mappedBy="product", cascade={"persist"})
      */
-    private ArrayCollection $urls;
+    private Collection $urls;
 
     /**
-     * @var ArrayCollection<ProductPrice>
+     * @var Collection<ProductPrice>
      * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product", cascade={"persist"})
      */
-    private ArrayCollection $prices;
+    private Collection $prices;
 
     /**
      * @ORM\OneToOne(targetEntity="Quantity", mappedBy="product", cascade={"persist"})
      */
-    private Quantity $quantity;
+    private $quantity;
 
     /**
      * @var int|null
@@ -217,9 +218,9 @@ class Product
     }
 
     /**
-     * @return ArrayCollection<Image>
+     * @return Collection<Image>
      */
-    public function getImages(): ArrayCollection
+    public function getImages(): Collection
     {
         return $this->images;
     }
@@ -234,18 +235,18 @@ class Product
     }
 
     /**
-     * @return ArrayCollection<ProductFiles>
+     * @return Collection<ProductFiles>
      */
-    public function getFiles(): ArrayCollection
+    public function getFiles(): Collection
     {
         return $this->files;
     }
 
 
     /**
-     * @return ArrayCollection<ProductTag>
+     * @return Collection<ProductTag>
      */
-    public function getTags(): ArrayCollection
+    public function getTags(): Collection
     {
         return $this->tags;
     }
@@ -347,9 +348,9 @@ class Product
     }
 
     /**
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function getUrls()
+    public function getUrls(): Collection
     {
         return $this->urls;
     }
@@ -410,9 +411,9 @@ class Product
     }
 
     /**
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function getPrices()
+    public function getPrices(): Collection
     {
         return $this->prices;
     }
