@@ -96,7 +96,7 @@ final class Add implements ModelInterface
         $form->setDefaults(
             [
                 'category' => $this->request->getQueryParams()['category_id']
-                    ?? Cookie::get('__catalog__last_category_when_add_product')
+                    ?? $this->cookie->get('__catalog__last_category_when_add_product')
             ]
         );
 
