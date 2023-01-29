@@ -4,7 +4,7 @@
     "type": "enjoyscms-module",
     "require": {
         "php": ">=8.0",
-        "enjoyscms/core": "^4.5.6",
+        "enjoyscms/core": "^4.6.0",
         "enjoyscms/admin": "^4.0",
         "enjoyscms/elfinder": "^4.0",
         "gedmo/doctrine-extensions": "^3.0",
