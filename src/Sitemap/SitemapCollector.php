@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Sitemap;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\Mapping\MappingException;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -42,6 +43,9 @@ final class SitemapCollector implements SitemapCollectorInterface
     }
 
 
+    /**
+     * @throws MappingException
+     */
     public function make()
     {
         /** @var Category $item */
@@ -59,19 +63,27 @@ final class SitemapCollector implements SitemapCollectorInterface
             );
         }
 
-        /** @var Product $product */
-        foreach ($this->repositoryProduct->findBy(['active' => true]) as $product) {
-            if ($this->checkOffStatusParentCategory($product->getCategory())) {
-                continue;
-            }
+        $allCount = $this->repositoryProduct->count(['active' => true]);
+        $limit = 100;
+        $offset = 0;
 
-            yield new Url(
-                $this->urlGenerator->generate(
-                    'catalog/product',
-                    ['slug' => $product->getSlug()],
-                    UrlGeneratorInterface::ABSOLUTE_URL
-                )
-            );
+        while ($allCount > $offset) {
+            /** @var Product $product */
+            foreach ($this->repositoryProduct->findBy(['active' => true], limit: $limit, offset: $offset) as $product) {
+                if ($this->checkOffStatusParentCategory($product->getCategory())) {
+                    continue;
+                }
+
+                yield new Url(
+                    $this->urlGenerator->generate(
+                        'catalog/product',
+                        ['slug' => $product->getSlug()],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    )
+                );
+            }
+            $this->em->clear();
+            $offset += $limit;
         }
     }
 }
