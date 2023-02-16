@@ -1,4 +1,8 @@
-WYSIWYG: summernote
+editor:
+  productDescription: null
+  categoryShortDescription: null
+  categoryDescription: null
+
 limitItems: 12
 allowedPerPage:
   - 12

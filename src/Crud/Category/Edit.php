@@ -14,14 +14,13 @@ use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -44,8 +43,8 @@ final class Edit implements ModelInterface
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private ContainerInterface $container,
-        private Config $config
+        private Config $config,
+        private ContentEditor $contentEditor
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
 
@@ -69,14 +68,15 @@ final class Edit implements ModelInterface
             $this->doAction();
         }
 
-        $wysiwyg = WYSIWYG::getInstance($this->config->getModuleConfig()->get('WYSIWYG'), $this->container);
-
 
         return [
             'title' => $this->category->getTitle(),
             'subtitle' => 'Изменение категории',
             'form' => $this->renderer,
-            'wysiwyg' => $wysiwyg->selector('#description'),
+            'editorEmbedCode' => $this->contentEditor
+                ->withConfig($this->config->getEditorConfigCategoryDescription())
+                ->setSelector('#description')
+                ->getEmbedCode(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',

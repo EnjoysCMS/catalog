@@ -6,7 +6,8 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
-use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
@@ -15,8 +16,8 @@ use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -36,12 +37,16 @@ final class Add implements ModelInterface
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private Container $container,
-        private Config $config
+        private Config $config,
+        private ContentEditor $contentEditor
     ) {
         $this->categoryRepository = $this->entityManager->getRepository(Category::class);
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -52,13 +57,13 @@ final class Add implements ModelInterface
             $this->doAction();
         }
 
-        //  dd(Setting::get('WYSIWYG'));
-        $wysiwyg = WYSIWYG::getInstance($this->config->getModuleConfig()->get('WYSIWYG'), $this->container);
-
         return [
             'subtitle' => 'Добавление категории',
             'form' => $this->renderer,
-            'wysiwyg' => $wysiwyg->selector('#description'),
+            'editorEmbedCode' => $this->contentEditor
+                ->withConfig($this->config->getEditorConfigCategoryDescription())
+                ->setSelector('#description')
+                ->getEmbedCode(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',

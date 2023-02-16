@@ -86,6 +86,21 @@ final class Config
         return $realpath;
     }
 
+    public function getEditorConfigProductDescription()
+    {
+        return $this->config->get('editor')['productDescription'] ?? null;
+    }
+
+    public function getEditorConfigCategoryDescription()
+    {
+        return $this->config->get('editor')['categoryDescription'] ?? null;
+    }
+
+    public function getEditorConfigCategoryShortDescription()
+    {
+        return $this->config->get('editor')['categoryShortDescription'] ?? null;
+    }
+
 
     /**
      * @deprecated

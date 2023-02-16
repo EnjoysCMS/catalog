@@ -15,8 +15,8 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\WYSIWYG\WYSIWYG;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
@@ -47,7 +47,8 @@ final class Edit implements ModelInterface
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private Container $container,
-        private Config $config
+        private Config $config,
+        private ContentEditor $contentEditor
     ) {
         $this->productRepository = $entityManager->getRepository(Product::class);
         $this->product = $this->productRepository->find(
@@ -83,14 +84,14 @@ final class Edit implements ModelInterface
             $this->doAction();
         }
 
-        $wysiwyg = WYSIWYG::getInstance($this->config->getModuleConfig()->get('WYSIWYG'), $this->container);
-
-
         return [
             'form' => $this->renderer,
             'product' => $this->product,
             'subtitle' => 'Редактирование',
-            'wysiwyg' => $wysiwyg->selector('#description'),
+            'editorEmbedCode' => $this->contentEditor
+                ->withConfig($this->config->getEditorConfigProductDescription())
+                ->setSelector('#description')
+                ->getEmbedCode(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
