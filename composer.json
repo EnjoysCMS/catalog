@@ -3,8 +3,8 @@
     "description": "Module Catalog for EnjoysCMS",
     "type": "enjoyscms-module",
     "require": {
-        "php": ">=8.0",
-        "enjoyscms/core": "^4.6.0",
+        "php": "^8.0",
+        "enjoyscms/core": "^4.6.0 <4.7",
         "enjoyscms/admin": "^4.0",
         "enjoyscms/elfinder": "^4.0",
         "gedmo/doctrine-extensions": "^3.0",
