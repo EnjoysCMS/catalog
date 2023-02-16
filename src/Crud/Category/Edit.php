@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
+use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
@@ -58,6 +59,10 @@ final class Edit implements ModelInterface
         }
     }
 
+    /**
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -74,9 +79,13 @@ final class Edit implements ModelInterface
             'subtitle' => 'Изменение категории',
             'form' => $this->renderer,
             'editorEmbedCode' => $this->contentEditor
-                ->withConfig($this->config->getEditorConfigCategoryDescription())
-                ->setSelector('#description')
-                ->getEmbedCode(),
+                    ->withConfig($this->config->getEditorConfigCategoryDescription())
+                    ->setSelector('#description')
+                    ->getEmbedCode()
+                . $this->contentEditor
+                    ->withConfig($this->config->getEditorConfigCategoryShortDescription())
+                    ->setSelector('#shortDescription')
+                    ->getEmbedCode(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
@@ -114,10 +123,12 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Статус категории']);
+            ->fill([1 => 'Статус категории'])
+        ;
 
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED);
+            ->addRule(Rules::REQUIRED)
+        ;
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -139,7 +150,8 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            );
+            )
+        ;
         $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
 
@@ -156,7 +168,8 @@ final class Edit implements ModelInterface
 HTML
                     ),
                 ]
-            );
+            )
+        ;
 
         $linkFillFromParent = $this->category->getParent() ? '<a class="align-top btn btn-xs btn-warning"
                 id="fill-from-parent"
@@ -200,7 +213,8 @@ HTML
                     ];
                 }
                 return $result;
-            });
+            })
+        ;
 
         $form->submit('add');
         return $form;

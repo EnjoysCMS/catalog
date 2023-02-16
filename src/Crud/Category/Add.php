@@ -61,9 +61,13 @@ final class Add implements ModelInterface
             'subtitle' => 'Добавление категории',
             'form' => $this->renderer,
             'editorEmbedCode' => $this->contentEditor
-                ->withConfig($this->config->getEditorConfigCategoryDescription())
-                ->setSelector('#description')
-                ->getEmbedCode(),
+                    ->withConfig($this->config->getEditorConfigCategoryDescription())
+                    ->setSelector('#description')
+                    ->getEmbedCode()
+                . $this->contentEditor
+                    ->withConfig($this->config->getEditorConfigCategoryShortDescription())
+                    ->setSelector('#shortDescription')
+                    ->getEmbedCode(),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
