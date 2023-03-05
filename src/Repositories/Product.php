@@ -27,7 +27,8 @@ final class Product extends EntityRepository
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.prices', 'pr')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true');
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+        ;
     }
 
 
@@ -85,7 +86,8 @@ final class Product extends EntityRepository
             ->andWhere('p.name LIKE :query')
             ->setParameter('query', '%' . $query . '%')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     public function findByCategory(Category $category)
@@ -105,7 +107,8 @@ final class Product extends EntityRepository
         }
         return $this->getFindAllBuilder()
             ->where('p.category = :category')
-            ->setParameter('category', $category);
+            ->setParameter('category', $category)
+        ;
     }
 
     public function getFindByCategorysIdsDQL($categoryIds): QueryBuilder
@@ -113,7 +116,8 @@ final class Product extends EntityRepository
         $qb = $this->getFindAllBuilder();
 
         $qb->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds);
+            ->setParameter('category', $categoryIds)
+        ;
 
         if (false !== $null_key = array_search(null, $categoryIds)) {
             $qb->orWhere('p.category IS NULL');
@@ -132,6 +136,24 @@ final class Product extends EntityRepository
         return $this->getFindByCategorysIdsQuery($categoryIds)->getResult();
     }
 
+    public function getFindByIdsDQL($productIds): QueryBuilder
+    {
+        return $this->getFindAllBuilder()
+            ->where('p.id IN (:ids)')
+            ->setParameter('ids', $productIds)
+        ;
+    }
+
+    public function getFindByIdsQuery($productIds): Query
+    {
+        return $this->getFindByIdsDQL($productIds)->getQuery();
+    }
+
+    public function findByIds($productIds)
+    {
+        return $this->getFindByIdsQuery($productIds)->getResult();
+    }
+
     public function getFindByUrlBuilder(string $url, ?Category $category = null): QueryBuilder
     {
         $dql = $this->createQueryBuilder('p')
@@ -140,16 +162,19 @@ final class Product extends EntityRepository
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.images', 'i')
             ->leftJoin('p.files', 'f')
-            ->orderBy('i.general', 'desc');
+            ->orderBy('i.general', 'desc')
+        ;
         if ($category === null) {
             $dql->where('p.category IS NULL');
         } else {
             $dql->where('p.category = :category')
-                ->setParameter('category', $category);
+                ->setParameter('category', $category)
+            ;
         }
         $dql->leftJoin('p.urls', 'u')
             ->andWhere('u.path = :url')
-            ->setParameter('url', $url);
+            ->setParameter('url', $url)
+        ;
 
         return $dql;
     }
