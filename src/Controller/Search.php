@@ -26,7 +26,7 @@ final class Search extends PublicController
         ServerRequestInterface $request,
         Environment $twig,
         Config $config,
-        ResponseInterface $response = null
+        ResponseInterface $response
     ) {
         parent::__construct($request, $twig, $config, $response);
         $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));
