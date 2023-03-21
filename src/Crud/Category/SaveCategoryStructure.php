@@ -29,16 +29,23 @@ class SaveCategoryStructure
     /**
      * @throws ORMException
      */
-    private function doAction($data, Category|null $parent = null): void
+    private function doAction($data, Category|null $parent = null, array $tmp = []): void
     {
         foreach ($data as $key => $value) {
             /** @var Category $item */
             $item = $this->categoryRepository->find($value->id);
+
             $item->setParent($parent);
             $item->setSort($key);
             $this->em->persist($item);
+
+            if (array_key_exists($slug = $item->getSlug(), $tmp)){
+                throw new \LogicException(sprintf('Пути совпадают в: %s', $slug));
+            }
+            $tmp[$slug] = true;
+
             if (isset($value->children)) {
-                $this->doAction($value->children, $item);
+                $this->doAction($value->children, $item, $tmp);
             }
         }
     }
