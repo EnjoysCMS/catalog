@@ -8,9 +8,11 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\Query\QueryException;
 use Enjoys\Cookie\Cookie;
 use Enjoys\Cookie\Exception;
 use Enjoys\Forms\Exception\ExceptionRule;
@@ -27,15 +29,12 @@ use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 final class Add implements ModelInterface
 {
 
-    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
-    private ObjectRepository|EntityRepository $categoryRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
     public function __construct(
         private EntityManager $em,
@@ -50,16 +49,14 @@ final class Add implements ModelInterface
         $this->categoryRepository = $em->getRepository(Category::class);
     }
 
+
     /**
-     * @throws Exception
-     * @throws ExceptionRule
-     * @throws LoaderError
-     * @throws ORMException
      * @throws OptimisticLockException
-     * @throws RuntimeError
-     * @throws SyntaxError
-     * @throws DependencyException
+     * @throws ExceptionRule
+     * @throws ORMException
      * @throws NotFoundException
+     * @throws Exception
+     * @throws DependencyException
      */
     public function getContext(): array
     {
@@ -86,8 +83,12 @@ final class Add implements ModelInterface
         ];
     }
 
+
     /**
      * @throws ExceptionRule
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     * @throws QueryException
      */
     private function getForm(): Form
     {
@@ -104,9 +105,7 @@ final class Add implements ModelInterface
         $form->select('category', 'Категория')
             ->addRule(Rules::REQUIRED)
             ->fill(
-                ['0' => '_без категории_'] + $this->em->getRepository(
-                    Category::class
-                )->getFormFillArray()
+                ['0' => '_без категории_'] + $this->categoryRepository->getFormFillArray()
             );
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
@@ -118,10 +117,15 @@ final class Add implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () {
-                    $check = $this->productRepository->getFindByUrlBuilder(
-                        $this->request->getParsedBody()['url'] ?? null,
-                        $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0)
-                    )->getQuery()->getOneOrNullResult();
+                    try {
+                        $check = $this->productRepository->getFindByUrlBuilder(
+                            $this->request->getParsedBody()['url'] ?? null,
+                            $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0)
+                        )->getQuery()->getOneOrNullResult();
+                    }catch (NonUniqueResultException){
+                        return false;
+                    }
+
                     return is_null($check);
                 }
             );
@@ -130,6 +134,7 @@ final class Add implements ModelInterface
         $form->submit('add');
         return $form;
     }
+
 
     /**
      * @throws OptimisticLockException
