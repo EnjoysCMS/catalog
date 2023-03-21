@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
-use DI\Container;
 use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
@@ -25,6 +24,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -34,8 +34,9 @@ use Twig\Error\SyntaxError;
 final class Edit implements ModelInterface
 {
 
-    private ?Product $product;
-    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
+    private Product $product;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
 
     /**
@@ -46,19 +47,16 @@ final class Edit implements ModelInterface
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
-        private Container $container,
         private Config $config,
         private ContentEditor $contentEditor
     ) {
         $this->productRepository = $entityManager->getRepository(Product::class);
+        $this->categoryRepository = $entityManager->getRepository(Category::class);
         $this->product = $this->productRepository->find(
             $this->request->getQueryParams()['id'] ?? 0
+        ) ?? throw new NotFoundException(
+            sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
         );
-        if ($this->product === null) {
-            throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
-            );
-        }
     }
 
     /**
@@ -103,7 +101,7 @@ final class Edit implements ModelInterface
 
     /**
      * @throws ExceptionRule
-     * @throws \Exception
+     * @throws Exception
      */
     private function getForm(): Form
     {
@@ -125,7 +123,7 @@ final class Edit implements ModelInterface
 
         $form->setDefaults($defaults);
 
-        $form->checkbox('active', null)
+        $form->checkbox('active')
             ->setPrefixId('active')
             ->addClass(
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
@@ -133,7 +131,7 @@ final class Edit implements ModelInterface
             )
             ->fill([1 => 'Включен?']);
 
-        $form->checkbox('hide', null)
+        $form->checkbox('hide')
             ->setPrefixId('hide')
             ->addClass(
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
@@ -143,10 +141,7 @@ final class Edit implements ModelInterface
 
         $form->select('category', 'Категория')
             ->addRule(Rules::REQUIRED)
-            ->fill(
-                $this->entityManager->getRepository(
-                    Category::class
-                )->getFormFillArray()
+            ->fill($this->categoryRepository->getFormFillArray()
             );
 
         $form->text('name', 'Наименование')
@@ -159,11 +154,17 @@ final class Edit implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () {
-                    /** @var Product $product */
-                    $product = $this->productRepository->getFindByUrlBuilder(
-                        $this->request->getParsedBody()['url'] ?? null,
-                        $this->product->getCategory()
-                    )->getQuery()->getOneOrNullResult();
+                    $category = $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0);
+
+                    try {
+                        /** @var Product $product */
+                        $product = $this->productRepository->getFindByUrlBuilder(
+                            $this->request->getParsedBody()['url'] ?? null,
+                            $category
+                        )->getQuery()->getOneOrNullResult();
+                    }catch (NonUniqueResultException){
+                        return false;
+                    }
 
                     if ($product === null) {
                         return true;
