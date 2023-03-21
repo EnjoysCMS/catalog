@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Module\Catalog\Crud\Category\Add;
 use EnjoysCMS\Module\Catalog\Crud\Category\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Category\Edit;
 use EnjoysCMS\Module\Catalog\Crud\Category\Index;
+use EnjoysCMS\Module\Catalog\Crud\Category\SaveCategoryStructure;
 use EnjoysCMS\Module\Catalog\Crud\Category\SetExtraFieldsToChildren;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -33,10 +35,12 @@ final class Category extends AdminController
     )]
     public function index(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/category.twig',
-            $this->getContext($this->container->get(Index::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/category.twig',
+                $this->getContext($this->container->get(Index::class))
+            )
+        );
     }
 
 
@@ -53,10 +57,12 @@ final class Category extends AdminController
     )]
     public function add(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/addcategory.twig',
-            $this->getContext($this->container->get(Add::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/addcategory.twig',
+                $this->getContext($this->container->get(Add::class))
+            )
+        );
     }
 
 
@@ -73,10 +79,40 @@ final class Category extends AdminController
     )]
     public function edit(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/editcategory.twig',
-            $this->getContext($this->container->get(Edit::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/editcategory.twig',
+                $this->getContext($this->container->get(Edit::class))
+            )
+        );
+    }
+
+    /**
+     * @throws ORMException
+     */
+    #[Route(
+        path: 'admin/catalog/category/save_category_structure',
+        name: 'catalog/admin/category/save_category_structure',
+        options: [
+            'comment' => 'Редактирование категорий (структура, json)'
+        ],
+        methods: [
+            'post'
+        ]
+    )]
+    public function saveCategoryStructure(EntityManager $em, ServerRequestInterface $request): ResponseInterface
+    {
+        try {
+            $this->container->call(
+                SaveCategoryStructure::class,
+                ['data' => \json_decode($request->getBody()->getContents())]
+            );
+            $em->flush();
+            return $this->responseJson('saved');
+        } catch (\Throwable $e) {
+            $response = $this->responseJson($e->getMessage());
+            return $response->withStatus(401);
+        }
     }
 
 
@@ -93,10 +129,12 @@ final class Category extends AdminController
     )]
     public function delete(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Delete::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Delete::class))
+            )
+        );
     }
 
 
@@ -143,9 +181,11 @@ final class Category extends AdminController
     )]
     public function setExtraFieldsToAllChildren(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(SetExtraFieldsToChildren::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(SetExtraFieldsToChildren::class))
+            )
+        );
     }
 }

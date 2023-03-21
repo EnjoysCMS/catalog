@@ -5,12 +5,14 @@
 {% block content %}
 
     {% do asset('js', [
-        module.path ~ '/template/assets/js/nestable/jquery.nestable.js'
+        'modules/catalog/template/assets/js/nestable/jquery.nestable.js',
+        'modules/admin/node_modules/toastr/build/toastr.min.js',
     ]) %}
 
 
     {% do asset('css', [
-        module.path ~ '/template/assets/css/nestable/nestable.css'
+        'modules/catalog/template/assets/css/nestable/nestable.css',
+        'modules/admin/node_modules/toastr/build/toastr.css',
     ]) %}
 
 
@@ -22,7 +24,8 @@
             <div class="dd3-content{% if not category.isStatus %} bg-danger{% endif %}">
                 {{ category.getTitle }}
                 <span class="small">
-                    <a href="{{ path('catalog/category', {"slug": category.getSlug}) }}"><i class="fa fa-external-link-square-alt"></i></a>
+                    <a href="{{ path('catalog/category', {"slug": category.getSlug}) }}"><i
+                            class="fa fa-external-link-square-alt"></i></a>
                 </span>
                 <div class="small text-dark">
                     <a href="{{ path('catalog/admin/category/delete', {"id": category.getId}) }}">[удалить]</a>
@@ -68,14 +71,51 @@
         <!-- /.card -->
     </section>
 
-    <script type="text/javascript">
+    <script>
+
+        function save(data)
+        {
+           fetch("{{ path('catalog/admin/category/save_category_structure') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded',
+                        }, referrerPolicy: 'no-referrer', // no-referrer, *client
+                        body: data
+                    }).then(function (response) {
+                        if (response.status !== 200) {
+                            response.json()
+                                .then(function (data) {
+                                    toastr.error(data, 'Error', {timeOut: 2000})
+                                })
+                                .catch(function (err) {
+                                    toastr.error('Json Error: ' + err, 'Error', {timeOut: 2000})
+                                });
+                            return false;
+                        }
+                        response.json()
+                            .then(function (data) {
+                                toastr.success(data, 'Success', {timeOut: 2000})
+                            })
+                            .catch(function (err) {
+                                toastr.error('Json Error: ' + err, 'Error', {timeOut: 2000})
+                            });
+                    }).catch(function (err) {
+                        toastr.error('Fetch Error: ' + err, 'Error', {timeOut: 2000})
+                    });
+        }
+
         $(document).ready(function () {
             // Nestable
             var updateOutput = function (e) {
+
                 var list = e.length ? e : $(e.target),
                     output = list.data('output');
                 if (window.JSON) {
-                    output.val(window.JSON.stringify(list.nestable('serialize'))); //, null, 2));
+                    output.val(data = window.JSON.stringify(list.nestable('serialize'))); //, null, 2));
+                    if(e.type == 'change'){
+                      save(data);
+                    }
                 } else {
                     output.val('JSON browser support required for this demo.');
                 }
@@ -83,13 +123,16 @@
 
             $('#nestable').nestable({
                 group: 1,
-                expanded: false
+                expanded: true
             }).on('change', updateOutput);
 
 
             updateOutput($('#nestable').data('output', $('#nestable-output')));
 
+
+
         });
+
     </script>
 
 {% endblock %}

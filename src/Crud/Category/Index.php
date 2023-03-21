@@ -8,6 +8,11 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
@@ -17,6 +22,8 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use function json_decode;
 
 final class Index implements ModelInterface
 {
@@ -35,6 +42,13 @@ final class Index implements ModelInterface
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getContext(): array
     {
         $form = new Form();
@@ -43,7 +57,11 @@ final class Index implements ModelInterface
 
 
         if ($form->isSubmitted()) {
-            $this->_recursive(\json_decode($this->request->getParsedBody()['nestable-output'] ?? ''));
+            (new SaveCategoryStructure($this->em))
+            (
+                json_decode($this->request->getParsedBody()['nestable-output'] ?? '')
+            );
+
             $this->em->flush();
             Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
         }
@@ -61,18 +79,5 @@ final class Index implements ModelInterface
         ];
     }
 
-    private function _recursive($data, Category|null $parent = null): void
-    {
-        foreach ($data as $key => $value) {
-            /** @var Category $item */
-            $item = $this->categoryRepository->find($value->id);
-            $item->setParent($parent);
-            $item->setSort($key);
-            $this->em->persist($item);
-            if (isset($value->children)) {
-                $this->_recursive($value->children, $item);
-            }
-        }
-    }
 
 }
