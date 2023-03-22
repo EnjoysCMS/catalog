@@ -12,7 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,14 +31,12 @@ final class PriceGroupDelete implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-
-        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->request->getQueryParams()['id'] ?? null);
-        if ($priceGroup === null){
-            throw new NoResultException();
-        }
-        $this->priceGroup = $priceGroup;
+        $this->priceGroup = $this->em->getRepository(PriceGroup::class)->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
     /**
@@ -57,7 +55,7 @@ final class PriceGroupDelete implements ModelInterface
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/pricegroup') =>'Группы цен',
+                $this->urlGenerator->generate('catalog/admin/pricegroup') => 'Группы цен',
                 'Удаление группы цен'
             ],
         ];
@@ -79,6 +77,6 @@ final class PriceGroupDelete implements ModelInterface
     {
         $this->em->remove($this->priceGroup);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/pricegroup'), emit: true);
     }
 }

@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Files;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -17,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
+    private EntityRepository|ProductRepository $productRepository;
     protected Product $product;
 
     /**
@@ -30,20 +29,9 @@ final class Manage implements ModelInterface
         private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
-    }
-
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
     public function getContext(): array

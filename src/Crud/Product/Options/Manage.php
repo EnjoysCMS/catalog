@@ -6,14 +6,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Options;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -27,10 +26,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Manage implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
-    protected Product $product;
-    private ObjectRepository|EntityRepository|OptionKeyRepository $keyRepository;
-    private ObjectRepository|EntityRepository|OptionValueRepository $valueRepository;
+    private EntityRepository|ProductRepository $productRepository;
+    private Product $product;
+    private EntityRepository|OptionKeyRepository $keyRepository;
+    private EntityRepository|OptionValueRepository $valueRepository;
 
     /**
      * @throws NoResultException
@@ -38,39 +37,35 @@ final class Manage implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
-
 
     /**
-     * @throws NoResultException
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
-    }
-
     public function getContext(): array
     {
         $form = $this->getForm();
 
         if ($form->isSubmitted()) {
             $this->doSave();
+            $this->em->flush();
+            $this->redirect->http(emit: true);
         }
 
         return [
             'product' => $this->product,
             'form' => $form,
-            'delimiterOptions' =>Setting::get('delimiterOptions', '|'),
+            'delimiterOptions' => Setting::get('delimiterOptions', '|'),
             'subtitle' => 'Параметры',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
@@ -94,11 +89,11 @@ final class Manage implements ModelInterface
                 (new Text(
                     'options[' . $key . '][option]'
                 ))->setAttributes(
-                   AttributeFactory::createFromArray( [
-                       'class' => 'filter-option form-control',
-                       'placeholder' => 'Опция',
-                       'grid' => 'col-md-3'
-                   ])
+                    AttributeFactory::createFromArray([
+                        'class' => 'filter-option form-control',
+                        'placeholder' => 'Опция',
+                        'grid' => 'col-md-3'
+                    ])
                 ),
                 (new Text(
                     'options[' . $key . '][unit]'
@@ -112,11 +107,11 @@ final class Manage implements ModelInterface
                 (new Text(
                     'options[' . $key . '][value]'
                 ))->setAttributes(
-                   AttributeFactory::createFromArray( [
-                       'class' => 'filter-value form-control',
-                       'placeholder' => 'Значение',
-                       'grid' => 'col-md-7'
-                   ])
+                    AttributeFactory::createFromArray([
+                        'class' => 'filter-value form-control',
+                        'placeholder' => 'Значение',
+                        'grid' => 'col-md-7'
+                    ])
                 ),
             ]);
         }
@@ -141,8 +136,8 @@ final class Manage implements ModelInterface
         return $defaults;
     }
 
+
     /**
-     * @throws OptimisticLockException
      * @throws ORMException
      */
     private function doSave(): void
@@ -160,8 +155,6 @@ final class Manage implements ModelInterface
                 $this->product->addOption($optionValue);
             }
         }
-        $this->em->flush();
-        Redirect::http();
     }
 
 }

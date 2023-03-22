@@ -6,11 +6,12 @@ namespace EnjoysCMS\Module\Catalog\Crud;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,17 +20,22 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class Setting implements ModelInterface
 {
 
-    private ObjectRepository|EntityRepository $setting;
+    private EntityRepository $settingRepository;
 
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $this->setting = $this->entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
+        $this->settingRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -53,7 +59,7 @@ final class Setting implements ModelInterface
         $form = new Form();
 
         $form->setDefaults(function (){
-            $setting = $this->setting->findAll();
+            $setting = $this->settingRepository->findAll();
             $defaults = [];
             /** @var \EnjoysCMS\Module\Catalog\Entities\Setting $item */
             foreach ($setting as $item) {
@@ -76,11 +82,11 @@ final class Setting implements ModelInterface
             )
             ->setMultiple()
             ->fill(function () {
-                $value = $this->setting->findOneBy(['key' => 'searchOptionField'])?->getValue();
+                $value = $this->settingRepository->findOneBy(['key' => 'searchOptionField'])?->getValue();
                 if ($value === null) {
                     return [];
                 }
-                $optionKeys = $this->entityManager->getRepository(OptionKey::class)->findBy(
+                $optionKeys = $this->em->getRepository(OptionKey::class)->findBy(
                     [
                         'id' => explode(',', $value)
                     ]
@@ -98,12 +104,16 @@ final class Setting implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
-        foreach ($this->setting->findAll() as $item) {
-            $this->entityManager->remove($item);
+        foreach ($this->settingRepository->findAll() as $item) {
+            $this->em->remove($item);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
 
         foreach ($this->request->getParsedBody() as $key => $value) {
 
@@ -113,18 +123,18 @@ final class Setting implements ModelInterface
                     if (is_array($value)) {
                         $value = implode(',', $value);
                     }
-                    $setting = $this->setting->findOneBy(['key' => $key]);
+                    $setting = $this->settingRepository->findOneBy(['key' => $key]);
                     if ($setting === null) {
                         $setting = new \EnjoysCMS\Module\Catalog\Entities\Setting();
                     }
                     $setting->setKey($key);
                     $setting->setValue($value);
-                    $this->entityManager->persist($setting);
+                    $this->em->persist($setting);
 
                     break;
             }
         }
-        $this->entityManager->flush();
-        Redirect::http();
+        $this->em->flush();
+        $this->redirect->http(emit: true);
     }
 }

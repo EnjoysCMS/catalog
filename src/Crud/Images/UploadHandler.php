@@ -16,6 +16,8 @@ use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterf
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use Psr\Http\Message\UploadedFileInterface;
+use RuntimeException;
+use Throwable;
 
 final class UploadHandler
 {
@@ -30,7 +32,7 @@ final class UploadHandler
 
     /**
      * @throws OptimisticLockException
-     * @throws \Throwable
+     * @throws Throwable
      * @throws \Doctrine\ORM\ORMException
      * @throws ORMException
      * @throws FilesystemException
@@ -59,7 +61,7 @@ final class UploadHandler
             );
 
             return $file;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             if (null !== $location = $file->getTargetPath()) {
                 $this->filesystem->delete($location);
             }
@@ -81,7 +83,7 @@ final class UploadHandler
         );
         if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memoryLimit) {
             if (!$this->config->getModuleConfig()->get('allocatedMemoryDynamically')) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'The allocated memory (%s MiB) is not enough for image processing. Needed: %s MiB',
                         $memoryLimit / pow(1024, 2),

@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use LogicException;
 
 class SaveCategoryStructure
 {
@@ -40,7 +41,7 @@ class SaveCategoryStructure
             $this->em->persist($item);
 
             if (array_key_exists($slug = $item->getSlug(), $tmp)){
-                throw new \LogicException(sprintf('Пути совпадают в: %s', $slug));
+                throw new LogicException(sprintf('Пути совпадают в: %s', $slug));
             }
             $tmp[$slug] = true;
 

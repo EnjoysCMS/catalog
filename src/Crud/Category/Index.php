@@ -13,11 +13,10 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\QueryException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,20 +26,20 @@ use function json_decode;
 
 final class Index implements ModelInterface
 {
-    /**
-     * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
-     */
-    private $categoryRepository;
+
+    private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
 
 
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private RedirectInterface $redirect,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
+
 
     /**
      * @throws OptimisticLockException
@@ -63,7 +62,7 @@ final class Index implements ModelInterface
             );
 
             $this->em->flush();
-            Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
         }
         $this->renderer->setForm($form);
 

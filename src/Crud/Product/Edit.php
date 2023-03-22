@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
 use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -40,23 +41,22 @@ final class Edit implements ModelInterface
 
 
     /**
-     * @throws NotFoundException
+     * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
         private Config $config,
         private ContentEditor $contentEditor
     ) {
-        $this->productRepository = $entityManager->getRepository(Product::class);
-        $this->categoryRepository = $entityManager->getRepository(Category::class);
+        $this->productRepository = $em->getRepository(Product::class);
+        $this->categoryRepository = $em->getRepository(Category::class);
         $this->product = $this->productRepository->find(
             $this->request->getQueryParams()['id'] ?? 0
-        ) ?? throw new NotFoundException(
-            sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
-        );
+        ) ?? throw new NoResultException();
     }
 
     /**
@@ -67,7 +67,7 @@ final class Edit implements ModelInterface
      * @throws RuntimeError
      * @throws SyntaxError
      * @throws DependencyException
-     * @throws \DI\NotFoundException
+     * @throws NotFoundException
      */
     public function getContext(): array
     {
@@ -196,7 +196,7 @@ final class Edit implements ModelInterface
     private function doAction(): void
     {
         /** @var Category|null $category */
-        $category = $this->entityManager->getRepository(Category::class)->find(
+        $category = $this->em->getRepository(Category::class)->find(
             $this->request->getParsedBody()['category'] ?? 0
         );
 
@@ -205,12 +205,12 @@ final class Edit implements ModelInterface
 
 
         $unitValue = $this->request->getParsedBody()['unit'] ?? null;
-        $unit = $this->entityManager->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
+        $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
         if ($unit === null) {
             $unit = new ProductUnit();
             $unit->setName($unitValue);
-            $this->entityManager->persist($unit);
-            $this->entityManager->flush();
+            $this->em->persist($unit);
+            $this->em->flush();
         }
         $this->product->setUnit($unit);
 
@@ -239,10 +239,10 @@ final class Edit implements ModelInterface
             $url->setPath($urlString);
             $url->setDefault(true);
             $url->setProduct($this->product);
-            $this->entityManager->persist($url);
+            $this->em->persist($url);
         }
 
-        $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+        $this->em->flush();
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 }

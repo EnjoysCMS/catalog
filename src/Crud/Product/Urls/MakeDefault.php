@@ -7,10 +7,10 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,14 +27,14 @@ final class MakeDefault
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $product = $this->em->getRepository(Product::class)->find($this->request->getQueryParams()['product_id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        $this->product = $product;
+        $this->product = $this->em->getRepository(Product::class)->find(
+            $this->request->getQueryParams()['product_id'] ?? null
+        ) ?? throw new NoResultException();
     }
+
 
     /**
      * @throws OptimisticLockException
@@ -58,6 +58,9 @@ final class MakeDefault
         }
 
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]));
+        $this->redirect->http(
+            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+            emit: true
+        );
     }
 }

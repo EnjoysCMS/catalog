@@ -8,45 +8,48 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Elements\Hidden;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
+use EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 
 final class Delete implements ModelInterface
 {
     private Currency $currency;
-    private ObjectRepository|EntityRepository $repo;
+    private EntityRepository $currencyRepository;
+    private CurrencyRateRepository|EntityRepository $currencyRateRepository;
 
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $currencyId = $this->request->getQueryParams()['id'] ?? null;
-        if ($currencyId === null) {
-            throw new InvalidArgumentException('Currency id was not transmitted');
-        }
+        $currencyId = $this->request->getQueryParams()['id']
+            ?? throw new InvalidArgumentException('Currency id was not transmitted');
 
-        $this->repo = $this->entityManager->getRepository(Currency::class);
 
-        $currency = $this->repo->find($currencyId);
-        if ($currency === null) {
-            throw new InvalidArgumentException(sprintf('Currency not found: %s', $currencyId));
-        }
-        $this->currency = $currency;
+        $this->currencyRepository = $this->entityManager->getRepository(Currency::class);
+        $this->currencyRateRepository = $this->entityManager->getRepository(CurrencyRate::class);
+
+        $this->currency = $this->currencyRepository
+            ->find($currencyId)
+            ?? throw new InvalidArgumentException(
+                sprintf('Currency not found: %s', $currencyId)
+            );
     }
 
     /**
@@ -64,7 +67,7 @@ final class Delete implements ModelInterface
         if ($form->isSubmitted()) {
             try {
                 $this->doProcess();
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 if ($e->getCode() !== 1451) {
                     throw $e;
                 }
@@ -105,7 +108,7 @@ final class Delete implements ModelInterface
             Rules::CALLBACK,
             'Нельзя удалять все валюты из системы',
             function () {
-                return $this->repo->count([]) > 1;
+                return $this->currencyRepository->count([]) > 1;
             }
         );
 
@@ -113,16 +116,17 @@ final class Delete implements ModelInterface
         return $form;
     }
 
+
     /**
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doProcess()
+    private function doProcess(): void
     {
-        $this->entityManager->getRepository(CurrencyRate::class)->removeAllRatesByCurrency($this->currency);
+        $this->currencyRateRepository->removeAllRatesByCurrency($this->currency);
         $this->entityManager->remove($this->currency);
         $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/currency'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
     }
 
 }

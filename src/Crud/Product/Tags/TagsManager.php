@@ -7,6 +7,8 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Tags;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Entities\ProductTag;
 
 final class TagsManager
@@ -16,6 +18,10 @@ final class TagsManager
     }
 
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function getTagsFromArray(array $tags = []): array
     {
         $ret = [];

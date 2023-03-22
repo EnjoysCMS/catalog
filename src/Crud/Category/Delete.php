@@ -7,10 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\Persistence\Mapping\MappingException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -19,24 +22,32 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Delete implements ModelInterface
 {
-    private ?Category $category;
-    /**
-     * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category
-     */
-    private $categoryRepository;
+    private Category $category;
+    private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
+    private \EnjoysCMS\Module\Catalog\Repositories\Product|EntityRepository $productRepository;
 
+    /**
+     * @throws NoResultException
+     */
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private UrlGeneratorInterface $urlGenerator,
         private RendererInterface $renderer,
-        private ServerRequestInterface $request
+        private ServerRequestInterface $request,
+        private RedirectInterface $redirect,
     ) {
-        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->categoryRepository = $this->em->getRepository(Category::class);
+        $this->productRepository = $this->em->getRepository(Product::class);
         $this->category = $this->categoryRepository->find(
             $this->request->getQueryParams()['id'] ?? 0
-        );
+        ) ?? throw new NoResultException();
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws MappingException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
@@ -45,6 +56,7 @@ final class Delete implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
         }
 
         return [
@@ -80,34 +92,42 @@ final class Delete implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws MappingException
+     */
     private function doAction(): void
     {
         $setCategory = (($this->request->getParsedBody(
             )['set_parent_category'] ?? null) !== null) ? $this->category->getParent() : null;
 
         if (($this->request->getParsedBody()['remove_childs'] ?? null) !== null) {
-            $allCategoryIds = $this->entityManager->getRepository(Category::class)->getAllIds($this->category);
-            $products = $this->entityManager->getRepository(Product::class)->findByCategorysIds($allCategoryIds);
+            $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
+            $products = $this->productRepository->findByCategorysIds($allCategoryIds);
             $this->setCategory($products, $setCategory);
 
-            $this->entityManager->remove($this->category);
-            $this->entityManager->flush();
+            $this->em->remove($this->category);
+            $this->em->flush();
         } else {
-            $products = $this->entityManager->getRepository(Product::class)->findByCategory($this->category);
+            $products = $this->productRepository->findByCategory($this->category);
             $this->setCategory($products, $setCategory);
 
             $this->categoryRepository->removeFromTree($this->category);
             $this->categoryRepository->updateLevelValues();
-            $this->entityManager->clear();
+            $this->em->clear();
         }
-        Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function setCategory($products, ?Category $category = null): void
     {
         foreach ($products as $product) {
             $product->setCategory($category);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
     }
 }

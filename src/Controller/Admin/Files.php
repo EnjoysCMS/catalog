@@ -10,10 +10,11 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Functions\TwigExtension\ConvertSize;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Manage;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Upload;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
+use League\Flysystem\FilesystemException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -57,7 +58,7 @@ final class Files extends AdminController
             "comment" => "[ADMIN] Загрузить файл для продукта"
         ]
     )]
-    public function upload()
+    public function upload(): ResponseInterface
     {
         return $this->responseText(
             $this->view(
@@ -73,6 +74,7 @@ final class Files extends AdminController
      * @throws ContainerExceptionInterface
      * @throws OptimisticLockException
      * @throws NoResultException
+     * @throws FilesystemException
      */
     #[Route(
         path: "admin/catalog/product/files/delete",
@@ -81,12 +83,11 @@ final class Files extends AdminController
             "comment" => "[ADMIN] Удалить загруженный файл"
         ]
     )]
-    public function delete()
-    {
-        /** @var EntityManager $em */
-        $em = $this->getContainer()->get(EntityManager::class);
-        /** @var ServerRequestInterface $request */
-        $request = $this->getContainer()->get(ServerRequestInterface::class);
+    public function delete(
+        RedirectInterface $redirect,
+        ServerRequestInterface $request,
+        EntityManager $em
+    ): ResponseInterface {
         $product = $em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->find(
             $request->getQueryParams()['product'] ?? 0
         );
@@ -94,11 +95,7 @@ final class Files extends AdminController
         $file = $em->getRepository(ProductFiles::class)->findOneBy([
             'id' => $request->getQueryParams()['id'] ?? 0,
             'product' => $product,
-        ]);
-
-        if ($file === null) {
-            throw new NoResultException();
-        }
+        ]) ?? throw new NoResultException();
 
         $em->remove($file);
         $em->flush();
@@ -106,7 +103,7 @@ final class Files extends AdminController
         $filesystem = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
         $filesystem->delete($file->getFilePath());
 
-        Redirect::http(
+        return $redirect->http(
             $this->getContainer()->get(UrlGeneratorInterface::class)->generate('@a/catalog/product/files', [
                 'id' => $product->getId()
             ])

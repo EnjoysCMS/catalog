@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
@@ -19,7 +18,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class Index implements ModelInterface
 {
 
-    private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
+    private Repositories\Product|EntityRepository $productRepository;
 
     public function __construct(
         private EntityManager $em,

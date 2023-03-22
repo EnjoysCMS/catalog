@@ -20,7 +20,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -41,6 +41,7 @@ final class Add implements ModelInterface
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
         private Config $config,
         private Cookie $cookie,
         private ContentEditor $contentEditor
@@ -122,7 +123,7 @@ final class Add implements ModelInterface
                             $this->request->getParsedBody()['url'] ?? null,
                             $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0)
                         )->getQuery()->getOneOrNullResult();
-                    }catch (NonUniqueResultException){
+                    } catch (NonUniqueResultException) {
                         return false;
                     }
 
@@ -172,6 +173,6 @@ final class Add implements ModelInterface
 
         $this->em->persist($url);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 }

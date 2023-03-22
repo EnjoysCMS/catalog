@@ -10,7 +10,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Quantity;
@@ -29,23 +29,13 @@ final class Manage implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect
     ) {
-        $this->product = $this->getProduct();
+        $this->product = $this->em->getRepository(Product::class)->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
         $this->quantity = $this->product->getQuantity();
-    }
-
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->em->getRepository(Product::class)->find($this->request->getQueryParams()['id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
     }
 
     /**
@@ -58,6 +48,8 @@ final class Manage implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->em->flush();
+            $this->redirect->http(emit: true);
         }
 
         $this->renderer->setForm($form);
@@ -97,17 +89,10 @@ final class Manage implements ModelInterface
         return $form;
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
     private function doAction(): void
     {
         $this->quantity->setQty($this->request->getParsedBody()['qty'] ?? null);
         $this->quantity->setStep($this->request->getParsedBody()['step'] ?? null);
         $this->quantity->setMin($this->request->getParsedBody()['min'] ?? null);
-        $this->em->flush();
-
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/quantity', ['id' => $this->product->getId()]));
     }
 }

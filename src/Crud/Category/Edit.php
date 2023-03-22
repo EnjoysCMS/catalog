@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
 use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -22,8 +23,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -34,43 +34,39 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class Edit implements ModelInterface
 {
 
-    private ?Category $category;
+    private Category $category;
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
 
     /**
-     * @throws NotFoundException
+     * @throws NoResultException
      */
     public function __construct(
         private RendererInterface $renderer,
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
-        private ContentEditor $contentEditor
+        private ContentEditor $contentEditor,
+        private RedirectInterface $redirect,
     ) {
-        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->categoryRepository = $this->em->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
             $this->request->getQueryParams()['id'] ?? 0
-        );
-        if ($this->category === null) {
-            throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? '0')
-            );
-        }
+        ) ?? throw new NoResultException();
     }
 
     /**
-     * @throws DependencyException
      * @throws ExceptionRule
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws ORMException
+     * @throws DependencyException
      * @throws OptimisticLockException
+     * @throws NotFoundException
      * @throws QueryException
-     * @throws \DI\NotFoundException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     public function getContext(): array
     {
@@ -80,6 +76,8 @@ final class Edit implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->em->flush();
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
         }
 
 
@@ -134,7 +132,7 @@ final class Edit implements ModelInterface
             ]
         );
 
-        $form->checkbox('status', null)
+        $form->checkbox('status')
             ->addClass(
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
@@ -208,7 +206,7 @@ HTML
 
         $form->select(
             'extraFields',
-            "Дополнительные поля {$linkFillFromParent} {$linkFillAllChildren} "
+            "Дополнительные поля $linkFillFromParent $linkFillAllChildren "
         )
             ->setDescription(
                 'Дополнительные поля, которые можно отображать в списке продуктов.
@@ -216,7 +214,7 @@ HTML
             )->addClass('set-extra-fields')
             ->setMultiple()
             ->fill(function () {
-                $optionKeys = $this->entityManager->getRepository(OptionKey::class)->findBy(
+                $optionKeys = $this->em->getRepository(OptionKey::class)->findBy(
                     [
                         'id' => array_map(
                             function ($item) {
@@ -240,13 +238,10 @@ HTML
         return $form;
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
+
     private function doAction(): void
     {
-        $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null));
+        $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? 0));
         $this->category->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->category->setDescription($this->request->getParsedBody()['description'] ?? null);
         $this->category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
@@ -254,16 +249,13 @@ HTML
         $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
 
-        $extraFields = $this->entityManager->getRepository(OptionKey::class)->findBy(
-            ['id' => $this->request->getParsedBody()['extraFields'] ?? null]
+        $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
+            ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]
         );
 
         $this->category->removeExtraFields();
         foreach ($extraFields as $extraField) {
             $this->category->addExtraField($extraField);
         }
-
-        $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
     }
 }

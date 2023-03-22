@@ -8,15 +8,14 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
@@ -26,7 +25,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class AddUrl implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
+    private EntityRepository|ProductRepository $productRepository;
     protected Product $product;
 
     /**
@@ -36,26 +35,18 @@ final class AddUrl implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private RedirectInterface $redirect
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
-    }
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['product_id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
     /**
      * @throws OptimisticLockException
+     * @throws ExceptionRule
      * @throws ORMException
      */
     public function getContext(): array
@@ -82,6 +73,7 @@ final class AddUrl implements ModelInterface
             ],
         ];
     }
+
 
     /**
      * @throws ExceptionRule
@@ -115,6 +107,7 @@ final class AddUrl implements ModelInterface
         return $form;
     }
 
+
     /**
      * @throws OptimisticLockException
      * @throws ORMException
@@ -134,6 +127,9 @@ final class AddUrl implements ModelInterface
 
         $this->em->persist($url);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]));
+        $this->redirect->http(
+            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+            emit: true
+        );
     }
 }

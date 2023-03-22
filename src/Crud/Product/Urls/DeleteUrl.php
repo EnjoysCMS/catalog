@@ -8,23 +8,23 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class DeleteUrl implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
+    private EntityRepository|ProductRepository $productRepository;
     protected Product $product;
     private Url $url;
 
@@ -35,25 +35,14 @@ final class DeleteUrl implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private RedirectInterface $redirect,
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['product_id'] ?? null
+        ) ?? throw new NoResultException();
         $this->url = $this->product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? null));
-
-
-    }
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
     }
 
     /**
@@ -99,11 +88,14 @@ final class DeleteUrl implements ModelInterface
      */
     private function doAction(): void
     {
-        if($this->url->isDefault()){
-            throw new \InvalidArgumentException('You cannot delete the main link');
+        if ($this->url->isDefault()) {
+            throw new InvalidArgumentException('You cannot delete the main link');
         }
         $this->em->remove($this->url);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]));
+        $this->redirect->http(
+            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+            emit: true
+        );
     }
 }
