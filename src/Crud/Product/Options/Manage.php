@@ -38,7 +38,8 @@ final class Manage implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect
+        private RedirectInterface $redirect,
+        private Setting $setting
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -65,7 +66,7 @@ final class Manage implements ModelInterface
         return [
             'product' => $this->product,
             'form' => $form,
-            'delimiterOptions' => Setting::get('delimiterOptions', '|'),
+            'delimiterOptions' => $this->setting->get('delimiterOptions', '|'),
             'subtitle' => 'Параметры',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
@@ -127,7 +128,7 @@ final class Manage implements ModelInterface
             $defaults['options'][$key]['option'] = $option['key']->getName();
             $defaults['options'][$key]['unit'] = $option['key']->getUnit();
             $defaults['options'][$key]['value'] = implode(
-                Setting::get('delimiterOptions', '|'),
+                $this->setting->get('delimiterOptions', '|'),
                 array_map(function ($item) {
                     return $item->getValue();
                 }, $option['values'])
@@ -149,7 +150,7 @@ final class Manage implements ModelInterface
                 continue;
             }
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
-            foreach (explode(Setting::get('delimiterOptions', '|'), $option['value']) as $value) {
+            foreach (explode($this->setting->get('delimiterOptions', '|'), $option['value']) as $value) {
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
                 $this->em->persist($optionValue);
                 $this->product->addOption($optionValue);

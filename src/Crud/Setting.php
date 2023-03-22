@@ -58,7 +58,7 @@ final class Setting implements ModelInterface
     {
         $form = new Form();
 
-        $form->setDefaults(function (){
+        $form->setDefaults(function () {
             $setting = $this->settingRepository->findAll();
             $defaults = [];
             /** @var \EnjoysCMS\Module\Catalog\Entities\Setting $item */
@@ -116,7 +116,6 @@ final class Setting implements ModelInterface
         $this->em->flush();
 
         foreach ($this->request->getParsedBody() as $key => $value) {
-
             switch ($key) {
                 case 'minSearchChars':
                 case 'searchOptionField':

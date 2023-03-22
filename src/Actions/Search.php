@@ -13,11 +13,11 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Traits\Options;
-use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,6 +36,7 @@ final class Search
         private ContainerInterface $container,
         private ServerRequestInterface $request,
         private EntityManager $em,
+        private Setting $setting,
         Config $config
     ) {
         $this->setOptions($config->getModuleConfig()->asArray());
@@ -65,7 +66,7 @@ final class Search
             'products' => $result,
             '_title' => sprintf(
                 'Поиск: %2$s #страница %3$d - Найдено: %4$d - %1$s',
-                Setting::get('sitename'),
+                $this->setting->get('sitename'),
                 $this->searchQuery,
                 $pagination->getCurrentPage(),
                 $result->count()

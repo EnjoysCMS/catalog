@@ -10,12 +10,17 @@ use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Dto\SearchDto;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
+use Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 final class Search extends PublicController
 {
@@ -26,10 +31,11 @@ final class Search extends PublicController
         ServerRequestInterface $request,
         Environment $twig,
         Config $config,
+        Setting $setting,
         ResponseInterface $response
     ) {
         parent::__construct($request, $twig, $config, $response);
-        $this->optionKeys = explode(',', Setting::get('searchOptionField', ''));
+        $this->optionKeys = explode(',', $setting->get('searchOptionField', ''));
     }
 
 
@@ -44,13 +50,18 @@ final class Search extends PublicController
                 $this->optionKeys
             );
             $response = $this->responseJson($this->convertResultToDTO($result));
-        } catch (\Exception|\Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $response = $this->responseJson(['error' => $e->getMessage()]);
         } finally {
             return $response;
         }
     }
 
+    /**
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws LoaderError
+     */
     #[Route(
         path: '/search/',
         name: 'catalog/search'
@@ -64,7 +75,7 @@ final class Search extends PublicController
             $result = $search->getSearchResult(
                 $this->optionKeys
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $result = [
                 'error' => $e
             ];
@@ -91,7 +102,10 @@ final class Search extends PublicController
     private function convertResultToDTO($result)
     {
         $optionKeys = $result['optionKeys'];
-        $result['result'] = array_map(function ($item) use ($optionKeys) {
+        $result['result'] = array_map(
+        /**
+         * @throws Exception
+         */ function ($item) use ($optionKeys) {
             /** @var \EnjoysCMS\Module\Catalog\Entities\Product $item */
             $searchDto = new SearchDto();
             $searchDto->id = $item->getId();
@@ -108,7 +122,9 @@ final class Search extends PublicController
             }
 
             return $searchDto;
-        }, iterator_to_array($result['products']->getIterator()));
+        },
+            iterator_to_array($result['products']->getIterator())
+        );
         return $result;
     }
 }
