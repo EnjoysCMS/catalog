@@ -12,7 +12,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Interfaces\RedirectInterface;
-use EnjoysCMS\Module\Catalog\DynamicConfig;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -42,10 +42,10 @@ class ProductModel implements ModelInterface
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
         private Setting $setting,
-        DynamicConfig $config
+        private Config $config
     ) {
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
-        $entityListenerResolver->register(new ProductPriceEntityListener($config));
+        $entityListenerResolver->register(new ProductPriceEntityListener($this->config));
 
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();

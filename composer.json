@@ -4,6 +4,7 @@
     "type": "enjoyscms-module",
     "require": {
         "php": "^8.0",
+        "ext-intl": "*",
         "enjoyscms/core": "^4.7",
         "enjoyscms/admin": "^4.0",
         "enjoyscms/elfinder": "^4.0",
