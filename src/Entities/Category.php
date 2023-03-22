@@ -28,7 +28,7 @@ class Category
     private int $id;
 
     /**
-     * @ORM\Column(name="title", type="string", length=64)
+     * @ORM\Column(name="title", type="string", length=255)
      */
     private string $title;
 

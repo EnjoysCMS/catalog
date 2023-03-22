@@ -8,15 +8,15 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
@@ -37,29 +37,21 @@ final class EditUrl implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
         private RendererInterface $renderer
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['product_id'] ?? null
+        ) ?? throw new NoResultException();
         $this->url = $this->product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
     }
 
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['product_id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
-    }
 
     /**
      * @throws ExceptionRule
-     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ORMException
      */
     public function getContext(): array
     {
@@ -110,14 +102,13 @@ final class EditUrl implements ModelInterface
                         return true;
                     }
 
-                    if ($this->url->getPath() === ($this->request->getParsedBody()['path'] ?? null)){
+                    if ($this->url->getPath() === ($this->request->getParsedBody()['path'] ?? null)) {
                         return true;
                     }
 
                     return false;
                 }
-            )
-        ;
+            );
         $form->submit('save', 'Сохранить');
         return $form;
     }
@@ -130,6 +121,9 @@ final class EditUrl implements ModelInterface
     {
         $this->url->setPath($this->request->getParsedBody()['path'] ?? null);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]));
+        $this->redirect->http(
+            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+            emit: true
+        );
     }
 }

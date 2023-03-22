@@ -10,10 +10,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -21,14 +19,16 @@ use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Helpers\MetaHelpers;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repositories;
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ProductModel implements ModelInterface
 {
 
-    private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
+    private EntityRepository|Repositories\Product $productRepository;
     private Product $product;
 
     /**
@@ -40,6 +40,8 @@ class ProductModel implements ModelInterface
         private ServerRequestInterface $request,
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
+        private Setting $setting,
         DynamicConfig $config
     ) {
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
@@ -47,17 +49,18 @@ class ProductModel implements ModelInterface
 
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
-
-
-
     }
 
+    /**
+     * @throws Exception
+     */
     public function getContext(): array
     {
         if ($this->product->getUrl() !== $this->product->getCurrentUrl()) {
-            Redirect::http(
+            $this->redirect->http(
                 $this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]),
-                301
+                301,
+                true
             );
         }
         // $this->em->flush();
@@ -65,16 +68,16 @@ class ProductModel implements ModelInterface
         return [
             '_title' => sprintf(
                 '%2$s - %3$s - %1$s',
-                Setting::get('sitename'),
+                $this->setting->get('sitename'),
                 $this->product->getMeta()?->getTitle() ?? $this->product->getName(),
                 $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
             ),
             '_keywords' => $this->product->getMeta()?->getKeyword() ?? MetaHelpers::generateKeywords(
                     $this->product
-                ) ?? Setting::get('site-keywords'),
+                ) ?? $this->setting->get('site-keywords'),
             '_description' => $this->product->getMeta()?->getDescription() ?? MetaHelpers::generateDescription(
                     $this->product
-                ) ?? Setting::get('site-description'),
+                ) ?? $this->setting->get('site-description'),
 
             'product' => $this->product,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),

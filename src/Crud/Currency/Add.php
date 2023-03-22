@@ -7,15 +7,17 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -25,16 +27,25 @@ final class Add implements ModelInterface
         private RendererInterface $renderer,
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
 
         if ($form->isSubmitted()) {
             $this->doProcess();
+            $this->entityManager->flush();
+            exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
         }
 
 
@@ -52,11 +63,11 @@ final class Add implements ModelInterface
         ];
     }
 
+
     /**
-     * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doProcess()
+    private function doProcess(): void
     {
         $currency = new Currency();
         $currency->setId(strtoupper($this->request->getParsedBody()['id'] ?? null));
@@ -87,12 +98,8 @@ final class Add implements ModelInterface
         );
 
         $this->entityManager->persist($currency);
-        $this->entityManager->flush();
-
-        exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
-
-        Redirect::http($this->urlGenerator->generate('catalog/admin/currency'));
     }
+
 
     /**
      * @throws ExceptionRule
@@ -113,9 +120,21 @@ final class Add implements ModelInterface
                 );
             })
             ->addRule(Rules::CALLBACK, 'Валюту с таким кодом невозможно добавить', function () {
+
+                $client = new Client(
+                    [
+                        'verify' => false,
+                        RequestOptions::IDN_CONVERSION => true
+                    ]
+                );
+                $response = $client->get('https://www.cbr-xml-daily.ru/latest.js');
+                $data = json_decode($response->getBody()->getContents(), true);
+               // $data = json_decode(file_get_contents('https://www.cbr-xml-daily.ru/latest.js'), true);
+                $currencyList = array_keys($data['rates']);
+                $currencyList[] = $data['base'];
                 return in_array(
                     strtoupper($this->request->getParsedBody()['id'] ?? null),
-                    array_keys(json_decode(file_get_contents('https://www.cbr-xml-daily.ru/latest.js'), true)['rates']),
+                    $currencyList,
                     true
                 );
             });

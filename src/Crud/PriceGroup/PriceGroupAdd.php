@@ -7,11 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,10 +26,16 @@ final class PriceGroupAdd implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ExceptionRule
+     * @throws ORMException
+     */
     public function getContext(): array
     {
         $form = $this->getAddForm();
@@ -67,6 +75,10 @@ final class PriceGroupAdd implements ModelInterface
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         $priceGroup = new PriceGroup();
@@ -74,6 +86,6 @@ final class PriceGroupAdd implements ModelInterface
         $priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->persist($priceGroup);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/pricegroup'), emit: true);
     }
 }

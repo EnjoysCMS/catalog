@@ -7,18 +7,59 @@ namespace EnjoysCMS\Module\Catalog\Helpers;
 
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Core\Components\Helpers\HelpersBase;
-use EnjoysCMS\Module\Catalog\Config;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
-final class Setting extends HelpersBase
+final class Setting
 {
 
-    public static function get(string $key, string|null $defaults = null)
+    private LoggerInterface $logger;
+
+    private static ?array $cache = null;
+
+    public function __construct(private EntityManager $em, LoggerInterface $logger = null)
     {
-        $moduleConfig = self::$container->get(Config::class)->getModuleConfig()->getAll();
-        return self::$container->get(EntityManager::class)->getRepository(
-                \EnjoysCMS\Module\Catalog\Entities\Setting::class
-            )->findOneBy(['key' => $key])?->getValue() ?? $moduleConfig[$key] ?? $defaults;
+        $this->logger = $logger ?? new NullLogger();
     }
+
+
+    public function getAll(): ?array
+    {
+        if (Setting::$cache === null) {
+            Setting::$cache = $this->fetchSetting();
+        }
+        return self::$cache;
+    }
+
+    public function get(string $var, mixed $default = null): mixed
+    {
+        if (Setting::$cache === null) {
+            Setting::$cache = $this->fetchSetting();
+        }
+
+        if (array_key_exists($var, Setting::$cache)) {
+            return Setting::$cache[$var];
+        }
+
+        $this->logger->debug(sprintf('Parameter `%s` not found! Return default value', $var));
+
+        return $default;
+    }
+
+    /**
+     * @return array<string, null|string>
+     * @psalm-suppress MixedInferredReturnType, MixedReturnStatement
+     */
+    private function fetchSetting(): array
+    {
+        /** @var \EnjoysCMS\Core\Repositories\Setting $repositoryCoreSetting */
+        $repositoryCoreSetting = $this->em->getRepository(\EnjoysCMS\Core\Entities\Setting::class);
+
+        /** @var \EnjoysCMS\Module\Catalog\Repositories\Setting $repositoryCatalogSetting */
+        $repositoryCatalogSetting = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
+
+        return array_merge($repositoryCoreSetting->findAllKeyVar(), $repositoryCatalogSetting->findAllKeyVar());
+    }
+
 
 }

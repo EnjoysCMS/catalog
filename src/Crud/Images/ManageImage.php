@@ -15,8 +15,9 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 
 final class ManageImage
 {
+
     /**
-     * @var array|object[]
+     * @var Image[]
      */
     private array $productImages;
 

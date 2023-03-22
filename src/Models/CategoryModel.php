@@ -12,7 +12,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Setting;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
@@ -20,6 +19,7 @@ use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Psr\Http\Message\ServerRequestInterface;
@@ -46,6 +46,7 @@ final class CategoryModel implements ModelInterface
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
+        private Setting $setting,
         private DynamicConfig $dynamicConfig,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
@@ -74,6 +75,9 @@ final class CategoryModel implements ModelInterface
     }
 
 
+    /**
+     * @throws NotFoundException
+     */
     public function getContext(): array
     {
         $pagination = new Pagination(
@@ -114,7 +118,7 @@ final class CategoryModel implements ModelInterface
         return [
             '_title' => sprintf(
                 '%2$s #страница %3$d - %1$s',
-                Setting::get('sitename'),
+                $this->setting->get('sitename'),
                 $this->category->getFullTitle(reverse: true) ?? 'Каталог',
                 $pagination->getCurrentPage()
             ),
@@ -149,7 +153,7 @@ final class CategoryModel implements ModelInterface
         return $this->breadcrumbs->get();
     }
 
-    private function updateDynamicConfig()
+    private function updateDynamicConfig(): void
     {
         $this->updatePerPage();
         $this->updateSortMode();

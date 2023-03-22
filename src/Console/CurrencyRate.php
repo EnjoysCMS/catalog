@@ -12,6 +12,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use PatchRanger\CartesianIterator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -25,11 +27,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class CurrencyRate extends Command
 {
 
-    private array $rates;
+    private array $rates = [];
 
     public function __construct(private EntityManager $em, private Config $config)
     {
-        $this->rates = json_decode(file_get_contents('https://www.cbr-xml-daily.ru/latest.js'), true);
         parent::__construct();
     }
 
@@ -39,6 +40,15 @@ final class CurrencyRate extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        $client = new Client(
+            [
+                'verify' => false,
+                RequestOptions::IDN_CONVERSION => true
+            ]
+        );
+        $response = $client->get('https://www.cbr-xml-daily.ru/latest.js');
+        $this->rates = json_decode($response->getBody()->getContents(), true);
+
         /** @var Currency[] $currencies */
         $currencies = $this->em->getRepository(Currency::class)->findAll();
         $cartesianIterator = new CartesianIterator();

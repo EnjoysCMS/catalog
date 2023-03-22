@@ -10,8 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\Persistence\ObjectRepository;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,14 +18,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class FillFromProduct
 {
-    private ObjectRepository|EntityRepository|ProductRepository $productRepository;
+    private EntityRepository|ProductRepository $productRepository;
 
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $this->productRepository = $this->entityManager->getRepository(Product::class);
+        $this->productRepository = $this->em->getRepository(Product::class);
     }
 
     /**
@@ -36,10 +36,10 @@ final class FillFromProduct
     public function __invoke(): void
     {
         /** @var Product $product */
-        $product = $this->productRepository->find($this->request->getParsedBody()['id'] ?? 0);
-        if ($product === null) {
-            throw new NoResultException();
-        }
+        $product = $this->productRepository->find(
+            $this->request->getParsedBody()['id'] ?? 0
+        ) ?? throw new NoResultException();
+
 
         /** @var Product $from */
         $from = $this->productRepository->find($this->request->getParsedBody()['fillFromProduct'] ?? 0);
@@ -51,14 +51,17 @@ final class FillFromProduct
             $product->addOption($item);
         }
 
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
+        $this->em->persist($product);
+        $this->em->flush();
 
         $this->redirectToProductOptionsPage($product);
     }
 
     private function redirectToProductOptionsPage(Product $product): void
     {
-        Redirect::http($this->urlGenerator->generate('@a/catalog/product/options', ['id' => $product->getId()]));
+        $this->redirect->http(
+            $this->urlGenerator->generate('@a/catalog/product/options', ['id' => $product->getId()]),
+            emit: true
+        );
     }
 }

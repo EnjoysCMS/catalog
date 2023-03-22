@@ -14,12 +14,14 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use function trim;
 
 class TagsList implements ModelInterface
 {
@@ -34,23 +36,13 @@ class TagsList implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->getProduct();
-    }
-
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
 
@@ -82,6 +74,7 @@ class TagsList implements ModelInterface
         ];
     }
 
+
     /**
      * @throws ExceptionRule
      */
@@ -92,13 +85,13 @@ class TagsList implements ModelInterface
         $form->setMethod('post');
 
         $form->setDefaults([
-                               'tags' => implode(
-                                   ',',
-                                   array_map(function ($tag) {
-                                       return \trim($tag->getName());
-                                   }, $this->product->getTags()->toArray())
-                               )
-                           ]);
+            'tags' => implode(
+                ',',
+                array_map(function ($tag) {
+                    return trim($tag->getName());
+                }, $this->product->getTags()->toArray())
+            )
+        ]);
 
         $form->text('tags', 'Теги')->setDescription('Теги через запятую')->setAttributes(
             AttributeFactory::createFromArray(['placeholder' => ''])
@@ -108,6 +101,7 @@ class TagsList implements ModelInterface
 
         return $form;
     }
+
 
     /**
      * @throws OptimisticLockException
@@ -121,7 +115,7 @@ class TagsList implements ModelInterface
         $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));
         $this->em->flush();
 
-        Redirect::http();
+        $this->redirect->http(emit: true);
     }
 
 

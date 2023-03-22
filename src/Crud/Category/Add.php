@@ -10,14 +10,19 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\QueryException;
 use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -27,25 +32,26 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class Add implements ModelInterface
 {
 
-    /**
-     * @var EntityRepository|ObjectRepository
-     */
-    private $categoryRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
-        private ContentEditor $contentEditor
+        private ContentEditor $contentEditor,
+        private RedirectInterface $redirect,
     ) {
-        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->categoryRepository = $this->em->getRepository(Category::class);
     }
 
     /**
      * @throws DependencyException
+     * @throws ExceptionRule
      * @throws NotFoundException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function getContext(): array
     {
@@ -55,6 +61,8 @@ final class Add implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->em->flush();
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
         }
 
         return [
@@ -77,6 +85,12 @@ final class Add implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws QueryException
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -89,16 +103,13 @@ final class Add implements ModelInterface
 
 
         $form->select('parent', 'Родительская категория')
+            ->addRule(Rules::REQUIRED)
             ->fill(
-                ['0' => '_без родительской категории_'] + $this->entityManager->getRepository(
-                    Category::class
-                )->getFormFillArray()
-            )
-            ->addRule(Rules::REQUIRED)
-        ;
+                ['0' => '_без родительской категории_'] + $this->categoryRepository->getFormFillArray()
+            );
+
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -116,8 +127,7 @@ final class Add implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
 
         $form->textarea('shortDescription', 'Короткое Описание');
         $form->textarea('description', 'Описание');
@@ -133,18 +143,19 @@ final class Add implements ModelInterface
 HTML
                     ),
                 ]
-            )
-        ;
+            );
         $form->submit('add');
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
-        /** @var Category|null $parent */
-        $parent = $this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null);
         $category = new Category();
-        $category->setParent($parent);
+        $category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null));
         $category->setSort(0);
         $category->setTitle($this->request->getParsedBody()['title'] ?? null);
         $category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
@@ -152,8 +163,6 @@ HTML
         $category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
 
-        $this->entityManager->persist($category);
-        $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
+        $this->em->persist($category);
     }
 }

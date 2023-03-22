@@ -9,8 +9,11 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
 use Exception;
+use Generator;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -66,12 +69,20 @@ final class Download implements LoadImage
     }
 
 
-    public function upload(ServerRequestInterface $request): \Generator
+    /**
+     * @throws FilesystemException
+     * @throws GuzzleException
+     */
+    public function upload(ServerRequestInterface $request): Generator
     {
         $this->loadAndSave($request->getParsedBody()['image'] ?? null);
         yield $this;
     }
 
+    /**
+     * @throws FilesystemException
+     * @throws GuzzleException
+     */
     public function loadAndSave(string $link): void
     {
         $client = new Client(
@@ -93,6 +104,9 @@ final class Download implements LoadImage
         $this->thumbnailService->make($this->filesystem, $targetPath, $data);
     }
 
+    /**
+     * @throws Exception
+     */
     private function makeDirectory(string $directory): void
     {
         if (preg_match("/(\/\.+|\.+)$/i", $directory)) {

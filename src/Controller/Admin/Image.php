@@ -7,10 +7,10 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\Add;
 use EnjoysCMS\Module\Catalog\Crud\Images\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Images\Index;
@@ -23,6 +23,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 
 final class Image extends AdminController
 {
@@ -87,22 +88,21 @@ final class Image extends AdminController
     public function makeGeneral(
         EntityManager $entityManager,
         ServerRequestInterface $request,
-        UrlGeneratorInterface $urlGenerator
-    ): void {
+        UrlGeneratorInterface $urlGenerator,
+        RedirectInterface $redirect
+    ): ResponseInterface {
         $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
-        $image = $repository->find($request->getQueryParams()['id'] ?? null);
-        if ($image === null) {
-            throw new NotFoundException(
-                sprintf('Not found by id: %s', $request->getQueryParams()['id'] ?? null)
-            );
-        }
+        $image = $repository->find($request->getQueryParams()['id'] ?? null) ?? throw new NotFoundException(
+            sprintf('Not found by id: %s', $request->getQueryParams()['id'] ?? null)
+        );
+
         $images = $repository->findBy(['product' => $image->getProduct()]);
         foreach ($images as $item) {
             $item->setGeneral(false);
         }
         $image->setGeneral(true);
         $entityManager->flush();
-        Redirect::http(
+        return $redirect->http(
             $urlGenerator->generate(
                 'catalog/admin/product/images',
                 ['product_id' => $image->getProduct()->getId()]
@@ -160,7 +160,7 @@ final class Image extends AdminController
                 str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()),
                 $file->getFileInfo()->getExtension()
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->response = $this->response->withStatus(500);
             $errorMessage = htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage()));
         }

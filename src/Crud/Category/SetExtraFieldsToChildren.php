@@ -10,13 +10,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\PersistentCollection;
-use Doctrine\Persistence\ObjectRepository;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,40 +25,39 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class SetExtraFieldsToChildren implements ModelInterface
 {
 
-    private ?Category $category;
+    private Category $category;
+
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
+
 
     /**
-     * @var EntityRepository|ObjectRepository
-     */
-    private $categoryRepository;
-
-    /**
-     * @throws NotFoundException
+     * @throws NoResultException
      */
     public function __construct(
         private RendererInterface $renderer,
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $this->categoryRepository = $this->entityManager->getRepository(Category::class);
+        $this->categoryRepository = $this->em->getRepository(Category::class);
 
         $this->category = $this->categoryRepository->find(
             $this->request->getQueryParams()['id'] ?? 0
-        );
-        if ($this->category === null) {
-            throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? '0')
-            );
-        }
+        ) ?? throw new NoResultException();
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws ExceptionRule
+     */
     public function getContext(): array
     {
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doActionRecursive($this->category->getChildren());
-            Redirect::http($this->urlGenerator->generate('catalog/admin/category'));
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
         }
 
         $this->renderer->setForm($form);
@@ -70,6 +69,9 @@ final class SetExtraFieldsToChildren implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -103,9 +105,8 @@ final class SetExtraFieldsToChildren implements ModelInterface
                 $item->addExtraField($optionKey);
             }
 
-            $this->entityManager->persist($item);
-            $this->entityManager->flush();
-
+            $this->em->persist($item);
+            $this->em->flush();
         }
     }
 }

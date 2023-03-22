@@ -6,11 +6,11 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
-use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -21,26 +21,22 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class Delete implements ModelInterface
 {
 
-    private ?Product $product;
+    private Product $product;
 
     /**
-     * @throws NotFoundException
+     * @throws NoResultException
      */
     public function __construct(
         private EntityManager $entityManager,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
         private Config $config
     ) {
         $this->product = $this->entityManager->getRepository(Product::class)->find(
             $this->request->getQueryParams()['id'] ?? 0
-        );
-        if ($this->product === null) {
-            throw new NotFoundException(
-                sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? 0)
-            );
-        }
+        ) ?? throw new NoResultException();
     }
 
     /**
@@ -95,7 +91,7 @@ final class Delete implements ModelInterface
         $this->entityManager->remove($this->product);
 
         $this->entityManager->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/products'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 
     /**

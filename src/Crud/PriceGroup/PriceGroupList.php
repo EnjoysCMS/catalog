@@ -20,7 +20,6 @@ final class PriceGroupList implements ModelInterface
 
     public function getContext(): array
     {
-
         return [
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
             'breadcrumbs' => [

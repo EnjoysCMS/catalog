@@ -7,13 +7,15 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use InvalidArgumentException;
@@ -24,28 +26,29 @@ final class Edit implements ModelInterface
 {
 
     private Currency $currency;
+    private EntityRepository $currencyRepository;
 
     public function __construct(
         private RendererInterface $renderer,
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-        $currencyId = $this->request->getQueryParams()['id'] ?? null;
-        if ($currencyId === null) {
-            throw new InvalidArgumentException('Currency id was not transmitted');
-        }
+        $currencyId = $this->request->getQueryParams()['id']
+            ?? throw new InvalidArgumentException('Currency id was not transmitted');
 
-        $currency = $this->entityManager->getRepository(Currency::class)->find($currencyId);
-        if ($currency === null) {
-            throw new InvalidArgumentException(sprintf('Currency not found: %s', $currencyId));
-        }
-        $this->currency = $currency;
+        $this->currencyRepository = $this->em->getRepository(Currency::class);
+
+        $this->currency = $this->currencyRepository->find($currencyId)
+            ?? throw new InvalidArgumentException(sprintf('Currency not found: %s', $currencyId));
     }
+
 
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws ExceptionRule
      */
     public function getContext(): array
     {
@@ -53,6 +56,10 @@ final class Edit implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doProcess();
+            $this->em->flush();
+            exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
+
+            $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
         }
 
         $this->renderer->setForm($form);
@@ -70,6 +77,9 @@ final class Edit implements ModelInterface
         ];
     }
 
+    /**
+     * @throws ExceptionRule
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -113,11 +123,8 @@ final class Edit implements ModelInterface
         return $form;
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
-    private function doProcess()
+
+    private function doProcess(): void
     {
         $this->currency->setName($this->request->getParsedBody()['name'] ?? null);
         $this->currency->setDCode(
@@ -146,11 +153,7 @@ final class Edit implements ModelInterface
         );
 
 
-        $this->entityManager->flush();
 
-        exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
-
-        Redirect::http($this->urlGenerator->generate('catalog/admin/currency'));
     }
 
 }

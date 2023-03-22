@@ -14,7 +14,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use Psr\Http\Message\ServerRequestInterface;
@@ -33,14 +33,12 @@ final class PriceGroupEdit implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
     ) {
-
-        $priceGroup = $this->em->getRepository(PriceGroup::class)->find($this->request->getQueryParams()['id'] ?? null);
-        if ($priceGroup === null){
-            throw new NoResultException();
-        }
-        $this->priceGroup = $priceGroup;
+        $this->priceGroup = $this->em->getRepository(PriceGroup::class)->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
     /**
@@ -60,7 +58,7 @@ final class PriceGroupEdit implements ModelInterface
             'breadcrumbs' => [
                 $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/pricegroup') =>'Группы цен',
+                $this->urlGenerator->generate('catalog/admin/pricegroup') => 'Группы цен',
                 'Редактирование группы цен'
             ],
         ];
@@ -83,11 +81,11 @@ final class PriceGroupEdit implements ModelInterface
                     ['code' => $this->request->getParsedBody()['code'] ?? null]
                 );
 
-                if($pg === null){
+                if ($pg === null) {
                     return true;
                 }
 
-                if ($pg->getId() === $this->priceGroup->getId()){
+                if ($pg->getId() === $this->priceGroup->getId()) {
                     return true;
                 }
 
@@ -105,10 +103,9 @@ final class PriceGroupEdit implements ModelInterface
      */
     private function doAction(): void
     {
-
         $this->priceGroup->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->flush();
-        Redirect::http($this->urlGenerator->generate('catalog/admin/pricegroup'));
+        $this->redirect->http($this->urlGenerator->generate('catalog/admin/pricegroup'), emit: true);
     }
 }

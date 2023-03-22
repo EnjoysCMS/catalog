@@ -9,10 +9,9 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Helpers\Redirect;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductMeta;
@@ -23,9 +22,9 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class MetaManage implements ModelInterface
 {
-    private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
-    protected Product $product;
-    private ObjectRepository|EntityRepository $metaRepository;
+    private EntityRepository|Repositories\Product $productRepository;
+    private Product $product;
+    private EntityRepository $metaRepository;
 
     /**
      * @throws NoResultException
@@ -34,24 +33,14 @@ final class MetaManage implements ModelInterface
         private EntityManager $em,
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer
+        private RendererInterface $renderer,
+        private RedirectInterface $redirect,
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->metaRepository = $this->em->getRepository(ProductMeta::class);
-        $this->product = $this->getProduct();
-    }
-
-
-    /**
-     * @throws NoResultException
-     */
-    private function getProduct(): Product
-    {
-        $product = $this->productRepository->find($this->request->getQueryParams()['id'] ?? null);
-        if ($product === null) {
-            throw new NoResultException();
-        }
-        return $product;
+        $this->product = $this->productRepository->find(
+            $this->request->getQueryParams()['id'] ?? null
+        ) ?? throw new NoResultException();
     }
 
 
@@ -65,6 +54,8 @@ final class MetaManage implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
+            $this->em->flush();
+            $this->redirect->http(emit: true);
         }
 
 
@@ -121,7 +112,5 @@ final class MetaManage implements ModelInterface
         $meta->setDescription($this->request->getParsedBody()['description'] ?? null);
         $meta->setProduct($this->product);
         $this->em->persist($meta);
-        $this->em->flush();
-        Redirect::http();
     }
 }

@@ -6,14 +6,16 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
+use Generator;
 use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
 final class Upload implements LoadImage
 {
@@ -72,19 +74,18 @@ final class Upload implements LoadImage
 
     /**
      * @throws FilesystemException
-     * @throws ORMException
      * @throws OptimisticLockException
-     * @throws \Doctrine\ORM\Exception\ORMException
-     * @throws \Throwable
+     * @throws ORMException
+     * @throws Throwable
      */
-    public function upload(ServerRequestInterface $request): \Generator
+    public function upload(ServerRequestInterface $request): Generator
     {
             try {
                 $file = $this->uploadHandler->uploadFile($request->getUploadedFiles()['image'] ?? null);
                 $this->setName( str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()));
                 $this->setExtension($file->getFileInfo()->getExtension());
                 yield $this;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 throw $e;
             }
     }

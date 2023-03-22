@@ -13,7 +13,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Helpers\Setting;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
@@ -39,7 +39,8 @@ final class Index extends PublicController
     )]
     public function view(
         EntityManager $entityManager,
-        BreadcrumbsInterface $breadcrumbs
+        BreadcrumbsInterface $breadcrumbs,
+        Setting $setting
     ): ResponseInterface
     {
         /**
@@ -60,7 +61,7 @@ final class Index extends PublicController
                 [
                     '_title' => sprintf(
                         '%2$s - %1$s',
-                        Setting::get('sitename'),
+                        $setting->get('sitename'),
                         'Каталог'
                     ),
                     'categories' => $categoryRepository->getChildNodes(null, ['status' => true]),
