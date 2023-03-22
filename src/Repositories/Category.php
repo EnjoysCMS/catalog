@@ -7,10 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Expr\ClosureExpressionVisitor;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Persisters\SqlExpressionVisitor;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr;
+use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Gedmo\Exception\InvalidArgumentException;
@@ -73,8 +76,7 @@ class Category extends ClosureTreeRepository
         return $this
             ->getChildNodesQuery($node, $criteria, $orderBy, $direction)
 //            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     /**
@@ -116,8 +118,7 @@ class Category extends ClosureTreeRepository
         if ($node === null) {
             $dql->select('node')
                 ->from($config['useObjectClass'], 'node')
-                ->where('node.' . $config['parent'] . ' IS NULL')
-            ;
+                ->where('node.' . $config['parent'] . ' IS NULL');
         } else {
             $currentLevel = $this->createQueryBuilder('c')
                 ->select('c.level')
@@ -129,8 +130,7 @@ class Category extends ClosureTreeRepository
             $dql->select('node')
                 ->from($config['useObjectClass'], 'node')
                 ->where('node.' . $config['parent'] . ' = :node')
-                ->setParameter('node', $node)
-            ;
+                ->setParameter('node', $node);
         }
 
         if ($meta->hasField($orderBy) && in_array(strtolower($direction), ['asc', 'desc'])) {
@@ -143,6 +143,10 @@ class Category extends ClosureTreeRepository
 
 
         foreach ($criteria as $field => $value) {
+            if ($value instanceof Criteria) {
+                $dql->addCriteria($value);
+                continue;
+            }
             $dql->addCriteria(Criteria::create()->where(Criteria::expr()->eq($field, $value)));
         }
 
@@ -150,6 +154,19 @@ class Category extends ClosureTreeRepository
         for ($i = $currentLevel + 2; $i <= $maxLevel + 1; $i++) {
             $condition = "c{$i}.level = $i and c{$i}.parent = {$parentAlias}.id";
             foreach ($criteria as $field => $value) {
+                if ($value instanceof Criteria) {
+                    /** @var Comparison $expr */
+                    $expr = $value->getWhereExpression()->visit(
+                        new Query\QueryExpressionVisitor(["c{$i}"])
+                    );
+                    $condition .= sprintf(
+                        ' AND %s %s %s',
+                        $expr->getLeftExpr(),
+                        $expr->getOperator(),
+                        $expr->getRightExpr()
+                    );
+                    continue;
+                }
                 $condition .= " AND c{$i}.{$field} = :{$field}";
                 // параметры биндятся автоматически, чудеса )
                 // $parameters[$field] = $value;
@@ -176,9 +193,13 @@ class Category extends ClosureTreeRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getFormFillArray(): array
-    {
-        return $this->_build($this->getChildNodes());
+    public function getFormFillArray(
+        $node = null,
+        array $criteria = [],
+        string $orderBy = 'sort',
+        string $direction = 'asc'
+    ): array {
+        return $this->_build($this->getChildNodes($node, $criteria, $orderBy, $direction));
     }
 
     private function _build($tree, $level = 1): array
