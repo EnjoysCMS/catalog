@@ -33,9 +33,14 @@ final class Config
     }
 
 
-    public function getModuleConfig(): ModuleConfig
+    public function all(): ModuleConfig
     {
         return $this->config;
+    }
+
+    public function get(string $key, $default = null): mixed
+    {
+        return $this->config->get($key, $default);
     }
 
     public function getCurrentCurrencyCode(): string
@@ -175,15 +180,6 @@ final class Config
     public function getEditorConfigCategoryShortDescription()
     {
         return $this->config->get('editor')['categoryShortDescription'] ?? null;
-    }
-
-
-    /**
-     * @deprecated
-     */
-    public function get(string $key): mixed
-    {
-        return $this->config->get($key);
     }
 
 }

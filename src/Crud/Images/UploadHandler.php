@@ -82,7 +82,7 @@ final class UploadHandler
                 )) * 1.65
         );
         if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memoryLimit) {
-            if (!$this->config->getModuleConfig()->get('allocatedMemoryDynamically')) {
+            if (!$this->config->get('allocatedMemoryDynamically')) {
                 throw new RuntimeException(
                     sprintf(
                         'The allocated memory (%s MiB) is not enough for image processing. Needed: %s MiB',
