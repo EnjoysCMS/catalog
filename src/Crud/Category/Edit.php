@@ -7,11 +7,17 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
 use DI\DependencyException;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\QueryException;
 use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
@@ -30,10 +36,7 @@ final class Edit implements ModelInterface
 
     private ?Category $category;
 
-    /**
-     * @var EntityRepository|ObjectRepository
-     */
-    private $categoryRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
 
     /**
@@ -61,6 +64,12 @@ final class Edit implements ModelInterface
 
     /**
      * @throws DependencyException
+     * @throws ExceptionRule
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws QueryException
      * @throws \DI\NotFoundException
      */
     public function getContext(): array
@@ -96,6 +105,12 @@ final class Edit implements ModelInterface
     }
 
 
+    /**
+     * @throws ExceptionRule
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     private function getForm(): Form
     {
         $form = new Form();
@@ -103,6 +118,7 @@ final class Edit implements ModelInterface
 
         $form->setDefaults(
             [
+                'parent' => $this->category->getParent()?->getId(),
                 'title' => $this->category->getTitle(),
                 'description' => $this->category->getDescription(),
                 'shortDescription' => $this->category->getShortDescription(),
@@ -123,12 +139,19 @@ final class Edit implements ModelInterface
                 'custom-switch custom-switch-off-danger custom-switch-on-success',
                 Form::ATTRIBUTES_FILLABLE_BASE
             )
-            ->fill([1 => 'Статус категории'])
-        ;
+            ->fill([1 => 'Статус категории']);
+
+
+        $form->select('parent', 'Родительская категория')
+            ->addRule(Rules::REQUIRED)
+            ->fill(
+                ['0' => '_без родительской категории_'] + $this->categoryRepository->getFormFillArray(criteria: [
+                    Criteria::create()->where(Criteria::expr()->neq('id', $this->category->getId()))
+                ])
+            );
 
         $form->text('title', 'Наименование')
-            ->addRule(Rules::REQUIRED)
-        ;
+            ->addRule(Rules::REQUIRED);
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -150,8 +173,7 @@ final class Edit implements ModelInterface
                     );
                     return is_null($check);
                 }
-            )
-        ;
+            );
         $form->textarea('shortDescription', 'Короткое описание');
         $form->textarea('description', 'Описание');
 
@@ -168,8 +190,7 @@ final class Edit implements ModelInterface
 HTML
                     ),
                 ]
-            )
-        ;
+            );
 
         $linkFillFromParent = $this->category->getParent() ? '<a class="align-top btn btn-xs btn-warning"
                 id="fill-from-parent"
@@ -213,15 +234,19 @@ HTML
                     ];
                 }
                 return $result;
-            })
-        ;
+            });
 
         $form->submit('add');
         return $form;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     private function doAction(): void
     {
+        $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null));
         $this->category->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->category->setDescription($this->request->getParsedBody()['description'] ?? null);
         $this->category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
