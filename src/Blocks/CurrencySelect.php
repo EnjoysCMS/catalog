@@ -9,11 +9,11 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use Enjoys\Session\Session;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Block as Entity;
-use EnjoysCMS\Module\Catalog\DynamicConfig;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use NumberFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -29,8 +29,7 @@ final class CurrencySelect extends AbstractBlock
     private array $currencies;
 
     public function __construct(
-        private DynamicConfig $config,
-        private Session $session,
+        private Config $config,
         private Environment $twig,
         private EntityManager $em,
         private ServerRequestInterface $request,
@@ -51,7 +50,7 @@ final class CurrencySelect extends AbstractBlock
      * @throws SyntaxError
      * @throws LoaderError
      */
-    public function view()
+    public function view(): string
     {
         if (null !== $currentCurrency = ($this->request->getQueryParams()['currency'] ?? null)) {
             $this->config->setCurrencyCode($currentCurrency);
@@ -98,13 +97,13 @@ final class CurrencySelect extends AbstractBlock
             'name' => array_merge(...array_map(fn($item) => [$item->getCode() => $item->getName()], $this->currencies)),
             'symbol' => array_merge(
                 ...array_map(function ($item) {
-                    $numberFormatter = new \NumberFormatter(
+                    $numberFormatter = new NumberFormatter(
                         'ru_RU' . sprintf(
                             '@currency=%s',
                             $item->getCode()
-                        ), \NumberFormatter::CURRENCY
+                        ), NumberFormatter::CURRENCY
                     );
-                    return [$item->getCode() => $item->getSymbol() ?? $numberFormatter->getSymbol(\NumberFormatter::CURRENCY_SYMBOL)];
+                    return [$item->getCode() => $item->getSymbol() ?? $numberFormatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL)];
                 }, $this->currencies)
             ),
             default => [],

@@ -15,7 +15,6 @@ use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\DynamicConfig;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
@@ -47,7 +46,6 @@ final class CategoryModel implements ModelInterface
         private UrlGeneratorInterface $urlGenerator,
         private Config $config,
         private Setting $setting,
-        private DynamicConfig $dynamicConfig,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -65,13 +63,12 @@ final class CategoryModel implements ModelInterface
         $this->category = $category;
 
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
-        $entityListenerResolver->register(new ProductPriceEntityListener($dynamicConfig));
+        $entityListenerResolver->register(new ProductPriceEntityListener($this->config));
 
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
-        $this->updateDynamicConfig();
-        $this->setOptions($this->config->getModuleConfig()->asArray());
-//        $this->dynamicConfig->setCurrencyCode($this->request->getQueryParams()['currency'] ?? null);
+        $this->updateConfigValues();
+        $this->setOptions($this->config->all()->asArray());
     }
 
 
@@ -82,11 +79,11 @@ final class CategoryModel implements ModelInterface
     {
         $pagination = new Pagination(
             $this->request->getAttribute('page', 1),
-            $this->dynamicConfig->getPerPage()
+            $this->config->getPerPage()
         );
 
         if ($this->getOption('showSubcategoryProducts', false)) {
-            $allCategoryIds = $this->em->getRepository(Category::class)->getAllIds($this->category);
+            $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
             $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
         } else {
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
@@ -100,9 +97,9 @@ final class CategoryModel implements ModelInterface
         }
 
         $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
-        $qb->setParameter('current_currency', $this->dynamicConfig->getCurrentCurrencyCode());
+        $qb->setParameter('current_currency', $this->config->getCurrentCurrencyCode());
 
-        match ($this->dynamicConfig->getSortMode()) {
+        match ($this->config->getSortMode()) {
             'price.desc' => $qb->addOrderBy('converted_price', 'DESC'),
             'price.asc' => $qb->addOrderBy('converted_price', 'ASC'),
             'name.desc' => $qb->addOrderBy('p.name', 'DESC'),
@@ -126,7 +123,7 @@ final class CategoryModel implements ModelInterface
             'categoryRepository' => $this->categoryRepository,
             'pagination' => $pagination,
             'products' => $result,
-            'dynamicConfig' => $this->dynamicConfig,
+            'config' => $this->config,
             'breadcrumbs' => $this->getBreadcrumbs(),
         ];
     }
@@ -153,7 +150,7 @@ final class CategoryModel implements ModelInterface
         return $this->breadcrumbs->get();
     }
 
-    private function updateDynamicConfig(): void
+    private function updateConfigValues(): void
     {
         $this->updatePerPage();
         $this->updateSortMode();
@@ -163,7 +160,7 @@ final class CategoryModel implements ModelInterface
     {
         $mode = $this->request->getQueryParams()['sort'] ?? null;
         if ($mode !== null){
-            $this->dynamicConfig->setSortMode($mode);
+            $this->config->setSortMode($mode);
         }
     }
 
@@ -171,7 +168,7 @@ final class CategoryModel implements ModelInterface
     {
         $perpage = $this->request->getQueryParams()['perpage'] ?? null;
         if ($perpage !== null){
-            $this->dynamicConfig->setPerPage($perpage);
+            $this->config->setPerPage($perpage);
         }
     }
 

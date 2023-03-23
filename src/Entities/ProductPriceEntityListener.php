@@ -9,39 +9,31 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
-use EnjoysCMS\Module\Catalog\DynamicConfig;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
 
 final class ProductPriceEntityListener
 {
-    public function __construct(private ?DynamicConfig $config = null)
+    public function __construct(private Config $config)
     {
     }
 
-    public function preUpdate(ProductPrice $productPrice, PreUpdateEventArgs $eventArgs)
+    public function preUpdate(ProductPrice $productPrice, PreUpdateEventArgs $eventArgs): void
     {
-        if ($this->config === null) {
-            return;
-        }
         $eventArgs->setNewValue('price', $eventArgs->getOldValue('price'));
         $eventArgs->setNewValue('updatedAt', $eventArgs->getOldValue('updatedAt'));
     }
 
 
-    public function postLoad(ProductPrice $productPrice, LifecycleEventArgs $event)
+    public function postLoad(ProductPrice $productPrice, LifecycleEventArgs $event): void
     {
         $em = $event->getObjectManager();
         $this->convertPrice($productPrice, $em);
     }
 
 
-    private function convertPrice(ProductPrice $productPrice, ObjectManager $em)
+    private function convertPrice(ProductPrice $productPrice, ObjectManager $em): void
     {
-        if ($this->config === null) {
-            return;
-        }
-
         $currentCurrency = $this->config->getCurrentCurrency();
 
         $currencyRate = $em->getRepository(CurrencyRate::class)->find(
@@ -49,10 +41,5 @@ final class ProductPriceEntityListener
         );
         $productPrice->setPrice($productPrice->getPrice() * $currencyRate?->getRate() ?? 1);
         $productPrice->setCurrentCurrency($currentCurrency);
-    }
-
-    public function setConfig(?DynamicConfig $config): void
-    {
-        $this->config = $config;
     }
 }

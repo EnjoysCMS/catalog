@@ -124,7 +124,7 @@ final class Upload implements ModelInterface
             $productFile->setOriginalFilename($file->getFileInfo()->getOriginalFilename());
             $productFile->setDescription($this->request->getParsedBody()['description'] ?? null);
             $productFile->setTitle($this->request->getParsedBody()['title'] ?? null);
-            $productFile->setStorage($this->config->getModuleConfig()->get('productFileStorage'));
+            $productFile->setStorage($this->config->get('productFileStorage'));
 
             $this->em->persist($productFile);
             $this->em->flush();
