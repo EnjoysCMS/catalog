@@ -14,7 +14,7 @@ use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
 
 final class ProductPriceEntityListener
 {
-    public function __construct(private Config $config)
+    public function __construct(private ?Config $config = null)
     {
     }
 
