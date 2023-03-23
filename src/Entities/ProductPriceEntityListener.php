@@ -20,6 +20,9 @@ final class ProductPriceEntityListener
 
     public function preUpdate(ProductPrice $productPrice, PreUpdateEventArgs $eventArgs): void
     {
+        if ($this->config === null) {
+            return;
+        }
         $eventArgs->setNewValue('price', $eventArgs->getOldValue('price'));
         $eventArgs->setNewValue('updatedAt', $eventArgs->getOldValue('updatedAt'));
     }
@@ -34,6 +37,10 @@ final class ProductPriceEntityListener
 
     private function convertPrice(ProductPrice $productPrice, ObjectManager $em): void
     {
+        if ($this->config === null) {
+            return;
+        }
+
         $currentCurrency = $this->config->getCurrentCurrency();
 
         $currencyRate = $em->getRepository(CurrencyRate::class)->find(
