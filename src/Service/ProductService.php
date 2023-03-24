@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories;
 
@@ -23,6 +24,12 @@ final class ProductService
     }
 
 
+    /**
+     * @param int $page
+     * @param int $limit
+     * @return array{products: Product[], pagination: Pagination}
+     * @throws NotFoundException
+     */
     public function getProducts(int $page = 1, int $limit = 10): array
     {
         $pagination = new Pagination($page, $limit);
