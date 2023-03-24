@@ -10,11 +10,12 @@ use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Module\Catalog\Crud\Product\Add;
 use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Product\Edit;
-use EnjoysCMS\Module\Catalog\Crud\Product\Index;
 use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
+use EnjoysCMS\Module\Catalog\Service\ProductService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Product extends AdminController
 {
@@ -26,12 +27,24 @@ final class Product extends AdminController
             'comment' => 'Просмотр товаров в админке'
         ]
     )]
-    public function index(): ResponseInterface
-    {
+    public function index(
+        ProductService $productService,
+        ServerRequestInterface $request,
+        UrlGeneratorInterface $urlGenerator
+    ): ResponseInterface {
+        $result = $productService->getProducts((int)$request->getQueryParams()['page'] ?? 1);
         return $this->responseText(
             $this->view(
                 $this->templatePath . '/products.twig',
-                $this->getContext($this->container->get(Index::class))
+                [
+                    'products' => $result['products'],
+                    'pagination' => $result['pagination'],
+                    'breadcrumbs' => [
+                        $urlGenerator->generate('admin/index') => 'Главная',
+                        $urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                        'Список товаров (продуктов)',
+                    ],
+                ],
             )
         );
     }
