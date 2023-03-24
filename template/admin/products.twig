@@ -2,6 +2,54 @@
 
 {% block content %}
 
+    {% do asset('css', [
+        'modules/admin/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css'
+    ]) %}
+
+    {% do asset('js', [
+        'modules/admin/node_modules/datatables.net/js/jquery.dataTables.js',
+        'modules/admin/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js'
+    ]) %}
+
+    <script>
+
+$(document).ready(function () {
+$('#example').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: '{{ path('catalog/admin/api/get-products') }}',
+    columns: [
+        { data: 'id' },
+        { data: 'name' },
+    ],
+    order: [[1, 'asc']],
+    language: {
+        "processing": "Подождите...",
+        "search": "Поиск:",
+        "lengthMenu": "Показать _MENU_ записей",
+        "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+        "infoEmpty": "Записи с 0 до 0 из 0 записей",
+        "infoFiltered": "(отфильтровано из _MAX_ записей)",
+        "infoPostFix": "",
+        "loadingRecords": "Загрузка записей...",
+        "zeroRecords": "Записи отсутствуют.",
+        "emptyTable": "В таблице отсутствуют данные",
+        "paginate": {
+          "first": "Первая",
+          "previous": "Предыдущая",
+          "next": "Следующая",
+          "last": "Последняя"
+        },
+        "aria": {
+          "sortAscending": ": активировать для сортировки столбца по возрастанию",
+          "sortDescending": ": активировать для сортировки столбца по убыванию"
+        }
+      }
+});
+});
+
+
+</script>
 
     <section class="content">
         <div class="card">
@@ -10,92 +58,48 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <a href="{{ url('catalog/admin/product/add') }}" class="btn btn-primary btn-sm mb-3">Добавить
-                    продукт</a>
+                <div id="example_wrapper" class="dataTables_wrapper">
 
-                {% if pagination.isActive %}
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            <li class="page-item{% if pagination.getPrevPage is null %} disabled{% endif %}">
-                                <a class="page-link" {% if pagination.getPrevPage is not null %} href="{{ path("catalog/admin/products", { "page": 1 }) }}"{% endif %}
-                                   aria-label="First">
-                                    <span aria-hidden="true">Первая</span>
-                                </a>
-                            </li>
-                            <li class="page-item{% if pagination.getPrevPage is null %} disabled{% endif %}">
-                                <a class="page-link" {% if pagination.getPrevPage is not null %} href="{{ path("catalog/admin/products", { "page": pagination.getPrevPage }) }}"{% endif %}
-                                   aria-label="Previous">
-                                    <span aria-hidden="true">Предыдущая</span>
-                                </a>
-                            </li>
-                            {% set slice_start =  pagination.getCurrentPage-5 %}
-                            {% for page in (1..pagination.getTotalPages)|slice((slice_start<0)?0:slice_start, 9) %}
-                                <li class="page-item{% if page == pagination.getCurrentPage %} active{% endif %}">
-                                    <a class="page-link" href="{{ path("catalog/admin/products", {"page": page }) }}">
-                                        {{ page }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            <li class="page-item{% if pagination.getNextPage is null %} disabled{% endif %}">
 
-                                <a class="page-link" {% if pagination.getNextPage is not null %} href="{{ path("catalog/admin/products", {"page": pagination.getNextPage }) }}" {% endif %}
-                                   aria-label="Next">
-                                    <span aria-hidden="true">Следующая</span>
-                                </a>
-                            </li>
-                            <li class="page-item{% if pagination.getNextPage is null %} disabled{% endif %}">
-
-                                <a class="page-link" {% if pagination.getNextPage is not null %} href="{{ path("catalog/admin/products", {"page": pagination.getTotalPages }) }}" {% endif %}
-                                   aria-label="Last">
-                                    <span aria-hidden="true">Последняя</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                {% endif %}
-
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Наименование</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for product in products %}
-                        {% set image = product.getImages.first %}
-                        <tr{% if product.isActive == false %} class="table-danger" {% endif %}>
-                            <td>
-                                {% if image %}
-                                    <img class="w-50"
-                                         src="{{ config.getImageStorageUpload(image.storage).url(image.getFilename ~ '_small.' ~ image.getExtension) }}">
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="h4">{{ product.getName }}
-                                    <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i class="fas fa-external-link-alt"></i></a>
-                                    {% if product.isHide %}[скрыт]{% endif %}
-                                    {% if product.isActive == false %}[отключен]{% endif %}
-                                </div>
-                                <div class="small">
-                                    {% if product.getHashId %}
-                                    <div  class="text-muted">Hash ID: <b>{{ product.getHashId }}</b></div>
-                                    {% endif %}
-
-                                    <div class="text-muted">Категория:
-                                        <a href="{{ path('catalog/category', {"slug": product.getCategory.getSlug}) }}"> {{ product.getCategory.getFullTitle(' &rarr; ')|raw }}</a> </div>
-
-                                </div>
-                            </td>
-
-                            <td>
-                                {% include '@catalog_admin/products_admin_links.twig' %}
-                            </td>
+                    <table id="example" class="table w-100 display dataTable" aria-describedby="example_info">
+                        <thead>
+                        <tr>
+                            <th class="sorting sorting_asc" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-sort="ascending"
+                                aria-label="Name: activate to sort column descending">Name
+                            </th>
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-label="Position: activate to sort column ascending">
+                                Position
+                            </th>
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-label="Office: activate to sort column ascending">Office
+                            </th>
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-label="Extn.: activate to sort column ascending">Extn.
+                            </th>
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-label="Start date: activate to sort column ascending">
+                                Start date
+                            </th>
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                                aria-label="Salary: activate to sort column ascending">Salary
+                            </th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        <tr class="odd">
+                            <td colspan="6" class="dataTables_empty">Loading...</td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+
+                        </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
             </div>
             <!-- /.card-body -->
         </div>
