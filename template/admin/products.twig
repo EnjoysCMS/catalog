@@ -12,44 +12,138 @@
     ]) %}
 
     <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{{ path('catalog/admin/api/get-products') }}',
+                columns: [
+                    {
+                        "data":  null,
+                        "name":  'image',
+                        "orderable": false,
+                        "render": function ( data ) {
+                            if(data.image){
+                                return  `
+                                    <img alt="" class="w-50" src="${data.image}" />
+                                `;
+                            }
+                            return '';
+                        }
+                    },
+                    {
+                        "data":  null,
+                        "name":  'title',
+                        "orderable": true,
+                        "render": function ( data ) {
+                            return  `
+                            <div class="h5">${data.name}
+                            <a class="small text-dark" href="/?_route=catalog/product&slug=${data.slug}">
+                            <i class="fas fa-external-link-alt"></i></a>
+                            ${data.hide ? '[скрыт]': ''}
+                            ${!data.active ? '[отключен]': ''}
+                            </div>
+                            `;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "name": "price",
+                        "orderable": true,
+                        "render": function ( data ) {
+                            return data.price?.format ?? '';
+                        }
+                    },
+                    {
+                        "orderable":      false,
+                        "data":           null,
+                        "render": function ( data ) {
+                            return  `
+                            <div class="text-nowrap">
+                                {% if access2route('catalog/admin/product/edit') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=catalog/admin/product/edit&id=${data.id}"
+                                       title="Редактирование"><i class="fa fa-edit"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/quantity') %}
+                                    <a class="btn btn-default"
+                                            href="/?_route=@a/catalog/product/quantity&id=${data.id}" title="Количество"><i
+                                            class="fa fa-cubes"></i></a>
+                                {% endif %}
+                                {% if access2route('catalog/admin/product/images') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=catalog/admin/product/images&product_id=${data.id}"
+                                       title="Управление изображениями"><i class="fa fa-image"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/tags') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/tags&id=${data.id}"
+                                       title="Теги"><i class="fa fa-tags"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/options') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/options&id=${data.id}"
+                                       title="Параметры"><i class="fa fa-list"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/urls') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/urls&id=${data.id}"
+                                       title="URLs"><i class="fas fa-link"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/files') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/files&id=${data.id}"
+                                       title="Файлы"><i class="fa fa-file"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/prices') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/prices&id=${data.id}"
+                                       title="Цены"><i class="fa fa-dollar-sign"></i></a>
+                                {% endif %}
+                                {% if access2route('@a/catalog/product/meta') %}
+                                    <a class="btn btn-default"
+                                       href="/?_route=@a/catalog/product/meta&id=${data.id}"
+                                       title="SEO"><i class="fa fa-globe"></i></a>
+                                {% endif %}
+                                {% if access2route('catalog/admin/product/delete') %}
+                                    <a class="btn btn-danger"
+                                       href="/?_route=catalog/admin/product/delete&id=${data.id}"
+                                       title="Удаление"><i class="fa fa-trash"></i></a>
+                                {% endif %}
+                            </div>
 
-$(document).ready(function () {
-$('#example').DataTable({
-    processing: true,
-    serverSide: true,
-    ajax: '{{ path('catalog/admin/api/get-products') }}',
-    columns: [
-        { data: 'id' },
-        { data: 'name' },
-    ],
-    order: [[1, 'asc']],
-    language: {
-        "processing": "Подождите...",
-        "search": "Поиск:",
-        "lengthMenu": "Показать _MENU_ записей",
-        "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
-        "infoEmpty": "Записи с 0 до 0 из 0 записей",
-        "infoFiltered": "(отфильтровано из _MAX_ записей)",
-        "infoPostFix": "",
-        "loadingRecords": "Загрузка записей...",
-        "zeroRecords": "Записи отсутствуют.",
-        "emptyTable": "В таблице отсутствуют данные",
-        "paginate": {
-          "first": "Первая",
-          "previous": "Предыдущая",
-          "next": "Следующая",
-          "last": "Последняя"
-        },
-        "aria": {
-          "sortAscending": ": активировать для сортировки столбца по возрастанию",
-          "sortDescending": ": активировать для сортировки столбца по убыванию"
-        }
-      }
-});
-});
+                            `;
+                        }
+                    },
+                ],
+                order: [[1, 'asc']],
+                language: {
+                    "processing": "Подождите...",
+                    "search": "Поиск:",
+                    "lengthMenu": "Показать _MENU_ записей",
+                    "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                    "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                    "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                    "infoPostFix": "",
+                    "loadingRecords": "Загрузка записей...",
+                    "zeroRecords": "Записи отсутствуют.",
+                    "emptyTable": "В таблице отсутствуют данные",
+                    "paginate": {
+                        "first": "Первая",
+                        "previous": "Предыдущая",
+                        "next": "Следующая",
+                        "last": "Последняя"
+                    },
+                    "aria": {
+                        "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                        "sortDescending": ": активировать для сортировки столбца по убыванию"
+                    }
+                }
+            });
+        });
 
 
-</script>
+    </script>
 
     <section class="content">
         <div class="card">
@@ -66,24 +160,17 @@ $('#example').DataTable({
                         <tr>
                             <th class="sorting sorting_asc" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
                                 aria-sort="ascending"
-                                aria-label="Name: activate to sort column descending">Name
+                                aria-label="Name: activate to sort column descending">Изображение
                             </th>
                             <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
                                 aria-label="Position: activate to sort column ascending">
-                                Position
+                                Наименование
                             </th>
                             <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Office: activate to sort column ascending">Office
+                                aria-label="Office: activate to sort column ascending">Цена
                             </th>
                             <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Extn.: activate to sort column ascending">Extn.
-                            </th>
-                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Start date: activate to sort column ascending">
-                                Start date
-                            </th>
-                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Salary: activate to sort column ascending">Salary
+                                aria-label="Salary: activate to sort column ascending">Действие
                             </th>
                         </tr>
                         </thead>
