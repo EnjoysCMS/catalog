@@ -37,11 +37,13 @@
                         "orderable": true,
                         "render": function (data) {
                             return `
-                            <div class="h5">${data.name}
-                            <a class="small text-dark" href="/?_route=catalog/product&slug=${data.slug}">
-                            <i class="fas fa-external-link-alt"></i></a>
+                            <div class="h5">
                             ${data.hide ? '[скрыт]' : ''}
                             ${!data.active ? '[отключен]' : ''}
+                            ${data.name}
+                            <a class="small text-dark" href="/?_route=catalog/product&slug=${data.slug}">
+                            <i class="fas fa-external-link-alt"></i></a>
+
                             </div>
                             <div class="small">
                                     ${data.productCode ? '<div  class="text-muted">Hash ID: <b>' + data.productCode + '</b></div>' : ''}

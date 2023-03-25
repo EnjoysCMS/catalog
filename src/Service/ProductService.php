@@ -37,11 +37,12 @@ final class ProductService
         $qb = $this->productRepository->getFindAllBuilder();
         $query = $qb->orderBy('p.id', 'desc');
         if ($search !== null) {
+
             $query->addCriteria(
                 Criteria::create()->where(Criteria::expr()->contains('p.name', $search))
             );
         }
-        $query->getQuery()
+        $query = $query->getQuery()
             ->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems());
 
