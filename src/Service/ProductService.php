@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Service;
 
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -30,12 +31,17 @@ final class ProductService
      * @return array{products: Product[], pagination: Pagination}
      * @throws NotFoundException
      */
-    public function getProducts(int $page = 1, int $limit = 10): array
+    public function getProducts(int $page = 1, int $limit = 10, string $search = null): array
     {
         $pagination = new Pagination($page, $limit);
         $qb = $this->productRepository->getFindAllBuilder();
-        $query = $qb->orderBy('p.id', 'desc')
-            ->getQuery()
+        $query = $qb->orderBy('p.id', 'desc');
+        if ($search !== null) {
+            $query->addCriteria(
+                Criteria::create()->where(Criteria::expr()->contains('p.name', $search))
+            );
+        }
+        $query->getQuery()
             ->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems());
 

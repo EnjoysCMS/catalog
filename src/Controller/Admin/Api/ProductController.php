@@ -77,9 +77,16 @@ class ProductController
                 }
             )
         ], $this->encoders);
+
         $limit = (int)($this->request->getQueryParams()['length'] ?? 10);
+
         $page = ((int)($this->request->getQueryParams()['start'] ?? 0) / $limit) + 1;
-        $products = $productsService->getProducts($page, $limit);
+        
+        $search = (empty(
+            $this->request->getQueryParams()['search']['value'] ?? null
+        )) ? null : $this->request->getQueryParams()['search']['value'];
+
+        $products = $productsService->getProducts($page, $limit, $search);
         $this->response->getBody()->write(
             json_encode([
                 'draw' => $this->request->getQueryParams()['draw'] ?? null,
@@ -111,8 +118,8 @@ class ProductController
                     ],
                     AbstractNormalizer::CALLBACKS => [
                         'defaultImage' => function ($image) {
-                            return $this->config->getImageStorageUpload($image->getStorage())->getUrl(
-                                $image->getFilename() . '_small.' . $image->getExtension()
+                            return $this->config->getImageStorageUpload($image?->getStorage())->getUrl(
+                                $image?->getFilename() . '_small.' . $image?->getExtension()
                             );
                         },
                         'prices' => function ($prices) {
