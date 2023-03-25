@@ -19,12 +19,12 @@
                 ajax: '{{ path('catalog/admin/api/get-products') }}',
                 columns: [
                     {
-                        "data":  null,
-                        "name":  'image',
+                        "data": null,
+                        "name": 'image',
                         "orderable": false,
-                        "render": function ( data ) {
-                            if(data.image){
-                                return  `
+                        "render": function (data) {
+                            if (data.image) {
+                                return `
                                     <img alt="" class="w-50" src="${data.image}" />
                                 `;
                             }
@@ -32,16 +32,23 @@
                         }
                     },
                     {
-                        "data":  null,
-                        "name":  'title',
+                        "data": null,
+                        "name": 'title',
                         "orderable": true,
-                        "render": function ( data ) {
-                            return  `
+                        "render": function (data) {
+                            return `
                             <div class="h5">${data.name}
                             <a class="small text-dark" href="/?_route=catalog/product&slug=${data.slug}">
                             <i class="fas fa-external-link-alt"></i></a>
-                            ${data.hide ? '[скрыт]': ''}
-                            ${!data.active ? '[отключен]': ''}
+                            ${data.hide ? '[скрыт]' : ''}
+                            ${!data.active ? '[отключен]' : ''}
+                            </div>
+                            <div class="small">
+                                    ${data.productCode ? '<div  class="text-muted">Hash ID: <b>' + data.productCode + '</b></div>' : ''}
+                                    <div class="text-muted">Категория:
+                                        <a href="/?_route=catalog/category&slug=${data.category.slug}""> ${data.category.breadcrumbs.map(i => i.title).join(' &rarr; ')}</a>
+                                        </div>
+
                             </div>
                             `;
                         }
@@ -50,15 +57,15 @@
                         "data": null,
                         "name": "price",
                         "orderable": true,
-                        "render": function ( data ) {
+                        "render": function (data) {
                             return data.price?.format ?? '';
                         }
                     },
                     {
-                        "orderable":      false,
-                        "data":           null,
-                        "render": function ( data ) {
-                            return  `
+                        "orderable": false,
+                        "data": null,
+                        "render": function (data) {
+                            return `
                             <div class="text-nowrap">
                                 {% if access2route('catalog/admin/product/edit') %}
                                     <a class="btn btn-default"
