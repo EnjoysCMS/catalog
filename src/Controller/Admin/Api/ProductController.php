@@ -61,7 +61,7 @@ class ProductController
                     public function normalize(string $propertyName): string
                     {
                         return match ($propertyName) {
-                            'defaultImage' => 'image',
+                          //  'defaultImage' => 'image',
                             'prices' => 'price',
                             default => $propertyName
                         };
@@ -70,7 +70,7 @@ class ProductController
                     public function denormalize(string $propertyName): string
                     {
                         return match ($propertyName) {
-                            'image' => 'defaultImage',
+                       //     'image' => 'defaultImage',
                             default => $propertyName
                         };
                     }
@@ -119,13 +119,39 @@ class ProductController
                         ],
                         'slug',
                         'prices',
-                        'defaultImage'
+                        'defaultImage',
+                        'images'
                     ],
                     AbstractNormalizer::CALLBACKS => [
                         'defaultImage' => function ($image) {
-                            return $this->config->getImageStorageUpload($image?->getStorage())->getUrl(
-                                $image?->getFilename() . '_small.' . $image?->getExtension()
-                            );
+                            $storage = $this->config->getImageStorageUpload($image?->getStorage());
+                            return [
+                                'original' => $storage->getUrl(
+                                    $image?->getFilename() . '.' . $image?->getExtension()
+                                ),
+                                'small' => $storage->getUrl(
+                                    $image?->getFilename() . '_small.' . $image?->getExtension()
+                                ),
+                                'large' => $storage->getUrl(
+                                    $image?->getFilename() . '_large.' . $image?->getExtension()
+                                ),
+                            ];
+                        },
+                        'images' => function ($images) {
+                            return array_map(function ($image){
+                                $storage = $this->config->getImageStorageUpload($image?->getStorage());
+                                return [
+                                    'original' => $storage->getUrl(
+                                        $image?->getFilename() . '.' . $image?->getExtension()
+                                    ),
+                                    'small' => $storage->getUrl(
+                                        $image?->getFilename() . '_small.' . $image?->getExtension()
+                                    ),
+                                    'large' => $storage->getUrl(
+                                        $image?->getFilename() . '_large.' . $image?->getExtension()
+                                    ),
+                                ];
+                            },$images->toArray());
                         },
                         'prices' => function ($prices) {
                             foreach ($prices as $price) {

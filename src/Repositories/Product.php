@@ -27,7 +27,7 @@ final class Product extends EntityRepository
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.prices', 'pr')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id AND i.general = true')
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id')
         ;
     }
 

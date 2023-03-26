@@ -24,9 +24,9 @@
                         "name": 'i.filename',
                         "orderable": true,
                         "render": function (data) {
-                            if (data.image) {
+                            if (data.defaultImage) {
                                 return `
-                                    <img alt="" class="w-50" src="${data.image}" />
+                                    <img alt="" class="w-50" src="${data.defaultImage.small}" />
                                 `;
                             }
                             return '';
@@ -52,15 +52,10 @@
                                         </div>
 
                             </div>
+                            <div class="small">
+                                    ${data.price ? '<div  class="text-muted">Цена: <b>' + data.price.format + '</b></div>' : ''}
+                            </div>
                             `;
-                        }
-                    },
-                    {
-                        "data": null,
-                        "name": "pr.price",
-                        "orderable": true,
-                        "render": function (data) {
-                            return data.price?.format ?? '-';
                         }
                     },
                     {
@@ -68,58 +63,95 @@
                         "data": null,
                         "render": function (data) {
                             return `
-                            <div class="text-nowrap">
-                                {% if access2route('catalog/admin/product/edit') %}
-                                    <a class="btn btn-default"
+                            <div class="dropdown">
+                              <button class="btn btn-light btn-lg" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                              </button>
+                              <div class="dropdown-menu">
+                                 {% if access2route('catalog/admin/product/edit') %}
+                                 <li>
+                                    <a class="dropdown-item"
                                        href="/?_route=catalog/admin/product/edit&id=${data.id}"
-                                       title="Редактирование"><i class="fa fa-edit"></i></a>
+                                       title="Редактирование"> Редактирование
+                                    </a>
+                                 </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/quantity') %}
-                                    <a class="btn btn-default"
-                                            href="/?_route=@a/catalog/product/quantity&id=${data.id}" title="Количество"><i
-                                            class="fa fa-cubes"></i></a>
+                                   {% if access2route('@a/catalog/product/quantity') %}
+                                    <li>
+                                        <a class="dropdown-item"
+                                            href="/?_route=@a/catalog/product/quantity&id=${data.id}" title="Количество">
+                                             Количество
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('catalog/admin/product/images') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=catalog/admin/product/images&product_id=${data.id}"
-                                       title="Управление изображениями"><i class="fa fa-image"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=catalog/admin/product/images&product_id=${data.id}"
+                                           title="Управление изображениями">
+                                                 Изображения <span class="badge badge-warning">${data.images.length}</span>
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/tags') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/tags&id=${data.id}"
-                                       title="Теги"><i class="fa fa-tags"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/tags&id=${data.id}"
+                                           title="Теги"> Теги
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/options') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/options&id=${data.id}"
-                                       title="Параметры"><i class="fa fa-list"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/options&id=${data.id}"
+                                           title="Параметры">Параметры
+                                       </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/urls') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/urls&id=${data.id}"
-                                       title="URLs"><i class="fas fa-link"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/urls&id=${data.id}"
+                                           title="URLs">URLs
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/files') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/files&id=${data.id}"
-                                       title="Файлы"><i class="fa fa-file"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/files&id=${data.id}"
+                                           title="Файлы">Файлы
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/prices') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/prices&id=${data.id}"
-                                       title="Цены"><i class="fa fa-dollar-sign"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/prices&id=${data.id}"
+                                           title="Цены">Цены
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('@a/catalog/product/meta') %}
-                                    <a class="btn btn-default"
-                                       href="/?_route=@a/catalog/product/meta&id=${data.id}"
-                                       title="SEO"><i class="fa fa-globe"></i></a>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/?_route=@a/catalog/product/meta&id=${data.id}"
+                                           title="SEO">SEO
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 {% if access2route('catalog/admin/product/delete') %}
-                                    <a class="btn btn-danger"
-                                       href="/?_route=catalog/admin/product/delete&id=${data.id}"
-                                       title="Удаление"><i class="fa fa-trash"></i></a>
+                                    <li>
+                                        <a class="dropdown-item bg-danger"
+                                           href="/?_route=catalog/admin/product/delete&id=${data.id}"
+                                           title="Удаление">Удаление
+                                        </a>
+                                    </li>
                                 {% endif %}
+                              </div>
                             </div>
+
 
                             `;
                         }
@@ -161,13 +193,13 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <div id="example_wrapper" class="dataTables_wrapper">
+                <div id="example_wrapper" class="table-responsive dataTables_wrapper">
 
 
                     <table id="example" class="table w-100 display dataTable" aria-describedby="example_info">
                         <thead>
                         <tr>
-                            <th class="sorting sorting_asc" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
                                 aria-sort="ascending"
                                 aria-label="Name: activate to sort column descending">Изображение
                             </th>
@@ -175,11 +207,7 @@
                                 aria-label="Position: activate to sort column ascending">
                                 Наименование
                             </th>
-                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Office: activate to sort column ascending">Цена
-                            </th>
-                            <th tabindex="0" aria-controls="example" rowspan="1" colspan="1"
-                                aria-label="Salary: activate to sort column ascending">Действие
+                            <th tabindex="0" aria-controls="example" rowspan="1" colspan="1">
                             </th>
                         </tr>
                         </thead>
