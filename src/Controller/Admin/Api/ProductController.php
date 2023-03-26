@@ -2,14 +2,19 @@
 
 namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
 
+use Doctrine\Common\Collections\Collection;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
+use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Service\ProductService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -32,6 +37,7 @@ class ProductController
     public function __construct(
         private ServerRequestInterface $request,
         private ResponseInterface $response,
+        private UrlGeneratorInterface $urlGenerator,
         private Config $config
     ) {
         $this->response = $this->response->withHeader('content-type', 'application/json');
@@ -61,7 +67,6 @@ class ProductController
                     public function normalize(string $propertyName): string
                     {
                         return match ($propertyName) {
-                          //  'defaultImage' => 'image',
                             'prices' => 'price',
                             default => $propertyName
                         };
@@ -70,7 +75,6 @@ class ProductController
                     public function denormalize(string $propertyName): string
                     {
                         return match ($propertyName) {
-                       //     'image' => 'defaultImage',
                             default => $propertyName
                         };
                     }
@@ -118,43 +122,49 @@ class ProductController
                             'breadcrumbs'
                         ],
                         'slug',
+                        'urls',
                         'prices',
                         'defaultImage',
                         'images'
                     ],
                     AbstractNormalizer::CALLBACKS => [
-                        'defaultImage' => function ($image) {
-                            $storage = $this->config->getImageStorageUpload($image?->getStorage());
+                        'defaultImage' => function (?Image $image) {
+                            if ($image === null) {
+                                return null;
+                            }
+                            $storage = $this->config->getImageStorageUpload($image->getStorage());
                             return [
                                 'original' => $storage->getUrl(
-                                    $image?->getFilename() . '.' . $image?->getExtension()
+                                    $image->getFilename() . '.' . $image->getExtension()
                                 ),
                                 'small' => $storage->getUrl(
-                                    $image?->getFilename() . '_small.' . $image?->getExtension()
+                                    $image->getFilename() . '_small.' . $image->getExtension()
                                 ),
                                 'large' => $storage->getUrl(
-                                    $image?->getFilename() . '_large.' . $image?->getExtension()
+                                    $image->getFilename() . '_large.' . $image->getExtension()
                                 ),
                             ];
                         },
-                        'images' => function ($images) {
-                            return array_map(function ($image){
-                                $storage = $this->config->getImageStorageUpload($image?->getStorage());
+                        'images' => function (Collection $images) {
+                            return array_map(function ($image) {
+                                /** @var Image $image */
+                                $storage = $this->config->getImageStorageUpload($image->getStorage());
                                 return [
                                     'original' => $storage->getUrl(
-                                        $image?->getFilename() . '.' . $image?->getExtension()
+                                        $image->getFilename() . '.' . $image->getExtension()
                                     ),
                                     'small' => $storage->getUrl(
-                                        $image?->getFilename() . '_small.' . $image?->getExtension()
+                                        $image->getFilename() . '_small.' . $image->getExtension()
                                     ),
                                     'large' => $storage->getUrl(
-                                        $image?->getFilename() . '_large.' . $image?->getExtension()
+                                        $image->getFilename() . '_large.' . $image->getExtension()
                                     ),
                                 ];
-                            },$images->toArray());
+                            }, $images->toArray());
                         },
-                        'prices' => function ($prices) {
+                        'prices' => function (Collection $prices) {
                             foreach ($prices as $price) {
+                                /** @var ProductPrice $price */
                                 if ($price->getPriceGroup()->getCode() === 'PUBLIC') {
                                     return [
                                         'price' => $price->getPrice(),
@@ -164,6 +174,14 @@ class ProductController
                                 }
                             }
                             return null;
+                        },
+                        'urls' => function (Collection $urls) {
+                            return array_map(function ($url) {
+                                /** @var Url $url */
+                                return $this->urlGenerator->generate('catalog/product', [
+                                    'slug' => $url->getProduct()->getSlug($url->getPath())
+                                ]);
+                            }, $urls->toArray());
                         }
                     ],
                 ])
