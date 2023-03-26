@@ -81,12 +81,17 @@ class ProductController
         $limit = (int)($this->request->getQueryParams()['length'] ?? 10);
 
         $page = ((int)($this->request->getQueryParams()['start'] ?? 0) / $limit) + 1;
-        
+
         $search = (empty(
             $this->request->getQueryParams()['search']['value'] ?? null
         )) ? null : $this->request->getQueryParams()['search']['value'];
 
-        $products = $productsService->getProducts($page, $limit, $search);
+        $orders = ['p.id' => 'desc'];
+        foreach ($this->request->getQueryParams()['order'] ?? [] as $item) {
+            $orders[$this->request->getQueryParams()['columns'][$item['column']]['name']] = $item['dir'];
+        }
+
+        $products = $productsService->getProducts($page, $limit, $search, $orders);
         $this->response->getBody()->write(
             json_encode([
                 'draw' => $this->request->getQueryParams()['draw'] ?? null,

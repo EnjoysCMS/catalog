@@ -16,12 +16,13 @@
             $('#example').DataTable({
                 processing: true,
                 serverSide: true,
+                stateSave: true,
                 ajax: '{{ path('catalog/admin/api/get-products') }}',
                 columns: [
                     {
                         "data": null,
-                        "name": 'image',
-                        "orderable": false,
+                        "name": 'i.filename',
+                        "orderable": true,
                         "render": function (data) {
                             if (data.image) {
                                 return `
@@ -33,7 +34,7 @@
                     },
                     {
                         "data": null,
-                        "name": 'title',
+                        "name": 'p.name',
                         "orderable": true,
                         "render": function (data) {
                             return `
@@ -47,8 +48,7 @@
                             </div>
                             <div class="small">
                                     ${data.productCode ? '<div  class="text-muted">Hash ID: <b>' + data.productCode + '</b></div>' : ''}
-                                    <div class="text-muted">Категория:
-                                        <a href="/?_route=catalog/category&slug=${data.category.slug}""> ${data.category.breadcrumbs.map(i => i.title).join(' &rarr; ')}</a>
+                                    <div class="text-muted"><a class="text-reset" href="/?_route=catalog/category&slug=${data.category.slug}""> ${data.category.breadcrumbs.map(i => i.title).join(' &rarr; ')}</a>
                                         </div>
 
                             </div>
@@ -57,10 +57,10 @@
                     },
                     {
                         "data": null,
-                        "name": "price",
+                        "name": "pr.price",
                         "orderable": true,
                         "render": function (data) {
-                            return data.price?.format ?? '';
+                            return data.price?.format ?? '-';
                         }
                     },
                     {
@@ -125,7 +125,7 @@
                         }
                     },
                 ],
-                order: [[1, 'asc']],
+                order: [],
                 language: {
                     "processing": "Подождите...",
                     "search": "Поиск:",
@@ -178,7 +178,7 @@
                             <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
                                 aria-label="Office: activate to sort column ascending">Цена
                             </th>
-                            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1"
+                            <th tabindex="0" aria-controls="example" rowspan="1" colspan="1"
                                 aria-label="Salary: activate to sort column ascending">Действие
                             </th>
                         </tr>

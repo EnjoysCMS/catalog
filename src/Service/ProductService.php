@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Service;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
@@ -28,21 +29,31 @@ final class ProductService
     /**
      * @param int $page
      * @param int $limit
+     * @param string|null $search
+     * @param array $orders
      * @return array{products: Product[], pagination: Pagination}
      * @throws NotFoundException
+     * @throws QueryException
      */
-    public function getProducts(int $page = 1, int $limit = 10, string $search = null): array
-    {
+    public function getProducts(
+        int $page = 1,
+        int $limit = 10,
+        string $search = null,
+        array $orders = ['p.id' => 'desc']
+    ): array {
         $pagination = new Pagination($page, $limit);
         $qb = $this->productRepository->getFindAllBuilder();
-        $query = $qb->orderBy('p.id', 'desc');
-        if ($search !== null) {
 
-            $query->addCriteria(
+        foreach ($orders as $sort => $dir) {
+            $qb = $qb->orderBy($sort, $dir);
+        }
+
+        if ($search !== null) {
+            $qb = $qb->addCriteria(
                 Criteria::create()->where(Criteria::expr()->contains('p.name', $search))
             );
         }
-        $query = $query->getQuery()
+        $query = $qb->getQuery()
             ->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems());
 
