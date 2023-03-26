@@ -47,3 +47,8 @@ currency:
   default: RUB
   ratio:
 #    USDRUB: 1.15
+
+admin:
+  searchFields:
+    - p.name
+    - p.productCode

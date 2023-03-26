@@ -4,7 +4,6 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\QueryException;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
@@ -64,6 +63,8 @@ class ProductController
     )]
     public function getProducts(ProductService $productsService): ResponseInterface
     {
+        $criteria = [];
+
         $serializer = new Serializer([
             new ObjectNormalizer(
                 nameConverter: new class() implements NameConverterInterface {
@@ -90,9 +91,19 @@ class ProductController
 
         $page = ((int)($this->request->getQueryParams()['start'] ?? 0) / $limit) + 1;
 
+
+
         $search = (empty(
             $this->request->getQueryParams()['search']['value'] ?? null
         )) ? null : $this->request->getQueryParams()['search']['value'];
+
+        if ($search !== null) {
+            $searchCriteria = Criteria::create();
+            foreach ($this->config->get('admin')['searchFields'] ?? [] as $field) {
+                $searchCriteria->orWhere(Criteria::expr()->contains($field, $search));
+            }
+            $criteria[] = $searchCriteria;
+        }
 
         $orders = ['p.id' => 'desc'];
         foreach ($this->request->getQueryParams()['order'] ?? [] as $item) {
@@ -102,7 +113,7 @@ class ProductController
         $products = $productsService->getProducts(
             page: $page,
             limit: $limit,
-            search: $search,
+            criteria: $criteria,
             orders: $orders
         );
         $this->response->getBody()->write(

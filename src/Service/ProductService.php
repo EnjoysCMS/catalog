@@ -40,7 +40,6 @@ final class ProductService
         int $page = 1,
         int $limit = 10,
         array $criteria = [],
-        string $search = null,
         array $orders = ['p.id' => 'desc']
     ): array {
         $pagination = new Pagination($page, $limit);
@@ -57,13 +56,6 @@ final class ProductService
             }
             $qb->addCriteria(Criteria::create()->where(Criteria::expr()->eq($field, $value)));
         }
-
-        if ($search !== null) {
-            $qb->addCriteria(
-                Criteria::create()->where(Criteria::expr()->contains('p.name', $search))
-            );
-        }
-
 
         $query = $qb->getQuery()
             ->setFirstResult($pagination->getOffset())
