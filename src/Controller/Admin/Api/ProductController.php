@@ -3,6 +3,9 @@
 namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
 
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\QueryException;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -47,6 +50,7 @@ class ProductController
     /**
      * @throws ExceptionInterface
      * @throws NotFoundException
+     * @throws QueryException
      */
     #[Route(
         path: 'admin/catalog/api/get-products',
@@ -95,7 +99,12 @@ class ProductController
             $orders[$this->request->getQueryParams()['columns'][$item['column']]['name']] = $item['dir'];
         }
 
-        $products = $productsService->getProducts($page, $limit, $search, $orders);
+        $products = $productsService->getProducts(
+            page: $page,
+            limit: $limit,
+            search: $search,
+            orders: $orders
+        );
         $this->response->getBody()->write(
             json_encode([
                 'draw' => $this->request->getQueryParams()['draw'] ?? null,

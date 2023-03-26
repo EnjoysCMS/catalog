@@ -29,6 +29,7 @@ final class ProductService
     /**
      * @param int $page
      * @param int $limit
+     * @param array $criteria
      * @param string|null $search
      * @param array $orders
      * @return array{products: Product[], pagination: Pagination}
@@ -38,6 +39,7 @@ final class ProductService
     public function getProducts(
         int $page = 1,
         int $limit = 10,
+        array $criteria = [],
         string $search = null,
         array $orders = ['p.id' => 'desc']
     ): array {
@@ -45,14 +47,24 @@ final class ProductService
         $qb = $this->productRepository->getFindAllBuilder();
 
         foreach ($orders as $sort => $dir) {
-            $qb = $qb->orderBy($sort, $dir);
+            $qb->orderBy($sort, $dir);
+        }
+
+        foreach ($criteria as $field => $value) {
+            if ($value instanceof Criteria) {
+                $qb->addCriteria($value);
+                continue;
+            }
+            $qb->addCriteria(Criteria::create()->where(Criteria::expr()->eq($field, $value)));
         }
 
         if ($search !== null) {
-            $qb = $qb->addCriteria(
+            $qb->addCriteria(
                 Criteria::create()->where(Criteria::expr()->contains('p.name', $search))
             );
         }
+
+
         $query = $qb->getQuery()
             ->setFirstResult($pagination->getOffset())
             ->setMaxResults($pagination->getLimitItems());
