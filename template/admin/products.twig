@@ -12,12 +12,39 @@
     ]) %}
 
     <script>
+
+        function loadSelectCategory(select, selected) {
+            $.ajax({
+                method: "GET",
+                url: "{{ path('catalog/admin/api/get-category-tree') }}"
+            })
+                .done(function (data) {
+                    Object.entries(data).forEach(function (v) {
+                        let option = new Option(v[1], v[0], false, v[0] === selected);
+                        select.append(option);
+                    })
+                });
+        }
+
         $(document).ready(function () {
-            $('#example').DataTable({
+            let select = $('select#category');
+
+            let table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
                 stateSave: true,
-                ajax: '{{ path('catalog/admin/api/get-products') }}',
+                ajax: {
+                    url: '{{ path('catalog/admin/api/get-products') }}',
+                    data: function (d) {
+                        d.categoryId = select.val();
+                    },
+                },
+                stateSaveParams: function (s, data) {
+                    data.categoryId = select.val();
+                },
+                stateLoadParams: function (s, data) {
+                    loadSelectCategory(select, data.categoryId)
+                },
                 columns: [
                     {
                         "data": null,
@@ -181,6 +208,11 @@
                     }
                 }
             });
+
+            select.on('change', function () {
+                table.draw();
+            });
+
         });
 
 
@@ -193,6 +225,15 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
+                <div>
+                    <label for="category">Категории</label>
+                    <select name="category" id="category"
+                            aria-controls="example"
+                            class="custom-select custom-select-sm form-control form-control-sm mb-3">
+
+                    </select>
+                </div>
+
                 <div id="example_wrapper" class="table-responsive dataTables_wrapper">
 
 

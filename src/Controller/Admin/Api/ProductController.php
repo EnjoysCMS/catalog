@@ -4,6 +4,8 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\QueryException;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
@@ -40,6 +42,7 @@ class ProductController
         private ServerRequestInterface $request,
         private ResponseInterface $response,
         private UrlGeneratorInterface $urlGenerator,
+        private EntityManager $em,
         private Config $config
     ) {
         $this->response = $this->response->withHeader('content-type', 'application/json');
@@ -92,6 +95,11 @@ class ProductController
         $page = ((int)($this->request->getQueryParams()['start'] ?? 0) / $limit) + 1;
 
 
+        /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
+        $categoryRepository = $this->em->getRepository(Category::class);
+        $criteria[] = Criteria::create()->where(Criteria::expr()->in('p.category', $categoryRepository->getAllIds(
+            $categoryRepository->find($this->request->getQueryParams()['categoryId'] ?? 0)
+        )));
 
         $search = (empty(
             $this->request->getQueryParams()['search']['value'] ?? null
