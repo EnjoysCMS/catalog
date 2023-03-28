@@ -37,8 +37,9 @@ class CategoryController
 
     public function __construct(
         private ServerRequestInterface $request,
-        private ResponseInterface $response
-    ) {
+        private ResponseInterface      $response
+    )
+    {
         $this->response = $this->response->withHeader('content-type', 'application/json');
     }
 
@@ -69,17 +70,26 @@ class CategoryController
         $orderBy = 'sort';
         $direction = 'asc';
 
+        $categories = $categoryRepository->getFormFillArray(
+            $node,
+            $criteria,
+            $orderBy,
+            $direction
+        );
+
+
         $this->response->getBody()->write(
             json_encode(
-                ['0' => 'Все категории'] + $categoryRepository->getFormFillArray(
-                    $node,
-                    $criteria,
-                    $orderBy,
-                    $direction
-                ),
+                array_merge([['id' => 0, 'title' => 'Все категории']], array_map(function ($id, $title){
+                    return [
+                        'id' => (string)$id,
+                        'title' => $title
+                    ];
+                }, array_keys($categories), $categories)),
             )
         );
 
         return $this->response;
     }
+
 }

@@ -12,59 +12,56 @@
     ]) %}
 
     <script>
+        $(document).ready(function () {
 
-        function loadSelectCategory(select, selected) {
+            let select = $('select#category');
+
             $.ajax({
                 method: "GET",
                 url: "{{ path('catalog/admin/api/get-category-tree') }}"
             })
                 .done(function (data) {
-                    Object.entries(data).forEach(function (v) {
-                        let option = new Option(v[1], v[0], false, v[0] === selected);
+                    Object.values(data).forEach(function (v) {
+                        let option = new Option(v.title.replaceAll("&nbsp;", "\u00A0"), v.id);
                         select.append(option);
                     })
-                });
-        }
 
-        $(document).ready(function () {
-            let select = $('select#category');
-
-            let table = $('#example').DataTable({
-                processing: true,
-                serverSide: true,
-                stateSave: true,
-                ajax: {
-                    url: '{{ path('catalog/admin/api/get-products') }}',
-                    data: function (d) {
-                        d.categoryId = select.val();
-                    },
-                },
-                stateSaveParams: function (s, data) {
-                    data.categoryId = select.val();
-                },
-                stateLoadParams: function (s, data) {
-                    loadSelectCategory(select, data.categoryId)
-                },
-                columns: [
-                    {
-                        "data": null,
-                        "name": 'i.filename',
-                        "orderable": true,
-                        "render": function (data) {
-                            if (data.defaultImage) {
-                                return `
+                    let table = $('#example').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        stateSave: true,
+                        stateSaveParams: function (s, data) {
+                            data.categoryId = select.val();
+                        },
+                        stateLoadParams: function (s, data) {
+                            select.val(data.categoryId)
+                        },
+                        ajax: {
+                            url: '{{ path('catalog/admin/api/get-products') }}',
+                            data: function (d) {
+                                d.categoryId = select.val();
+                            },
+                        },
+                        columns: [
+                            {
+                                "data": null,
+                                "name": 'i.filename',
+                                "orderable": true,
+                                "render": function (data) {
+                                    if (data.defaultImage) {
+                                        return `
                                     <img alt="" class="w-50" src="${data.defaultImage.small}" />
                                 `;
-                            }
-                            return '';
-                        }
-                    },
-                    {
-                        "data": null,
-                        "name": 'p.name',
-                        "orderable": true,
-                        "render": function (data) {
-                            return `
+                                    }
+                                    return '';
+                                }
+                            },
+                            {
+                                "data": null,
+                                "name": 'p.name',
+                                "orderable": true,
+                                "render": function (data) {
+                                    return `
                             <div class="h5">
                             ${data.hide ? '[скрыт]' : ''}
                             ${!data.active ? '[отключен]' : ''}
@@ -83,13 +80,13 @@
                                     ${data.price ? '<div  class="text-muted">Цена: <b>' + data.price.format + '</b></div>' : ''}
                             </div>
                             `;
-                        }
-                    },
-                    {
-                        "orderable": false,
-                        "data": null,
-                        "render": function (data) {
-                            return `
+                                }
+                            },
+                            {
+                                "orderable": false,
+                                "data": null,
+                                "render": function (data) {
+                                    return `
                             <div class="dropdown">
                               <button class="btn btn-light btn-lg" type="button" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-ellipsis-h"></i>
@@ -181,38 +178,39 @@
 
 
                             `;
+                                }
+                            },
+                        ],
+                        order: [],
+                        language: {
+                            "processing": "Подождите...",
+                            "search": "Поиск:",
+                            "lengthMenu": "Показать _MENU_ записей",
+                            "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                            "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                            "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                            "infoPostFix": "",
+                            "loadingRecords": "Загрузка записей...",
+                            "zeroRecords": "Записи отсутствуют.",
+                            "emptyTable": "В таблице отсутствуют данные",
+                            "paginate": {
+                                "first": "Первая",
+                                "previous": "Предыдущая",
+                                "next": "Следующая",
+                                "last": "Последняя"
+                            },
+                            "aria": {
+                                "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                                "sortDescending": ": активировать для сортировки столбца по убыванию"
+                            }
                         }
-                    },
-                ],
-                order: [],
-                language: {
-                    "processing": "Подождите...",
-                    "search": "Поиск:",
-                    "lengthMenu": "Показать _MENU_ записей",
-                    "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
-                    "infoEmpty": "Записи с 0 до 0 из 0 записей",
-                    "infoFiltered": "(отфильтровано из _MAX_ записей)",
-                    "infoPostFix": "",
-                    "loadingRecords": "Загрузка записей...",
-                    "zeroRecords": "Записи отсутствуют.",
-                    "emptyTable": "В таблице отсутствуют данные",
-                    "paginate": {
-                        "first": "Первая",
-                        "previous": "Предыдущая",
-                        "next": "Следующая",
-                        "last": "Последняя"
-                    },
-                    "aria": {
-                        "sortAscending": ": активировать для сортировки столбца по возрастанию",
-                        "sortDescending": ": активировать для сортировки столбца по убыванию"
-                    }
-                }
-            });
+                    });
 
-            select.on('change', function () {
-                table.draw();
-            });
+                    select.on('change', function () {
+                        table.draw();
+                    });
 
+                });
         });
 
 
@@ -226,7 +224,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div>
-                    <label for="category">Категории</label>
+                    <label for="category">Категория</label>
                     <select name="category" id="category"
                             aria-controls="example"
                             class="custom-select custom-select-sm form-control form-control-sm mb-3">
