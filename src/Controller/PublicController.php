@@ -12,6 +12,7 @@ use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
+use Twig\TwigFunction;
 
 abstract class PublicController
 {
@@ -31,6 +32,7 @@ abstract class PublicController
 
         $this->twig->addGlobal('module', $this->module);
         $this->twig->addGlobal('config', $this->config);
+        $this->twig->addFunction(new TwigFunction('callstatic', 'forward_static_call_array'));
     }
 
     private function writeBody(string $body): void
