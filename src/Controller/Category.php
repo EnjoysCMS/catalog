@@ -38,15 +38,11 @@ final class Category extends PublicController
         defaults: [
             'page' => 1,
             'slug' => ''
-        ]
+        ],
+        priority: 1
     )]
     public function view(Container $container): ResponseInterface
     {
-
-        if ($this->request->getAttribute('slug', '') === '') {
-            return $container->call([Index::class, 'view']);
-        }
-
         $template_path = '@m/catalog/category.twig';
 
 

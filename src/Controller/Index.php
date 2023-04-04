@@ -35,7 +35,8 @@ final class Index extends PublicController
     #[Route(
         path: 'catalog',
         name: 'catalog/index',
-        options: ['comment' => '[PUBLIC] Просмотр категорий (индекс)']
+        options: ['comment' => '[PUBLIC] Просмотр категорий (индекс)'],
+        priority: 2
     )]
     public function view(
         EntityManager $entityManager,
