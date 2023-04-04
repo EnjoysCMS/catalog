@@ -39,6 +39,8 @@ class ConvertPrice extends FunctionNode
 
 /*
 //insert to migration
+./vendor/bin/doctrine-migrations  migrations:generate
+
 $this->addSql(<<<SQL
 CREATE FUNCTION CONVERT_PRICE(
     `price` INT,
