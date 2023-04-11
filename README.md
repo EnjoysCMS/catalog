@@ -1,4 +1,5 @@
-1. added to doctrine config in `/config/doctrine.php`
+1. Added to doctrine config in `/di/doctrine.php`
+
 ```php
 use Gedmo\Tree\TreeListener;
 
@@ -7,30 +8,48 @@ $treeListener = new TreeListener();
 $evm->addEventSubscriber($treeListener);
 ```
 
-2. load annotation classes in `/bootstrap.php` after `$loader = require_once __DIR__ . "/vendor/autoload.php";`
-```php
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Gedmo\Mapping\Annotation\Timestampable;
-use Gedmo\Mapping\Annotation\Tree;
-use Gedmo\Mapping\Annotation\TreeClosure;
-use Gedmo\Mapping\Annotation\TreeLevel;
-use Gedmo\Mapping\Annotation\TreeParent;
+2. Diff migration, migrate and clear cache-metadata
 
-AnnotationRegistry::loadAnnotationClass(TreeLevel::class);
-AnnotationRegistry::loadAnnotationClass(Tree::class);
-AnnotationRegistry::loadAnnotationClass(TreeClosure::class);
-AnnotationRegistry::loadAnnotationClass(TreeParent::class);
-AnnotationRegistry::loadAnnotationClass(Timestampable::class);
-```
-3. diff migration, migrate and clear cache-metadata
-```
+```shell
 composer diff
 composer migrate
 ```
-or
+
+3. Migration function
+
+```shell
+./vendor/bin/doctrine-migrations  migrations:generate
 ```
-./vendor/bin/doctrine-migrations diff --allow-empty-diff --formatted
-./vendor/bin/doctrine-migrations migrate  --no-interaction
-./vendor/bin/doctrine orm:clear-cache:metadata
+
+```php
+//for Mysql insert to migration
+
+$this->addSql(<<<SQL
+CREATE FUNCTION CONVERT_PRICE(
+    `price` INT,
+	`main_currency` VARCHAR(3),
+	`convert_currency` VARCHAR(3)
+) RETURNS double
+    DETERMINISTIC
+BEGIN
+	IF (main_currency = convert_currency)
+	THEN
+		SET @result = price;
+	ELSE
+		SET @rate = (SELECT rate FROM catalog_currency_rate WHERE
+			main = main_currency
+			AND `convert` = convert_currency
+		);
+		SET @result = price * @rate;
+	END IF;
+RETURN @result;
+
+END;
+SQL);
 ```
-4. setting elfinder 
+
+```shell
+composer migrate
+```
+
+4. Setting elfinder 
