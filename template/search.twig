@@ -5,19 +5,19 @@
 
 {% if result.error %}
     <h1 style='color: red'>
-            {{ result.error.getMessage }}
+            {{ searchResult.error.getMessage }}
     </h1>
 {% endif %}
-<h2>Искали: {{  result.searchQuery }}</h2>
-<h2>Найдено: {{  result.countResult }}</h2>
+<h2>Искали: {{  searchResult.searchQuery }}</h2>
+<h2>Найдено: {{  searchResult.countResult }}</h2>
 
-{% include module.path ~ '/template/_pagination.twig' with {'pagination': result.pagination} %}
+{% include module.path ~ '/template/_pagination.twig' with {'pagination': searchResult.pagination} %}
 
 
 <div>
     <h2>Найденные товары</h2>
     <ul>
-        {% for product in result.products %}
+        {% for product in searchResult.result %}
             <li><a href="{{ path("catalog/product", {"slug": product.getSlug }) }}">{{ product.getName }}</a></li>
         {% endfor %}
     </ul>

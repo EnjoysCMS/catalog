@@ -6,8 +6,8 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog;
 
 
+use DI\Container;
 use DI\DependencyException;
-use DI\FactoryInterface;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Session\Session;
@@ -27,9 +27,12 @@ final class Config
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function __construct(FactoryInterface $factory, private Session $session, private EntityManager $em)
+    public function __construct(Container $factory, private Session $session, private EntityManager $em)
     {
-        $this->config = $factory->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog']);
+        $this->config = $factory
+            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog'])
+            ->strict(false)
+        ;
     }
 
 
