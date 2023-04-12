@@ -63,8 +63,6 @@ final class DefaultSearch implements SearchInterface
 
     private function getFoundProductsQueryBuilder(string $searchQuery, array $optionKeys = []): QueryBuilder
     {
-        $this->optionKeys = $optionKeys;
-
         return $this->productRepository->createQueryBuilder('p')
             ->select('p', 'm', 'u', 'ov', 'c')
             ->leftJoin('p.meta', 'm')
