@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Service\Search;
 
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\Query\Expr\Orx;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
@@ -40,7 +42,9 @@ final class DefaultSearch implements SearchInterface
     {
         $this->validateSearchQuery();
 
-        $pagination = new Pagination($this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems', 30));
+        $pagination = new Pagination(
+            $this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems', 30)
+        );
 
         $qb = $this->getFoundProducts($this->optionKeys);
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
@@ -61,7 +65,7 @@ final class DefaultSearch implements SearchInterface
         $this->optionKeys = $optionKeys;
         $qb = $this->productRepository->createQueryBuilder('p');
 
-        $qb->select('p', 'm', 'u', 'ov')
+        $qb->select('p', 'm', 'u', 'ov', 'c')
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.category', 'c')
@@ -71,7 +75,7 @@ final class DefaultSearch implements SearchInterface
             ->orWhere('c.title LIKE :option')
             ->orWhere('ov.value LIKE :option')
             ->andWhere('p.active = true')
-            ->andWhere('c.status = true')
+            ->andWhere('c.status = true OR c IS null')
             ->setParameters([
                 'key' => $optionKeys,
                 'option' => '%' . $this->searchQuery . '%'
@@ -85,7 +89,12 @@ final class DefaultSearch implements SearchInterface
     private function validateSearchQuery(): void
     {
         if (mb_strlen($this->searchQuery) < $this->config->get('minSearchChars', 3)) {
-            throw new \InvalidArgumentException(sprintf('Слишком короткое слово для поиска (нужно минимум %s символа)', $this->config->get('minSearchChars', 3)));
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Слишком короткое слово для поиска (нужно минимум %s символа)',
+                    $this->config->get('minSearchChars', 3)
+                )
+            );
         }
     }
 
