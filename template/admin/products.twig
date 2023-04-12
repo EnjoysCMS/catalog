@@ -72,8 +72,7 @@
                             </div>
                             <div class="small">
                                     ${data.productCode ? '<div  class="text-muted">Product code (articul): <b>' + data.productCode + '</b></div>' : ''}
-                                    <div class="text-muted"><a class="text-reset" href="/?_route=catalog/category&slug=${data.category.slug}""> ${data.category.breadcrumbs.map(i => i.title).join(' &rarr; ')}</a>
-                                        </div>
+                                    ${data.category ? '<div class="text-muted"><a class="text-reset" href="/?_route=catalog/category&slug=' + data.category.slug + '">' + data.category.breadcrumbs.map(i => i.title).join(' &rarr; ') + '</a></div>' : ''}
 
                             </div>
                             <div class="small">
@@ -235,7 +234,7 @@
                     </select>
                 </div>
 
-                <div id="example_wrapper" class="table-responsive dataTables_wrapper">
+                <div id="example_wrapper" class="table-responsive dataTables_wrapper  vh-100">
 
 
                     <table id="example" class="table w-100 display dataTable" aria-describedby="example_info">
