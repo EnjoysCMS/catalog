@@ -11,7 +11,7 @@
 <h2>Искали: {{  searchResult.searchQuery }}</h2>
 <h2>Найдено: {{  searchResult.countResult }}</h2>
 
-{% include module.path ~ '/template/_pagination.twig' with {'pagination': searchResult.pagination} %}
+{% include module.path ~ '/template/_pagination.twig' with {'pagination': pagination} %}
 
 
 <div>

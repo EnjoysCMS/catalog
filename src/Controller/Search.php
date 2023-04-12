@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use DI\Container;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
+use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Service\Search\DefaultSearch;
@@ -42,6 +43,24 @@ final class Search extends PublicController
         parent::__construct($request, $twig, $config, $response);
         $this->optionKeys = explode(',', $setting->get('searchOptionField', ''));
         $this->searchClass = $container->get($config->get('searchClass', DefaultSearch::class));
+        $this->searchClass->setOptionKeys($this->optionKeys);
+        $this->searchClass->setSearchQuery($this->getSearchQuery());
+    }
+
+    private function getSearchQuery(): string
+    {
+        $searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
+
+        if (mb_strlen($searchQuery) < $this->config->get('minSearchChars', 3)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Слишком короткое слово для поиска (нужно минимум %s символа)',
+                    $this->config->get('minSearchChars', 3)
+                )
+            );
+        }
+
+        return $searchQuery;
     }
 
 
@@ -52,9 +71,10 @@ final class Search extends PublicController
     public function apiSearch(): ResponseInterface
     {
         try {
-
-            $this->searchClass->setOptionKeys($this->optionKeys);
-            $searchResult = $this->searchClass->getResult();
+            $pagination = new Pagination(
+                $this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems', 30)
+            );
+            $searchResult = $this->searchClass->getResult($pagination->getOffset(), $pagination->getLimitItems());
 
             $response = $this->responseJson($this->convertResultToDTO($searchResult));
         } catch (Exception|Throwable $e) {
@@ -77,9 +97,13 @@ final class Search extends PublicController
         BreadcrumbsInterface $breadcrumbs,
         UrlGeneratorInterface $urlGenerator
     ): ResponseInterface {
+        $pagination = new Pagination(
+            $this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems', 30)
+        );
+
         try {
-            $this->searchClass->setOptionKeys($this->optionKeys);
-            $searchResult = $this->searchClass->getResult();
+            $searchResult = $this->searchClass->getResult($pagination->getOffset(), $pagination->getLimitItems());
+            $pagination->setTotalItems($searchResult->getCountResult());
         } catch (Throwable $e) {
             $searchResult = [
                 'error' => $e
@@ -97,6 +121,7 @@ final class Search extends PublicController
 
         return $this->responseText(
             $this->twig->render($template_path, [
+                'pagination' => $pagination,
                 'searchResult' => $searchResult,
                 'breadcrumbs' => $breadcrumbs->get()
             ])

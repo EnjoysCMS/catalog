@@ -4,52 +4,49 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Service\Search;
 
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
-use Doctrine\ORM\Query\Expr\Orx;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use EnjoysCMS\Core\Components\Pagination\Pagination;
-use EnjoysCMS\Core\Exception\NotFoundException;
-use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use Psr\Http\Message\ServerRequestInterface;
 
 final class DefaultSearch implements SearchInterface
 {
 
-
     private \EnjoysCMS\Module\Catalog\Repositories\Product|EntityRepository $productRepository;
-    private string $searchQuery;
+    private ?string $searchQuery = null;
     private array $optionKeys = [];
 
 
     public function __construct(
-        private ServerRequestInterface $request,
-        private EntityManager $em,
-        private Config $config
+        private EntityManager $em
     ) {
-        $this->searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
         $this->productRepository = $this->em->getRepository(Product::class);
     }
 
-    /**
-     * @throws NotFoundException
-     */
-    public function getResult(): SearchResult
+    public function setSearchQuery(string $searchQuery): void
     {
-        $this->validateSearchQuery();
+        $this->searchQuery = $searchQuery;
+    }
 
-        $pagination = new Pagination(
-            $this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems', 30)
+    public function setOptionKeys(array $optionKeys): void
+    {
+        $this->optionKeys = $optionKeys;
+    }
+
+    public function getResult(int $offset, int $limit): SearchResult
+    {
+        if ($this->searchQuery === null) {
+            throw new \InvalidArgumentException('Not set searchQuery (SearchInterface::setSearchQuery())');
+        }
+
+        $result = new Paginator(
+            $this
+                ->getFoundProducts($this->searchQuery, $this->optionKeys)
+                ->setFirstResult($offset)
+                ->setMaxResults($limit)
         );
-
-        $qb = $this->getFoundProducts($this->optionKeys);
-        $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
-        $result = new Paginator($qb);
-        $pagination->setTotalItems($result->count());
 
         $searchResult = new SearchResult();
         $searchResult->setCountResult($result->count());
@@ -60,7 +57,7 @@ final class DefaultSearch implements SearchInterface
     }
 
 
-    private function getFoundProducts(array $optionKeys = []): QueryBuilder
+    private function getFoundProducts(string $searchQuery, array $optionKeys = []): QueryBuilder
     {
         $this->optionKeys = $optionKeys;
         $qb = $this->productRepository->createQueryBuilder('p');
@@ -78,7 +75,7 @@ final class DefaultSearch implements SearchInterface
             ->andWhere('c.status = true OR c IS null')
             ->setParameters([
                 'key' => $optionKeys,
-                'option' => '%' . $this->searchQuery . '%'
+                'option' => '%' . $searchQuery . '%'
             ])//
         ;
 
@@ -86,22 +83,5 @@ final class DefaultSearch implements SearchInterface
         return $qb;
     }
 
-    private function validateSearchQuery(): void
-    {
-        if (mb_strlen($this->searchQuery) < $this->config->get('minSearchChars', 3)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'Слишком короткое слово для поиска (нужно минимум %s символа)',
-                    $this->config->get('minSearchChars', 3)
-                )
-            );
-        }
-    }
-
-
-    public function setOptionKeys(array $optionKeys): void
-    {
-        $this->optionKeys = $optionKeys;
-    }
 
 }
