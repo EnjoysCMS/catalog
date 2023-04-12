@@ -97,9 +97,26 @@ class ProductController
 
         /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
         $categoryRepository = $this->em->getRepository(Category::class);
-        $criteria[] = Criteria::create()->where(Criteria::expr()->in('p.category', $categoryRepository->getAllIds(
-            $categoryRepository->find($this->request->getQueryParams()['categoryId'] ?? 0)
-        )));
+
+
+        $categoryId = $this->request->getQueryParams()['categoryId'] ?? '0';
+        $categoryCriteria = Criteria::create()
+            ->where(
+                Criteria::expr()->in(
+                    'p.category',
+                    $categoryRepository->getAllIds(
+                        $categoryRepository->find($categoryId)
+                    )
+                )
+            )
+        ;
+
+        if ($categoryId === '0') {
+            $categoryCriteria->orWhere(Criteria::expr()->eq('p.category', null));
+        }
+
+
+        $criteria[] = $categoryCriteria;
 
         $search = (empty(
             $this->request->getQueryParams()['search']['value'] ?? null
