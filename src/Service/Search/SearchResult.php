@@ -7,16 +7,24 @@ namespace EnjoysCMS\Module\Catalog\Service\Search;
 
 
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use Traversable;
 
 final class SearchResult
 {
-    private string $searchQuery = '';
-    private int $countResult = 0;
-    private array $optionKeys = [];
+
     /**
-     * @var Product[]
+     * @param string $searchQuery
+     * @param int $countResult
+     * @param array $optionKeys
+     * @param iterable<Product> $result
      */
-    private iterable $result = [];
+    public function __construct(
+        private string $searchQuery = '',
+        private int $countResult = 0,
+        private array $optionKeys = [],
+        private iterable  $result = []
+    ) {
+    }
 
 
     public function getSearchQuery(): string
@@ -50,11 +58,17 @@ final class SearchResult
     }
 
 
+    /**
+     * @return iterable<Product>
+     */
     public function getResult(): iterable
     {
         return $this->result;
     }
 
+    /**
+     * @param iterable<Product> $result
+     */
     public function setResult(iterable $result): void
     {
         $this->result = $result;

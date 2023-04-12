@@ -154,7 +154,7 @@ final class Search extends PublicController
 
             return $searchDto;
         },
-            iterator_to_array($searchResult->getResult()->getIterator())
+            $searchResult->getResult()
         );
         return $result;
     }

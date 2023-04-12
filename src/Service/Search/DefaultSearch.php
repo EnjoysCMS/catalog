@@ -35,6 +35,9 @@ final class DefaultSearch implements SearchInterface
         $this->optionKeys = $optionKeys;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getResult(int $offset, int $limit): SearchResult
     {
         if ($this->searchQuery === null) {
@@ -43,26 +46,27 @@ final class DefaultSearch implements SearchInterface
 
         $result = new Paginator(
             $this
-                ->getFoundProducts($this->searchQuery, $this->optionKeys)
+                ->getFoundProductsQueryBuilder($this->searchQuery, $this->optionKeys)
                 ->setFirstResult($offset)
                 ->setMaxResults($limit)
         );
 
-        $searchResult = new SearchResult();
-        $searchResult->setCountResult($result->count());
-        $searchResult->setOptionKeys($this->optionKeys);
-        $searchResult->setResult($result);
-        $searchResult->setSearchQuery($this->searchQuery);
-        return $searchResult;
+
+        return new SearchResult(
+            searchQuery: $this->searchQuery,
+            countResult: $result->count(),
+            optionKeys: $this->optionKeys,
+            result: $result->getIterator()->getArrayCopy()
+        );
     }
 
 
-    private function getFoundProducts(string $searchQuery, array $optionKeys = []): QueryBuilder
+    private function getFoundProductsQueryBuilder(string $searchQuery, array $optionKeys = []): QueryBuilder
     {
         $this->optionKeys = $optionKeys;
-        $qb = $this->productRepository->createQueryBuilder('p');
 
-        $qb->select('p', 'm', 'u', 'ov', 'c')
+        return $this->productRepository->createQueryBuilder('p')
+            ->select('p', 'm', 'u', 'ov', 'c')
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.category', 'c')
@@ -77,10 +81,7 @@ final class DefaultSearch implements SearchInterface
                 'key' => $optionKeys,
                 'option' => '%' . $searchQuery . '%'
             ])//
-        ;
-
-
-        return $qb;
+            ;
     }
 
 
