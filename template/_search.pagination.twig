@@ -1,0 +1,77 @@
+{% if pagination.isActive %}
+    <style>
+        ul.pagination li {
+            display: inline;
+        }
+    </style>
+
+    <div class="container">
+        <div class="row">
+    <!-- Start Pagination -->
+    <div class="page-pagination text-left col-md-12">
+        <ul>
+            {% if pagination.getPrevPage is not null %}
+                <li>
+                    <a href="{{ path("catalog/search", {"q": searchQuery, "page": pagination.getPrevPage }) }}">
+                        <span>Назад</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li>
+                <a{% if 1 == pagination.getCurrentPage %} class="active"{% endif %}
+                    href="{{ path("catalog/search", {"q": searchQuery, "page": 1 }) }}">
+                    {{ 1 }}
+                </a>
+            </li>
+
+            {% set show_pages = 9 %}
+
+            {% set slice_start =  pagination.getCurrentPage - (show_pages/2|round(0, 'ceil') + 1) %}
+            {% if pagination.getTotalPages <= 2 %}
+                {% set slice = false %}
+            {% else %}
+                {% set slice = (2..pagination.getTotalPages-1)|slice((slice_start < 0) ? 0 : slice_start, show_pages) %}
+            {% endif %}
+
+            {% if slice != false %}
+
+                {% if slice_start > 0 %}
+                    <li><span>&hellip;</span></li>
+                {% endif %}
+
+
+                {% for page in slice %}
+                    <li>
+                        <a{% if page == pagination.getCurrentPage %} class="active"{% endif %}
+                            href="{{ path("catalog/search", {"q": searchQuery, "page": page }) }}">
+                            {{ page }}
+                        </a>
+                    </li>
+                {% endfor %}
+
+                {% if max(slice) + 1 != pagination.getTotalPages %}
+                    <li><span>&hellip;</span></li>
+                {% endif %}
+
+            {% endif %}
+
+            <li>
+                <a{% if pagination.getTotalPages == pagination.getCurrentPage %} class="active"{% endif %}
+                    href="{{ path("catalog/search", {"q": searchQuery, "page": pagination.getTotalPages }) }}">
+                    {{ pagination.getTotalPages }}
+                </a>
+            </li>
+            {% if pagination.getNextPage is not null %}
+                <li>
+                    <a href="{{ path("catalog/search", {"q": searchQuery, "page": pagination.getNextPage }) }}">
+                        <span>Далее</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div> <!-- End Pagination -->
+        </div>
+    </div>
+
+
+{% endif %}
