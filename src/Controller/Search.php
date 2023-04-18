@@ -73,7 +73,7 @@ final class Search extends PublicController
 
 
     #[Route(
-        path: '/api/search/',
+        path: '/catalog/api/search/',
         name: 'catalog/api/search'
     )]
     public function apiSearch(): ResponseInterface
@@ -168,8 +168,9 @@ final class Search extends PublicController
      * @throws LoaderError
      */
     #[Route(
-        path: '/search/',
-        name: 'catalog/search'
+        path: '/catalog/search',
+        name: 'catalog/search',
+        priority: 2
     )]
     public function search(
         BreadcrumbsInterface $breadcrumbs,
