@@ -72,6 +72,35 @@ final class Setting implements ModelInterface
 //        $form->number('minSearchChars', 'minSearchChars');
 
         $form->select(
+            'globalExtraFields',
+            "Опции (глобально) для отображения во всех группах товаров и товарах"
+        )
+            ->setAttribute(AttributeFactory::create('id', 'globalExtraFields'))
+            ->setDescription(
+                'Дополнительные поля, которые можно отображать в списке продуктов,а также в короткой информации о товаре.
+             Берутся из параметров товара (опций)'
+            )
+            ->setMultiple()->fill(function () {
+                $value = $this->settingRepository->findOneBy(['key' => 'globalExtraFields'])?->getValue();
+                if ($value === null) {
+                    return [];
+                }
+                $optionKeys = $this->em->getRepository(OptionKey::class)->findBy(
+                    [
+                        'id' => explode(',', $value)
+                    ]
+                );
+                $result = [];
+                foreach ($optionKeys as $key) {
+                    $result[$key->getId()] = [
+                        $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : ''),
+                        ['id' => uniqid()]
+                    ];
+                }
+                return $result;
+            });
+
+        $form->select(
             'searchOptionField',
             "Опции по которым также будет идти поиск"
         )
@@ -119,6 +148,7 @@ final class Setting implements ModelInterface
             switch ($key) {
                 case 'minSearchChars':
                 case 'searchOptionField':
+                case 'globalExtraFields':
                     if (is_array($value)) {
                         $value = implode(',', $value);
                     }

@@ -16,6 +16,7 @@ use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
@@ -49,18 +50,20 @@ final class CategoryModel implements ModelInterface
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
-        $category = $this->getCategory(
+
+        $this->category = $this->getCategory(
             $this->request->getAttribute('slug', '')
+        ) ?? throw new NotFoundException(
+            sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
         );
 
+        $globalExtraFields = array_map(function ($item) {
+            return $this->em->getRepository(OptionKey::class)->find($item);
+        }, explode(',', $setting->get('globalExtraFields', '')));
 
-        if ($category === null) {
-            throw new NotFoundException(
-                sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
-            );
+        foreach ($globalExtraFields as $globalExtraField) {
+            $this->category->addExtraField($globalExtraField);
         }
-
-        $this->category = $category;
 
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
         $entityListenerResolver->register(new ProductPriceEntityListener($this->config));
@@ -159,7 +162,7 @@ final class CategoryModel implements ModelInterface
     private function updateSortMode(): void
     {
         $mode = $this->request->getQueryParams()['sort'] ?? null;
-        if ($mode !== null){
+        if ($mode !== null) {
             $this->config->setSortMode($mode);
         }
     }
@@ -167,12 +170,10 @@ final class CategoryModel implements ModelInterface
     private function updatePerPage(): void
     {
         $perpage = $this->request->getQueryParams()['perpage'] ?? null;
-        if ($perpage !== null){
+        if ($perpage !== null) {
             $this->config->setPerPage($perpage);
         }
     }
-
-
 
 
 }
