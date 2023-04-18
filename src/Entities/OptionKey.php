@@ -45,8 +45,10 @@ class OptionKey
      */
     private int $weight = 0;
 
-
-
+    /**
+     * @ORM\Column(type="boolean", options={"default":true})
+     */
+    private bool $multiple = true;
 
     public function getWeight(): int
     {
@@ -96,5 +98,15 @@ class OptionKey
     public function __toString(): string
     {
         return $this->getName() . ($this->getUnit() ? ', ' . $this->getUnit() : '');
+    }
+
+    public function isMultiple(): bool
+    {
+        return $this->multiple;
+    }
+
+    public function setMultiple(bool $multiple): void
+    {
+        $this->multiple = $multiple;
     }
 }
