@@ -50,9 +50,11 @@ class ProductModel implements ModelInterface
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->getProduct();
 
-        $globalExtraFields = array_map(function ($item) {
-            return $this->em->getRepository(OptionKey::class)->find($item);
-        }, explode(',', $setting->get('globalExtraFields', '')));
+        $globalExtraFields = array_filter(
+            array_map(function ($item) {
+                return $this->em->getRepository(OptionKey::class)->find($item);
+            }, explode(',', $setting->get('globalExtraFields', '')))
+        );
 
         foreach ($globalExtraFields as $globalExtraField) {
             $this->product->getCategory()->addExtraField($globalExtraField);
