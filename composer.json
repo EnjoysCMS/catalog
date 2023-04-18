@@ -29,6 +29,7 @@
         "admin-links": {
             "catalog/admin/category": "Категории",
             "catalog/admin/products": "Продукты",
+            "catalog/admin/filters": "Фильтры (настройка)",
             "catalog/admin/pricegroup": "Группы цен",
             "catalog/admin/currency": "Валюты",
             "catalog/admin/setting": "Настройки"
@@ -42,7 +43,7 @@
         "bin/catalog"
     ],
     "require-dev": {
-        "vimeo/psalm": "^4.20"
+        "vimeo/psalm": "^4.20 | ^5.9"
     },
     "config": {
         "allow-plugins": {

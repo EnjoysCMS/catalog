@@ -1,0 +1,71 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+    {% do asset('css', [
+        {0: module.path ~ '/node_modules/select2/dist/css/select2.css','minify': false},
+        {0: module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
+    ]) %}
+
+    {% do asset('js', [
+        {0: module.path ~ '/node_modules/select2/dist/js/select2.full.js','minify': false }
+    ]) %}
+
+    <script>
+        $(document).ready(function () {
+
+            let select = $('select#category');
+
+            $.ajax({
+                method: "GET",
+                url: "{{ path('catalog/admin/api/get-category-tree') }}"
+            })
+                .done(function (data) {
+                    Object.values(data).forEach(function (v) {
+                        let option = new Option(v.title.replaceAll("&nbsp;", "\u00A0"), v.id);
+                        if (v.id === 0){
+                            option = new Option('Выберите категорию...', v.id);
+                        }
+                        select.append(option);
+                    })
+
+
+                    select.on('change', function () {
+                        alert(select.val())
+                    });
+
+                });
+        });
+
+
+    </script>
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Настройки
+                    <small class="d-block">{{ subtitle }}</small>
+                </h2>
+
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div>
+                    <label for="category">Категория</label>
+                    <select name="category" id="category"
+                            aria-controls="example"
+                            class="custom-select custom-select-sm form-control form-control-sm mb-3">
+
+                    </select>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}
