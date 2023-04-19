@@ -57,9 +57,11 @@ final class CategoryModel implements ModelInterface
             sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
         );
 
-        $globalExtraFields = array_map(function ($item) {
-            return $this->em->getRepository(OptionKey::class)->find($item);
-        }, explode(',', $setting->get('globalExtraFields', '')));
+        $globalExtraFields = array_filter(
+            array_map(function ($item) {
+                return $this->em->getRepository(OptionKey::class)->find($item);
+            }, explode(',', $setting->get('globalExtraFields', '')))
+        );
 
         foreach ($globalExtraFields as $globalExtraField) {
             $this->category->addExtraField($globalExtraField);
