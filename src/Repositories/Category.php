@@ -217,13 +217,17 @@ class Category extends ClosureTreeRepository
 
     public function getAllIds($node = null): array
     {
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Category[] $nodes */
         $nodes = $this->getChildren($node);
-        $ids = array_map(
+        $ids = array_filter(array_map(
             function ($node) {
+                if (!$node->isStatus()){
+                    return null;
+                }
                 return $node?->getId();
             },
             $nodes
-        );
+        ));
         $ids[] = $node?->getId();
         return $ids;
     }
