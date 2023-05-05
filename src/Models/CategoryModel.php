@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Traits\Options;
@@ -108,6 +109,7 @@ final class CategoryModel implements ModelInterface
             'price.desc' => $qb->addOrderBy('converted_price', 'DESC'),
             'price.asc' => $qb->addOrderBy('converted_price', 'ASC'),
             'name.desc' => $qb->addOrderBy('p.name', 'DESC'),
+            'custom' => $this->addCustomOrderBy($qb),
             default => $qb->addOrderBy('p.name', 'ASC'),
         };
 
@@ -174,6 +176,17 @@ final class CategoryModel implements ModelInterface
         $perpage = $this->request->getQueryParams()['perpage'] ?? null;
         if ($perpage !== null) {
             $this->config->setPerPage($perpage);
+        }
+    }
+
+    private function addCustomOrderBy(QueryBuilder $qb): void
+    {
+        foreach (
+            $this->config->get('customSortParams') ?? throw new \RuntimeException(
+            'Need set customSortParams'
+        ) as $order
+        ) {
+            $qb->addOrderBy($order['column'], $order['direction']);
         }
     }
 
