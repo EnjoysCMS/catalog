@@ -37,8 +37,6 @@ final class CategoryModel implements ModelInterface
     private Category $category;
 
     /**
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws NotFoundException
      */
     public function __construct(
@@ -52,7 +50,7 @@ final class CategoryModel implements ModelInterface
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
 
-        $this->category = $this->getCategory(
+        $this->category = $this->categoryRepository->findByPath(
             $this->request->getAttribute('slug', '')
         ) ?? throw new NotFoundException(
             sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
@@ -135,14 +133,6 @@ final class CategoryModel implements ModelInterface
         ];
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
-    private function getCategory(string $slug): ?Category
-    {
-        return $this->categoryRepository->findByPath($slug);
-    }
 
     private function getBreadcrumbs(): array
     {

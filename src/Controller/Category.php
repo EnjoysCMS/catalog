@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
+use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -50,10 +51,22 @@ final class Category extends PublicController
             $template_path = __DIR__ . '/../../template/category.twig';
         }
 
-        return $this->responseText($this->twig->render(
-            $template_path,
-            $container->get(CategoryModel::class)->getContext()
-        ));
+        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
+        $category = $container
+            ->get(EntityManager::class)
+            ->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)
+            ->findByPath(
+                $this->request->getAttribute('slug', '')
+            ) ?? throw new \EnjoysCMS\Core\Exception\NotFoundException(
+            sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
+        );
+
+        return $this->responseText(
+            $this->twig->render(
+                $category->getCustomTemplatePath() ?: $template_path,
+                $container->get(CategoryModel::class)->getContext()
+            )
+        );
     }
 
 }

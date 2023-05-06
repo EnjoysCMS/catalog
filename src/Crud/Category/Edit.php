@@ -128,7 +128,8 @@ final class Edit implements ModelInterface
                         return $item->getId();
                     },
                     $this->category->getExtraFields()->toArray()
-                )
+                ),
+                'customTemplatePath' => $this->category->getCustomTemplatePath(),
             ]
         );
 
@@ -234,6 +235,9 @@ HTML
                 return $result;
             });
 
+        $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
+            ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
+
         $form->submit('add');
         return $form;
     }
@@ -248,6 +252,7 @@ HTML
         $this->category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
+        $this->category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
         $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
             ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]

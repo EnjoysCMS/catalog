@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -73,12 +74,12 @@ class Category
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
      */
-    private $parent;
+    private ?Category $parent;
 
     /**
      * @ORM\OneToMany(targetEntity="Category", mappedBy="parent")
      */
-    private $children;
+    private Collection $children;
 
     /**
      * @var string|null
@@ -87,11 +88,15 @@ class Category
     private ?string $img = null;
 
     /**
-     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="OptionKey")
      * @ORM\JoinTable(name="catalog_category_optionkey")
      */
-    private  $extraFields;
+    private Collection $extraFields;
+
+    /**
+     * @ORM\Column(type="string", nullable=true, options={"default": null})
+     */
+    private ?string $customTemplatePath = null;
 
     public function __construct()
     {
@@ -166,10 +171,7 @@ class Category
         $this->parent = $parent;
     }
 
-    /**
-     * @return Category|null
-     */
-    public function getParent()
+    public function getParent(): ?Category
     {
         return $this->parent;
     }
@@ -263,7 +265,7 @@ class Category
     }
 
 
-    public function getChildren(): ArrayCollection
+    public function getChildren(): Collection
     {
 
         $iterator = $this->children->getIterator();
@@ -277,10 +279,7 @@ class Category
     }
 
 
-    /**
-     * @return ArrayCollection|null
-     */
-    public function getExtraFields()
+    public function getExtraFields(): Collection
     {
         return $this->extraFields;
     }
@@ -290,10 +289,7 @@ class Category
         $this->extraFields = new ArrayCollection();
     }
 
-    /**
-     * @return void
-     */
-    public function addExtraField(OptionKey $field)
+    public function addExtraField(OptionKey $field): void
     {
         if ($this->extraFields->contains($field)){
             return;
@@ -301,11 +297,13 @@ class Category
         $this->extraFields->add($field);
     }
 
+    public function getCustomTemplatePath(): ?string
+    {
+        return $this->customTemplatePath;
+    }
 
-//
-//
-//    public function setExtraFields(?array $extraFields): void
-//    {
-//        $this->extraFields = $extraFields;
-//    }
+    public function setCustomTemplatePath(?string $customTemplatePath): void
+    {
+        $this->customTemplatePath = $customTemplatePath;
+    }
 }

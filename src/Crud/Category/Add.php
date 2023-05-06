@@ -144,6 +144,11 @@ HTML
                     ),
                 ]
             );
+
+        $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
+            ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
+
+
         $form->submit('add');
         return $form;
     }
@@ -162,6 +167,7 @@ HTML
         $category->setDescription($this->request->getParsedBody()['description'] ?? null);
         $category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
+        $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
         $this->em->persist($category);
     }
