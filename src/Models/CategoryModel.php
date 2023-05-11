@@ -6,8 +6,6 @@ namespace EnjoysCMS\Module\Catalog\Models;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
@@ -15,6 +13,7 @@ use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -40,13 +39,15 @@ final class CategoryModel implements ModelInterface
      * @throws NotFoundException
      */
     public function __construct(
-        private EntityManager $em,
+        private EntityManager          $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator,
-        private Config $config,
-        private Setting $setting,
-    ) {
+        private BreadcrumbsInterface   $breadcrumbs,
+        private UrlGeneratorInterface  $urlGenerator,
+        private RedirectInterface      $redirect,
+        private Config                 $config,
+        private Setting                $setting,
+    )
+    {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
 
@@ -116,6 +117,24 @@ final class CategoryModel implements ModelInterface
 
         $result = new Paginator($qb);
         $pagination->setTotalItems($result->count());
+
+        if ($this->config->get('redirectCategoryToProductIfIsOne', false) && $pagination->getTotalItems() === 1) {
+            $redirectAllow = false;
+
+            if ($this->config->get('allowRedirectForAllCategories', false)) {
+                $redirectAllow = true;
+            }
+
+            if ($redirectAllow === false && in_array($this->category->getId(), $this->config->get('categoriesIdForRedirectToProductIfIsOne', []), true)) {
+                $redirectAllow = true;
+            }
+
+            if ($redirectAllow === true) {
+                $this->redirect->toRoute('catalog/product', [
+                    'slug' => $result->getIterator()->current()->getSlug()
+                ], 301, true);
+            }
+        }
 
         return [
             '_title' => sprintf(
