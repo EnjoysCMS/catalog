@@ -140,6 +140,7 @@ final class Download implements LoadImage
             'image/vnd.microsoft.icon' => 'ico',
             'image/tiff' => 'tiff',
             'image/svg+xml' => 'svg',
+            'image/webp' => 'webp'
         );
 
         if (array_key_exists($content_type, $mime_types)) {
