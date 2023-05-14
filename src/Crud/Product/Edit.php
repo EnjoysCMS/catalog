@@ -25,8 +25,11 @@ use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Events\PostEditProductEvent;
+use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Exception;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -45,15 +48,15 @@ final class Edit implements ModelInterface
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager          $em,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private RendererInterface      $renderer,
-        private UrlGeneratorInterface  $urlGenerator,
-        private RedirectInterface      $redirect,
-        private Config                 $config,
-        private ContentEditor          $contentEditor
-    )
-    {
+        private RendererInterface $renderer,
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
+        private Config $config,
+        private ContentEditor $contentEditor,
+        private EventDispatcherInterface $dispatcher,
+    ) {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
         $this->product = $this->productRepository->find(
@@ -144,26 +147,31 @@ final class Edit implements ModelInterface
 
         $form->select('category', 'Категория')
             ->addRule(Rules::REQUIRED)
-            ->fill($this->categoryRepository->getFormFillArray()
+            ->fill(
+                $this->categoryRepository->getFormFillArray()
             );
 
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
         $productCodeElem = $form->text('productCode', 'Уникальный код продукта')
-            ->setDescription('Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
+            ->setDescription(
+                'Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
             в системе учета или что-то подобное, используется для внутренних команд и запросов,
-            но также можно и показывать это поле наружу')
+            но также можно и показывать это поле наружу'
+            )
             ->addRule(
                 Rules::CALLBACK,
                 'Ошибка, productCode уже используется',
                 function () {
-                    $check = $this->productRepository->findOneBy(['productCode' => $this->request->getParsedBody()['productCode'] ?? '']);
+                    $check = $this->productRepository->findOneBy(
+                        ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
+                    );
                     return is_null($check);
                 }
             );
 
-        if ($this->config->get('disableEditProductCode', false)){
+        if ($this->config->get('disableEditProductCode', false)) {
             $productCodeElem->setAttribute(AttributeFactory::create('disabled'));
         }
 
@@ -214,6 +222,11 @@ final class Edit implements ModelInterface
      */
     private function doAction(): void
     {
+        $this->dispatcher->dispatch(
+            new PreEditProductEvent($oldProduct = clone $this->product)
+        );
+
+
         /** @var Category|null $category */
         $category = $this->em->getRepository(Category::class)->find(
             $this->request->getParsedBody()['category'] ?? 0
@@ -268,6 +281,7 @@ final class Edit implements ModelInterface
         }
 
         $this->em->flush();
+        $this->dispatcher->dispatch(new PostEditProductEvent($oldProduct, $this->product));
         $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 }
