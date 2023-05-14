@@ -84,7 +84,12 @@ final class Edit implements ModelInterface
         ]);
 
         if ($form->isSubmitted()) {
+            $this->dispatcher->dispatch(
+                new PreEditProductEvent($oldProduct = clone $this->product)
+            );
             $this->doAction();
+            $this->dispatcher->dispatch(new PostEditProductEvent($oldProduct, $this->product));
+            $this->redirect->toRoute('catalog/admin/products', emit: true);
         }
 
         return [
@@ -222,11 +227,6 @@ final class Edit implements ModelInterface
      */
     private function doAction(): void
     {
-        $this->dispatcher->dispatch(
-            new PreEditProductEvent($oldProduct = clone $this->product)
-        );
-
-
         /** @var Category|null $category */
         $category = $this->em->getRepository(Category::class)->find(
             $this->request->getParsedBody()['category'] ?? 0
@@ -281,7 +281,5 @@ final class Edit implements ModelInterface
         }
 
         $this->em->flush();
-        $this->dispatcher->dispatch(new PostEditProductEvent($oldProduct, $this->product));
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 }

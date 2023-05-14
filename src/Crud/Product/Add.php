@@ -70,7 +70,10 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-            $this->doAction();
+            $this->dispatcher->dispatch(new PreAddProductEvent());
+            $product = $this->doAction();
+            $this->dispatcher->dispatch(new PostAddProductEvent($product));
+            $this->redirect->toRoute('catalog/admin/products', emit: true);
         }
 
         return [
@@ -163,10 +166,8 @@ final class Add implements ModelInterface
      * @throws ORMException
      * @throws Exception
      */
-    private function doAction(): void
+    private function doAction(): Product
     {
-        $this->dispatcher->dispatch(new PreAddProductEvent());
-
         $categoryId = $this->request->getParsedBody()['category'] ?? 0;
         $this->cookie->set('__catalog__last_category_when_add_product', $categoryId);
 
@@ -200,8 +201,6 @@ final class Add implements ModelInterface
         $this->em->persist($url);
         $this->em->flush();
 
-        $this->dispatcher->dispatch(new PostAddProductEvent($product));
-
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
+        return $product;
     }
 }

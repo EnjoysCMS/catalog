@@ -9,6 +9,7 @@
         "enjoyscms/admin": "^4.0",
         "enjoyscms/sitemap": "^1.0 | ^2.0",
         "enjoyscms/elfinder": "^4.0",
+        "psr/event-dispatcher": "^1.0",
         "gedmo/doctrine-extensions": "^3.0",
         "jbroadway/urlify": "^1.2",
         "intervention/image": "^2.5",
