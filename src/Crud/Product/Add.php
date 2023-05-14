@@ -201,6 +201,7 @@ final class Add implements ModelInterface
         $this->em->persist($url);
         $this->em->flush();
 
+        $product->addUrl($url);
         return $product;
     }
 }

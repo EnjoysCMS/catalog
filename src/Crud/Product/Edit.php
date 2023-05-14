@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
+use DeepCopy\DeepCopy;
+use DeepCopy\Filter\Doctrine\DoctrineCollectionFilter;
+use DeepCopy\Matcher\PropertyTypeMatcher;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
@@ -84,11 +87,22 @@ final class Edit implements ModelInterface
         ]);
 
         if ($form->isSubmitted()) {
-            $this->dispatcher->dispatch(
-                new PreEditProductEvent($oldProduct = clone $this->product)
+            $copier = new DeepCopy();
+            $copier->addFilter(
+                new DoctrineCollectionFilter(),
+                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
             );
+            /** @var Product $oldProduct */
+            $oldProduct = $copier->copy($this->product);
+
+            $this->dispatcher->dispatch(
+                new PreEditProductEvent($oldProduct)
+            );
+
             $this->doAction();
+
             $this->dispatcher->dispatch(new PostEditProductEvent($oldProduct, $this->product));
+
             $this->redirect->toRoute('catalog/admin/products', emit: true);
         }
 
@@ -278,8 +292,8 @@ final class Edit implements ModelInterface
             $url->setDefault(true);
             $url->setProduct($this->product);
             $this->em->persist($url);
+            $this->product->addUrl($url);
         }
-
         $this->em->flush();
     }
 }
