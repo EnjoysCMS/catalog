@@ -17,6 +17,9 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Events\PostDeleteCategoryEvent;
+use EnjoysCMS\Module\Catalog\Events\PreDeleteCategoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -35,6 +38,7 @@ final class Delete implements ModelInterface
         private RendererInterface $renderer,
         private ServerRequestInterface $request,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -55,8 +59,10 @@ final class Delete implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
+            $this->dispatcher->dispatch(new PreDeleteCategoryEvent($this->category));
             $this->doAction();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->dispatcher->dispatch(new PostDeleteCategoryEvent($this->category));
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
         return [
