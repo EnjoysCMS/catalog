@@ -12,6 +12,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
@@ -149,7 +150,7 @@ final class Edit implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
-        $form->text('productCode', 'Уникальный код продукта')
+        $productCodeElem = $form->text('productCode', 'Уникальный код продукта')
             ->setDescription('Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
             в системе учета или что-то подобное, используется для внутренних команд и запросов,
             но также можно и показывать это поле наружу')
@@ -161,6 +162,10 @@ final class Edit implements ModelInterface
                     return is_null($check);
                 }
             );
+
+        if ($this->config->get('disableEditProductCode', false)){
+            $productCodeElem->setAttribute(AttributeFactory::create('disabled'));
+        }
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -216,8 +221,10 @@ final class Edit implements ModelInterface
 
         $this->product->setName($this->request->getParsedBody()['name'] ?? null);
 
-        $productCode = $this->request->getParsedBody()['productCode'] ?? null;
-        $this->product->setProductCode(empty($productCode) ? null : $productCode);
+        if (!$this->config->get('disableEditProductCode', false)) {
+            $productCode = $this->request->getParsedBody()['productCode'] ?? null;
+            $this->product->setProductCode(empty($productCode) ? null : $productCode);
+        }
 
         $this->product->setDescription($this->request->getParsedBody()['description'] ?? null);
 

@@ -53,3 +53,6 @@ composer migrate
 ```
 
 4. Setting elfinder 
+
+
+# Options
