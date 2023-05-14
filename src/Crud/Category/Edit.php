@@ -6,6 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
+use DeepCopy\DeepCopy;
+use DeepCopy\Filter\Doctrine\DoctrineCollectionFilter;
+use DeepCopy\Matcher\PropertyTypeMatcher;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\Common\Collections\Criteria;
@@ -28,6 +31,10 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;
+use EnjoysCMS\Module\Catalog\Events\PreEditCategoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -50,6 +57,7 @@ final class Edit implements ModelInterface
         private Config $config,
         private ContentEditor $contentEditor,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
 
@@ -75,9 +83,17 @@ final class Edit implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
+            $copier = new DeepCopy();
+            $copier->addFilter(
+                new DoctrineCollectionFilter(),
+                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
+            );
+            /** @var Category $oldCategory */
+            $oldCategory = $copier->copy($this->category);
+            $this->dispatcher->dispatch(new PreEditCategoryEvent($oldCategory));
             $this->doAction();
-            $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->dispatcher->dispatch(new PostEditCategoryEvent($oldCategory, $this->category));
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
 
@@ -262,5 +278,6 @@ HTML
         foreach ($extraFields as $extraField) {
             $this->category->addExtraField($extraField);
         }
+        $this->em->flush();
     }
 }

@@ -26,6 +26,9 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Events\PostAddCategoryEvent;
+use EnjoysCMS\Module\Catalog\Events\PreAddCategoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -42,6 +45,7 @@ final class Add implements ModelInterface
         private Config $config,
         private ContentEditor $contentEditor,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
@@ -60,9 +64,10 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-            $this->doAction();
-            $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->dispatcher->dispatch(new PreAddCategoryEvent());
+            $category = $this->doAction();
+            $this->dispatcher->dispatch(new PostAddCategoryEvent($category));
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
         return [
@@ -157,7 +162,7 @@ HTML
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction(): void
+    private function doAction(): Category
     {
         $category = new Category();
         $category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null));
@@ -170,5 +175,7 @@ HTML
         $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
         $this->em->persist($category);
+        $this->em->flush();
+        return $category;
     }
 }
