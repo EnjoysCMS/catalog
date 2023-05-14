@@ -56,3 +56,26 @@ composer migrate
 
 
 # Options
+- `disableEditProductCode` **bool**
+- `allowedPerPage` **int**
+- `productImageStorage` **string**
+- `storageUploads` **array**
+- `productFileStorage` **string**
+- `thumbnailService` **array**
+- `adminTemplateDir` **string**
+- `editor` **array**
+  - `productDescription`
+  - `categoryDescription`
+  - `categoryShortDescription`
+- `allowedPerPage` **int[]**
+- `sort` **string**
+- `minSearchChars` **int**
+- `showSubcategoryProducts` **bool**
+- `delimiterOptions` **string**
+- `allocatedMemoryDynamically` **bool**
+- `currency` **array**
+  - `default` **string**
+  - `ratio` **array**
+- `admin` **array**
+  - `searchFields` **array**
+
