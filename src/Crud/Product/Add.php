@@ -37,15 +37,16 @@ final class Add implements ModelInterface
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
     public function __construct(
-        private EntityManager $em,
+        private EntityManager          $em,
         private ServerRequestInterface $request,
-        private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private Config $config,
-        private Cookie $cookie,
-        private ContentEditor $contentEditor
-    ) {
+        private RendererInterface      $renderer,
+        private UrlGeneratorInterface  $urlGenerator,
+        private RedirectInterface      $redirect,
+        private Config                 $config,
+        private Cookie                 $cookie,
+        private ContentEditor          $contentEditor
+    )
+    {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
     }
@@ -111,6 +112,19 @@ final class Add implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
+        $form->text('productCode', 'Уникальный код продукта')
+            ->setDescription('Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
+            в системе учета или что-то подобное, используется для внутренних команд и запросов,
+            но также можно и показывать это поле наружу')
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, productCode уже используется',
+                function () {
+                    $check = $this->productRepository->findOneBy(['productCode' => $this->request->getParsedBody()['productCode'] ?? '']);
+                    return is_null($check);
+                }
+            );
+
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -155,6 +169,9 @@ final class Add implements ModelInterface
         $product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
         $product->setCategory($category);
+
+        $productCode = $this->request->getParsedBody()['productCode'] ?? null;
+        $product->setProductCode(empty($productCode) ? null : $productCode);
 
         $product->setHide(false);
         $product->setActive(true);

@@ -44,14 +44,15 @@ final class Edit implements ModelInterface
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $em,
+        private EntityManager          $em,
         private ServerRequestInterface $request,
-        private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private Config $config,
-        private ContentEditor $contentEditor
-    ) {
+        private RendererInterface      $renderer,
+        private UrlGeneratorInterface  $urlGenerator,
+        private RedirectInterface      $redirect,
+        private Config                 $config,
+        private ContentEditor          $contentEditor
+    )
+    {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
         $this->product = $this->productRepository->find(
@@ -107,6 +108,7 @@ final class Edit implements ModelInterface
     {
         $defaults = [
             'name' => $this->product->getName(),
+            'productCode' => $this->product->getProductCode(),
             'url' => $this->product->getUrl()->getPath(),
             'description' => $this->product->getDescription(),
             'unit' => $this->product->getUnit()?->getName(),
@@ -147,6 +149,18 @@ final class Edit implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
+        $form->text('productCode', 'Уникальный код продукта')
+            ->setDescription('Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
+            в системе учета или что-то подобное, используется для внутренних команд и запросов,
+            но также можно и показывать это поле наружу')
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, productCode уже используется',
+                function () {
+                    $check = $this->productRepository->findOneBy(['productCode' => $this->request->getParsedBody()['productCode'] ?? '']);
+                    return is_null($check);
+                }
+            );
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -162,7 +176,7 @@ final class Edit implements ModelInterface
                             $this->request->getParsedBody()['url'] ?? null,
                             $category
                         )->getQuery()->getOneOrNullResult();
-                    }catch (NonUniqueResultException){
+                    } catch (NonUniqueResultException) {
                         return false;
                     }
 
@@ -201,6 +215,10 @@ final class Edit implements ModelInterface
         );
 
         $this->product->setName($this->request->getParsedBody()['name'] ?? null);
+
+        $productCode = $this->request->getParsedBody()['productCode'] ?? null;
+        $this->product->setProductCode(empty($productCode) ? null : $productCode);
+
         $this->product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
