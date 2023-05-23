@@ -11,6 +11,7 @@ use DI\NotFoundException;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -41,6 +42,7 @@ final class Edit implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -77,7 +79,7 @@ final class Edit implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
             $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
 
@@ -251,6 +253,10 @@ HTML
     }
 
 
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? 0));
