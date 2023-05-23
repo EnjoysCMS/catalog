@@ -26,7 +26,10 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Events\PostAddProductEvent;
+use EnjoysCMS\Module\Catalog\Events\PreAddProductEvent;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -44,7 +47,8 @@ final class Add implements ModelInterface
         private RedirectInterface $redirect,
         private Config $config,
         private Cookie $cookie,
-        private ContentEditor $contentEditor
+        private ContentEditor $contentEditor,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
@@ -66,7 +70,10 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-            $this->doAction();
+            $this->dispatcher->dispatch(new PreAddProductEvent());
+            $product = $this->doAction();
+            $this->dispatcher->dispatch(new PostAddProductEvent($product));
+            $this->redirect->toRoute('catalog/admin/products', emit: true);
         }
 
         return [
@@ -111,6 +118,23 @@ final class Add implements ModelInterface
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
+        $form->text('productCode', 'Уникальный код продукта')
+            ->setDescription(
+                'Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
+            в системе учета или что-то подобное, используется для внутренних команд и запросов,
+            но также можно и показывать это поле наружу'
+            )
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, productCode уже используется',
+                function () {
+                    $check = $this->productRepository->findOneBy(
+                        ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
+                    );
+                    return is_null($check);
+                }
+            );
+
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -142,7 +166,7 @@ final class Add implements ModelInterface
      * @throws ORMException
      * @throws Exception
      */
-    private function doAction(): void
+    private function doAction(): Product
     {
         $categoryId = $this->request->getParsedBody()['category'] ?? 0;
         $this->cookie->set('__catalog__last_category_when_add_product', $categoryId);
@@ -155,6 +179,9 @@ final class Add implements ModelInterface
         $product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
         $product->setCategory($category);
+
+        $productCode = $this->request->getParsedBody()['productCode'] ?? null;
+        $product->setProductCode(empty($productCode) ? null : $productCode);
 
         $product->setHide(false);
         $product->setActive(true);
@@ -173,6 +200,8 @@ final class Add implements ModelInterface
 
         $this->em->persist($url);
         $this->em->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
+
+        $product->addUrl($url);
+        return $product;
     }
 }

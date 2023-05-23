@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Crud\Product;
 
+use DeepCopy\DeepCopy;
+use DeepCopy\Filter\Doctrine\DoctrineCollectionFilter;
+use DeepCopy\Matcher\PropertyTypeMatcher;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
@@ -12,6 +15,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
@@ -24,8 +28,11 @@ use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Events\PostEditProductEvent;
+use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Exception;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Error\LoaderError;
@@ -50,7 +57,8 @@ final class Edit implements ModelInterface
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
         private Config $config,
-        private ContentEditor $contentEditor
+        private ContentEditor $contentEditor,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->productRepository = $em->getRepository(Product::class);
         $this->categoryRepository = $em->getRepository(Category::class);
@@ -79,7 +87,23 @@ final class Edit implements ModelInterface
         ]);
 
         if ($form->isSubmitted()) {
+            $copier = new DeepCopy();
+            $copier->addFilter(
+                new DoctrineCollectionFilter(),
+                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
+            );
+            /** @var Product $oldProduct */
+            $oldProduct = $copier->copy($this->product);
+
+            $this->dispatcher->dispatch(
+                new PreEditProductEvent($oldProduct)
+            );
+
             $this->doAction();
+
+            $this->dispatcher->dispatch(new PostEditProductEvent($oldProduct, $this->product));
+
+            $this->redirect->toRoute('catalog/admin/products', emit: true);
         }
 
         return [
@@ -107,6 +131,7 @@ final class Edit implements ModelInterface
     {
         $defaults = [
             'name' => $this->product->getName(),
+            'productCode' => $this->product->getProductCode(),
             'url' => $this->product->getUrl()->getPath(),
             'description' => $this->product->getDescription(),
             'unit' => $this->product->getUnit()?->getName(),
@@ -141,12 +166,33 @@ final class Edit implements ModelInterface
 
         $form->select('category', 'Категория')
             ->addRule(Rules::REQUIRED)
-            ->fill($this->categoryRepository->getFormFillArray()
+            ->fill(
+                $this->categoryRepository->getFormFillArray()
             );
 
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
+        $productCodeElem = $form->text('productCode', 'Уникальный код продукта')
+            ->setDescription(
+                'Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
+            в системе учета или что-то подобное, используется для внутренних команд и запросов,
+            но также можно и показывать это поле наружу'
+            )
+            ->addRule(
+                Rules::CALLBACK,
+                'Ошибка, productCode уже используется',
+                function () {
+                    $check = $this->productRepository->findOneBy(
+                        ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
+                    );
+                    return is_null($check);
+                }
+            );
+
+        if ($this->config->get('disableEditProductCode', false)) {
+            $productCodeElem->setAttribute(AttributeFactory::create('disabled'));
+        }
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
@@ -162,7 +208,7 @@ final class Edit implements ModelInterface
                             $this->request->getParsedBody()['url'] ?? null,
                             $category
                         )->getQuery()->getOneOrNullResult();
-                    }catch (NonUniqueResultException){
+                    } catch (NonUniqueResultException) {
                         return false;
                     }
 
@@ -201,6 +247,12 @@ final class Edit implements ModelInterface
         );
 
         $this->product->setName($this->request->getParsedBody()['name'] ?? null);
+
+        if (!$this->config->get('disableEditProductCode', false)) {
+            $productCode = $this->request->getParsedBody()['productCode'] ?? null;
+            $this->product->setProductCode(empty($productCode) ? null : $productCode);
+        }
+
         $this->product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
@@ -240,9 +292,8 @@ final class Edit implements ModelInterface
             $url->setDefault(true);
             $url->setProduct($this->product);
             $this->em->persist($url);
+            $this->product->addUrl($url);
         }
-
         $this->em->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
     }
 }
