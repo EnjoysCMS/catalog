@@ -10,6 +10,7 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -37,6 +38,10 @@ final class Add implements ModelInterface
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
+
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
@@ -153,6 +158,9 @@ HTML
         $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
             ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
 
+        $form->text('meta-title', 'meta-title');
+        $form->textarea('meta-description', 'meta-description');
+        $form->text('meta-keywords', 'meta-keywords');
 
         $form->submit('add');
         return $form;
@@ -173,6 +181,14 @@ HTML
         $category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
         $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+
+        $meta = $category->getMeta();
+        $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
+        $this->em->persist($meta);
+
+        $category->setMeta($meta);
 
         $this->em->persist($category);
         $this->em->flush();

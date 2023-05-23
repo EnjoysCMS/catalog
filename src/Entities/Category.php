@@ -98,6 +98,11 @@ class Category
      */
     private ?string $customTemplatePath = null;
 
+    /**
+     * @ORM\OneToOne(targetEntity="CategoryMeta", mappedBy="category", cascade={"persist", "remove"})
+     */
+    private ?CategoryMeta $meta = null;
+
     public function __construct()
     {
         $this->extraFields = new ArrayCollection();
@@ -305,5 +310,18 @@ class Category
     public function setCustomTemplatePath(?string $customTemplatePath): void
     {
         $this->customTemplatePath = $customTemplatePath;
+    }
+
+
+    public function getMeta(): CategoryMeta
+    {
+        return $this->meta ?? new CategoryMeta();
+    }
+
+
+    public function setMeta(?CategoryMeta $meta): void
+    {
+        $meta->setCategory($this);
+        $this->meta = $meta;
     }
 }

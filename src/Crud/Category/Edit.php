@@ -14,6 +14,7 @@ use DI\NotFoundException;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -31,7 +32,6 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditCategoryEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -48,6 +48,7 @@ final class Edit implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -146,6 +147,9 @@ final class Edit implements ModelInterface
                     $this->category->getExtraFields()->toArray()
                 ),
                 'customTemplatePath' => $this->category->getCustomTemplatePath(),
+                'meta-title' => $this->category->getMeta()->getTitle(),
+                'meta-description' => $this->category->getMeta()->getDescription(),
+                'meta-keywords' => $this->category->getMeta()->getKeyword(),
             ]
         );
 
@@ -254,11 +258,20 @@ HTML
         $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
             ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
 
+
+        $form->text('meta-title', 'meta-title');
+        $form->textarea('meta-description', 'meta-description');
+        $form->text('meta-keywords', 'meta-keywords');
+
         $form->submit('add');
         return $form;
     }
 
 
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? 0));
@@ -269,6 +282,14 @@ HTML
         $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
         $this->category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+
+        $meta = $this->category->getMeta();
+        $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
+        $this->em->persist($meta);
+
+        $this->category->setMeta($meta);
 
         $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
             ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]
