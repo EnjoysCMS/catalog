@@ -32,7 +32,6 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditCategoryEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
