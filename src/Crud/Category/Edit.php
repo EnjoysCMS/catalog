@@ -130,6 +130,9 @@ final class Edit implements ModelInterface
                     $this->category->getExtraFields()->toArray()
                 ),
                 'customTemplatePath' => $this->category->getCustomTemplatePath(),
+                'meta-title' => $this->category->getMeta()->getTitle(),
+                'meta-description' => $this->category->getMeta()->getDescription(),
+                'meta-keywords' => $this->category->getMeta()->getKeyword(),
             ]
         );
 
@@ -238,6 +241,11 @@ HTML
         $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
             ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
 
+
+        $form->text('meta-title', 'meta-title');
+        $form->textarea('meta-description', 'meta-description');
+        $form->text('meta-keywords', 'meta-keywords');
+
         $form->submit('add');
         return $form;
     }
@@ -253,6 +261,14 @@ HTML
         $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
         $this->category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+
+        $meta = $this->category->getMeta();
+        $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
+        $this->em->persist($meta);
+
+        $this->category->setMeta($meta);
 
         $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
             ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]

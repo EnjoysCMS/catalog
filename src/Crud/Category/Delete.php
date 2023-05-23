@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -26,7 +27,9 @@ final class Delete implements ModelInterface
     private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
     private \EnjoysCMS\Module\Catalog\Repositories\Product|EntityRepository $productRepository;
 
+
     /**
+     * @throws NotSupported
      * @throws NoResultException
      */
     public function __construct(
@@ -56,7 +59,7 @@ final class Delete implements ModelInterface
 
         if ($form->isSubmitted()) {
             $this->doAction();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
         return [
@@ -84,7 +87,7 @@ final class Delete implements ModelInterface
             [
                 sprintf(
                     'Установить для продуктов из удаляемых категорий родительскую категорию (%s)',
-                    $this->category->getParent()?->getTitle()
+                    $this->category->getParent()?->getTitle() ?? 'без родительской категории'
                 )
             ]
         );
@@ -102,14 +105,19 @@ final class Delete implements ModelInterface
         $setCategory = (($this->request->getParsedBody(
             )['set_parent_category'] ?? null) !== null) ? $this->category->getParent() : null;
 
+        $this->em->remove($this->category->getMeta());
+
         if (($this->request->getParsedBody()['remove_childs'] ?? null) !== null) {
+            /** @var array $allCategoryIds */
             $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
+            /** @var Product[] $products */
             $products = $this->productRepository->findByCategorysIds($allCategoryIds);
             $this->setCategory($products, $setCategory);
 
             $this->em->remove($this->category);
             $this->em->flush();
         } else {
+            /** @var Product[] $products */
             $products = $this->productRepository->findByCategory($this->category);
             $this->setCategory($products, $setCategory);
 
@@ -120,10 +128,11 @@ final class Delete implements ModelInterface
     }
 
     /**
-     * @throws OptimisticLockException
+     * @param Product[] $products
      * @throws ORMException
+     * @throws OptimisticLockException
      */
-    private function setCategory($products, ?Category $category = null): void
+    private function setCategory(array $products, ?Category $category = null): void
     {
         foreach ($products as $product) {
             $product->setCategory($category);
