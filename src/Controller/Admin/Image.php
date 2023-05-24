@@ -22,7 +22,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
 final class Image extends AdminController
@@ -88,7 +87,6 @@ final class Image extends AdminController
     public function makeGeneral(
         EntityManager $entityManager,
         ServerRequestInterface $request,
-        UrlGeneratorInterface $urlGenerator,
         RedirectInterface $redirect
     ): ResponseInterface {
         $repository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Image::class);
@@ -102,11 +100,10 @@ final class Image extends AdminController
         }
         $image->setGeneral(true);
         $entityManager->flush();
-        return $redirect->http(
-            $urlGenerator->generate(
-                'catalog/admin/product/images',
-                ['product_id' => $image->getProduct()->getId()]
-            )
+
+        return $redirect->toRoute(
+            'catalog/admin/product/images',
+            ['product_id' => $image->getProduct()->getId()]
         );
     }
 

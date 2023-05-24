@@ -7,14 +7,15 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
+use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class MakeDefault
 {
@@ -23,11 +24,11 @@ final class MakeDefault
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
     ) {
         $this->product = $this->em->getRepository(Product::class)->find(
@@ -54,12 +55,13 @@ final class MakeDefault
         }
 
         if ($setFlag === false) {
-            throw new \InvalidArgumentException('Url id is invalid');
+            throw new InvalidArgumentException('Url id is invalid');
         }
 
         $this->em->flush();
-        $this->redirect->http(
-            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+        $this->redirect->toRoute(
+            '@a/catalog/product/urls',
+            ['id' => $this->product->getId()],
             emit: true
         );
     }

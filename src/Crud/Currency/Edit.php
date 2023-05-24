@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
@@ -28,6 +29,9 @@ final class Edit implements ModelInterface
     private Currency $currency;
     private EntityRepository $currencyRepository;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $em,
@@ -59,7 +63,7 @@ final class Edit implements ModelInterface
             $this->em->flush();
             exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
 
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
+            $this->redirect->toRoute('catalog/admin/currency', emit: true);
         }
 
         $this->renderer->setForm($form);

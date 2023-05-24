@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -20,7 +21,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Files extends AdminController
 {
@@ -69,12 +69,11 @@ final class Files extends AdminController
     }
 
     /**
-     * @throws NotFoundExceptionInterface
-     * @throws ORMException
-     * @throws ContainerExceptionInterface
-     * @throws OptimisticLockException
-     * @throws NoResultException
      * @throws FilesystemException
+     * @throws NoResultException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws NotSupported
      */
     #[Route(
         path: "admin/catalog/product/files/delete",
@@ -103,10 +102,8 @@ final class Files extends AdminController
         $filesystem = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
         $filesystem->delete($file->getFilePath());
 
-        return $redirect->http(
-            $this->getContainer()->get(UrlGeneratorInterface::class)->generate('@a/catalog/product/files', [
-                'id' => $product->getId()
-            ])
-        );
+        return $redirect->toRoute('@a/catalog/product/files', [
+            'id' => $product->getId()
+        ]);
     }
 }

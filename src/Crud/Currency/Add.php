@@ -45,7 +45,7 @@ final class Add implements ModelInterface
             $this->doProcess();
             $this->entityManager->flush();
             exec('php ' . __DIR__ . '/../../../bin/catalog currency-rate-update');
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
+            $this->redirect->toRoute('catalog/admin/currency', emit: true);
         }
 
 

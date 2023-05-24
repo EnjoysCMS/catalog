@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -28,6 +29,7 @@ final class PriceGroupEdit implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -106,6 +108,6 @@ final class PriceGroupEdit implements ModelInterface
         $this->priceGroup->setTitle($this->request->getParsedBody()['title'] ?? null);
         $this->priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/pricegroup'), emit: true);
+        $this->redirect->toRoute('catalog/admin/pricegroup', emit: true);
     }
 }

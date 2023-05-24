@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -30,6 +31,9 @@ final class Index implements ModelInterface
     private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
 
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
@@ -62,7 +66,7 @@ final class Index implements ModelInterface
             );
 
             $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
         $this->renderer->setForm($form);
 

@@ -10,6 +10,7 @@ use DI\DependencyException;
 use DI\FactoryInterface;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -35,6 +36,7 @@ final class Add implements ModelInterface
      * @throws DependencyException
      * @throws NotFoundException
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $entityManager,
@@ -73,18 +75,14 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-
             try {
                 $this->doAction();
 
-                $this->redirect->http(
-                    $this->urlGenerator->generate(
-                        'catalog/admin/product/images',
-                        ['product_id' => $this->product->getId()]
-                    ),
+                $this->redirect->toRoute(
+                    'catalog/admin/product/images',
+                    ['product_id' => $this->product->getId()],
                     emit: true
                 );
-
             } catch (Throwable $e) {
                 /** @var File $image */
                 $image = $form->getElement('image');
@@ -119,8 +117,6 @@ final class Add implements ModelInterface
                 $item->getExtension()
             );
         }
-
-
     }
 
 }
