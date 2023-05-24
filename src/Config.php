@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-
 namespace EnjoysCMS\Module\Catalog;
-
 
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
-use EnjoysCMS\Core\Components\Modules\ModuleConfig;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
@@ -21,40 +19,43 @@ use RuntimeException;
 final class Config
 {
 
-    private ModuleConfig $config;
+    private const CONFIG_SECTION = 'enjoyscms/catalog';
 
-    /**
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public function __construct(Container $factory, private Session $session, private EntityManager $em)
+
+    public function __construct(
+        private \Enjoys\Config\Config $config,
+        private Container $container,
+        private Session $session,
+        private EntityManager $em
+    ) {
+    }
+
+    public function get(string $key = null, mixed $default = null): mixed
     {
-        $this->config = $factory
-            ->make(ModuleConfig::class, ['moduleName' => 'enjoyscms/catalog'])
-            ->strict(false)
-        ;
+        if ($key === null){
+            return $this->config->get(self::CONFIG_SECTION);
+        }
+        return $this->config->get(sprintf('%s->%s', self::CONFIG_SECTION, $key), $default);
     }
 
 
-    public function all(): ModuleConfig
+    public function all(): array
     {
-        return $this->config;
+        return $this->config->get();
     }
 
-    public function get(string $key, $default = null): mixed
-    {
-        return $this->config->get($key, $default);
-    }
 
     public function getCurrentCurrencyCode(): string
     {
-        return $this->session->get('catalog')['currency'] ?? $this->config->get(
-            'currency'
-        )['default'] ?? throw new InvalidArgumentException(
+        return $this->session->get('catalog')['currency'] ?? $this->get(
+            'currency->default') ?? throw new InvalidArgumentException(
             'Default currency value not valid'
         );
     }
 
+    /**
+     * @throws NotSupported
+     */
     public function getCurrentCurrency(): Currency
     {
         return $this->em->getRepository(Currency::class)->find(
@@ -76,7 +77,7 @@ final class Config
 
     public function getSortMode(): ?string
     {
-        return $this->session->get('catalog')['sort'] ?? $this->config->get(
+        return $this->session->get('catalog')['sort'] ?? $this->get(
             'sort'
         );
     }
@@ -94,14 +95,14 @@ final class Config
 
     public function getPerPage(): string
     {
-        return (string)($this->session->get('catalog')['limitItems'] ?? $this->config->get(
+        return (string)($this->session->get('catalog')['limitItems'] ?? $this->get(
             'limitItems'
         ) ?? throw new InvalidArgumentException('limitItems not set'));
     }
 
     public function setPerPage(string $perpage = null): void
     {
-        $allowedPerPage = $this->config->get(
+        $allowedPerPage = $this->get(
             'allowedPerPage'
         ) ?? throw new InvalidArgumentException('allowedPerPage not set');
 
@@ -119,10 +120,10 @@ final class Config
 
     public function getImageStorageUpload($storageName = null): StorageUploadInterface
     {
-        $storageName = $storageName ?? $this->config->get('productImageStorage');
+        $storageName = $storageName ?? $this->get('productImageStorage');
 
-        $storageUploadConfig = $this->config->get('storageUploads')[$storageName] ?? throw new RuntimeException(
-            sprintf('Not set config `storageUploads.%s`', $storageName)
+        $storageUploadConfig = $this->get(sprintf('storageUploads->%s', $storageName)) ?? throw new RuntimeException(
+            sprintf('Not set config `storageUploads->%s`', $storageName)
         );
         /** @var class-string $storageUploadClass */
         $storageUploadClass = key($storageUploadConfig);
@@ -131,28 +132,32 @@ final class Config
 
     public function getFileStorageUpload($storageName = null): StorageUploadInterface
     {
-        $storageName = $storageName ?? $this->config->get('productFileStorage');
+        $storageName = $storageName ?? $this->get('productFileStorage');
 
-        $storageUploadConfig = $this->config->get('storageUploads')[$storageName] ?? throw new RuntimeException(
-            sprintf('Not set config `storageUploads.%s`', $storageName)
+        $storageUploadConfig = $this->get(sprintf('storageUploads->%s', $storageName)) ?? throw new RuntimeException(
+            sprintf('Not set config `storageUploads->%s`', $storageName)
         );
         /** @var class-string $storageUploadClass */
         $storageUploadClass = key($storageUploadConfig);
         return new $storageUploadClass(...current($storageUploadConfig));
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function getThumbnailService(): ThumbnailServiceInterface
     {
-        $thumbnailServiceConfig = $this->config->get('thumbnailService');
-        /** @var class-string $thumbnailServiceClass */
-        $thumbnailServiceClass = key($thumbnailServiceConfig);
-        return new $thumbnailServiceClass(...current($thumbnailServiceConfig));
+        return $this->container->get($this->get('thumbnailService'));
     }
 
     public function getAdminTemplatePath(): string
     {
         try {
-            $templatePath = getenv('ROOT_PATH') . $this->config->get('adminTemplateDir', throw new \InvalidArgumentException());
+            $templatePath = getenv('ROOT_PATH') . $this->get(
+                    'adminTemplateDir',
+                    throw new InvalidArgumentException()
+                );
         } catch (InvalidArgumentException) {
             $templatePath = __DIR__ . '/../template/admin';
         }
@@ -172,17 +177,17 @@ final class Config
 
     public function getEditorConfigProductDescription()
     {
-        return $this->config->get('editor')['productDescription'] ?? null;
+        return $this->get('editor->productDescription');
     }
 
     public function getEditorConfigCategoryDescription()
     {
-        return $this->config->get('editor')['categoryDescription'] ?? null;
+        return $this->get('editor->categoryDescription');
     }
 
     public function getEditorConfigCategoryShortDescription()
     {
-        return $this->config->get('editor')['categoryShortDescription'] ?? null;
+        return $this->get('editor->categoryShortDescription');
     }
 
 }
