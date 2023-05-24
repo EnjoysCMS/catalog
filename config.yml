@@ -19,8 +19,7 @@ formSendRequest:
   useCaptcha: true
   captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
 
-thumbnailService:
-  EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService: []
+thumbnailService: EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailService
 
 storageUploads:
   image_default:
