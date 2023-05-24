@@ -73,7 +73,7 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->updateConfigValues();
-        $this->setOptions($this->config->all()->asArray());
+        $this->setOptions($this->config->get());
     }
 
 

@@ -124,7 +124,7 @@ class ProductController
 
         if ($search !== null) {
             $searchCriteria = Criteria::create();
-            foreach ($this->config->get('admin')['searchFields'] ?? [] as $field) {
+            foreach ($this->config->get('admin->searchFields', []) as $field) {
                 $searchCriteria->orWhere(Criteria::expr()->contains($field, $search));
             }
             $criteria[] = $searchCriteria;
