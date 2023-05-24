@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Product\Quantity;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -24,6 +25,7 @@ final class Manage implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -49,7 +51,7 @@ final class Manage implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
             $this->em->flush();
-            $this->redirect->http(emit: true);
+            $this->redirect->toUrl(emit: true);
         }
 
         $this->renderer->setForm($form);

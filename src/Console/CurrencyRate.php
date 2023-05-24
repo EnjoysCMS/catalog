@@ -102,7 +102,7 @@ final class CurrencyRate extends Command
 
     private function getRatio(\EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate $currencyRate)
     {
-        $ratio = $this->config->get('currency')['ratio'] ?? [];
+        $ratio = $this->config->get('currency->ratio', []);
         return $ratio[$currencyRate->__toString()] ?? 1;
     }
 

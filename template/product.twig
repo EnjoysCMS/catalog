@@ -27,7 +27,7 @@
                 <ul>
                     {% for price in product.getPrices %}
                         <li>
-                            {{ price.getPriceGroup.getTitle }}: {{ price.getFormatted }}
+                            {{ price.getPriceGroup.getTitle }}: {{ price.format }}
                         </li>
                     {% endfor %}
                 </ul>

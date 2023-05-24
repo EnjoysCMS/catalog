@@ -8,22 +8,24 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Options;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class FillFromProduct
 {
     private EntityRepository|ProductRepository $productRepository;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -59,8 +61,9 @@ final class FillFromProduct
 
     private function redirectToProductOptionsPage(Product $product): void
     {
-        $this->redirect->http(
-            $this->urlGenerator->generate('@a/catalog/product/options', ['id' => $product->getId()]),
+        $this->redirect->toRoute(
+            '@a/catalog/product/options',
+            ['id' => $product->getId()],
             emit: true
         );
     }

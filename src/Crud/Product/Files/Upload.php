@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Files;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -36,6 +37,7 @@ final class Upload implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -129,10 +131,9 @@ final class Upload implements ModelInterface
             $this->em->persist($productFile);
             $this->em->flush();
 
-            $this->redirect->http(
-                $this->urlGenerator->generate('@a/catalog/product/files', [
-                    'id' => $this->product->getId()
-                ]),
+            $this->redirect->toRoute(
+                '@a/catalog/product/files',
+                ['id' => $this->product->getId()],
                 emit: true
             );
         } catch (Exception $e) {

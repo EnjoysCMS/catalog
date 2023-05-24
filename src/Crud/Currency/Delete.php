@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Currency;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Elements\Hidden;
@@ -31,6 +32,9 @@ final class Delete implements ModelInterface
     private EntityRepository $currencyRepository;
     private CurrencyRateRepository|EntityRepository $currencyRateRepository;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $entityManager,
@@ -126,7 +130,7 @@ final class Delete implements ModelInterface
         $this->currencyRateRepository->removeAllRatesByCurrency($this->currency);
         $this->entityManager->remove($this->currency);
         $this->entityManager->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/currency'), emit: true);
+        $this->redirect->toRoute('catalog/admin/currency', emit: true);
     }
 
 }

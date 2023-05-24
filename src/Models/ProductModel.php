@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Models;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
@@ -34,6 +35,7 @@ class ProductModel implements ModelInterface
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -67,8 +69,9 @@ class ProductModel implements ModelInterface
     public function getContext(): array
     {
         if ($this->product->getUrl() !== $this->product->getCurrentUrl()) {
-            $this->redirect->http(
-                $this->urlGenerator->generate('catalog/product', ['slug' => $this->product->getSlug()]),
+            $this->redirect->toRoute(
+                'catalog/product',
+                ['slug' => $this->product->getSlug()],
                 301,
                 true
             );

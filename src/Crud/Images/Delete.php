@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -25,6 +26,7 @@ final class Delete implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $entityManager,
@@ -102,8 +104,8 @@ final class Delete implements ModelInterface
             $this->entityManager->flush();
         }
 
-        $this->redirect->http(
-            $this->urlGenerator->generate('catalog/admin/product/images', ['product_id' => $product->getId()]),
+        $this->redirect->toRoute(
+            'catalog/admin/product/images', ['product_id' => $product->getId()],
             emit: true
         );
     }
