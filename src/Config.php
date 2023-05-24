@@ -10,32 +10,57 @@ use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
+use EnjoysCMS\Core\Components\Modules\ModuleCollection;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use Exception;
 use InvalidArgumentException;
 use RuntimeException;
+use Symfony\Component\Yaml\Yaml;
 
 final class Config
 {
 
-    private const CONFIG_SECTION = 'enjoyscms/catalog';
+    private const MODULE_NAME = 'enjoyscms/catalog';
 
 
+    /**
+     * @throws Exception
+     */
     public function __construct(
         private \Enjoys\Config\Config $config,
         private Container $container,
         private Session $session,
-        private EntityManager $em
+        private EntityManager $em,
+        ModuleCollection $moduleCollection
     ) {
+        $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
+            sprintf(
+                'Module %s not found. Name must be same like packageName in module composer.json',
+                self::MODULE_NAME
+            )
+        );
+
+
+        if (file_exists($module->path . '/config.yml')) {
+            $config->addConfig(
+                [
+                    self::MODULE_NAME => file_get_contents($module->path . '/config.yml')
+                ],
+                ['flags' => Yaml::PARSE_CONSTANT],
+                \Enjoys\Config\Config::YAML,
+                false
+            );
+        }
     }
 
     public function get(string $key = null, mixed $default = null): mixed
     {
-        if ($key === null){
-            return $this->config->get(self::CONFIG_SECTION);
+        if ($key === null) {
+            return $this->config->get(self::MODULE_NAME);
         }
-        return $this->config->get(sprintf('%s->%s', self::CONFIG_SECTION, $key), $default);
+        return $this->config->get(sprintf('%s->%s', self::MODULE_NAME, $key), $default);
     }
 
 
@@ -48,7 +73,8 @@ final class Config
     public function getCurrentCurrencyCode(): string
     {
         return $this->session->get('catalog')['currency'] ?? $this->get(
-            'currency->default') ?? throw new InvalidArgumentException(
+            'currency->default'
+        ) ?? throw new InvalidArgumentException(
             'Default currency value not valid'
         );
     }
