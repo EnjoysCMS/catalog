@@ -8,7 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
 
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
-use Intervention\Image\Image;
+use Intervention\Image\Exception\NotReadableException;
 use Intervention\Image\ImageManagerStatic;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
@@ -25,7 +25,6 @@ final class DefaultThumbnailCreationService implements ThumbnailService
      */
     public function make(string $location, FilesystemOperator $filesystem): void
     {
-
         $data = $filesystem->read($location);
 
         $this->checkMemory($data);
@@ -45,7 +44,7 @@ final class DefaultThumbnailCreationService implements ThumbnailService
                         $constraint->upsize();
                     }
                 ]
-            ])->encode()->getEncoded()
+            ])
         );
 
         $filesystem->write(
@@ -63,24 +62,32 @@ final class DefaultThumbnailCreationService implements ThumbnailService
                         $constraint->upsize();
                     }
                 ]
-            ])->encode()->getEncoded()
+            ])
         );
     }
 
-    private function generate($data, array $params = []): Image
+    private function generate($data, array $params = []): string
     {
-        $image = ImageManagerStatic::make($data);
-        foreach ($params as $method => $param) {
-            $image->$method(...$param);
+        try {
+            $image = ImageManagerStatic::make($data);
+            foreach ($params as $method => $param) {
+                $image->$method(...$param);
+            }
+            return $image->encode()->getEncoded();
+        } catch (NotReadableException) {
+            return $data;
         }
-
-        return $image;
     }
 
     private function checkMemory(string $fileContent): void
     {
         $memoryLimit = (int)ini_get('memory_limit') * pow(1024, 2);
         $imageInfo = getimagesizefromstring($fileContent);
+
+        if ($imageInfo === false) {
+            return;
+        }
+
         $memoryNeeded = round(
             ($imageInfo[0] * $imageInfo[1] * ($imageInfo['bits'] ?? 1) * ($imageInfo['channels'] ?? 1) / 8 + Pow(
                     2,
