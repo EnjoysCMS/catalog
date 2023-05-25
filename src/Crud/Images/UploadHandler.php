@@ -6,6 +6,8 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Upload\Rule\MediaType;
@@ -26,6 +28,10 @@ final class UploadHandler
     private Filesystem $filesystem;
     private ?ThumbnailService $thumbnailService;
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function __construct(private Config $config, private EventDispatcherInterface $dispatcher)
     {
         $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();

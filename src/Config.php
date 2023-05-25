@@ -17,6 +17,7 @@ use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterf
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use Exception;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -31,12 +32,12 @@ final class Config
      */
     public function __construct(
         private \Enjoys\Config\Config $config,
-        private Container             $container,
-        private Session               $session,
-        private EntityManager         $em,
-        ModuleCollection              $moduleCollection
-    )
-    {
+        private Container $container,
+        private Session $session,
+        private EntityManager $em,
+        private LoggerInterface $logger,
+        ModuleCollection $moduleCollection
+    ) {
         $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
             sprintf(
                 'Module %s not found. Name must be same like packageName in module composer.json',
@@ -186,13 +187,18 @@ final class Config
      */
     public function getThumbnailCreationService(): ?ThumbnailService
     {
+        $classString = $this->get(
+            'thumbnailCreationService',
+            ThumbnailService\DefaultThumbnailCreationService::class
+        );
+
         try {
-            $classString = $this->get('thumbnailCreationService');
             if ($classString === null) {
                 return null;
             }
             return $this->container->get($classString);
         } catch (DependencyException|NotFoundException) {
+            $this->logger->warning(sprintf('ThumbnailService %s not found. Use %s', $classString, ThumbnailService\DefaultThumbnailCreationService::class));
             return $this->container->get(ThumbnailService\DefaultThumbnailCreationService::class);
         }
     }
