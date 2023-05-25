@@ -114,31 +114,6 @@ final class Download implements LoadImage
         $this->thumbnailService?->make($targetPath, $this->filesystem);
     }
 
-    /**
-     * @throws Exception
-     */
-    private function makeDirectory(string $directory): void
-    {
-        if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
-            throw new Exception(
-                sprintf("Нельзя создать директорию: %s", $directory)
-            );
-        }
-
-        //Clear the most recent error
-        error_clear_last();
-
-        if (!is_dir($directory)) {
-            if (@mkdir($directory, 0777, true) === false) {
-                /** @var string[] $error */
-                $error = error_get_last();
-                throw new Exception(
-                    sprintf("Не удалось создать директорию: %s! Причина: %s", $directory, $error['message'])
-                );
-            }
-        }
-    }
-
     private function getExt(string $content_type): string|null
     {
         $mime_types = array(
