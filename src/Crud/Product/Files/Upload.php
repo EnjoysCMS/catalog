@@ -22,10 +22,13 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
+use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
+use EnjoysCMS\Module\Catalog\Events\PreUploadFile;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Exception;
 use InvalidArgumentException;
 use League\Flysystem\FilesystemException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -45,6 +48,7 @@ final class Upload implements ModelInterface
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
         private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -116,7 +120,10 @@ final class Upload implements ModelInterface
         $newName = md5((string)microtime(true));
         $file->setFilename($newName[0] . '/' . $newName);
         try {
+            $this->dispatcher->dispatch(new PreUploadFile($file));
             $file->upload();
+            $this->dispatcher->dispatch(new PostUploadFile($file));
+
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);

@@ -12,6 +12,7 @@ use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
 use EnjoysCMS\Core\Components\Modules\ModuleCollection;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
+use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use Exception;
@@ -30,11 +31,12 @@ final class Config
      */
     public function __construct(
         private \Enjoys\Config\Config $config,
-        private Container $container,
-        private Session $session,
-        private EntityManager $em,
-        ModuleCollection $moduleCollection
-    ) {
+        private Container             $container,
+        private Session               $session,
+        private EntityManager         $em,
+        ModuleCollection              $moduleCollection
+    )
+    {
         $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
             sprintf(
                 'Module %s not found. Name must be same like packageName in module composer.json',
@@ -171,10 +173,28 @@ final class Config
     /**
      * @throws DependencyException
      * @throws NotFoundException
+     * @deprecated
      */
     public function getThumbnailService(): ThumbnailServiceInterface
     {
         return $this->container->get($this->get('thumbnailService'));
+    }
+
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function getThumbnailCreationService(): ?ThumbnailService
+    {
+        try {
+            $classString = $this->get('thumbnailCreationService');
+            if ($classString === null) {
+                return null;
+            }
+            return $this->container->get($classString);
+        } catch (DependencyException|NotFoundException) {
+            return $this->container->get(ThumbnailService\DefaultThumbnailCreationService::class);
+        }
     }
 
     public function getAdminTemplatePath(): string
