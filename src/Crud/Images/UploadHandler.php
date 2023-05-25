@@ -14,13 +14,11 @@ use Enjoys\Upload\Rule\MediaType;
 use Enjoys\Upload\Rule\Size;
 use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
-use EnjoysCMS\Module\Catalog\Events\PreUploadFile;
+use EnjoysCMS\Module\Catalog\Events\PostLoadAndSaveImage;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use RuntimeException;
 use Throwable;
 
 final class UploadHandler
@@ -59,10 +57,8 @@ final class UploadHandler
 //                (new Extension())->allow('jpg, png, jpeg, svg'),
             ]);
 
-
-            $this->dispatcher->dispatch(new PreUploadFile($file));
             $file->upload($subDirectory);
-            $this->dispatcher->dispatch(new PostUploadFile($file));
+            $this->dispatcher->dispatch(new PostLoadAndSaveImage($file->getTargetPath(), $this->filesystem));
 
             $this->thumbnailService?->make(
                 $file->getTargetPath(),

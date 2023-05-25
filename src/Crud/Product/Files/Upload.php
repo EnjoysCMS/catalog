@@ -120,10 +120,8 @@ final class Upload implements ModelInterface
         $newName = md5((string)microtime(true));
         $file->setFilename($newName[0] . '/' . $newName);
         try {
-            $this->dispatcher->dispatch(new PreUploadFile($file));
             $file->upload();
             $this->dispatcher->dispatch(new PostUploadFile($file));
-
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);

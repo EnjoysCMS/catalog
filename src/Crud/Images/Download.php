@@ -10,7 +10,7 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Events\PostDownloadFileFromWeb;
+use EnjoysCMS\Module\Catalog\Events\PostLoadAndSaveImage;
 use Exception;
 use Generator;
 use GuzzleHttp\Client;
@@ -109,7 +109,7 @@ final class Download implements LoadImage
         $targetPath = $this->getName() . '.' . $this->getExtension();
 
         $this->filesystem->write($targetPath, $data);
-        $this->dispatcher->dispatch(new PostDownloadFileFromWeb($targetPath, $this->filesystem));
+        $this->dispatcher->dispatch(new PostLoadAndSaveImage($targetPath, $this->filesystem));
 
         $this->thumbnailService?->make($targetPath, $this->filesystem);
     }

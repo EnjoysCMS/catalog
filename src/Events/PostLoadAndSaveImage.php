@@ -8,7 +8,7 @@ use Enjoys\Upload\UploadProcessing;
 use League\Flysystem\Filesystem;
 use Symfony\Contracts\EventDispatcher\Event;
 
-final class PostDownloadFileFromWeb extends Event
+final class PostLoadAndSaveImage extends Event
 {
     public function __construct(private string $location, private Filesystem $filesystem)
     {
