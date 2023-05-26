@@ -5,7 +5,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\FilterRepository")
  * @ORM\Table(name="catalog_filters")
  */
 class Filter

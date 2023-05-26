@@ -15,9 +15,10 @@
 
             </div>
 
+            {% for filter in filters %}
             <hr>
             <div class="product-brands">
-                <h6 class="text-uppercase mb-3">Brands</h6>
+                <h6 class="text-uppercase mb-3">{{ filter.optionKey }}</h6>
                 <ul class="list-unstyled mb-0 categories-list">
                     <li>
                         <div class="form-check">
@@ -27,6 +28,7 @@
                     </li>
                 </ul>
             </div>
+            {% endfor %}
 
 
         </div>
