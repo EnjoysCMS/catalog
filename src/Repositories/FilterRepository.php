@@ -10,14 +10,20 @@ use EnjoysCMS\Module\Catalog\Entities\Filter;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\ORM\Doctrine\FilterHydrate;
 
 class FilterRepository extends EntityRepository
 {
 
     public function getCategoryFilters(Category $category)
     {
+        $this->getEntityManager()->getConfiguration()->addCustomHydrationMode(
+            FilterHydrate::NAME,
+            FilterHydrate::class
+        );
+
         $qb = $this->createQueryBuilder('f')
-            ->select('f as filter, v as value')
+            ->select('f, v, k')
             ->join(OptionKey::class, 'k', Expr\Join::WITH, 'k.id = f.optionKey')
             ->join(OptionValue::class, 'v', Expr\Join::WITH, 'k.id = v.optionKey')
             ->where('f.category = :category')
@@ -28,7 +34,7 @@ class FilterRepository extends EntityRepository
                 'category' => $category
             ]);
 
-        return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_OBJECT);
+        return $qb->getQuery()->getResult(FilterHydrate::NAME);
     }
 
     private function getProductIdsFromCategory(Category $category): array
