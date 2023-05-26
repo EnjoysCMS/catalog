@@ -20,6 +20,8 @@
                 let row = template.content.cloneNode(true);
                 let filter = row.querySelector('.filter');
                 filter.innerText = item.option.name;
+                row.querySelector('.type').innerText = item.type;
+                row.querySelector('.order input').value = item.order;
                 table.appendChild(row)
             });
             filtersBody.appendChild(table);
