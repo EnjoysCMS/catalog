@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Files;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -21,10 +22,13 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
+use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
+use EnjoysCMS\Module\Catalog\Events\PreUploadFile;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Exception;
 use InvalidArgumentException;
 use League\Flysystem\FilesystemException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -36,6 +40,7 @@ final class Upload implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -43,6 +48,7 @@ final class Upload implements ModelInterface
         private ServerRequestInterface $request,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
         private Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -115,6 +121,7 @@ final class Upload implements ModelInterface
         $file->setFilename($newName[0] . '/' . $newName);
         try {
             $file->upload();
+            $this->dispatcher->dispatch(new PostUploadFile($file));
 
             $productFile = new ProductFiles();
             $productFile->setProduct($this->product);
@@ -129,10 +136,9 @@ final class Upload implements ModelInterface
             $this->em->persist($productFile);
             $this->em->flush();
 
-            $this->redirect->http(
-                $this->urlGenerator->generate('@a/catalog/product/files', [
-                    'id' => $this->product->getId()
-                ]),
+            $this->redirect->toRoute(
+                '@a/catalog/product/files',
+                ['id' => $this->product->getId()],
                 emit: true
             );
         } catch (Exception $e) {

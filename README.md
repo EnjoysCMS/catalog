@@ -8,14 +8,16 @@ $treeListener = new TreeListener();
 $evm->addEventSubscriber($treeListener);
 ```
 
-2. Diff migration, migrate and clear cache-metadata
+2. Define in DI `\Psr\EventDispatcher\EventDispatcherInterface`
+
+3. Diff migration, migrate and clear cache-metadata
 
 ```shell
 composer diff
 composer migrate
 ```
 
-3. Migration function
+4. Migration function
 
 ```shell
 ./vendor/bin/doctrine-migrations  migrations:generate
@@ -52,4 +54,30 @@ SQL);
 composer migrate
 ```
 
-4. Setting elfinder 
+5. Setting elfinder 
+
+
+# Options
+- `disableEditProductCode` **bool**
+- `allowedPerPage` **int**
+- `productImageStorage` **string**
+- `storageUploads` **array**
+- `productFileStorage` **string**
+- `thumbnailService` **array**
+- `adminTemplateDir` **string**
+- `editor` **array**
+  - `productDescription`
+  - `categoryDescription`
+  - `categoryShortDescription`
+- `allowedPerPage` **int[]**
+- `sort` **string**
+- `minSearchChars` **int**
+- `showSubcategoryProducts` **bool**
+- `delimiterOptions` **string**
+- `allocatedMemoryDynamically` **bool**
+- `currency` **array**
+  - `default` **string**
+  - `ratio` **array**
+- `admin` **array**
+  - `searchFields` **array**
+

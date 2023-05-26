@@ -6,8 +6,11 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Events\PostLoadAndSaveImage;
 use Exception;
 use Generator;
 use GuzzleHttp\Client;
@@ -15,6 +18,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class Download implements LoadImage
@@ -23,13 +27,17 @@ final class Download implements LoadImage
     private string $extension;
     private string $fullPathFileNameWithExtension;
     private FilesystemOperator $filesystem;
-    private ThumbnailService\ThumbnailServiceInterface $thumbnailService;
+    private ?ThumbnailService $thumbnailService;
 
 
-    public function __construct(private Config $config)
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function __construct(private Config $config, private EventDispatcherInterface $dispatcher)
     {
         $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
-        $this->thumbnailService = $this->config->getThumbnailService();
+        $this->thumbnailService = $this->config->getThumbnailCreationService();
     }
 
     public function getTemplatePath(string $templateRootPath): string
@@ -98,35 +106,12 @@ final class Download implements LoadImage
         $subDirectory = $newFilename[0] . '/' . $newFilename[1];
         $this->setName($subDirectory . '/' . $newFilename);
         $this->setExtension($ext);
-
         $targetPath = $this->getName() . '.' . $this->getExtension();
+
         $this->filesystem->write($targetPath, $data);
-        $this->thumbnailService->make($this->filesystem, $targetPath, $data);
-    }
+        $this->dispatcher->dispatch(new PostLoadAndSaveImage($targetPath, $this->filesystem));
 
-    /**
-     * @throws Exception
-     */
-    private function makeDirectory(string $directory): void
-    {
-        if (preg_match("/(\/\.+|\.+)$/i", $directory)) {
-            throw new Exception(
-                sprintf("Нельзя создать директорию: %s", $directory)
-            );
-        }
-
-        //Clear the most recent error
-        error_clear_last();
-
-        if (!is_dir($directory)) {
-            if (@mkdir($directory, 0777, true) === false) {
-                /** @var string[] $error */
-                $error = error_get_last();
-                throw new Exception(
-                    sprintf("Не удалось создать директорию: %s! Причина: %s", $directory, $error['message'])
-                );
-            }
-        }
+        $this->thumbnailService?->make($targetPath, $this->filesystem);
     }
 
     private function getExt(string $content_type): string|null
@@ -140,6 +125,7 @@ final class Download implements LoadImage
             'image/vnd.microsoft.icon' => 'ico',
             'image/tiff' => 'tiff',
             'image/svg+xml' => 'svg',
+            'image/webp' => 'webp'
         );
 
         if (array_key_exists($content_type, $mime_types)) {

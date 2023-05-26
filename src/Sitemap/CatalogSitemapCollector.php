@@ -2,33 +2,36 @@
 
 declare(strict_types=1);
 
-
 namespace EnjoysCMS\Module\Catalog\Sitemap;
-
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\Persistence\Mapping\MappingException;
-use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Sitemap\SitemapCollectorInterface;
 use EnjoysCMS\Module\Sitemap\Url;
+use Exception;
+use Generator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class SitemapCollector implements SitemapCollectorInterface
+final class CatalogSitemapCollector implements SitemapCollectorInterface
 {
 
-    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $repositoryCategory;
-    private ObjectRepository|EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $repositoryProduct;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $repositoryCategory;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $repositoryProduct;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(private EntityManager $em, private UrlGeneratorInterface $urlGenerator)
     {
         $this->repositoryCategory = $this->em->getRepository(Category::class);
         $this->repositoryProduct = $this->em->getRepository(Product::class);
     }
 
-    public function setBaseUrl(string $baseUrl)
+    public function setBaseUrl(string $baseUrl): void
     {
         $this->urlGenerator->getContext()->setBaseUrl($baseUrl);
     }
@@ -45,8 +48,9 @@ final class SitemapCollector implements SitemapCollectorInterface
 
     /**
      * @throws MappingException
+     * @throws Exception
      */
-    public function make()
+    public function make(): Generator
     {
         /** @var Category $item */
         foreach ($this->repositoryCategory->findBy(['status' => true]) as $item) {

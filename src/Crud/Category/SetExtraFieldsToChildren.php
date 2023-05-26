@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Category;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -20,7 +21,6 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class SetExtraFieldsToChildren implements ModelInterface
 {
@@ -32,12 +32,12 @@ final class SetExtraFieldsToChildren implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private RendererInterface $renderer,
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
@@ -57,7 +57,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doActionRecursive($this->category->getChildren());
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
         $this->renderer->setForm($form);

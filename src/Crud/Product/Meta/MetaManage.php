@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Meta;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -26,7 +27,9 @@ final class MetaManage implements ModelInterface
     private Product $product;
     private EntityRepository $metaRepository;
 
+
     /**
+     * @throws NotSupported
      * @throws NoResultException
      */
     public function __construct(
@@ -55,7 +58,7 @@ final class MetaManage implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doAction();
             $this->em->flush();
-            $this->redirect->http(emit: true);
+            $this->redirect->toUrl(emit: true);
         }
 
 

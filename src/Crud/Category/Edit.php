@@ -6,11 +6,15 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Crud\Category;
 
 
+use DeepCopy\DeepCopy;
+use DeepCopy\Filter\Doctrine\DoctrineCollectionFilter;
+use DeepCopy\Matcher\PropertyTypeMatcher;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -28,6 +32,9 @@ use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;
+use EnjoysCMS\Module\Catalog\Events\PreEditCategoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -41,6 +48,7 @@ final class Edit implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private RendererInterface $renderer,
@@ -50,6 +58,7 @@ final class Edit implements ModelInterface
         private Config $config,
         private ContentEditor $contentEditor,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
 
@@ -75,9 +84,17 @@ final class Edit implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
+            $copier = new DeepCopy();
+            $copier->addFilter(
+                new DoctrineCollectionFilter(),
+                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
+            );
+            /** @var Category $oldCategory */
+            $oldCategory = $copier->copy($this->category);
+            $this->dispatcher->dispatch(new PreEditCategoryEvent($oldCategory));
             $this->doAction();
-            $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->dispatcher->dispatch(new PostEditCategoryEvent($oldCategory, $this->category));
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
 
@@ -128,7 +145,11 @@ final class Edit implements ModelInterface
                         return $item->getId();
                     },
                     $this->category->getExtraFields()->toArray()
-                )
+                ),
+                'customTemplatePath' => $this->category->getCustomTemplatePath(),
+                'meta-title' => $this->category->getMeta()->getTitle(),
+                'meta-description' => $this->category->getMeta()->getDescription(),
+                'meta-keywords' => $this->category->getMeta()->getKeyword(),
             ]
         );
 
@@ -234,11 +255,23 @@ HTML
                 return $result;
             });
 
+        $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
+            ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
+
+
+        $form->text('meta-title', 'meta-title');
+        $form->textarea('meta-description', 'meta-description');
+        $form->text('meta-keywords', 'meta-keywords');
+
         $form->submit('add');
         return $form;
     }
 
 
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
     private function doAction(): void
     {
         $this->category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? 0));
@@ -248,6 +281,15 @@ HTML
         $this->category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
+        $this->category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+
+        $meta = $this->category->getMeta();
+        $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
+        $this->em->persist($meta);
+
+        $this->category->setMeta($meta);
 
         $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
             ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]
@@ -257,5 +299,6 @@ HTML
         foreach ($extraFields as $extraField) {
             $this->category->addExtraField($extraField);
         }
+        $this->em->flush();
     }
 }

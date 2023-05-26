@@ -39,7 +39,7 @@ final class Search
         private Setting $setting,
         Config $config
     ) {
-        $this->setOptions($config->all()->asArray());
+        $this->setOptions($config->get());
         $this->searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
     }

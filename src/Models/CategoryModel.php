@@ -6,14 +6,14 @@ namespace EnjoysCMS\Module\Catalog\Models;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
 use Enjoys\Traits\Options;
 use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
 use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -36,22 +36,22 @@ final class CategoryModel implements ModelInterface
     private Category $category;
 
     /**
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws NotFoundException
      */
     public function __construct(
-        private EntityManager $em,
+        private EntityManager          $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator,
-        private Config $config,
-        private Setting $setting,
-    ) {
+        private BreadcrumbsInterface   $breadcrumbs,
+        private UrlGeneratorInterface  $urlGenerator,
+        private RedirectInterface      $redirect,
+        private Config                 $config,
+        private Setting                $setting,
+    )
+    {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
 
-        $this->category = $this->getCategory(
+        $this->category = $this->categoryRepository->findByPath(
             $this->request->getAttribute('slug', '')
         ) ?? throw new NotFoundException(
             sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
@@ -73,7 +73,7 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->updateConfigValues();
-        $this->setOptions($this->config->all()->asArray());
+        $this->setOptions($this->config->get());
     }
 
 
@@ -108,6 +108,7 @@ final class CategoryModel implements ModelInterface
             'price.desc' => $qb->addOrderBy('converted_price', 'DESC'),
             'price.asc' => $qb->addOrderBy('converted_price', 'ASC'),
             'name.desc' => $qb->addOrderBy('p.name', 'DESC'),
+            'custom' => $this->addCustomOrderBy($qb),
             default => $qb->addOrderBy('p.name', 'ASC'),
         };
 
@@ -116,6 +117,24 @@ final class CategoryModel implements ModelInterface
 
         $result = new Paginator($qb);
         $pagination->setTotalItems($result->count());
+
+        if ($this->config->get('redirectCategoryToProductIfIsOne', false) && $pagination->getTotalItems() === 1) {
+            $redirectAllow = false;
+
+            if ($this->config->get('allowRedirectForAllCategories', false)) {
+                $redirectAllow = true;
+            }
+
+            if ($redirectAllow === false && in_array($this->category->getId(), $this->config->get('categoriesIdForRedirectToProductIfIsOne', []), true)) {
+                $redirectAllow = true;
+            }
+
+            if ($redirectAllow === true) {
+                $this->redirect->toRoute('catalog/product', [
+                    'slug' => $result->getIterator()->current()->getSlug()
+                ], 301, true);
+            }
+        }
 
         return [
             '_title' => sprintf(
@@ -133,14 +152,6 @@ final class CategoryModel implements ModelInterface
         ];
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
-    private function getCategory(string $slug): ?Category
-    {
-        return $this->categoryRepository->findByPath($slug);
-    }
 
     private function getBreadcrumbs(): array
     {
@@ -174,6 +185,17 @@ final class CategoryModel implements ModelInterface
         $perpage = $this->request->getQueryParams()['perpage'] ?? null;
         if ($perpage !== null) {
             $this->config->setPerPage($perpage);
+        }
+    }
+
+    private function addCustomOrderBy(QueryBuilder $qb): void
+    {
+        foreach (
+            $this->config->get('customSortParams') ?? throw new \RuntimeException(
+            'Need set customSortParams'
+        ) as $order
+        ) {
+            $qb->addOrderBy($order['column'], $order['direction']);
         }
     }
 

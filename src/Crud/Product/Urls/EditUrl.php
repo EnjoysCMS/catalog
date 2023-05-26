@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -32,6 +33,7 @@ final class EditUrl implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -121,8 +123,9 @@ final class EditUrl implements ModelInterface
     {
         $this->url->setPath($this->request->getParsedBody()['path'] ?? null);
         $this->em->flush();
-        $this->redirect->http(
-            $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]),
+        $this->redirect->toRoute(
+            '@a/catalog/product/urls',
+            ['id' => $this->product->getId()],
             emit: true
         );
     }

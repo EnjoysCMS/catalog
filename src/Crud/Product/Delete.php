@@ -14,7 +14,10 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Events\PostDeleteProductEvent;
+use EnjoysCMS\Module\Catalog\Events\PreDeleteProductEvent;
 use League\Flysystem\FilesystemException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -27,14 +30,15 @@ final class Delete implements ModelInterface
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $entityManager,
+        private EntityManager $em,
         private ServerRequestInterface $request,
         private RendererInterface $renderer,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
-        private Config $config
+        private Config $config,
+        private EventDispatcherInterface $dispatcher,
     ) {
-        $this->product = $this->entityManager->getRepository(Product::class)->find(
+        $this->product = $this->em->getRepository(Product::class)->find(
             $this->request->getQueryParams()['id'] ?? 0
         ) ?? throw new NoResultException();
     }
@@ -51,7 +55,11 @@ final class Delete implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
+            $this->dispatcher->dispatch(new PreDeleteProductEvent($this->product));
             $this->doAction();
+            $this->dispatcher->dispatch(new PostDeleteProductEvent($this->product));
+            $this->redirect->toRoute('catalog/admin/products', emit: true);
+
         }
 
 
@@ -87,11 +95,10 @@ final class Delete implements ModelInterface
         $this->removeUrls();
         $this->removePrices();
         $this->removeFiles();
-        $this->entityManager->remove($this->product->getQuantity());
-        $this->entityManager->remove($this->product);
+        $this->em->remove($this->product->getQuantity());
+        $this->em->remove($this->product);
 
-        $this->entityManager->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/products'), emit: true);
+        $this->em->flush();
     }
 
     /**
@@ -105,7 +112,7 @@ final class Delete implements ModelInterface
             $fs->delete($image->getFilename().'.'.$image->getExtension());
             $fs->delete($image->getFilename().'_large.'.$image->getExtension());
             $fs->delete($image->getFilename().'_small.'.$image->getExtension());
-            $this->entityManager->remove($image);
+            $this->em->remove($image);
         }
     }
 
@@ -118,7 +125,7 @@ final class Delete implements ModelInterface
         foreach ($this->product->getFiles() as $file) {
             $fs = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
             $fs->delete($file->getFilePath());
-            $this->entityManager->remove($file);
+            $this->em->remove($file);
         }
     }
 
@@ -128,7 +135,7 @@ final class Delete implements ModelInterface
     private function removePrices(): void
     {
         foreach ($this->product->getPrices() as $price) {
-            $this->entityManager->remove($price);
+            $this->em->remove($price);
         }
     }
 
@@ -138,7 +145,7 @@ final class Delete implements ModelInterface
     private function removeUrls(): void
     {
         foreach ($this->product->getUrls() as $url) {
-            $this->entityManager->remove($url);
+            $this->em->remove($url);
         }
     }
 }

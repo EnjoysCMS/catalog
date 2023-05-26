@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Crud;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
@@ -22,6 +23,9 @@ final class Setting implements ModelInterface
 
     private EntityRepository $settingRepository;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
@@ -164,6 +168,6 @@ final class Setting implements ModelInterface
             }
         }
         $this->em->flush();
-        $this->redirect->http(emit: true);
+        $this->redirect->toUrl(emit: true);
     }
 }

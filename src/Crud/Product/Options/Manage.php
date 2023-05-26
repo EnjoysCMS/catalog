@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Options;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -33,6 +34,7 @@ final class Manage implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -60,7 +62,7 @@ final class Manage implements ModelInterface
         if ($form->isSubmitted()) {
             $this->doSave();
             $this->em->flush();
-            $this->redirect->http(emit: true);
+            $this->redirect->toUrl(emit: true);
         }
 
         return [

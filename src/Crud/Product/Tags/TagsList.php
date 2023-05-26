@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Tags;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -31,6 +32,7 @@ class TagsList implements ModelInterface
 
     /**
      * @throws NoResultException
+     * @throws NotSupported
      */
     public function __construct(
         private EntityManager $em,
@@ -115,7 +117,7 @@ class TagsList implements ModelInterface
         $this->product->addTagsFromArray($manageTags->getTagsFromArray($tags));
         $this->em->flush();
 
-        $this->redirect->http(emit: true);
+        $this->redirect->toUrl(emit: true);
     }
 
 

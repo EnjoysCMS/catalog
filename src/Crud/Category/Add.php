@@ -10,6 +10,7 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -26,6 +27,9 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Events\PostAddCategoryEvent;
+use EnjoysCMS\Module\Catalog\Events\PreAddCategoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -34,6 +38,10 @@ final class Add implements ModelInterface
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
+
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
@@ -42,6 +50,7 @@ final class Add implements ModelInterface
         private Config $config,
         private ContentEditor $contentEditor,
         private RedirectInterface $redirect,
+        private EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
@@ -60,9 +69,10 @@ final class Add implements ModelInterface
         $this->renderer->setForm($form);
 
         if ($form->isSubmitted()) {
-            $this->doAction();
-            $this->em->flush();
-            $this->redirect->http($this->urlGenerator->generate('catalog/admin/category'), emit: true);
+            $this->dispatcher->dispatch(new PreAddCategoryEvent());
+            $category = $this->doAction();
+            $this->dispatcher->dispatch(new PostAddCategoryEvent($category));
+            $this->redirect->toRoute('catalog/admin/category', emit: true);
         }
 
         return [
@@ -144,6 +154,14 @@ HTML
                     ),
                 ]
             );
+
+        $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
+            ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
+
+        $form->text('meta-title', 'meta-title');
+        $form->textarea('meta-description', 'meta-description');
+        $form->text('meta-keywords', 'meta-keywords');
+
         $form->submit('add');
         return $form;
     }
@@ -152,7 +170,7 @@ HTML
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction(): void
+    private function doAction(): Category
     {
         $category = new Category();
         $category->setParent($this->categoryRepository->find($this->request->getParsedBody()['parent'] ?? null));
@@ -162,7 +180,18 @@ HTML
         $category->setDescription($this->request->getParsedBody()['description'] ?? null);
         $category->setUrl($this->request->getParsedBody()['url'] ?? null);
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
+        $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+
+        $meta = $category->getMeta();
+        $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
+        $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
+        $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
+        $this->em->persist($meta);
+
+        $category->setMeta($meta);
 
         $this->em->persist($category);
+        $this->em->flush();
+        return $category;
     }
 }

@@ -86,6 +86,6 @@ final class PriceGroupAdd implements ModelInterface
         $priceGroup->setCode($this->request->getParsedBody()['code'] ?? null);
         $this->em->persist($priceGroup);
         $this->em->flush();
-        $this->redirect->http($this->urlGenerator->generate('catalog/admin/pricegroup'), emit: true);
+        $this->redirect->toRoute('catalog/admin/pricegroup', emit: true);
     }
 }
