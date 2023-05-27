@@ -39,15 +39,14 @@ final class CategoryModel implements ModelInterface
      * @throws NotFoundException
      */
     public function __construct(
-        private EntityManager          $em,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface   $breadcrumbs,
-        private UrlGeneratorInterface  $urlGenerator,
-        private RedirectInterface      $redirect,
-        private Config                 $config,
-        private Setting                $setting,
-    )
-    {
+        private BreadcrumbsInterface $breadcrumbs,
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
+        private Config $config,
+        private Setting $setting,
+    ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
 
@@ -94,6 +93,18 @@ final class CategoryModel implements ModelInterface
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
         }
 
+        // Filter goods
+        $filters = $this->request->getQueryParams()['filter'] ?? null;
+        if (!empty($filters) && is_array($filters)) {
+            $i = 0;
+            foreach ($filters as $value) {
+                $qb->andWhere(sprintf(':value%s MEMBER OF p.options', $i))
+                    ->setParameter('value'.$i, $value)
+                ;
+                $i++;
+            }
+        }
+//dd('.');
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
@@ -112,6 +123,7 @@ final class CategoryModel implements ModelInterface
             default => $qb->addOrderBy('p.name', 'ASC'),
         };
 
+//        dd($qb->getQuery()->getSQL());
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
 
@@ -125,7 +137,11 @@ final class CategoryModel implements ModelInterface
                 $redirectAllow = true;
             }
 
-            if ($redirectAllow === false && in_array($this->category->getId(), $this->config->get('categoriesIdForRedirectToProductIfIsOne', []), true)) {
+            if ($redirectAllow === false && in_array(
+                    $this->category->getId(),
+                    $this->config->get('categoriesIdForRedirectToProductIfIsOne', []),
+                    true
+                )) {
                 $redirectAllow = true;
             }
 
