@@ -94,8 +94,10 @@ final class CategoryModel implements ModelInterface
         }
 
         // Filter goods
-        $filters = $this->request->getQueryParams()['filter'] ?? null;
+        $filtered = false;
+        $filters = $this->request->getQueryParams()['filter'] ?? false;
         if (!empty($filters) && is_array($filters)) {
+            $filtered = true;
             $i = 0;
             foreach ($filters as $value) {
                 $qb->andWhere(sprintf(':value%s MEMBER OF p.options', $i))
@@ -165,6 +167,7 @@ final class CategoryModel implements ModelInterface
             'products' => $result,
             'config' => $this->config,
             'breadcrumbs' => $this->getBreadcrumbs(),
+            'filtered' => $filtered
         ];
     }
 
