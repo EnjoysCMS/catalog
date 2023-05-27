@@ -9,26 +9,48 @@
 
             <div class="product-categories">
 
-                <h6 class="mb-3"> Фильтр
-                </h6>
 
 
             </div>
+{{ form|raw }}
+{#<form>#}
+{#            {% for filter in filters %}#}
+{#                {% set values = filters.info() %}#}
 
-            {% for filter in filters %}
-            <hr>
-            <div class="product-brands">
-                <h6 class="text-uppercase mb-3">{{ filter.optionKey }}</h6>
-                <ul class="list-unstyled mb-0 categories-list">
-                    <li>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="Adidas">
-                            <label class="form-check-label" for="Adidas">Adidas (15)</label>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            {% endfor %}
+{#                <div class="product-brands">#}
+{#                    <h6 class="text-uppercase mb-3">{{ filter.optionKey }}</h6>#}
+{#                    <ul class="list-unstyled mb-0 categories-list">#}
+{#                      {% for value in values %}#}
+{#                          <li>#}
+{#                              <div class="form-check">#}
+{#                                  <input class="form-check-input" type="checkbox" name="filter[]" value="{{ value.id }}" id="v_{{ value.id }}">#}
+{#                                  <label class="form-check-label" for="v_{{ value.id }}">{{ value }}</label>#}
+{#                              </div>#}
+{#                          </li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#                <hr>#}
+{#            {% endfor %}#}
+
+{#    <input type="submit" value="показать">#}
+
+{#</form>#}
+            {#            {% for filter in filters %} #}
+            {#            <hr> #}
+            {#      #}
+            {#            <div class="product-brands"> #}
+            {#                <h6 class="text-uppercase mb-3">{{ filter.optionKey }}</h6> #}
+            {#                <ul class="list-unstyled mb-0 categories-list"> #}
+            {#                    <li> #}
+            {#                        <div class="form-check"> #}
+            {#                            <input class="form-check-input" type="checkbox" value="" id="Adidas"> #}
+            {#                            <label class="form-check-label" for="Adidas">Adidas (15)</label> #}
+            {#                        </div> #}
+            {#                    </li> #}
+            {#                </ul> #}
+            {#            </div> #}
+            {#            {% endfor %} #}
 
 
         </div>
