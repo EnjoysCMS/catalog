@@ -4,14 +4,21 @@
         let select = document.querySelector('select#category');
         let filtersBody = document.getElementById('filters');
 
-        function drawFilters(data) {
+        function drawFilters(data, categoryId) {
             filtersBody.innerHTML = '';
 
             let addBtn = document.createElement('button');
+            addBtn.id = 'add-filter';
+            addBtn.setAttribute('data-toggle', 'modal')
+            addBtn.setAttribute('data-target', '#addFilterModal')
             addBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'mb-3');
             addBtn.innerText = 'Добавить фильтры';
 
             filtersBody.appendChild(document.createElement('div').appendChild(addBtn));
+
+            // document.getElementById('add-filter').addEventListener('click', function () {
+            //     addFilterModal(categoryId);
+            // });
 
             let table = document.createElement('table');
             table.classList.add('table')
@@ -34,7 +41,7 @@
             fetch(url.toString(), {
                 method: 'GET'
             }).then(response => response.json())
-                .then(data => drawFilters(data))
+                .then(data => drawFilters(data, categoryId))
         };
 
         const fillCategorySelect = function () {
@@ -56,6 +63,18 @@
                     })
                 })
         };
+
+        const addFilterModal = (categoryId) => {
+            fetch("{{ path('catalog/admin/filter/add') }}", {
+                method: 'PUT',
+                body: JSON.stringify({
+                    category: categoryId,
+                    optionKeys: [4, 5],
+                    order: 0,
+                    type: 'checkbox'
+                })
+            }).then(response => response.json())
+        }
 
         fillCategorySelect();
 
@@ -93,6 +112,23 @@
         </div>
         <!-- /.card -->
     </section>
+
+    <div class="modal fade" id="addFilterModal" >
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <template id="filterRow">
         <tr>

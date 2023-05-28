@@ -34,7 +34,7 @@ class Filter
     private string $type;
 
     /**
-     * @ORM\Column(type="integer", options={"default": 0})
+     * @ORM\Column(name="order_filter", type="integer", options={"default": 0})
      */
     private int $order;
 
