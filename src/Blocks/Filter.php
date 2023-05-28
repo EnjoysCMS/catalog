@@ -81,21 +81,24 @@ class Filter extends AbstractBlock
 //        }
 
         $form = new Form('get');
+        $hasFilters = false;
         foreach ($allowedFilters as $filter) {
+            $values = [];
+            /** @var OptionValue $value */
+            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
+                $values[$value->getId()] = $value->getValue();
+            }
+
+            if ($values === []) {
+                continue;
+            }
+
             switch ($filter->getType()) {
                 case 'checkbox':
                     $form->checkbox(
                         sprintf('filter[%s]', $filter->getOptionKey()->getId()),
                         $filter->getOptionKey()->__toString()
-                    )
-                        ->fill(function () use ($filter, $filterRepository, $pids) {
-                            $result = [];
-                            /** @var OptionValue $value */
-                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
-                                $result[$value->getId()] = $value->getValue();
-                            }
-                            return $result;
-                        });
+                    )->fill($values);
                     break;
                 case 'select-multiply':
                     $form->select(
@@ -103,49 +106,28 @@ class Filter extends AbstractBlock
                         $filter->getOptionKey()->__toString()
                     )
                         ->setMultiple()
-                        ->fill(function () use ($filter, $filterRepository, $pids) {
-                            $result = [];
-                            /** @var OptionValue $value */
-                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
-                                $result[$value->getId()] = $value->getValue();
-                            }
-                            return $result;
-                        });
+                        ->fill($values);
                     break;
                 case 'select':
                     $form->select(
                         sprintf('filter[%s][]', $filter->getOptionKey()->getId()),
                         $filter->getOptionKey()->__toString()
-                    )
-                        ->fill(function () use ($filter, $filterRepository, $pids) {
-                            $result = [];
-                            /** @var OptionValue $value */
-                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
-                                $result[$value->getId()] = $value->getValue();
-                            }
-                            return $result;
-                        });
+                    )->fill($values);
                     break;
                 case 'radio':
                     $form->radio(
                         sprintf('filter[%s][]', $filter->getOptionKey()->getId()),
                         $filter->getOptionKey()->__toString()
-                    )
-                        ->fill(function () use ($filter, $filterRepository, $pids) {
-                            $result = [];
-                            /** @var OptionValue $value */
-                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
-                                $result[$value->getId()] = $value->getValue();
-                            }
-                            return $result;
-                        });
+                    )->fill($values);
                     break;
                 default:
             }
+            $hasFilters = true;
         }
 
 
         $form->submit('submit1', 'Показать')->removeAttribute('name');
+
 
         $renderForm = $this->container->get(RendererInterface::class);
         $renderForm->setForm($form);
@@ -156,7 +138,7 @@ class Filter extends AbstractBlock
             ),
             [
 //                'filters' => $filters,
-                'form' => $renderForm->output(),
+                'form' => $hasFilters ? $renderForm->output() : null,
                 'blockOptions' => $this->getOptions()
             ]
         );
