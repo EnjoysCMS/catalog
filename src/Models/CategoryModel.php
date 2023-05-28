@@ -101,8 +101,7 @@ final class CategoryModel implements ModelInterface
             $i = 0;
             foreach ($filters as $value) {
                 $qb->andWhere(sprintf(':value%s MEMBER OF p.options', $i))
-                    ->setParameter('value'.$i, $value)
-                ;
+                    ->setParameter('value' . $i, $value);
                 $i++;
             }
         }
@@ -194,7 +193,7 @@ final class CategoryModel implements ModelInterface
 
     private function updateSortMode(): void
     {
-        $mode = $this->request->getQueryParams()['sort'] ?? null;
+        $mode = $this->request->getQueryParams()['sort'] ?? $this->request->getParsedBody()['sort'] ?? null;
         if ($mode !== null) {
             $this->config->setSortMode($mode);
         }
