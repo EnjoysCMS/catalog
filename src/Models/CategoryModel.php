@@ -106,7 +106,7 @@ final class CategoryModel implements ModelInterface
                 $i++;
             }
         }
-//dd('.');
+
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
@@ -167,7 +167,8 @@ final class CategoryModel implements ModelInterface
             'products' => $result,
             'config' => $this->config,
             'breadcrumbs' => $this->getBreadcrumbs(),
-            'filtered' => $filtered
+            'filtered' => $filtered,
+            'filters' => $filters
         ];
     }
 

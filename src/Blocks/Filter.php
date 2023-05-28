@@ -82,17 +82,67 @@ class Filter extends AbstractBlock
 
         $form = new Form('get');
         foreach ($allowedFilters as $filter) {
-            $form->checkbox('filter[]', $filter->getOptionKey()->__toString())
-                ->fill(function () use ($filter, $filterRepository, $pids) {
-                    $result = [];
-                    /** @var OptionValue $value */
-                    foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
-                        $result[$value->getId()] = $value->getValue();
-                    }
-                    return $result;
-                });
+            switch ($filter->getType()) {
+                case 'checkbox':
+                    $form->checkbox(
+                        sprintf('filter[%s]', $filter->getOptionKey()->getId()),
+                        $filter->getOptionKey()->__toString()
+                    )
+                        ->fill(function () use ($filter, $filterRepository, $pids) {
+                            $result = [];
+                            /** @var OptionValue $value */
+                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
+                                $result[$value->getId()] = $value->getValue();
+                            }
+                            return $result;
+                        });
+                    break;
+                case 'select-multiply':
+                    $form->select(
+                        sprintf('filter[%s][]', $filter->getOptionKey()->getId()),
+                        $filter->getOptionKey()->__toString()
+                    )
+                        ->setMultiple()
+                        ->fill(function () use ($filter, $filterRepository, $pids) {
+                            $result = [];
+                            /** @var OptionValue $value */
+                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
+                                $result[$value->getId()] = $value->getValue();
+                            }
+                            return $result;
+                        });
+                    break;
+                case 'select':
+                    $form->select(
+                        sprintf('filter[%s][]', $filter->getOptionKey()->getId()),
+                        $filter->getOptionKey()->__toString()
+                    )
+                        ->fill(function () use ($filter, $filterRepository, $pids) {
+                            $result = [];
+                            /** @var OptionValue $value */
+                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
+                                $result[$value->getId()] = $value->getValue();
+                            }
+                            return $result;
+                        });
+                    break;
+                case 'radio':
+                    $form->radio(
+                        sprintf('filter[%s][]', $filter->getOptionKey()->getId()),
+                        $filter->getOptionKey()->__toString()
+                    )
+                        ->fill(function () use ($filter, $filterRepository, $pids) {
+                            $result = [];
+                            /** @var OptionValue $value */
+                            foreach ($filterRepository->getValues($filter->getOptionKey(), $pids) as $value) {
+                                $result[$value->getId()] = $value->getValue();
+                            }
+                            return $result;
+                        });
+                    break;
+                default:
+            }
         }
-
 
 
         $form->submit('submit1', 'Показать')->removeAttribute('name');
