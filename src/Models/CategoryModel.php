@@ -17,6 +17,7 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
@@ -96,13 +97,16 @@ final class CategoryModel implements ModelInterface
         // Filter goods
         $filtered = false;
         $filters = $this->request->getQueryParams()['filter'] ?? false;
+        $usedFilters = [];
         if (!empty($filters) && is_array($filters)) {
             $filtered = true;
-            $i = 0;
-            foreach ($filters as $value) {
-                $qb->andWhere(sprintf(':value%s MEMBER OF p.options', $i))
-                    ->setParameter('value' . $i, $value);
-                $i++;
+            foreach ($filters as $key => $values) {
+                foreach ($values as $value) {
+                    $v = $this->em->getRepository(OptionValue::class)->find($value);
+                    $usedFilters[$v->getOptionKey()->getName()][] = $v;
+                }
+                $qb->andWhere(sprintf(':values%s MEMBER OF p.options', $key))
+                    ->setParameter('values' . $key, $values);
             }
         }
 
@@ -167,7 +171,7 @@ final class CategoryModel implements ModelInterface
             'config' => $this->config,
             'breadcrumbs' => $this->getBreadcrumbs(),
             'filtered' => $filtered,
-            'filters' => $filters
+            'usedFilters' => $usedFilters
         ];
     }
 
