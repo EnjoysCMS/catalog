@@ -53,11 +53,7 @@ final class FilterCrud
             if (null !== $filter = $em->getRepository(Filter::class)->findOneBy(
                     ['category' => $category, 'optionKey' => $optionKey]
                 )) {
-                $response = $response->withStatus(400);
-                $response->getBody()->write(
-                    json_encode(['error' => sprintf('filter `%s` already exist', $filter->getOptionKey())])
-                );
-                return $response;
+                continue;
             }
             $filter = new Filter();
             $filter->setCategory($category);
@@ -68,9 +64,7 @@ final class FilterCrud
             $em->persist($filter);
         }
         $em->flush();
-
-
-        $response->getBody()->write(json_encode(['error' => false]));
+        $response->getBody()->write('');
         return $response;
     }
 
@@ -87,6 +81,6 @@ final class FilterCrud
 
     public function get()
     {
-        
+
     }
 }

@@ -1,10 +1,67 @@
 {% extends '@a/layout.twig' %}
 {% block content %}
+    {% do asset('css', [
+        {0: module.path ~ '/node_modules/select2/dist/css/select2.css','minify': false},
+        {0: module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
+    ]) %}
+
+    {% do asset('js', [
+        {0: module.path ~ '/node_modules/select2/dist/js/select2.full.js','minify': false },
+    ]) %}
+
     <script>
+
+
+        $(function () {
+            $(".filters-select").select2({
+                width: "100%",
+                theme: 'bootstrap4',
+                allowClear: true,
+                placeholder: 'select..',
+                ajax: {
+                    url: "{{ path('@a/catalog/tools/find-option-keys') }}",
+                    dataType: 'json',
+                    // delay: 250,
+                    data: function (params) {
+                        return {
+                            query: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+
+                },
+                templateResult: function (result) {
+                    if (result.loading) {
+                        return result.text;
+                    }
+                    let $container = $(
+                        "<div class='select2-result-repository clearfix'>" +
+                        "<span class='select2-result---name'></span> " +
+                        "<span class='select2-result---unit small text-muted'></span>" +
+                        "</div>"
+                    );
+
+                    $container.find(".select2-result---name").text(result.name);
+                    $container.find(".select2-result---unit").text(result.unit);
+
+                    return $container;
+                },
+                templateSelection: function (result) {
+                    return result.text || (result.name + (result.unit ? ' (' + result.unit + ')' : ''));
+                }
+            });
+
+        });
+
         let select = document.querySelector('select#category');
         let filtersBody = document.getElementById('filters');
+        let categoryId;
 
-        function drawFilters(data, categoryId) {
+        function drawFilters(data) {
             filtersBody.innerHTML = '';
 
             let addBtn = document.createElement('button');
@@ -16,9 +73,7 @@
 
             filtersBody.appendChild(document.createElement('div').appendChild(addBtn));
 
-            // document.getElementById('add-filter').addEventListener('click', function () {
-            //     addFilterModal(categoryId);
-            // });
+
 
             let table = document.createElement('table');
             table.classList.add('table')
@@ -34,14 +89,14 @@
             filtersBody.appendChild(table);
         }
 
-        const loadCategoryFilters = function (categoryId) {
+        const loadCategoryFilters = function () {
 
             const url = new URL("{{ url('catalog/admin/api/get-category-filters') }}");
             url.searchParams.append('category', categoryId);
             fetch(url.toString(), {
                 method: 'GET'
             }).then(response => response.json())
-                .then(data => drawFilters(data, categoryId))
+                .then(data => drawFilters(data))
         };
 
         const fillCategorySelect = function () {
@@ -59,25 +114,38 @@
                     })
 
                     select.addEventListener('change', function () {
-                        loadCategoryFilters(select.value)
+                        categoryId = select.value;
+                        loadCategoryFilters()
                     })
                 })
         };
 
-        const addFilterModal = (categoryId) => {
+
+        fillCategorySelect();
+
+        document.querySelector('form[name="addFilters"]').addEventListener('submit', function (e) {
+            e.preventDefault()
+            let formData = new FormData(e.target);
+            let optionKeys = [];
+            formData.forEach((v) => {
+                optionKeys.push(v)
+            });
+
+            console.log(categoryId)
+
             fetch("{{ path('catalog/admin/filter/add') }}", {
                 method: 'PUT',
                 body: JSON.stringify({
                     category: categoryId,
-                    optionKeys: [4, 5],
+                    optionKeys: optionKeys,
                     order: 0,
                     type: 'checkbox'
                 })
-            }).then(response => response.json())
-        }
-
-        fillCategorySelect();
-
+            }).then(function () {
+                $('#addFilterModal').modal('hide')
+                return loadCategoryFilters(categoryId);
+            })
+        });
 
     </script>
     <section class="content">
@@ -113,18 +181,28 @@
         <!-- /.card -->
     </section>
 
-    <div class="modal fade" id="addFilterModal" >
-        <div class="modal-dialog">
+    <div class="modal fade" id="addFilterModal">
+        <div class="modal-dialog modal-lg">
 
             <!-- Modal content-->
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal"></button>
-                </div>
                 <div class="modal-body">
+                    <form id="addFilters" name="addFilters">
+                        <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для категории  <a
+                                    class="align-top btn btn-xs btn-warning"
+                                    id="fill-from-parent"
+                                    data-id="2">
+                                    заполнить из родительской категории</a> </label>
+                            <select class="filters-select form-select form-control" multiple name="optionKeys[]"
+                                    id="optionKeys" aria-describedby="optionKeysHelp">
 
-                </div>
-                <div class="modal-footer">
+                            </select>
+                            <small id="optionKeysHelp" class="form-text">Добавление фильтров для категорий (можно выбрать несколько).
+                                Берутся из параметров товара (опций)</small>
+                        </div>
+                        <input type="submit" class="btn btn-primary">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </form>
                 </div>
             </div>
         </div>
