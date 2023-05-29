@@ -119,13 +119,8 @@ final class FilterCrud
         $filter = $em->getRepository(Filter::class)->find(
             $this->input->filterId ?? throw new \InvalidArgumentException('Filter id not found')
         ) ?? throw new \RuntimeException('Filter not found');
-
-        if ($this->input->type ?? null) {
-            $filter->setType($this->input->type);
-        }
-        if ($this->input->order ?? null) {
-            $filter->setOrder((int)$this->input->order);
-        }
+        $filter->setType($this->input->type ?? 'checkbox');
+        $filter->setOrder((int)($this->input->order ?? 0));
         $em->flush();
         return $response;
     }

@@ -74,7 +74,6 @@
             filtersBody.appendChild(document.createElement('div').appendChild(addBtn));
 
 
-
             let table = document.createElement('table');
             table.classList.add('table')
             let template = document.getElementById('filterRow');
@@ -83,13 +82,13 @@
                 let filter = row.querySelector('.filter');
                 let tr = row.querySelector('tr');
                 let order = row.querySelector('.order input');
-                let type = row.querySelector('.type');
+                let type = row.querySelector('select[name="type"]');
 
                 filter.innerText = item.option.name;
 
 
                 tr.dataset.filterId = item.id;
-                type.innerText = item.type;
+                type.value = item.type;
                 order.value = item.order;
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
@@ -102,16 +101,20 @@
                     }).then(() => loadCategoryFilters(categoryId))
                 });
 
-                order.addEventListener('change', function (e) {
-                    e.preventDefault()
-                    fetch("{{ path('catalog/admin/filter/update') }}", {
-                        method: 'PATCH',
-                        body: JSON.stringify({
-                            filterId: tr.dataset.filterId,
-                            order: order.value
-                        })
-                    }).then(() => loadCategoryFilters(categoryId))
+                [type, order].forEach(function (element) {
+                    element.addEventListener('change', function (e) {
+                        e.preventDefault()
+                        fetch("{{ path('catalog/admin/filter/update') }}", {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                filterId: tr.dataset.filterId,
+                                order: order.value,
+                                type: type.value,
+                            })
+                        }).then(() => loadCategoryFilters(categoryId))
+                    });
                 });
+
 
                 table.appendChild(row)
             });
@@ -217,7 +220,8 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <form id="addFilters" name="addFilters">
-                        <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для категории  <a
+                        <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для
+                                категории <a
                                     class="align-top btn btn-xs btn-warning"
                                     id="fill-from-parent"
                                     data-id="2">
@@ -226,7 +230,8 @@
                                     id="optionKeys" aria-describedby="optionKeysHelp">
 
                             </select>
-                            <small id="optionKeysHelp" class="form-text">Добавление фильтров для категорий (можно выбрать несколько).
+                            <small id="optionKeysHelp" class="form-text">Добавление фильтров для категорий (можно
+                                выбрать несколько).
                                 Берутся из параметров товара (опций)</small>
                         </div>
                         <input type="submit" class="btn btn-primary">
@@ -241,7 +246,11 @@
         <tr>
             <td class="filter"></td>
             <td class="type">
-
+                <select name="type">
+                    <option value="checkbox">checkbox</option>
+                    <option value="radio">radio</option>
+                    <option value="select">select</option>
+                </select>
             </td>
             <td class="order">
                 <input name="order" type="number">
