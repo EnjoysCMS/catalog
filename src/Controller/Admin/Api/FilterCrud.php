@@ -100,7 +100,33 @@ final class FilterCrud
         return $response;
     }
 
-    public function get()
+    /**
+     * @throws OptimisticLockException
+     * @throws NotSupported
+     * @throws ORMException
+     */
+    #[Route(
+        path: 'admin/catalog/filter',
+        name: 'catalog/admin/filter/update',
+        methods: [
+            'PATCH'
+        ]
+    )]
+    public function updateFilter(EntityManager $em): ResponseInterface
     {
+        $response = $this->response->withHeader('content-type', 'application/json');
+        /** @var Category $category */
+        $filter = $em->getRepository(Filter::class)->find(
+            $this->input->filterId ?? throw new \InvalidArgumentException('Filter id not found')
+        ) ?? throw new \RuntimeException('Filter not found');
+
+        if ($this->input->type ?? null) {
+            $filter->setType($this->input->type);
+        }
+        if ($this->input->order ?? null) {
+            $filter->setOrder((int)$this->input->order);
+        }
+        $em->flush();
+        return $response;
     }
 }

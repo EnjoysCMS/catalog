@@ -48,7 +48,7 @@ class CategoryFilters
             'category' => $this->request->getQueryParams()['category'] ?? throw new \InvalidArgumentException(
                     sprintf('Category id not sent')
                 )
-        ]);
+        ], ['order' => 'asc']);
 
         $this->response->getBody()->write(
             json_encode($this->normalizeData($filters))

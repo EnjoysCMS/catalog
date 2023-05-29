@@ -81,18 +81,34 @@
             data.forEach(function (item) {
                 let row = template.content.cloneNode(true);
                 let filter = row.querySelector('.filter');
-                filter.innerText = item.option.name;
-                row.querySelector('.type').innerText = item.type;
-                row.querySelector('.order input').value = item.order;
-                let removeButton = row.querySelector('.delete-filter');
-                removeButton.dataset.filterId = item.id;
+                let tr = row.querySelector('tr');
+                let order = row.querySelector('.order input');
+                let type = row.querySelector('.type');
 
-                removeButton.addEventListener('click', function (e) {
+                filter.innerText = item.option.name;
+
+
+                tr.dataset.filterId = item.id;
+                type.innerText = item.type;
+                order.value = item.order;
+
+                row.querySelector('.delete-filter').addEventListener('click', function (e) {
                     e.preventDefault()
                     fetch("{{ path('catalog/admin/filter/delete') }}", {
                         method: 'DELETE',
                         body: JSON.stringify({
-                            filterId: e.target.dataset.filterId
+                            filterId: tr.dataset.filterId
+                        })
+                    }).then(() => loadCategoryFilters(categoryId))
+                });
+
+                order.addEventListener('change', function (e) {
+                    e.preventDefault()
+                    fetch("{{ path('catalog/admin/filter/update') }}", {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            filterId: tr.dataset.filterId,
+                            order: order.value
                         })
                     }).then(() => loadCategoryFilters(categoryId))
                 });
@@ -228,7 +244,7 @@
 
             </td>
             <td class="order">
-                <input type="number">
+                <input name="order" type="number">
             </td>
             <td class="action">
                 <button class="delete-filter btn btn-sm btn-danger">Удалить фильтр</button>
