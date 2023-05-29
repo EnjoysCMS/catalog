@@ -59,7 +59,7 @@ class Filter extends AbstractBlock
         $slug = $request->getAttribute('slug', '');
         $category = $categoryRepository->findByPath($slug);
         /** @var \EnjoysCMS\Module\Catalog\Entities\Filter[] $allowedFilters */
-        $allowedFilters = $filterRepository->findBy(['category' => $category]);
+        $allowedFilters = $filterRepository->findBy(['category' => $category], ['order' => 'asc']);
 
         /** @var int[] $pids id всех продуктов в этой категории */
         $pids = array_column(
