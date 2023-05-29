@@ -84,6 +84,19 @@
                 filter.innerText = item.option.name;
                 row.querySelector('.type').innerText = item.type;
                 row.querySelector('.order input').value = item.order;
+                let removeButton = row.querySelector('.delete-filter');
+                removeButton.dataset.filterId = item.id;
+
+                removeButton.addEventListener('click', function (e) {
+                    e.preventDefault()
+                    fetch("{{ path('catalog/admin/filter/delete') }}", {
+                        method: 'DELETE',
+                        body: JSON.stringify({
+                            filterId: e.target.dataset.filterId
+                        })
+                    }).then(() => loadCategoryFilters(categoryId))
+                });
+
                 table.appendChild(row)
             });
             filtersBody.appendChild(table);
@@ -131,7 +144,7 @@
                 optionKeys.push(v)
             });
 
-            console.log(categoryId)
+            //console.log(categoryId)
 
             fetch("{{ path('catalog/admin/filter/add') }}", {
                 method: 'PUT',
@@ -218,7 +231,7 @@
                 <input type="number">
             </td>
             <td class="action">
-                <button class="btn btn-sm btn-danger">Отключить фильтр</button>
+                <button class="delete-filter btn btn-sm btn-danger">Удалить фильтр</button>
             </td>
         </tr>
 

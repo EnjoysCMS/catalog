@@ -9,6 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Filter;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -18,10 +19,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class FilterCrud
 {
+    private \stdClass $input;
+
     public function __construct(
         private ServerRequestInterface $request,
         private ResponseInterface $response
     ) {
+        $this->input = json_decode($this->request->getBody()->getContents());
     }
 
     /**
@@ -38,14 +42,17 @@ final class FilterCrud
     public function addFilter(EntityManager $em): ResponseInterface
     {
         $response = $this->response->withHeader('content-type', 'application/json');
-        $input = json_decode($this->request->getBody()->getContents());
 
         /** @var Category $category */
         $category = $em->getRepository(Category::class)->find(
-            $input->category ?? throw new \InvalidArgumentException('category id not found')
+            $this->input->category ?? throw new \InvalidArgumentException('category id not found')
         ) ?? throw new \RuntimeException('Category not found');
 
-        foreach ($input->optionKeys ?? throw new \InvalidArgumentException('OptionKeys not set') as $optionKeyId) {
+        foreach (
+            $this->input->optionKeys ?? throw new \InvalidArgumentException(
+            'OptionKeys not set'
+        ) as $optionKeyId
+        ) {
             /** @var OptionKey $optionKey */
             $optionKey = $em->getRepository(OptionKey::class)->find($optionKeyId)
                 ?? throw new \RuntimeException('OptionKey not found');
@@ -57,9 +64,9 @@ final class FilterCrud
             }
             $filter = new Filter();
             $filter->setCategory($category);
-            $filter->setType($input->type ?? 'checkbox');
+            $filter->setType($this->input->type ?? 'checkbox');
             $filter->setOptionKey($optionKey);
-            $filter->setOrder($input->order ?? 0);
+            $filter->setOrder($this->input->order ?? 0);
 
             $em->persist($filter);
         }
@@ -68,6 +75,11 @@ final class FilterCrud
         return $response;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws NotSupported
+     * @throws ORMException
+     */
     #[Route(
         path: 'admin/catalog/filter',
         name: 'catalog/admin/filter/delete',
@@ -75,12 +87,20 @@ final class FilterCrud
             'DELETE'
         ]
     )]
-    public function deleteFilter()
+    public function deleteFilter(EntityManager $em): ResponseInterface
     {
+        $response = $this->response->withHeader('content-type', 'application/json');
+        /** @var Category $category */
+        $filter = $em->getRepository(Filter::class)->find(
+            $this->input->filterId ?? throw new \InvalidArgumentException('Filter id not found')
+        ) ?? throw new \RuntimeException('Filter not found');
+
+        $em->remove($filter);
+        $em->flush();
+        return $response;
     }
 
     public function get()
     {
-
     }
 }
