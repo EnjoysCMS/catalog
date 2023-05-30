@@ -13,7 +13,7 @@
             let maxInput = slider.querySelector('.maxInput');
 
             let sliderContainer = document.createElement('div');
-            slider.appendChild(sliderContainer);
+            slider.prepend(sliderContainer);
 
             noUiSlider.create(sliderContainer, {
                 start: [minInput.value, maxInput.value],
@@ -28,12 +28,12 @@
                 minInput.value = Math.round(values[0]);
                 maxInput.value = Math.round(values[1]);
             });
-            //
-            // [minInput, maxInput].forEach(function (element) {
-            //     element.addEventListener('change', function () {
-            //         sliderContainer.noUiSlider.set([null, this.value]);
-            //     });
-            // })
+
+            [minInput, maxInput].forEach(function (element) {
+                element.addEventListener('change', function () {
+                    sliderContainer.noUiSlider.set([minInput.value, maxInput.value]);
+                });
+            })
         })
 
 

@@ -23,6 +23,20 @@ class FilterFactory
     {
     }
 
+    public function create(string $filterClass, array $params): FilterInterface
+    {
+
+        return $this->container->make(
+            self::$filters[$filterClass] ?? throw new \RuntimeException(
+            sprintf(
+                '%s not mapped',
+                $filterClass
+            )
+        ),
+            $this->resolveParams($filterClass, $params)
+        );
+    }
+
     /**
      * @return FilterInterface[]
      * @throws DependencyException
@@ -49,16 +63,19 @@ class FilterFactory
 
     private function resolveParams(string $filterClassString, array $params): array
     {
-        return match ($filterClassString) {
-            OptionFilter::class => [
-                'optionKey' => $key = array_key_first($params),
-                'currentValues' => $params[$key]
-            ],
-            PriceFilter::class => [
-                'currentValues' => $params
-            ],
-            default => $params,
-        };
+        switch ($filterClassString) {
+            case OptionFilter::class:
+                return [
+                    'optionKey' => $key = array_key_first($params),
+                    'currentValues' => $params[$key]
+                ];
+            case PriceFilter::class:
+                return [
+                    'currentValues' => $params
+                ];
+            default:
+                return $params;
+        }
     }
 
     private function buildFilter(mixed $filterClass, array $params)

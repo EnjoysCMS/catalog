@@ -5,32 +5,27 @@ namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Enjoys\Forms\Elements\Group;
+use Enjoys\Forms\Elements\Number;
+use Enjoys\Forms\Interfaces\ElementInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
+use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 
-class PriceFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
+class PriceFilter implements FilterInterface
 {
 
-    public function __construct(private EntityManager $em, private Config $config, private array $currentValues = [])
-    {
+    private ?array $possibleValues = null;
+
+    public function __construct(
+        private EntityManager $em,
+        private Config $config,
+        private array $currentValues = []
+    ) {
     }
 
-    public function getType(): string
-    {
-        return 'price';
-    }
-
-    public function getParamName(): int|string
-    {
-        return 'price';
-    }
-
-    public function getFormName(): string
-    {
-        return 'filter[price]';
-    }
 
     public function getTitle(): string
     {
@@ -42,6 +37,10 @@ class PriceFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
      */
     public function getPossibleValues(array $pids): array
     {
+        if ($this->possibleValues !== null) {
+            return $this->possibleValues;
+        }
+
         /** @var array<array-key, int|float> $minmaxRaw */
         $minmaxRaw = $this->em
             ->createQueryBuilder()
@@ -57,18 +56,66 @@ class PriceFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
             ->getQuery()
             ->getOneOrNullResult();
 
-        return array_map(function ($value) {
+        $this->possibleValues = array_map(function ($value) {
             return (int)ceil(Normalize::intPriceToFloat($value));
         }, $minmaxRaw, []);
+
+        return $this->possibleValues;
     }
 
     public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
     {
-        return $qb->andWhere($qb->expr()->between('CONVERT_PRICE(pr.price, pr.currency, :current_currency)', ':minPrice', ':maxPrice'))
+        return $qb->andWhere(
+            $qb->expr()->between('CONVERT_PRICE(pr.price, pr.currency, :current_currency)', ':minPrice', ':maxPrice')
+        )
             ->andWhere('pr.priceGroup = :priceGroup')
             ->setParameter('current_currency', $this->config->getCurrentCurrencyCode())
-            ->setParameter('priceGroup', $this->em->getRepository(PriceGroup::class)->findOneBy(['code' => $this->config->getDefaultPriceGroup()]))
+            ->setParameter(
+                'priceGroup',
+                $this->em->getRepository(PriceGroup::class)->findOneBy(['code' => $this->config->getDefaultPriceGroup()]
+                )
+            )
             ->setParameter('minPrice', Normalize::floatPriceToInt($this->currentValues['min']))
             ->setParameter('maxPrice', Normalize::floatPriceToInt($this->currentValues['max']));
+    }
+
+    public function getFormName(): string
+    {
+        return 'filter[price]';
+    }
+
+    public function getFormType(): string
+    {
+        return 'slider';
+    }
+
+    public function getFormDefaults(array $values): array
+    {
+        return [
+            'filter' => [
+                'price' => [
+                    'min' => $values[0] ?? 0,
+                    'max' => $values[1] ?? 0,
+                ]
+            ]
+        ];
+    }
+
+    public function getFormElement($values): ElementInterface
+    {
+        [$min, $max] = $values;
+        return (new Group($this->getTitle()))
+            ->addClass('slider-group')
+            ->add([
+                (new Number('price[min]'))
+                    ->addClass('minInput')
+                    ->setMin($min)
+                    ->setMax($max),
+                (new Number('price[max]'))
+                    ->addClass('maxInput')
+                    ->setMin($min)
+                    ->setMax($max)
+                ,
+            ]);
     }
 }

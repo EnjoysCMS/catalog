@@ -52,6 +52,7 @@ class Block extends AbstractBlock
     {
         $request = $this->container->get(ServerRequestInterface::class);
         $em = $this->container->get(EntityManager::class);
+        $filterFactory = $this->container->get(FilterFactory::class);
         /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
         $categoryRepository = $em->getRepository(Category::class);
         /** @var Category $category */
@@ -84,71 +85,77 @@ class Block extends AbstractBlock
 
         $form = new Form('get');
         $hasFilters = false;
-        foreach ($allowedFilters as $filter) {
-
-            /** @var FilterInterface $filterImpl */
-            $filterImpl = $this->container->make($filter->getClassString(), $filter->getClassParams());
-            $values = $filterImpl->getPossibleValues($pids);
-
+        foreach ($allowedFilters as $filterMetaData) {
+//dd( $filter->getParams());
+            /** @var FilterInterface $filter */
+            $filter = $filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
+            $values = $filter->getPossibleValues($pids);
             if ($values === []) {
                 continue;
             }
 
-            switch ($filter->getFormType()) {
-                case 'checkbox':
-                    $form->checkbox(sprintf('%s[]', $filterImpl->getFormName()), $filterImpl->getTitle())
-                        ->fill($values);
-                    break;
-                case 'select-multiply':
-                    $form->select(sprintf('%s[]', $filterImpl->getFormName()), $filterImpl->getTitle())
-                        ->setMultiple()
-                        ->fill($values);
-                    break;
-                case 'select':
-                    $form->select(
-                        sprintf('%s[]', $filterImpl->getFormName()), $filterImpl->getTitle())
-                        ->fill($values);
-                    break;
-                case 'radio':
-                    $form->radio(
-                        sprintf('%s[]', $filterImpl->getFormName()), $filterImpl->getTitle())
-                        ->fill($values);
-                    break;
-                case 'slider':
-                    [$min, $max] = $values;
+            $form->setDefaults(
+                array_merge_recursive(
+                    $form->getDefaultsHandler()->getDefaults(),
+                    $filter->getFormDefaults($values)
+                )
+            );
 
-                    $form->setDefaults(array_merge_recursive($form->getDefaultsHandler()->getDefaults(), [
-                        'filter' => [
-                            $filterImpl->getType() => [
-                                'min' => $min,
-                                'max' => $max,
-                            ]
-                        ]
-                    ]));
+            $form->addElement($filter->getFormElement($values));
 
-                    $form->group($filterImpl->getTitle())
-                        ->addClass('slider-group')
-                        ->add([
-                        (new Number(sprintf('%s[min]', $filterImpl->getFormName())))
-                            ->addClass('minInput')
-                            ->setAttribute(AttributeFactory::create('id', sprintf('%s-min', $filterImpl->getType())))
-                            ->setMin($min)
-                            ->setMax($max),
-                        (new Number(sprintf('%s[max]', $filterImpl->getFormName())))
-                            ->addClass('maxInput')
-                            ->setAttribute(AttributeFactory::create('id', sprintf('%s-max', $filterImpl->getType())))
-                            ->setMin($min)
-                            ->setMax($max)
-                        ,
-                    ]);
-//                    $form->range(sprintf('filter[%s][]', $filterImpl->getType()), $filterImpl->getTitle())
-//                        ->setAttribute(AttributeFactory::create('id', 'price-range'))
-//                        ->setMin($min)
-//                        ->setMax($max)
-//                        ->setAttribute(AttributeFactory::create('multiple'));
-                    break;
-                default:
-            }
+//
+//
+//
+//
+//
+//            switch ($filter->getFormType()) {
+//                case 'checkbox':
+//                    $form->checkbox(sprintf('%s[]', $filter->getFormName()), $filter->getTitle())
+//                        ->fill($values);
+//                    break;
+//                case 'select-multiply':
+//                    $form->select(sprintf('%s[]', $filter->getFormName()), $filter->getTitle())
+//                        ->setMultiple()
+//                        ->fill($values);
+//                    break;
+//                case 'select':
+//                    $form->select(
+//                        sprintf('%s[]', $filter->getFormName()),
+//                        $filter->getTitle()
+//                    )
+//                        ->fill($values);
+//                    break;
+//                case 'radio':
+//                    $form->radio(
+//                        sprintf('%s[]', $filter->getFormName()),
+//                        $filter->getTitle()
+//                    )
+//                        ->fill($values);
+//                    break;
+//                case 'slider':
+//                    [$min, $max] = $values;
+//
+//                    $form->group($filter->getTitle())
+//                        ->addClass('slider-group')
+//                        ->add([
+//                            (new Number(sprintf('%s[min]', $filter->getFormName())))
+//                                ->addClass('minInput')
+//                                ->setMin($min)
+//                                ->setMax($max),
+//                            (new Number(sprintf('%s[max]', $filter->getFormName())))
+//                                ->addClass('maxInput')
+//                                ->setMin($min)
+//                                ->setMax($max)
+//                            ,
+//                        ]);
+////                    $form->range(sprintf('filter[%s][]', $filterImpl->getType()), $filterImpl->getTitle())
+////                        ->setAttribute(AttributeFactory::create('id', 'price-range'))
+////                        ->setMin($min)
+////                        ->setMax($max)
+////                        ->setAttribute(AttributeFactory::create('multiple'));
+//                    break;
+//                default:
+//            }
             $hasFilters = true;
         }
 
@@ -160,7 +167,11 @@ class Block extends AbstractBlock
         $renderForm->setForm($form);
 
         return $this->twig->render(
-            empty($this->getOption('template')) ? '../modules/catalog/template/blocks/filter_v2.twig' : $this->getOption(
+            empty(
+            $this->getOption(
+                'template'
+            )
+            ) ? '../modules/catalog/template/blocks/filter_v2.twig' : $this->getOption(
                 'template'
             ),
             [

@@ -55,7 +55,7 @@ class FilterEntity
         $this->category = $category;
     }
 
-    public function getFormType(): string
+    public function getFilterType(): string
     {
         return $this->formType;
     }

@@ -7,33 +7,35 @@ use Doctrine\ORM\QueryBuilder;
 class StockFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
 {
 
-    public function getParamName(): int|string
+    public function getTitle(): string
     {
-        // TODO: Implement getParamName() method.
+        return 'Только в наличии';
     }
 
-    public function getType(): string
+    public function getPossibleValues(array $pids): array
     {
-        return 'stock';
+        return [];
     }
+
+    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
+    {
+        return $qb;
+    }
+
 
     public function getFormName(): string
     {
         return 'filter[stock]';
     }
 
-    public function getTitle(): string
+
+    public function getFormType(): string
     {
-        // TODO: Implement getTitle() method.
+        return 'checkbox-on-off';
     }
 
-    public function getPossibleValues(array $pids): array
+    public function getFormDefaults(array $values): array
     {
-        // TODO: Implement getValues() method.
-    }
-
-    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
-    {
-        return $qb;
+        return [];
     }
 }
