@@ -3,6 +3,7 @@
 namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 
 use Doctrine\ORM\QueryBuilder;
+use Enjoys\Forms\Form;
 
 class StockFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
 {
@@ -37,5 +38,10 @@ class StockFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
     public function getFormDefaults(array $values): array
     {
         return [];
+    }
+
+    public function addFormElement($form, $values): Form
+    {
+        // TODO: Implement getFormElement() method.
     }
 }

@@ -5,9 +5,8 @@ namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use Enjoys\Forms\Elements\Group;
 use Enjoys\Forms\Elements\Number;
-use Enjoys\Forms\Interfaces\ElementInterface;
+use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
@@ -66,7 +65,11 @@ class PriceFilter implements FilterInterface
     public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere(
-            $qb->expr()->between('CONVERT_PRICE(pr.price, pr.currency, :current_currency)', ':minPrice', ':maxPrice')
+            $qb->expr()->between(
+                'CONVERT_PRICE(pr.price, pr.currency, :current_currency)',
+                ':minPrice',
+                ':maxPrice'
+            )
         )
             ->andWhere('pr.priceGroup = :priceGroup')
             ->setParameter('current_currency', $this->config->getCurrentCurrencyCode())
@@ -77,16 +80,6 @@ class PriceFilter implements FilterInterface
             )
             ->setParameter('minPrice', Normalize::floatPriceToInt($this->currentValues['min']))
             ->setParameter('maxPrice', Normalize::floatPriceToInt($this->currentValues['max']));
-    }
-
-    public function getFormName(): string
-    {
-        return 'filter[price]';
-    }
-
-    public function getFormType(): string
-    {
-        return 'slider';
     }
 
     public function getFormDefaults(array $values): array
@@ -101,21 +94,24 @@ class PriceFilter implements FilterInterface
         ];
     }
 
-    public function getFormElement($values): ElementInterface
+    public function addFormElement(Form $form, $values): Form
     {
         [$min, $max] = $values;
-        return (new Group($this->getTitle()))
+
+        $form->group($this->getTitle())
             ->addClass('slider-group')
             ->add([
-                (new Number('price[min]'))
+                (new Number('filter[price][min]'))
                     ->addClass('minInput')
                     ->setMin($min)
                     ->setMax($max),
-                (new Number('price[max]'))
+                (new Number('filter[price][max]'))
                     ->addClass('maxInput')
                     ->setMin($min)
                     ->setMax($max)
                 ,
             ]);
+
+        return $form;
     }
 }

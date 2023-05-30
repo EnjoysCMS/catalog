@@ -4,12 +4,7 @@ namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-use Enjoys\Forms\Elements\Checkbox;
-use Enjoys\Forms\Elements\Group;
-use Enjoys\Forms\Elements\Number;
-use Enjoys\Forms\Elements\Radio;
-use Enjoys\Forms\Elements\Select;
-use Enjoys\Forms\Interfaces\ElementInterface;
+use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
@@ -80,31 +75,35 @@ class OptionFilter implements FilterInterface
         return [];
     }
 
-    public function getFormElement($values): ElementInterface
+    public function addFormElement(Form $form, $values): Form
     {
         switch ($this->getFormType()) {
             case 'checkbox':
-                return (new Checkbox(
+                $form->checkbox(
                     sprintf('%s[]', $this->getFormName()),
                     $this->getTitle()
-                ))
-                    ->fill($values);
+                )->fill($values);
+                break;
             case 'select-multiply':
-                return (new Select(sprintf('%s[]', $this->getFormName()), $this->getTitle()))
+                $form->select(sprintf('%s[]', $this->getFormName()), $this->getTitle())
                     ->setMultiple()
                     ->fill($values);
+                break;
             case 'select':
-                return (new Select(
+                $form->select(
                     sprintf('%s[]', $this->getFormName()),
                     $this->getTitle()
-                ))
-                    ->fill($values);
+                )->fill($values);
+                break;
             case 'radio':
-                return (new Radio(
+                $form->radio(
                     sprintf('%s[]', $this->getFormName()),
                     $this->getTitle()
-                ))
-                    ->fill($values);
+                )->fill($values);
+                break;
+            default:
+                throw new \RuntimeException('FormType not support');
         }
+        return $form;
     }
 }

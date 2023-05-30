@@ -7,8 +7,6 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Enjoys\Forms\AttributeFactory;
-use Enjoys\Forms\Elements\Number;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
@@ -86,7 +84,6 @@ class Block extends AbstractBlock
         $form = new Form('get');
         $hasFilters = false;
         foreach ($allowedFilters as $filterMetaData) {
-//dd( $filter->getParams());
             /** @var FilterInterface $filter */
             $filter = $filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
             $values = $filter->getPossibleValues($pids);
@@ -101,61 +98,7 @@ class Block extends AbstractBlock
                 )
             );
 
-            $form->addElement($filter->getFormElement($values));
-
-//
-//
-//
-//
-//
-//            switch ($filter->getFormType()) {
-//                case 'checkbox':
-//                    $form->checkbox(sprintf('%s[]', $filter->getFormName()), $filter->getTitle())
-//                        ->fill($values);
-//                    break;
-//                case 'select-multiply':
-//                    $form->select(sprintf('%s[]', $filter->getFormName()), $filter->getTitle())
-//                        ->setMultiple()
-//                        ->fill($values);
-//                    break;
-//                case 'select':
-//                    $form->select(
-//                        sprintf('%s[]', $filter->getFormName()),
-//                        $filter->getTitle()
-//                    )
-//                        ->fill($values);
-//                    break;
-//                case 'radio':
-//                    $form->radio(
-//                        sprintf('%s[]', $filter->getFormName()),
-//                        $filter->getTitle()
-//                    )
-//                        ->fill($values);
-//                    break;
-//                case 'slider':
-//                    [$min, $max] = $values;
-//
-//                    $form->group($filter->getTitle())
-//                        ->addClass('slider-group')
-//                        ->add([
-//                            (new Number(sprintf('%s[min]', $filter->getFormName())))
-//                                ->addClass('minInput')
-//                                ->setMin($min)
-//                                ->setMax($max),
-//                            (new Number(sprintf('%s[max]', $filter->getFormName())))
-//                                ->addClass('maxInput')
-//                                ->setMin($min)
-//                                ->setMax($max)
-//                            ,
-//                        ]);
-////                    $form->range(sprintf('filter[%s][]', $filterImpl->getType()), $filterImpl->getTitle())
-////                        ->setAttribute(AttributeFactory::create('id', 'price-range'))
-////                        ->setMin($min)
-////                        ->setMax($max)
-////                        ->setAttribute(AttributeFactory::create('multiple'));
-//                    break;
-//                default:
-//            }
+            $filter->addFormElement($form, $values);
             $hasFilters = true;
         }
 
