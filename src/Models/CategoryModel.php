@@ -20,6 +20,7 @@ use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
+use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -45,6 +46,7 @@ final class CategoryModel implements ModelInterface
         private BreadcrumbsInterface $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
+        private FilterFactory $filterFactory,
         private Config $config,
         private Setting $setting,
     ) {
@@ -96,19 +98,16 @@ final class CategoryModel implements ModelInterface
 
         // Filter goods
         $filtered = false;
-        $filters = $this->request->getQueryParams()['filter'] ?? false;
+        $filtersQueryString = $this->request->getQueryParams()['filter'] ?? false;
         $usedFilters = [];
-        if (!empty($filters) && is_array($filters)) {
+        if (!empty($filtersQueryString) && is_array($filtersQueryString)) {
             $filtered = true;
-            foreach ($filters as $key => $values) {
-                foreach ($values as $value) {
-                    $v = $this->em->getRepository(OptionValue::class)->find($value);
-                    $usedFilters[$v->getOptionKey()->getName()][] = $v;
-                }
-                $qb->andWhere(sprintf(':values%s MEMBER OF p.options', $key))
-                    ->setParameter('values' . $key, $values);
+            $filters = $this->filterFactory->createFromArray($filtersQueryString);
+            foreach ($filters as $filter) {
+                $qb = $filter->addFilterRestriction($qb);
             }
         }
+
 
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');

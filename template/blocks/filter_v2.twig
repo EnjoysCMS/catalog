@@ -1,0 +1,59 @@
+{% if form %}
+    {% do asset('js', [
+        'node_modules/nouislider/dist/nouislider.min.js'
+    ]) %}
+    {% do asset('css', [
+        'node_modules/nouislider/dist/nouislider.min.css'
+    ]) %}
+    <script>
+        let sliders = document.querySelectorAll('.slider-group');
+
+        sliders.forEach(function (slider) {
+            let minInput = slider.querySelector('.minInput');
+            let maxInput = slider.querySelector('.maxInput');
+
+            let sliderContainer = document.createElement('div');
+            slider.appendChild(sliderContainer);
+
+            noUiSlider.create(sliderContainer, {
+                start: [minInput.value, maxInput.value],
+                connect: true,
+                range: {
+                    'min': Math.round(minInput.min),
+                    'max': Math.round(maxInput.max)
+                }
+            });
+
+            sliderContainer.noUiSlider.on('update', function (values) {
+                minInput.value = Math.round(values[0]);
+                maxInput.value = Math.round(values[1]);
+            });
+            //
+            // [minInput, maxInput].forEach(function (element) {
+            //     element.addEventListener('change', function () {
+            //         sliderContainer.noUiSlider.set([null, this.value]);
+            //     });
+            // })
+        })
+
+
+
+
+
+
+
+
+    </script>
+    <div class="filter-sidebar d-none d-xl-flex mt-3">
+        <div class="card rounded-0 w-100">
+            <div class="card-body">
+                <div class="align-items-center d-flex d-xl-none">
+                    <h6 class="text-uppercase mb-0">Фильтр</h6>
+                    <div class="btn-mobile-filter-close btn-close ms-auto cursor-pointer"></div>
+                </div>
+                <hr class="d-flex d-xl-none"/>
+                {{ form|raw }}
+            </div>
+        </div>
+    </div>
+{% endif %}

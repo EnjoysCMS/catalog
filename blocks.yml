@@ -86,3 +86,19 @@ EnjoysCMS\Module\Catalog\Blocks\Filter:
       value:
       name: Небольшое описание блока
       description: Для отображения в шаблоне (необязательно)
+
+EnjoysCMS\Module\Catalog\Filters\Block:
+  name: Фильтр товаров v2
+  options:
+    template:
+      value:
+      name: Путь до template
+      description: Обязательно
+    title:
+      value:
+      name: Заголовок блока
+      description: Для отображения в шаблоне (необязательно)
+    description:
+      value:
+      name: Небольшое описание блока
+      description: Для отображения в шаблоне (необязательно)
