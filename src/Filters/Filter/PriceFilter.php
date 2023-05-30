@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 
@@ -63,9 +64,10 @@ class PriceFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
 
     public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
     {
-//        return $qb;
-        return $qb->andWhere('CONVERT_PRICE(pr.price, pr.currency, :current_currency) BETWEEN :minPrice AND :maxPrice')
+        return $qb->andWhere($qb->expr()->between('CONVERT_PRICE(pr.price, pr.currency, :current_currency)', ':minPrice', ':maxPrice'))
+            ->andWhere('pr.priceGroup = :priceGroup')
             ->setParameter('current_currency', $this->config->getCurrentCurrencyCode())
+            ->setParameter('priceGroup', $this->em->getRepository(PriceGroup::class)->findOneBy(['code' => $this->config->getDefaultPriceGroup()]))
             ->setParameter('minPrice', Normalize::floatPriceToInt($this->currentValues['min']))
             ->setParameter('maxPrice', Normalize::floatPriceToInt($this->currentValues['max']));
     }
