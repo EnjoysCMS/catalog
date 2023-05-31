@@ -4,6 +4,7 @@ namespace EnjoysCMS\Module\Catalog\Filters\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 
 /**
  * @ORM\Entity
@@ -32,7 +33,7 @@ class FilterEntity
     /**
      * @ORM\Column(type="string")
      */
-    private string $formType;
+    private string $filterType;
 
     /**
      * @ORM\Column(name="order_filter", type="integer", options={"default": 0})
@@ -57,12 +58,12 @@ class FilterEntity
 
     public function getFilterType(): string
     {
-        return $this->formType;
+        return $this->filterType;
     }
 
-    public function setFormType(string $formType): void
+    public function setFilterType(string $filterType): void
     {
-        $this->formType = $formType;
+        $this->filterType = $filterType;
     }
 
     public function getOrder(): int
@@ -76,9 +77,9 @@ class FilterEntity
     }
 
 
-    public function getParams(): array
+    public function getParams(): FilterParams
     {
-        return $this->params;
+        return new FilterParams($this->params);
     }
 
 
@@ -87,13 +88,4 @@ class FilterEntity
         $this->params = $params;
     }
 
-    public function getClassString()
-    {
-        return $this->params['classString'] ?? throw new \RuntimeException('classString not set');
-    }
-
-    public function getClassParams(): array
-    {
-        return $this->params['classParams'] ?? [];
-    }
 }

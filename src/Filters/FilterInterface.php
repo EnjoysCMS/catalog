@@ -10,7 +10,7 @@ interface FilterInterface extends \Stringable
 
     public function getPossibleValues(array $productIds): array;
 
-    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder;
+    public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder;
 
     public function getFormElement(Form $form, $values): Form;
 }

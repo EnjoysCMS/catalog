@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models;
 
+use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -81,6 +82,8 @@ final class CategoryModel implements ModelInterface
 
     /**
      * @throws NotFoundException
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
      */
     public function getContext(): array
     {
@@ -102,12 +105,11 @@ final class CategoryModel implements ModelInterface
         $usedFilters = [];
         if (!empty($filtersQueryString) && is_array($filtersQueryString)) {
             $filtered = true;
-            $filters = $this->filterFactory->createFromArray($filtersQueryString);
+            $filters = $this->filterFactory->createFromQueryString($filtersQueryString);
             foreach ($filters as $filter) {
-                $qb = $filter->addFilterRestriction($qb);
+                $qb = $filter->addFilterQueryBuilderRestriction($qb);
             }
         }
-
 
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');

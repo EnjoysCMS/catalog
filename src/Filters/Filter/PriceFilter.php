@@ -12,6 +12,7 @@ use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
 use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
+use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 
 class PriceFilter implements FilterInterface
@@ -22,7 +23,7 @@ class PriceFilter implements FilterInterface
     public function __construct(
         private EntityManager $em,
         private Config $config,
-        private array $currentValues = []
+        private FilterParams $params
     ) {
     }
 
@@ -66,7 +67,7 @@ class PriceFilter implements FilterInterface
     /**
      * @throws NotSupported
      */
-    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
+    public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere(
             $qb->expr()->between(
@@ -82,8 +83,8 @@ class PriceFilter implements FilterInterface
                 $this->em->getRepository(PriceGroup::class)->findOneBy(['code' => $this->config->getDefaultPriceGroup()]
                 )
             )
-            ->setParameter('minPrice', Normalize::floatPriceToInt($this->currentValues['min']))
-            ->setParameter('maxPrice', Normalize::floatPriceToInt($this->currentValues['max']));
+            ->setParameter('minPrice', Normalize::floatPriceToInt($this->params->currentValues['min']))
+            ->setParameter('maxPrice', Normalize::floatPriceToInt($this->params->currentValues['max']));
     }
 
     public function getFormElement(Form $form, $values): Form

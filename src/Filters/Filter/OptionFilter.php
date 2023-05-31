@@ -9,6 +9,7 @@ use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
+use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 
 class OptionFilter implements FilterInterface
 {
@@ -18,12 +19,12 @@ class OptionFilter implements FilterInterface
      * @throws NotSupported
      */
     public function __construct(
-        $optionKey,
-        private EntityManager $em,
-        private ?string $formType = null,
-        private array $currentValues = []
+        private FilterParams $params,
+        private EntityManager $em
     ) {
-        $this->optionKey = $em->getRepository(OptionKey::class)->find($optionKey) ?? throw new \RuntimeException(
+        $this->optionKey = $em->getRepository(OptionKey::class)->find(
+            $this->params->optionKey ?? 0
+        ) ?? throw new \RuntimeException(
             'OptionKey Id not found'
         );
     }
@@ -58,10 +59,10 @@ class OptionFilter implements FilterInterface
         return $result;
     }
 
-    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
+    public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere(sprintf(':values%s MEMBER OF p.options', $this->optionKey->getId()))
-            ->setParameter('values' . $this->optionKey->getId(), $this->currentValues);
+            ->setParameter('values' . $this->optionKey->getId(), $this->params->currentValues ?? []);
     }
 
     public function getFormName(): string
@@ -74,25 +75,9 @@ class OptionFilter implements FilterInterface
         return $this->formType ?? 'checkbox';
     }
 
-    public function getFormDefaults(array $values): array
-    {
-        return [
-            'filter' => [
-                'option' => [
-                    1 => [
-                        4,
-                        11
-                    ]
-                ]
-            ]
-        ];
-    }
-
     public function getFormElement(Form $form, $values): Form
     {
-        $form->setDefaults($this->getFormDefaults($values));
-
-        switch ($this->getFormType()) {
+         switch ($this->getFormType()) {
             case 'checkbox':
                 $form->checkbox(
                     sprintf('%s[]', $this->getFormName()),

@@ -23,18 +23,19 @@ class FilterFactory
     {
     }
 
-    public function create(string $filterClass, array $params): FilterInterface
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function create(string $filterType, FilterParams $filterParams): FilterInterface
     {
-
-        return $this->container->make(
-            self::$filters[$filterClass] ?? throw new \RuntimeException(
+        $classString = self::$filters[$filterType] ?? throw new \RuntimeException(
             sprintf(
                 '%s not mapped',
-                $filterClass
+                $filterType
             )
-        ),
-            $this->resolveParams($filterClass, $params)
         );
+        return $this->container->make($classString, ['params' => $filterParams]);
     }
 
     /**
@@ -42,10 +43,10 @@ class FilterFactory
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function createFromArray(array $data): array
+    public function createFromQueryString(array $data): array
     {
-        foreach ($data as $filterClass => $params) {
-            $this->resolveFilters($filterClass, $params);
+        foreach ($data as $filterType => $params) {
+            $this->resolveFilters($filterType, $params);
         }
 
         return $this->result;
@@ -56,44 +57,37 @@ class FilterFactory
      * @throws DependencyException
      * @throws NotFoundException
      */
-    private function resolveFilters(int|string $filterClass, array $params): void
+    private function resolveFilters(string $filterType, array $params): void
     {
-        $this->buildFilter(self::$filters[$filterClass], $params);
-    }
-
-    private function resolveParams(string $filterClassString, array $params): array
-    {
-        switch ($filterClassString) {
-            case OptionFilter::class:
-                return [
-                    'optionKey' => $key = array_key_first($params),
-                    'currentValues' => $params[$key]
-                ];
-            case PriceFilter::class:
-                return [
-                    'currentValues' => $params
-                ];
-            default:
-                return $params;
+        $filterParamsResolved = $this->resolveParams($filterType, $params);
+        foreach ($filterParamsResolved as $filterParams) {
+            $this->result[] = $this->create($filterType, $filterParams);
         }
     }
 
-    private function buildFilter(mixed $filterClass, array $params)
+    /**
+     * @return FilterParams[]
+     */
+    private function resolveParams(string $filterType, array $params): array
     {
-        switch ($filterClass) {
-            case OptionFilter::class:
+        switch ($filterType) {
+            case 'option':
+                $result = [];
                 foreach ($params as $key => $values) {
-                    $this->result[] = $this->container->make(OptionFilter::class, [
+                    $result[] = new FilterParams([
                         'optionKey' => $key,
                         'currentValues' => $values
                     ]);
                 }
-                break;
-            case  PriceFilter::class:
-                $this->result[] = $this->container->make(PriceFilter::class, [
-                    'currentValues' => $params
-                ]);
-                break;
+                return $result;
+            case  'price':
+                return [
+                    new FilterParams([
+                        'currentValues' => $params
+                    ])
+                ];
+            default:
+                return [new FilterParams($params)];
         }
     }
 

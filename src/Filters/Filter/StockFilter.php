@@ -19,7 +19,7 @@ class StockFilter implements FilterInterface
         return [];
     }
 
-    public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
+    public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
         return $qb;
     }

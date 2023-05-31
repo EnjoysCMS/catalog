@@ -2,6 +2,8 @@
 
 namespace EnjoysCMS\Module\Catalog\Filters;
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
@@ -42,11 +44,13 @@ class Block extends AbstractBlock
 
     /**
      * @throws LoaderError
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws NotSupported
      * @throws RuntimeError
      * @throws SyntaxError
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function view(): string
     {
@@ -78,8 +82,11 @@ class Block extends AbstractBlock
 
         $form = new Form('get');
         $hasFilters = false;
+
         foreach ($allowedFilters as $filterMetaData) {
+
             $filter = $this->filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
+
             $values = $filter->getPossibleValues($productIds);
             if ($values === []) {
                 continue;
