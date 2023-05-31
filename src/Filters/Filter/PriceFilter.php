@@ -3,6 +3,7 @@
 namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Elements\Number;
@@ -26,7 +27,7 @@ class PriceFilter implements FilterInterface
     }
 
 
-    public function getTitle(): string
+    public function __toString(): string
     {
         return 'Фильтр по цене';
     }
@@ -34,7 +35,7 @@ class PriceFilter implements FilterInterface
     /**
      * @throws NonUniqueResultException
      */
-    public function getPossibleValues(array $pids): array
+    public function getPossibleValues(array $productIds): array
     {
         if ($this->possibleValues !== null) {
             return $this->possibleValues;
@@ -49,7 +50,7 @@ class PriceFilter implements FilterInterface
             ->from(ProductPrice::class, 'pr')
             ->where('pr.product IN (:pids)')
             ->setParameters([
-                'pids' => $pids,
+                'pids' => $productIds,
                 'current_currency' => $this->config->getCurrentCurrencyCode()
             ])
             ->getQuery()
@@ -57,11 +58,14 @@ class PriceFilter implements FilterInterface
 
         $this->possibleValues = array_map(function ($value) {
             return (int)ceil(Normalize::intPriceToFloat($value));
-        }, $minmaxRaw, []);
+        }, $minmaxRaw);
 
         return $this->possibleValues;
     }
 
+    /**
+     * @throws NotSupported
+     */
     public function addFilterRestriction(QueryBuilder $qb): QueryBuilder
     {
         return $qb->andWhere(
@@ -82,23 +86,21 @@ class PriceFilter implements FilterInterface
             ->setParameter('maxPrice', Normalize::floatPriceToInt($this->currentValues['max']));
     }
 
-    public function getFormDefaults(array $values): array
+    public function getFormElement(Form $form, $values): Form
     {
-        return [
+        $min = $values['min'] ?? 0;
+        $max = $values['max'] ?? $min;
+
+        $form->setDefaults([
             'filter' => [
                 'price' => [
-                    'min' => $values[0] ?? 0,
-                    'max' => $values[1] ?? 0,
+                    'min' => $min,
+                    'max' => $max,
                 ]
             ]
-        ];
-    }
+        ]);
 
-    public function addFormElement(Form $form, $values): Form
-    {
-        [$min, $max] = $values;
-
-        $form->group($this->getTitle())
+        $form->group($this->__toString())
             ->addClass('slider-group')
             ->add([
                 (new Number('filter[price][min]'))

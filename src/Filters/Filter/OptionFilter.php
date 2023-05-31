@@ -3,6 +3,7 @@
 namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
@@ -13,6 +14,9 @@ class OptionFilter implements FilterInterface
 {
     private OptionKey $optionKey;
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         $optionKey,
         private EntityManager $em,
@@ -24,12 +28,12 @@ class OptionFilter implements FilterInterface
         );
     }
 
-    public function getTitle(): string
+    public function __toString(): string
     {
         return $this->optionKey->__toString();
     }
 
-    public function getPossibleValues(array $pids): array
+    public function getPossibleValues(array $productIds): array
     {
         $result = [];
 
@@ -41,7 +45,7 @@ class OptionFilter implements FilterInterface
             ->where('v.optionKey = :optionKey')
             ->andWhere(':pids MEMBER OF v.products')
             ->setParameters([
-                'pids' => $pids,
+                'pids' => $productIds,
                 'optionKey' => $this->optionKey
             ])
             ->getQuery()
@@ -72,33 +76,44 @@ class OptionFilter implements FilterInterface
 
     public function getFormDefaults(array $values): array
     {
-        return [];
+        return [
+            'filter' => [
+                'option' => [
+                    1 => [
+                        4,
+                        11
+                    ]
+                ]
+            ]
+        ];
     }
 
-    public function addFormElement(Form $form, $values): Form
+    public function getFormElement(Form $form, $values): Form
     {
+        $form->setDefaults($this->getFormDefaults($values));
+
         switch ($this->getFormType()) {
             case 'checkbox':
                 $form->checkbox(
                     sprintf('%s[]', $this->getFormName()),
-                    $this->getTitle()
+                    $this->__toString()
                 )->fill($values);
                 break;
             case 'select-multiply':
-                $form->select(sprintf('%s[]', $this->getFormName()), $this->getTitle())
+                $form->select(sprintf('%s[]', $this->getFormName()), $this->__toString())
                     ->setMultiple()
                     ->fill($values);
                 break;
             case 'select':
                 $form->select(
                     sprintf('%s[]', $this->getFormName()),
-                    $this->getTitle()
+                    $this->__toString()
                 )->fill($values);
                 break;
             case 'radio':
                 $form->radio(
                     sprintf('%s[]', $this->getFormName()),
-                    $this->getTitle()
+                    $this->__toString()
                 )->fill($values);
                 break;
             default:

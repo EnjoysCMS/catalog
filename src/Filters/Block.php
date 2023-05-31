@@ -2,11 +2,11 @@
 
 namespace EnjoysCMS\Module\Catalog\Filters;
 
-use DI\Container;
-use DI\DependencyException;
-use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
@@ -24,16 +24,15 @@ use Twig\Error\SyntaxError;
 class Block extends AbstractBlock
 {
 
-    private Environment $twig;
-
-    /**
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public function __construct(private Container $container, Entity $block)
-    {
+    public function __construct(
+        private Environment $twig,
+        private ServerRequestInterface $request,
+        private EntityManager $em,
+        private FilterFactory $filterFactory,
+        private RendererInterface $renderForm,
+        Entity $block
+    ) {
         parent::__construct($block);
-        $this->twig = $this->container->get(Environment::class);
     }
 
     public static function getBlockDefinitionFile(): string
@@ -42,29 +41,29 @@ class Block extends AbstractBlock
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
      * @throws LoaderError
+     * @throws NotSupported
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function view(): string
     {
-        $request = $this->container->get(ServerRequestInterface::class);
-        $em = $this->container->get(EntityManager::class);
-        $filterFactory = $this->container->get(FilterFactory::class);
         /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
-        $categoryRepository = $em->getRepository(Category::class);
+        $categoryRepository = $this->em->getRepository(Category::class);
         /** @var Category $category */
-        $category = $categoryRepository->findByPath($request->getAttribute('slug', ''));
+        $category = $categoryRepository->findByPath($this->request->getAttribute('slug', ''));
 
         /** @var EntityRepository|FilterRepository $filterRepository */
-        $filterRepository = $em->getRepository(FilterEntity::class);
+        $filterRepository = $this->em->getRepository(FilterEntity::class);
 
         /** @var FilterEntity[] $allowedFilters */
         $allowedFilters = $filterRepository->findBy(['category' => $category], ['order' => 'asc']);
 
-        /** @var int[] $pids id всех продуктов в этой категории */
-        $pids = array_column(
-            $em->createQueryBuilder()
+        /** @var int[] $productIds id всех продуктов в этой категории */
+        $productIds = array_column(
+            $this->em->createQueryBuilder()
                 ->select('p.id')
                 ->from(Product::class, 'p')
                 ->leftJoin('p.category', 'c')
@@ -76,50 +75,32 @@ class Block extends AbstractBlock
             'id'
         );
 
-//        $filters = new \SplObjectStorage();
-//        foreach ($allowedFilters as $filter) {
-//            $filters[$filter] = $filterRepository->getValues($filter->getOptionKey(), $pids);
-//        }
 
         $form = new Form('get');
         $hasFilters = false;
         foreach ($allowedFilters as $filterMetaData) {
-            /** @var FilterInterface $filter */
-            $filter = $filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
-            $values = $filter->getPossibleValues($pids);
+            $filter = $this->filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
+            $values = $filter->getPossibleValues($productIds);
             if ($values === []) {
                 continue;
             }
-
-            $form->setDefaults(
-                array_merge_recursive(
-                    $form->getDefaultsHandler()->getDefaults(),
-                    $filter->getFormDefaults($values)
-                )
-            );
-
-            $filter->addFormElement($form, $values);
+            $form = $filter->getFormElement($form, $values);
             $hasFilters = true;
         }
-
 
         $form->submit('submit1', 'Показать')->removeAttribute('name');
 
 
-        $renderForm = $this->container->get(RendererInterface::class);
-        $renderForm->setForm($form);
+        $this->renderForm->setForm($form);
+
+        $template = empty($this->getOption('template'))
+            ? '../modules/catalog/template/blocks/filter_v2.twig' : $this->getOption('template');
 
         return $this->twig->render(
-            empty(
-            $this->getOption(
-                'template'
-            )
-            ) ? '../modules/catalog/template/blocks/filter_v2.twig' : $this->getOption(
-                'template'
-            ),
+            $template,
             [
 //                'filters' => $filters,
-                'form' => $hasFilters ? $renderForm->output() : null,
+                'form' => $hasFilters ? $this->renderForm->output() : null,
                 'blockOptions' => $this->getOptions()
             ]
         );

@@ -5,15 +5,12 @@ namespace EnjoysCMS\Module\Catalog\Filters;
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;
 
-interface FilterInterface
+interface FilterInterface extends \Stringable
 {
-    public function getTitle(): string;
 
-    public function getPossibleValues(array $pids): array;
+    public function getPossibleValues(array $productIds): array;
 
     public function addFilterRestriction(QueryBuilder $qb): QueryBuilder;
 
-    public function getFormDefaults(array $values): array;
-
-    public function addFormElement(Form $form, $values): Form;
+    public function getFormElement(Form $form, $values): Form;
 }

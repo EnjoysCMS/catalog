@@ -4,16 +4,17 @@ namespace EnjoysCMS\Module\Catalog\Filters\Filter;
 
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;
+use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
 
-class StockFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
+class StockFilter implements FilterInterface
 {
 
-    public function getTitle(): string
+    public function __toString(): string
     {
         return 'Только в наличии';
     }
 
-    public function getPossibleValues(array $pids): array
+    public function getPossibleValues(array $productIds): array
     {
         return [];
     }
@@ -40,7 +41,7 @@ class StockFilter implements \EnjoysCMS\Module\Catalog\Filters\FilterInterface
         return [];
     }
 
-    public function addFormElement($form, $values): Form
+    public function getFormElement($form, $values): Form
     {
         // TODO: Implement getFormElement() method.
     }
