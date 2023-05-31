@@ -32,13 +32,13 @@ final class FilterCrud
      * @throws NotSupported
      * @throws ORMException
      */
-    #[Route(
-        path: 'admin/catalog/filter',
-        name: 'catalog/admin/filter/add',
-        methods: [
-            'PUT'
-        ]
-    )]
+//    #[Route(
+//        path: 'admin/catalog/filter',
+//        name: 'catalog/admin/filter/add',
+//        methods: [
+//            'PUT'
+//        ]
+//    )]
     public function addFilter(EntityManager $em): ResponseInterface
     {
         $response = $this->response->withHeader('content-type', 'application/json');

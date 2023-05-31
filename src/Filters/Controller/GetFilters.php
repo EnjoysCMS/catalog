@@ -2,22 +2,15 @@
 
 namespace EnjoysCMS\Module\Catalog\Filters\Controller;
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
-use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\Module\Catalog\Entities\Filter;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
+use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 #[Route(
     path: 'admin/catalog/get-filters',
@@ -33,16 +26,20 @@ class GetFilters
 {
     public function __construct(
         private ServerRequestInterface $request,
-        private ResponseInterface $response
+        private ResponseInterface $response,
+        private FilterFactory $filterFactory,
     ) {
         $this->response = $this->response->withHeader('content-type', 'application/json');
     }
 
     /**
+     * @throws DependencyException
+     * @throws NotFoundException
      * @throws NotSupported
      */
     public function __invoke(EntityManager $em): ResponseInterface
     {
+        /** @var FilterEntity[] $filters */
         $filters = $em->getRepository(FilterEntity::class)->findBy([
             'category' => $this->request->getQueryParams()['category'] ?? throw new \InvalidArgumentException(
                     sprintf('Category id not sent')
@@ -56,56 +53,26 @@ class GetFilters
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param FilterEntity[] $filters
+     * @throws DependencyException
+     * @throws NotFoundException
      */
-    private function normalizeData(array $filters)
+    private function normalizeData(array $filters): array
     {
-        $encoders = [new JsonEncoder()];
-        $serializer = new Serializer([
-            new ObjectNormalizer(
-                nameConverter: new class() implements NameConverterInterface {
-
-                    public function normalize(string $propertyName): string
-                    {
-                        return match ($propertyName) {
-                            'optionKey' => 'option',
-                            default => $propertyName
-                        };
-                    }
-
-                    public function denormalize(string $propertyName): string
-                    {
-                        return match ($propertyName) {
-                            'option' => 'optionKey',
-                            default => $propertyName
-                        };
-                    }
-                }
-            )
-        ], $encoders);
-
-        return $serializer->normalize($filters, JsonEncoder::FORMAT, [
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return match ($object::class) {
-                    Category::class => $object->getTitle(),
-                };
-            },
-            AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
-            AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
-            AbstractNormalizer::ATTRIBUTES => [
-                'id',
-                'optionKey',
-                'type',
-                'order'
-            ],
-            AbstractNormalizer::CALLBACKS => [
-                'optionKey' => function (OptionKey $optionKey) {
-                    return [
-                        'id' => $optionKey->getId(),
-                        'name' => $optionKey->__toString(),
-                    ];
-                }
-            ],
-        ]);
+        $result = [];
+        foreach ($filters as $filterMetaData) {
+            $filter = $this->filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
+            if ($filter === null){
+                continue;
+            }
+            $result[] = [
+                'id' => $filterMetaData->getId(),
+                'order' => $filterMetaData->getOrder(),
+                'filterType' => $filterMetaData->getFilterType(),
+                'filterParams' => $filterMetaData->getParams()->getParams(),
+                'filterTitle' => $filter->__toString(),
+            ];
+        }
+        return $result;
     }
 }

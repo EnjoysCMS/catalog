@@ -20,12 +20,12 @@ class ManageFilters  extends AdminController
     {
         return $this->responseText(
             $this->view(
-                $this->templatePath . '/filters.twig',
+                $this->templatePath . '/filters_v21.twig',
                 [
                     'breadcrumbs' => [
                         $urlGenerator->generate('admin/index') => 'Главная',
                         $urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                        $urlGenerator->generate('catalog/admin/filters') => 'Фильтры (настройка)',
+                        $urlGenerator->generate('catalog/admin/filters') => 'Фильтры (настройка) 2',
                     ],
                 ]
             )

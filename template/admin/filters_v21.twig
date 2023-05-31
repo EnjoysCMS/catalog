@@ -64,14 +64,8 @@
         function drawFilters(data) {
             filtersBody.innerHTML = '';
 
-            let addBtn = document.createElement('button');
-            addBtn.id = 'add-filter';
-            addBtn.setAttribute('data-toggle', 'modal')
-            addBtn.setAttribute('data-target', '#addFilterModal')
-            addBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'mb-3');
-            addBtn.innerText = 'Добавить фильтры';
-
-            filtersBody.appendChild(document.createElement('div').appendChild(addBtn));
+            let buttons = document.getElementById('buttons').content.cloneNode(true);
+            filtersBody.appendChild(buttons);
 
 
             let table = document.createElement('table');
@@ -84,11 +78,11 @@
                 let order = row.querySelector('.order input');
                 let type = row.querySelector('select[name="type"]');
 
-                filter.innerText = item.option.name;
+               filter.innerText = item.filterTitle;
 
 
                 tr.dataset.filterId = item.id;
-                type.value = item.type;
+                type.value = item.filterType;
                 order.value = item.order;
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
@@ -123,7 +117,7 @@
 
         const loadCategoryFilters = function () {
 
-            const url = new URL("{{ url('catalog/admin/api/get-category-filters') }}");
+            const url = new URL("{{ url('catalog/get-filters') }}");
             url.searchParams.append('category', categoryId);
             fetch(url.toString(), {
                 method: 'GET'
@@ -165,13 +159,16 @@
 
             //console.log(categoryId)
 
-            fetch("{{ path('catalog/admin/filter/add') }}", {
-                method: 'PUT',
+            fetch("{{ path('catalog/filter/add') }}", {
+                method: 'POST',
+                headers: {
+                    "Accept": "application/json"
+                },
                 body: JSON.stringify({
-                    category: categoryId,
-                    optionKeys: optionKeys,
-                    order: 0,
-                    type: 'checkbox'
+                    "category": categoryId,
+                    "options": optionKeys,
+                    "order": 0,
+                    "filterType": 'option'
                 })
             }).then(function () {
                 $('#addFilterModal').modal('hide')
@@ -185,7 +182,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div>
-                    <label for="category">Категория</label>
+                    <label for="category">Категория2</label>
                     <select name="category" id="category"
                             aria-controls="example"
                             class="custom-select custom-select-sm form-control form-control-sm mb-3">
@@ -199,13 +196,13 @@
         <!-- /.card -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Активные фильтры</h2>
+                <h2 class="card-title">Активные фильтры 2</h2>
             </div>
 
             <!-- /.card-header -->
             <div class="card-body">
                 <div id="filters">
-                    <h2>Выберите категорию</h2>
+                    <h2>Выберите категорию 2</h2>
                 </div>
             </div>
             <!-- /.card-body -->
@@ -241,6 +238,12 @@
             </div>
         </div>
     </div>
+
+    <template id="buttons">
+        <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal" class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр</button>
+        <button id="add-stock-filter" class="btn btn-sm btn-primary mb-3">Добавить STOCK фильтр</button>
+        <button id="add-price-filter" class="btn btn-sm btn-primary mb-3">Добавить PRICE фильтр</button>
+    </template>
 
     <template id="filterRow">
         <tr>

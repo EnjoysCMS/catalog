@@ -13,6 +13,11 @@ class FilterParams
         $this->params = $params;
     }
 
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
     public function __get(string $name)
     {
         return $this->params[$name] ?? null;
