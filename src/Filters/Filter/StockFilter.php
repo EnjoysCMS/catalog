@@ -8,7 +8,6 @@ use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
 
 class StockFilter implements FilterInterface
 {
-
     public function __toString(): string
     {
         return 'Только в наличии';
@@ -16,33 +15,20 @@ class StockFilter implements FilterInterface
 
     public function getPossibleValues(array $productIds): array
     {
-        return [];
+        return [0, 1];
     }
 
     public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
+        $qb->andWhere('(q.qty-q.reserve) > 0');
         return $qb;
-    }
-
-
-    public function getFormName(): string
-    {
-        return 'filter[stock]';
-    }
-
-
-    public function getFormType(): string
-    {
-        return 'checkbox-on-off';
-    }
-
-    public function getFormDefaults(array $values): array
-    {
-        return [];
     }
 
     public function getFormElement($form, $values): Form
     {
-        // TODO: Implement getFormElement() method.
+        $form->checkbox('filter[stock]')
+            ->addClass('form-switch', Form::ATTRIBUTES_FILLABLE_BASE)
+            ->fill([1 => $this->__toString()]);
+        return $form;
     }
 }
