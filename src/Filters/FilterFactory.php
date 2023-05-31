@@ -27,14 +27,12 @@ class FilterFactory
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function create(string $filterType, FilterParams $filterParams): FilterInterface
+    public function create(string $filterType, FilterParams $filterParams): ?FilterInterface
     {
-        $classString = self::$filters[$filterType] ?? throw new \RuntimeException(
-            sprintf(
-                '%s not mapped',
-                $filterType
-            )
-        );
+        $classString = self::$filters[$filterType] ?? null;
+        if ($classString === null) {
+            return null;
+        }
         return $this->container->make($classString, ['params' => $filterParams]);
     }
 
@@ -49,7 +47,7 @@ class FilterFactory
             $this->resolveFilters($filterType, $params);
         }
 
-        return $this->result;
+        return array_filter($this->result);
     }
 
 

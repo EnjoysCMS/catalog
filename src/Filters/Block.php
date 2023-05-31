@@ -87,6 +87,10 @@ class Block extends AbstractBlock
 
             $filter = $this->filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
 
+            if ($filter === null){
+                continue;
+            }
+
             $values = $filter->getPossibleValues($productIds);
             if ($values === []) {
                 continue;
