@@ -132,7 +132,7 @@
                 [type, order].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
-                        fetch("{{ path('catalog/admin/filter/update') }}", {
+                        fetch("{{ path('catalog/filter/update') }}", {
                             method: 'PATCH',
                             body: JSON.stringify({
                                 filterId: tr.dataset.filterId,
