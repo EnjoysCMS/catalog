@@ -31,7 +31,7 @@
         "admin-links": {
             "catalog/admin/category": "Категории",
             "catalog/admin/products": "Продукты",
-            "catalog/admin/filters": "Фильтры (настройка)",
+            "catalog/manage-filters": "Фильтры (настройка)",
             "catalog/admin/pricegroup": "Группы цен",
             "catalog/admin/currency": "Валюты",
             "catalog/admin/setting": "Настройки"

@@ -64,14 +64,42 @@
         function drawFilters(data) {
             filtersBody.innerHTML = '';
 
-            let addBtn = document.createElement('button');
-            addBtn.id = 'add-filter';
-            addBtn.setAttribute('data-toggle', 'modal')
-            addBtn.setAttribute('data-target', '#addFilterModal')
-            addBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'mb-3');
-            addBtn.innerText = 'Добавить фильтры';
+            let buttons = document.getElementById('buttons').content.cloneNode(true);
 
-            filtersBody.appendChild(document.createElement('div').appendChild(addBtn));
+            let container_buttons = document.createElement('div');
+            container_buttons.appendChild(buttons)
+
+            filtersBody.appendChild(container_buttons);
+
+            document.getElementById('add-price-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 1,
+                        "filterType": 'price'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
+
+            document.getElementById('add-stock-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 0,
+                        "filterType": 'stock'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
 
 
             let table = document.createElement('table');
@@ -82,18 +110,23 @@
                 let filter = row.querySelector('.filter');
                 let tr = row.querySelector('tr');
                 let order = row.querySelector('.order input');
-                let type = row.querySelector('select[name="type"]');
 
-                filter.innerText = item.option.name;
+                let optionFormType = row.querySelector('.optionFormType');
+                let selectFormType = optionFormType.querySelector('select[name="optionFormType"]');
+                if (item.filterType === 'option'){
+                    selectFormType.value = item.filterParams.formType ?? 'checkbox';
+                }else{
+                    optionFormType.innerHTML = ''
+                }
 
 
+                filter.innerText = item.filterTitle;
                 tr.dataset.filterId = item.id;
-                type.value = item.type;
                 order.value = item.order;
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
                     e.preventDefault()
-                    fetch("{{ path('catalog/admin/filter/delete') }}", {
+                    fetch("{{ path('catalog/filter/delete') }}", {
                         method: 'DELETE',
                         body: JSON.stringify({
                             filterId: tr.dataset.filterId
@@ -101,15 +134,15 @@
                     }).then(() => loadCategoryFilters(categoryId))
                 });
 
-                [type, order].forEach(function (element) {
+                [selectFormType, order].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
-                        fetch("{{ path('catalog/admin/filter/update') }}", {
+                        fetch("{{ path('catalog/filter/update') }}", {
                             method: 'PATCH',
                             body: JSON.stringify({
                                 filterId: tr.dataset.filterId,
                                 order: order.value,
-                                type: type.value,
+                                filterParams: {formType: selectFormType.value},
                             })
                         }).then(() => loadCategoryFilters(categoryId))
                     });
@@ -123,7 +156,7 @@
 
         const loadCategoryFilters = function () {
 
-            const url = new URL("{{ url('catalog/admin/api/get-category-filters') }}");
+            const url = new URL("{{ url('catalog/get-filters') }}");
             url.searchParams.append('category', categoryId);
             fetch(url.toString(), {
                 method: 'GET'
@@ -155,7 +188,7 @@
 
         fillCategorySelect();
 
-        document.querySelector('form[name="addFilters"]').addEventListener('submit', function (e) {
+        document.querySelector('form[name="addOptionFilters"]').addEventListener('submit', function (e) {
             e.preventDefault()
             let formData = new FormData(e.target);
             let optionKeys = [];
@@ -163,21 +196,24 @@
                 optionKeys.push(v)
             });
 
-            //console.log(categoryId)
-
-            fetch("{{ path('catalog/admin/filter/add') }}", {
+            fetch("{{ path('catalog/filter/add') }}", {
                 method: 'PUT',
+                headers: {
+                    "Accept": "application/json"
+                },
                 body: JSON.stringify({
-                    category: categoryId,
-                    optionKeys: optionKeys,
-                    order: 0,
-                    type: 'checkbox'
+                    "category": categoryId,
+                    "options": optionKeys,
+                    "order": 2,
+                    "filterType": 'option'
                 })
             }).then(function () {
                 $('#addFilterModal').modal('hide')
                 return loadCategoryFilters(categoryId);
             })
         });
+
+
 
     </script>
     <section class="content">
@@ -219,7 +255,7 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-body">
-                    <form id="addFilters" name="addFilters">
+                    <form id="addFilters" name="addOptionFilters">
                         <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для
                                 категории <a
                                     class="align-top btn btn-xs btn-warning"
@@ -242,11 +278,19 @@
         </div>
     </div>
 
+    <template id="buttons">
+        <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal"
+                class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр
+        </button>
+        <button id="add-stock-filter" class="btn btn-sm btn-primary mb-3">Добавить STOCK фильтр</button>
+        <button id="add-price-filter" class="btn btn-sm btn-primary mb-3">Добавить PRICE фильтр</button>
+    </template>
+
     <template id="filterRow">
         <tr>
             <td class="filter"></td>
-            <td class="type">
-                <select name="type" class="form-select form-control">
+            <td class="optionFormType">
+                <select name="optionFormType" class="form-select form-control">
                     <option value="checkbox">checkbox</option>
                     <option value="radio">radio</option>
                     <option value="select">select</option>

@@ -1,19 +1,20 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Controller\Admin;
+namespace EnjoysCMS\Module\Catalog\Filters\Controller;
 
+use EnjoysCMS\Module\Catalog\Controller\Admin\AdminController;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route(
-    path: 'admin/catalog/filters',
-    name: 'catalog/admin/filters',
+    path: 'admin/catalog/manage_filters',
+    name: 'catalog/manage-filters',
     options: [
         'comment' => 'Управление Фильтрами'
     ]
 )]
-class Filters extends AdminController
+class ManageFilters  extends AdminController
 {
     public function __invoke(UrlGeneratorInterface $urlGenerator): ResponseInterface
     {
@@ -24,7 +25,7 @@ class Filters extends AdminController
                     'breadcrumbs' => [
                         $urlGenerator->generate('admin/index') => 'Главная',
                         $urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                        $urlGenerator->generate('catalog/admin/filters') => 'Фильтры (настройка)',
+                        'Фильтры (настройка)',
                     ],
                 ]
             )
