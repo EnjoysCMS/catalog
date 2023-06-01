@@ -121,7 +121,7 @@
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
                     e.preventDefault()
-                    fetch("{{ path('catalog/admin/filter/delete') }}", {
+                    fetch("{{ path('catalog/filter/delete') }}", {
                         method: 'DELETE',
                         body: JSON.stringify({
                             filterId: tr.dataset.filterId

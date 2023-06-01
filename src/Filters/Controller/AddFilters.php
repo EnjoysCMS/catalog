@@ -21,11 +21,14 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 class AddFilters
 {
+    private \stdClass $input;
+
     public function __construct(
         private ServerRequestInterface $request,
         private ResponseInterface $response,
         private EntityManager $em,
     ) {
+        $this->input = json_decode($this->request->getBody()->getContents());
     }
 
     /**
@@ -35,24 +38,23 @@ class AddFilters
      */
     public function __invoke(): ResponseInterface
     {
-        $input = json_decode($this->request->getBody()->getContents());
 
         $response = $this->response->withHeader('content-type', 'application/json');
 
         /** @var Category $category */
         $category = $this->em->getRepository(Category::class)->find(
-            $input->category ?? throw new \InvalidArgumentException('category id not found')
+            $this->input->category ?? throw new \InvalidArgumentException('category id not found')
         ) ?? throw new \RuntimeException('Category not found');
 
-        switch ($input->filterType) {
+        switch ($this->input->filterType) {
             case 'option':
-                $this->addOptionFilter($input, $category);
+                $this->addOptionFilter($category);
                 break;
             case 'price':
-                $this->addPriceFilter($input, $category);
+                $this->addPriceFilter($category);
                 break;
             case 'stock':
-                $this->addStockFilter($input, $category);
+                $this->addStockFilter($category);
                 break;
         }
         $this->em->flush();
@@ -64,22 +66,22 @@ class AddFilters
      * @throws NotSupported
      * @throws ORMException
      */
-    private function addOptionFilter($input, Category $category): void
+    private function addOptionFilter(Category $category): void
     {
-        foreach ($input->options ?? [] as $optionKeyId) {
-            $hash = md5($input->filterType . $optionKeyId);
+        foreach ($this->input->options ?? [] as $optionKeyId) {
+            $hash = md5($this->input->filterType . $optionKeyId);
 
-            if ($this->isFilterExist($category, $input->filterType, $hash)) {
+            if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
                 continue;
             }
 
             $filter = new FilterEntity();
             $filter->setCategory($category);
-            $filter->setFilterType($input->filterType);
+            $filter->setFilterType($this->input->filterType);
             $filter->setParams([
                 'optionKey' => $optionKeyId
             ]);
-            $filter->setOrder($input->order ?? 0);
+            $filter->setOrder($this->input->order ?? 0);
             $filter->setHash($hash);
 
             $this->em->persist($filter);
@@ -90,17 +92,17 @@ class AddFilters
      * @throws NotSupported
      * @throws ORMException
      */
-    private function addPriceFilter($input, Category $category): void
+    private function addPriceFilter(Category $category): void
     {
-        $hash = md5($input->filterType);
-        if ($this->isFilterExist($category, $input->filterType, $hash)) {
+        $hash = md5($this->input->filterType);
+        if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
             return;
         }
         $filter = new FilterEntity();
         $filter->setCategory($category);
-        $filter->setFilterType($input->filterType);
+        $filter->setFilterType($this->input->filterType);
         $filter->setParams([]);
-        $filter->setOrder($input->order ?? 0);
+        $filter->setOrder($this->input->order ?? 0);
         $filter->setHash($hash);
 
         $this->em->persist($filter);
@@ -110,17 +112,17 @@ class AddFilters
      * @throws NotSupported
      * @throws ORMException
      */
-    private function addStockFilter($input, Category $category): void
+    private function addStockFilter(Category $category): void
     {
-        $hash = md5($input->filterType);
-        if ($this->isFilterExist($category, $input->filterType, $hash)) {
+        $hash = md5($this->input->filterType);
+        if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
             return;
         }
         $filter = new FilterEntity();
         $filter->setCategory($category);
-        $filter->setFilterType($input->filterType);
+        $filter->setFilterType($this->input->filterType);
         $filter->setParams([]);
-        $filter->setOrder($input->order ?? 0);
+        $filter->setOrder($this->input->order ?? 0);
         $filter->setHash($hash);
 
         $this->em->persist($filter);

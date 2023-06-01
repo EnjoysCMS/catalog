@@ -28,30 +28,6 @@ final class FilterCrud
         $this->input = json_decode($this->request->getBody()->getContents());
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws NotSupported
-     * @throws ORMException
-     */
-    #[Route(
-        path: 'admin/catalog/filter',
-        name: 'catalog/admin/filter/delete',
-        methods: [
-            'DELETE'
-        ]
-    )]
-    public function deleteFilter(EntityManager $em): ResponseInterface
-    {
-        $response = $this->response->withHeader('content-type', 'application/json');
-        /** @var Category $category */
-        $filter = $em->getRepository(Filter::class)->find(
-            $this->input->filterId ?? throw new \InvalidArgumentException('Filter id not found')
-        ) ?? throw new \RuntimeException('Filter not found');
-
-        $em->remove($filter);
-        $em->flush();
-        return $response;
-    }
 
     /**
      * @throws OptimisticLockException

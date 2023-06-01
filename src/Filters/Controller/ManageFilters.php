@@ -25,7 +25,7 @@ class ManageFilters  extends AdminController
                     'breadcrumbs' => [
                         $urlGenerator->generate('admin/index') => 'Главная',
                         $urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                        $urlGenerator->generate('catalog/admin/filters') => 'Фильтры (настройка)',
+                        'Фильтры (настройка)',
                     ],
                 ]
             )
