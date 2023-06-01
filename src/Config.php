@@ -242,4 +242,9 @@ final class Config
         return $this->get('editor->categoryShortDescription');
     }
 
+    public function getDefaultPriceGroup()
+    {
+        return $this->get('priceGroup->default', 'ROZ');
+    }
+
 }

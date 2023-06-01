@@ -7,10 +7,8 @@ namespace EnjoysCMS\Module\Catalog\Repositories;
 
 
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Expr\ClosureExpressionVisitor;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Persisters\SqlExpressionVisitor;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Comparison;
@@ -180,9 +178,16 @@ class Category extends ClosureTreeRepository
                 Expr\Join::WITH,
                 $condition
             );
+            $dql->addSelect("c{$i}");
+
+            // join category_meta (\EnjoysCMS\Module\Catalog\Entities\CategoryMeta)
+            $dql->leftJoin(
+                "{$parentAlias}.meta",
+                "m{$i}"
+            );
+            $dql->addSelect("m{$i}");
 
             $parentAlias = "c{$i}";
-            $dql->addSelect("c{$i}");
         }
 
         return $dql;

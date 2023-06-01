@@ -1,0 +1,312 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+    {% do asset('css', [
+        {0: module.path ~ '/node_modules/select2/dist/css/select2.css','minify': false},
+        {0: module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
+    ]) %}
+
+    {% do asset('js', [
+        {0: module.path ~ '/node_modules/select2/dist/js/select2.full.js','minify': false },
+    ]) %}
+
+    <script>
+
+
+        $(function () {
+            $(".filters-select").select2({
+                width: "100%",
+                theme: 'bootstrap4',
+                allowClear: true,
+                placeholder: 'select..',
+                ajax: {
+                    url: "{{ path('@a/catalog/tools/find-option-keys') }}",
+                    dataType: 'json',
+                    // delay: 250,
+                    data: function (params) {
+                        return {
+                            query: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+
+                },
+                templateResult: function (result) {
+                    if (result.loading) {
+                        return result.text;
+                    }
+                    let $container = $(
+                        "<div class='select2-result-repository clearfix'>" +
+                        "<span class='select2-result---name'></span> " +
+                        "<span class='select2-result---unit small text-muted'></span>" +
+                        "</div>"
+                    );
+
+                    $container.find(".select2-result---name").text(result.name);
+                    $container.find(".select2-result---unit").text(result.unit);
+
+                    return $container;
+                },
+                templateSelection: function (result) {
+                    return result.text || (result.name + (result.unit ? ' (' + result.unit + ')' : ''));
+                }
+            });
+
+        });
+
+        let select = document.querySelector('select#category');
+        let filtersBody = document.getElementById('filters');
+        let categoryId;
+
+        function drawFilters(data) {
+            filtersBody.innerHTML = '';
+
+            let buttons = document.getElementById('buttons').content.cloneNode(true);
+
+            let container_buttons = document.createElement('div');
+            container_buttons.appendChild(buttons)
+
+            filtersBody.appendChild(container_buttons);
+
+            document.getElementById('add-price-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 1,
+                        "filterType": 'price'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
+
+            document.getElementById('add-stock-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 0,
+                        "filterType": 'stock'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
+
+
+            let table = document.createElement('table');
+            table.classList.add('table')
+            let template = document.getElementById('filterRow');
+            data.forEach(function (item) {
+                let row = template.content.cloneNode(true);
+                let filter = row.querySelector('.filter');
+                let tr = row.querySelector('tr');
+                let order = row.querySelector('.order input');
+
+                let optionFormType = row.querySelector('.optionFormType');
+                let selectFormType = optionFormType.querySelector('select[name="optionFormType"]');
+                if (item.filterType === 'option'){
+                    selectFormType.value = item.filterParams.formType ?? 'checkbox';
+                }else{
+                    optionFormType.innerHTML = ''
+                }
+
+
+                filter.innerText = item.filterTitle;
+                tr.dataset.filterId = item.id;
+                order.value = item.order;
+
+                row.querySelector('.delete-filter').addEventListener('click', function (e) {
+                    e.preventDefault()
+                    fetch("{{ path('catalog/filter/delete') }}", {
+                        method: 'DELETE',
+                        body: JSON.stringify({
+                            filterId: tr.dataset.filterId
+                        })
+                    }).then(() => loadCategoryFilters(categoryId))
+                });
+
+                [selectFormType, order].forEach(function (element) {
+                    element.addEventListener('change', function (e) {
+                        e.preventDefault()
+                        fetch("{{ path('catalog/filter/update') }}", {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                filterId: tr.dataset.filterId,
+                                order: order.value,
+                                filterParams: {formType: selectFormType.value},
+                            })
+                        }).then(() => loadCategoryFilters(categoryId))
+                    });
+                });
+
+
+                table.appendChild(row)
+            });
+            filtersBody.appendChild(table);
+        }
+
+        const loadCategoryFilters = function () {
+
+            const url = new URL("{{ url('catalog/get-filters') }}");
+            url.searchParams.append('category', categoryId);
+            fetch(url.toString(), {
+                method: 'GET'
+            }).then(response => response.json())
+                .then(data => drawFilters(data))
+        };
+
+        const fillCategorySelect = function () {
+            fetch("{{ path('catalog/admin/api/get-category-tree') }}", {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(function (data) {
+                    Object.values(data).forEach(function (v) {
+                        let option = new Option(v.title.replaceAll("&nbsp;", "\u00A0"), v.id);
+                        if (v.id === 0) {
+                            option = new Option('Выберите категорию...', v.id);
+                        }
+                        select.append(option);
+                    })
+
+                    select.addEventListener('change', function () {
+                        categoryId = select.value;
+                        loadCategoryFilters()
+                    })
+                })
+        };
+
+
+        fillCategorySelect();
+
+        document.querySelector('form[name="addOptionFilters"]').addEventListener('submit', function (e) {
+            e.preventDefault()
+            let formData = new FormData(e.target);
+            let optionKeys = [];
+            formData.forEach((v) => {
+                optionKeys.push(v)
+            });
+
+            fetch("{{ path('catalog/filter/add') }}", {
+                method: 'PUT',
+                headers: {
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    "category": categoryId,
+                    "options": optionKeys,
+                    "order": 2,
+                    "filterType": 'option'
+                })
+            }).then(function () {
+                $('#addFilterModal').modal('hide')
+                return loadCategoryFilters(categoryId);
+            })
+        });
+
+
+
+    </script>
+    <section class="content">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div>
+                    <label for="category">Категория</label>
+                    <select name="category" id="category"
+                            aria-controls="example"
+                            class="custom-select custom-select-sm form-control form-control-sm mb-3">
+
+                    </select>
+                </div>
+            </div>
+
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Активные фильтры</h2>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div id="filters">
+                    <h2>Выберите категорию</h2>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </section>
+
+    <div class="modal fade" id="addFilterModal">
+        <div class="modal-dialog modal-lg">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form id="addFilters" name="addOptionFilters">
+                        <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для
+                                категории <a
+                                    class="align-top btn btn-xs btn-warning"
+                                    id="fill-from-parent"
+                                    data-id="2">
+                                    заполнить из родительской категории</a> </label>
+                            <select class="filters-select form-select form-control" multiple name="optionKeys[]"
+                                    id="optionKeys" aria-describedby="optionKeysHelp">
+
+                            </select>
+                            <small id="optionKeysHelp" class="form-text">Добавление фильтров для категорий (можно
+                                выбрать несколько).
+                                Берутся из параметров товара (опций)</small>
+                        </div>
+                        <input type="submit" class="btn btn-primary">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="buttons">
+        <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal"
+                class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр
+        </button>
+        <button id="add-stock-filter" class="btn btn-sm btn-primary mb-3">Добавить STOCK фильтр</button>
+        <button id="add-price-filter" class="btn btn-sm btn-primary mb-3">Добавить PRICE фильтр</button>
+    </template>
+
+    <template id="filterRow">
+        <tr>
+            <td class="filter"></td>
+            <td class="optionFormType">
+                <select name="optionFormType" class="form-select form-control">
+                    <option value="checkbox">checkbox</option>
+                    <option value="radio">radio</option>
+                    <option value="select">select</option>
+                </select>
+            </td>
+            <td class="order">
+                <input name="order" type="number" class="form-control">
+            </td>
+            <td class="action">
+                <button class="delete-filter btn btn-sm btn-danger">Удалить фильтр</button>
+            </td>
+        </tr>
+
+    </template>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}

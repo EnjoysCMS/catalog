@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Models;
 
+use DI\DependencyException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -17,8 +18,10 @@ use EnjoysCMS\Core\Interfaces\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
+use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repositories;
@@ -39,15 +42,15 @@ final class CategoryModel implements ModelInterface
      * @throws NotFoundException
      */
     public function __construct(
-        private EntityManager          $em,
+        private EntityManager $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface   $breadcrumbs,
-        private UrlGeneratorInterface  $urlGenerator,
-        private RedirectInterface      $redirect,
-        private Config                 $config,
-        private Setting                $setting,
-    )
-    {
+        private BreadcrumbsInterface $breadcrumbs,
+        private UrlGeneratorInterface $urlGenerator,
+        private RedirectInterface $redirect,
+        private FilterFactory $filterFactory,
+        private Config $config,
+        private Setting $setting,
+    ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
 
@@ -79,6 +82,8 @@ final class CategoryModel implements ModelInterface
 
     /**
      * @throws NotFoundException
+     * @throws DependencyException
+     * @throws \DI\NotFoundException
      */
     public function getContext(): array
     {
@@ -92,6 +97,18 @@ final class CategoryModel implements ModelInterface
             $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
         } else {
             $qb = $this->productRepository->getQueryBuilderFindByCategory($this->category);
+        }
+
+        // Filter goods
+        $filtered = false;
+        $filtersQueryString = $this->request->getQueryParams()['filter'] ?? false;
+        $usedFilters = [];
+        if (!empty($filtersQueryString) && is_array($filtersQueryString)) {
+            $filtered = true;
+            $filters = $this->filterFactory->createFromQueryString($filtersQueryString);
+            foreach ($filters as $filter) {
+                $qb = $filter->addFilterQueryBuilderRestriction($qb);
+            }
         }
 
         $qb->andWhere('p.hide = false');
@@ -112,6 +129,7 @@ final class CategoryModel implements ModelInterface
             default => $qb->addOrderBy('p.name', 'ASC'),
         };
 
+//        dd($qb->getQuery()->getSQL());
 
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
 
@@ -125,7 +143,11 @@ final class CategoryModel implements ModelInterface
                 $redirectAllow = true;
             }
 
-            if ($redirectAllow === false && in_array($this->category->getId(), $this->config->get('categoriesIdForRedirectToProductIfIsOne', []), true)) {
+            if ($redirectAllow === false && in_array(
+                    $this->category->getId(),
+                    $this->config->get('categoriesIdForRedirectToProductIfIsOne', []),
+                    true
+                )) {
                 $redirectAllow = true;
             }
 
@@ -149,6 +171,8 @@ final class CategoryModel implements ModelInterface
             'products' => $result,
             'config' => $this->config,
             'breadcrumbs' => $this->getBreadcrumbs(),
+            'filtered' => $filtered,
+            'usedFilters' => $usedFilters
         ];
     }
 
@@ -174,7 +198,7 @@ final class CategoryModel implements ModelInterface
 
     private function updateSortMode(): void
     {
-        $mode = $this->request->getQueryParams()['sort'] ?? null;
+        $mode = $this->request->getQueryParams()['sort'] ?? $this->request->getParsedBody()['sort'] ?? null;
         if ($mode !== null) {
             $this->config->setSortMode($mode);
         }
@@ -182,7 +206,7 @@ final class CategoryModel implements ModelInterface
 
     private function updatePerPage(): void
     {
-        $perpage = $this->request->getQueryParams()['perpage'] ?? null;
+        $perpage = $this->request->getQueryParams()['perpage'] ?? $this->request->getParsedBody()['perpage'] ?? null;
         if ($perpage !== null) {
             $this->config->setPerPage($perpage);
         }
