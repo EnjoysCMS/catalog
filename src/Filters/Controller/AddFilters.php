@@ -3,9 +3,11 @@
 namespace EnjoysCMS\Module\Catalog\Filters\Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
-use HttpSoft\Emitter\SapiEmitter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,73 +16,124 @@ use Symfony\Component\Routing\Annotation\Route;
     path: 'admin/catalog/filter',
     name: 'catalog/filter/add',
     methods: [
-        'POST'
+        'PUT'
     ]
 )]
 class AddFilters
 {
     public function __construct(
         private ServerRequestInterface $request,
-        private ResponseInterface $response
+        private ResponseInterface $response,
+        private EntityManager $em,
     ) {
     }
 
-    public function __invoke(EntityManager $em): ResponseInterface
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws NotSupported
+     */
+    public function __invoke(): ResponseInterface
     {
-        $em->getConfiguration()->addCustomStringFunction(
-            'JSON_CONTAINS',
-            \DoctrineExtensions\Query\Mysql\JsonContains::class
-        );
         $input = json_decode($this->request->getBody()->getContents());
 
         $response = $this->response->withHeader('content-type', 'application/json');
 
         /** @var Category $category */
-        $category = $em->getRepository(Category::class)->find(
+        $category = $this->em->getRepository(Category::class)->find(
             $input->category ?? throw new \InvalidArgumentException('category id not found')
         ) ?? throw new \RuntimeException('Category not found');
 
+        switch ($input->filterType) {
+            case 'option':
+                $this->addOptionFilter($input, $category);
+                break;
+            case 'price':
+                $this->addPriceFilter($input, $category);
+                break;
+            case 'stock':
+                $this->addStockFilter($input, $category);
+                break;
+        }
+        $this->em->flush();
+
+        return $response;
+    }
+
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
+    private function addOptionFilter($input, Category $category): void
+    {
         foreach ($input->options ?? [] as $optionKeyId) {
-            $filterParams = [
-                'optionKey' => $optionKeyId
-            ];
+            $hash = md5($input->filterType . $optionKeyId);
 
-            $test =
-                $em->getRepository(FilterEntity::class)->createQueryBuilder('f')
-                    ->select('f')
-                    ->where('f.category = :category')
-                    ->andWhere('f.filterType = :filterType')
-                    ->andWhere('JSON_CONTAINS(f.params, :params, :jsonPath) = 1')
-                    ->setParameters([
-                        'jsonPath' => '$.parent',
-                        'category' => $category,
-                        'filterType' => 'option',
-                        'params' => $filterParams
-                    ])
-                    ->getQuery()->getOneOrNullResult();
-
-            $response->getBody()->write(json_encode($test));
-            $emitter = new SapiEmitter();
-            $emitter->emit($response);
-            exit;
-            return $response;
-
-            if (null !== $filter = $em->getRepository(FilterEntity::class)->findOneBy(
-                    ['category' => $category, 'filterType' => 'option', 'params' => $filterParams]
-                )) {
+            if ($this->isFilterExist($category, $input->filterType, $hash)) {
                 continue;
             }
+
             $filter = new FilterEntity();
             $filter->setCategory($category);
             $filter->setFilterType($input->filterType);
-            $filter->setParams($filterParams);
+            $filter->setParams([
+                'optionKey' => $optionKeyId
+            ]);
             $filter->setOrder($input->order ?? 0);
+            $filter->setHash($hash);
 
-            $em->persist($filter);
+            $this->em->persist($filter);
         }
-        $em->flush();
-        //  $response->getBody()->write('');
-        return $response;
+    }
+
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
+    private function addPriceFilter($input, Category $category): void
+    {
+        $hash = md5($input->filterType);
+        if ($this->isFilterExist($category, $input->filterType, $hash)) {
+            return;
+        }
+        $filter = new FilterEntity();
+        $filter->setCategory($category);
+        $filter->setFilterType($input->filterType);
+        $filter->setParams([]);
+        $filter->setOrder($input->order ?? 0);
+        $filter->setHash($hash);
+
+        $this->em->persist($filter);
+    }
+
+    /**
+     * @throws NotSupported
+     * @throws ORMException
+     */
+    private function addStockFilter($input, Category $category): void
+    {
+        $hash = md5($input->filterType);
+        if ($this->isFilterExist($category, $input->filterType, $hash)) {
+            return;
+        }
+        $filter = new FilterEntity();
+        $filter->setCategory($category);
+        $filter->setFilterType($input->filterType);
+        $filter->setParams([]);
+        $filter->setOrder($input->order ?? 0);
+        $filter->setHash($hash);
+
+        $this->em->persist($filter);
+    }
+
+    /**
+     * @throws NotSupported
+     */
+    public function isFilterExist(Category $category, string $filterType, string $hash): bool
+    {
+        return null !== $this->em->getRepository(FilterEntity::class)->findOneBy(
+                ['category' => $category, 'filterType' => $filterType, 'hash' => $hash]
+            );
     }
 
 }

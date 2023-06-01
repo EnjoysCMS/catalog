@@ -65,7 +65,41 @@
             filtersBody.innerHTML = '';
 
             let buttons = document.getElementById('buttons').content.cloneNode(true);
-            filtersBody.appendChild(buttons);
+
+            let container_buttons = document.createElement('div');
+            container_buttons.appendChild(buttons)
+
+            filtersBody.appendChild(container_buttons);
+
+            document.getElementById('add-price-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 1,
+                        "filterType": 'price'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
+
+            document.getElementById('add-stock-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('catalog/filter/add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 0,
+                        "filterType": 'stock'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
 
 
             let table = document.createElement('table');
@@ -78,7 +112,7 @@
                 let order = row.querySelector('.order input');
                 let type = row.querySelector('select[name="type"]');
 
-               filter.innerText = item.filterTitle;
+                filter.innerText = item.filterTitle;
 
 
                 tr.dataset.filterId = item.id;
@@ -149,7 +183,7 @@
 
         fillCategorySelect();
 
-        document.querySelector('form[name="addFilters"]').addEventListener('submit', function (e) {
+        document.querySelector('form[name="addOptionFilters"]').addEventListener('submit', function (e) {
             e.preventDefault()
             let formData = new FormData(e.target);
             let optionKeys = [];
@@ -157,17 +191,15 @@
                 optionKeys.push(v)
             });
 
-            //console.log(categoryId)
-
             fetch("{{ path('catalog/filter/add') }}", {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     "Accept": "application/json"
                 },
                 body: JSON.stringify({
                     "category": categoryId,
                     "options": optionKeys,
-                    "order": 0,
+                    "order": 2,
                     "filterType": 'option'
                 })
             }).then(function () {
@@ -176,13 +208,15 @@
             })
         });
 
+
+
     </script>
     <section class="content">
         <div class="card">
             <!-- /.card-header -->
             <div class="card-body">
                 <div>
-                    <label for="category">Категория2</label>
+                    <label for="category">Категория</label>
                     <select name="category" id="category"
                             aria-controls="example"
                             class="custom-select custom-select-sm form-control form-control-sm mb-3">
@@ -196,13 +230,13 @@
         <!-- /.card -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Активные фильтры 2</h2>
+                <h2 class="card-title">Активные фильтры</h2>
             </div>
 
             <!-- /.card-header -->
             <div class="card-body">
                 <div id="filters">
-                    <h2>Выберите категорию 2</h2>
+                    <h2>Выберите категорию</h2>
                 </div>
             </div>
             <!-- /.card-body -->
@@ -216,7 +250,7 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-body">
-                    <form id="addFilters" name="addFilters">
+                    <form id="addFilters" name="addOptionFilters">
                         <div class='form-group'><label class="form-label" for="optionKeys">Добавление фильтров для
                                 категории <a
                                     class="align-top btn btn-xs btn-warning"
@@ -240,7 +274,9 @@
     </div>
 
     <template id="buttons">
-        <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal" class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр</button>
+        <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal"
+                class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр
+        </button>
         <button id="add-stock-filter" class="btn btn-sm btn-primary mb-3">Добавить STOCK фильтр</button>
         <button id="add-price-filter" class="btn btn-sm btn-primary mb-3">Добавить PRICE фильтр</button>
     </template>

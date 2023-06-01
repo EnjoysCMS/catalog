@@ -105,7 +105,7 @@ class Block extends AbstractBlock
         $this->renderForm->setForm($form);
 
         $template = empty($this->getOption('template'))
-            ? '../modules/catalog/template/blocks/filter_v2.twig' : $this->getOption('template');
+            ? '../modules/catalog/template/blocks/filter.twig' : $this->getOption('template');
 
         return $this->twig->render(
             $template,

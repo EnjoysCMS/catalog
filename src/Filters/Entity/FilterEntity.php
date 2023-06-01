@@ -36,6 +36,11 @@ class FilterEntity
     private string $filterType;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private string $hash;
+
+    /**
      * @ORM\Column(name="order_filter", type="integer", options={"default": 0})
      */
     private int $order;
@@ -86,6 +91,22 @@ class FilterEntity
     public function setParams(array $params): void
     {
         $this->params = $params;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return $this->hash;
+    }
+
+    /**
+     * @param string $hash
+     */
+    public function setHash(string $hash): void
+    {
+        $this->hash = $hash;
     }
 
 }

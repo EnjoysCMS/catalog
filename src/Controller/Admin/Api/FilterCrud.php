@@ -29,53 +29,6 @@ final class FilterCrud
     }
 
     /**
-     * @throws NotSupported
-     * @throws ORMException
-     */
-//    #[Route(
-//        path: 'admin/catalog/filter',
-//        name: 'catalog/admin/filter/add',
-//        methods: [
-//            'PUT'
-//        ]
-//    )]
-    public function addFilter(EntityManager $em): ResponseInterface
-    {
-        $response = $this->response->withHeader('content-type', 'application/json');
-
-        /** @var Category $category */
-        $category = $em->getRepository(Category::class)->find(
-            $this->input->category ?? throw new \InvalidArgumentException('category id not found')
-        ) ?? throw new \RuntimeException('Category not found');
-
-        foreach (
-            $this->input->optionKeys ?? throw new \InvalidArgumentException(
-            'OptionKeys not set'
-        ) as $optionKeyId
-        ) {
-            /** @var OptionKey $optionKey */
-            $optionKey = $em->getRepository(OptionKey::class)->find($optionKeyId)
-                ?? throw new \RuntimeException('OptionKey not found');
-
-            if (null !== $filter = $em->getRepository(Filter::class)->findOneBy(
-                    ['category' => $category, 'optionKey' => $optionKey]
-                )) {
-                continue;
-            }
-            $filter = new Filter();
-            $filter->setCategory($category);
-            $filter->setType($this->input->type ?? 'checkbox');
-            $filter->setOptionKey($optionKey);
-            $filter->setOrder($this->input->order ?? 0);
-
-            $em->persist($filter);
-        }
-        $em->flush();
-        $response->getBody()->write('');
-        return $response;
-    }
-
-    /**
      * @throws OptimisticLockException
      * @throws NotSupported
      * @throws ORMException
