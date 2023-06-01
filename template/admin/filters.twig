@@ -110,13 +110,18 @@
                 let filter = row.querySelector('.filter');
                 let tr = row.querySelector('tr');
                 let order = row.querySelector('.order input');
-                let type = row.querySelector('select[name="type"]');
+
+                let optionFormType = row.querySelector('.optionFormType');
+                let selectFormType = optionFormType.querySelector('select[name="optionFormType"]');
+                if (item.filterType === 'option'){
+                    selectFormType.value = item.filterParams.formType ?? 'checkbox';
+                }else{
+                    optionFormType.innerHTML = ''
+                }
+
 
                 filter.innerText = item.filterTitle;
-
-
                 tr.dataset.filterId = item.id;
-                type.value = item.filterType;
                 order.value = item.order;
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
@@ -129,7 +134,7 @@
                     }).then(() => loadCategoryFilters(categoryId))
                 });
 
-                [type, order].forEach(function (element) {
+                [selectFormType, order].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
                         fetch("{{ path('catalog/filter/update') }}", {
@@ -137,7 +142,7 @@
                             body: JSON.stringify({
                                 filterId: tr.dataset.filterId,
                                 order: order.value,
-                                type: type.value,
+                                filterParams: {formType: selectFormType.value},
                             })
                         }).then(() => loadCategoryFilters(categoryId))
                     });
@@ -284,8 +289,8 @@
     <template id="filterRow">
         <tr>
             <td class="filter"></td>
-            <td class="type">
-                <select name="type" class="form-select form-control">
+            <td class="optionFormType">
+                <select name="optionFormType" class="form-select form-control">
                     <option value="checkbox">checkbox</option>
                     <option value="radio">radio</option>
                     <option value="select">select</option>

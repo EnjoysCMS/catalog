@@ -72,7 +72,7 @@ class OptionFilter implements FilterInterface
 
     public function getFormType(): string
     {
-        return $this->formType ?? 'checkbox';
+        return $this->params->formType ?? 'checkbox';
     }
 
     public function getFormElement(Form $form, $values): Form

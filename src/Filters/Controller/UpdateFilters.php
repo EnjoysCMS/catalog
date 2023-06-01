@@ -46,6 +46,7 @@ class UpdateFilters
         ) ?? throw new \RuntimeException('Filter not found');
 
         $filter->setOrder((int)($this->input->order ?? 0));
+        $filter->setParams(array_merge($filter->getParams()->getParams(), (array)$this->input->filterParams));
 
         $this->em->flush();
         return $this->response;
