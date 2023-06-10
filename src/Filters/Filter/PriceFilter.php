@@ -89,8 +89,8 @@ class PriceFilter implements FilterInterface
 
     public function getFormElement(Form $form, $values): Form
     {
-        $min = $values['min'] ?? 0;
-        $max = $values['max'] ?? $min;
+        $min = $values['min'] === null ? 0 : $values['min']-1;
+        $max = $values['max'] === null ? $min +1 : $values['max'] + 1;
 
         $form->setDefaults([
             'filter' => [
