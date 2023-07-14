@@ -183,10 +183,15 @@ final class Edit implements ModelInterface
                 Rules::CALLBACK,
                 'Ошибка, productCode уже используется',
                 function () {
+                    /** @var Product $check */
                     $check = $this->productRepository->findOneBy(
                         ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
                     );
-                    return is_null($check);
+
+                    if ($this->product->getProductCode() === $check->getProductCode()){
+                        return true;
+                    }
+                    return false;
                 }
             );
 
