@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Yaml\Yaml;
 use Twig\Environment;
 
-final class CountProducts extends AbstractWidgets
+final class CountProducts 
 {
 
     /**

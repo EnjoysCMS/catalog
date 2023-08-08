@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Core\Exception\NotFoundException;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\Add;
 use EnjoysCMS\Module\Catalog\Crud\Images\Delete;
 use EnjoysCMS\Module\Catalog\Crud\Images\Index;
@@ -38,12 +38,12 @@ final class Image extends AdminController
             'comment' => 'Управление изображениями товара'
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Index $index): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/images/manage.twig',
-                $this->getContext($this->container->get(Index::class))
+                $index->getContext()
             )
         );
     }
@@ -60,14 +60,13 @@ final class Image extends AdminController
             'comment' => 'Загрузка изображения к товару'
         ]
     )]
-    public function add(): ResponseInterface
+    public function add(Add $add): ResponseInterface
     {
         /** @var Add $addImageService */
-        $addImageService = $this->container->get(Add::class);
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $addImageService->getTemplatePath($this->templatePath),
-                $this->getContext($addImageService)
+                $add->getContext()
             )
         );
     }
@@ -119,12 +118,12 @@ final class Image extends AdminController
             'comment' => 'Удаление изображения к товару'
         ]
     )]
-    public function delete(): ResponseInterface
+    public function delete(Delete $delete): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/form.twig',
-                $this->getContext($this->container->get(Delete::class))
+                $delete->getContext()
             )
         );
     }
@@ -161,6 +160,6 @@ final class Image extends AdminController
             $this->response = $this->response->withStatus(500);
             $errorMessage = htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage()));
         }
-        return $this->responseJson($errorMessage ?? 'uploaded');
+        return $this->jsonResponse($errorMessage ?? 'uploaded');
     }
 }

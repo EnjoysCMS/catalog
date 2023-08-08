@@ -15,9 +15,11 @@ final class Dashboard extends AdminController
 {
     public function __invoke(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/dashboard.twig',
-            [])
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/dashboard.twig',
+                []
+            )
         );
     }
 }

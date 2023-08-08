@@ -12,7 +12,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,11 +27,11 @@ final class Setting implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly RendererInterface $renderer,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
     ) {
         $this->settingRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
     }
@@ -51,7 +51,6 @@ final class Setting implements ModelInterface
         return [
             'form' => $this->renderer->output(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 'Настройки',
             ],

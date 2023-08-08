@@ -25,7 +25,7 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
 
-final class CategoryTree extends AbstractBlock
+final class CategoryTree
 {
 
     private Repositories\Category $categoryRepository;
@@ -43,7 +43,6 @@ final class CategoryTree extends AbstractBlock
      */
     public function __construct(private ContainerInterface $container, Entity $block)
     {
-        parent::__construct($block);
         $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(
             Entities\Category::class
         );

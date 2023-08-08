@@ -14,7 +14,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\Mapping\MappingException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -36,12 +36,12 @@ final class Delete implements ModelInterface
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $em,
-        private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer,
-        private ServerRequestInterface $request,
-        private RedirectInterface $redirect,
-        private EventDispatcherInterface $dispatcher,
+        private readonly EntityManager $em,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RendererInterface $renderer,
+        private readonly ServerRequestInterface $request,
+        private readonly RedirectInterface $redirect,
+        private readonly EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -73,7 +73,6 @@ final class Delete implements ModelInterface
             'subtitle' => 'Удаление категории',
             'form' => $this->renderer,
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
                 sprintf('Удаление категории `%s`', $this->category->getTitle()),

@@ -7,8 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 
 use DI\Container;
-use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Image;

@@ -6,11 +6,11 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
-use EnjoysCMS\Core\Components\Composer\Utils;
-use EnjoysCMS\Core\Components\Modules\Module;
+use DI\Container;
+use EnjoysCMS\Core\Extensions\Composer\Utils;
+use EnjoysCMS\Core\Modules\Module;
 use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Catalog\Config;
-use Psr\Container\ContainerInterface;
 
 abstract class AdminController extends AdminBaseController
 {
@@ -18,7 +18,7 @@ abstract class AdminController extends AdminBaseController
     protected string $templatePath;
 
 
-    public function __construct(protected ContainerInterface $container, protected Config $config)
+    public function __construct(protected Container $container, protected Config $config)
     {
         parent::__construct($container);
         $this->templatePath = $this->config->getAdminTemplatePath();
@@ -27,9 +27,11 @@ abstract class AdminController extends AdminBaseController
                 __DIR__ . '/../../../composer.json'
             )
         );
-        $this->getTwig()->getLoader()->addPath($this->templatePath, 'catalog_admin');
-        $this->getTwig()->addGlobal('module', $this->module);
-        $this->getTwig()->addGlobal('config', $this->config);
+        $this->twig->getLoader()->addPath($this->templatePath, 'catalog_admin');
+        $this->twig->addGlobal('module', $this->module);
+        $this->twig->addGlobal('config', $this->config);
+
+        $this->breadcrumbs->add('@a/catalog/dashboard', 'Каталог' );
     }
 
 }

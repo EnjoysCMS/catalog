@@ -13,7 +13,7 @@ use EnjoysCMS\Module\Catalog\Entities\ProductTag;
 
 final class TagsManager
 {
-    public function __construct(private EntityManager $entityManager)
+    public function __construct(private readonly EntityManager $entityManager)
     {
     }
 

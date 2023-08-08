@@ -13,7 +13,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
@@ -24,7 +24,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Manage implements ModelInterface
+final class Manage
 {
     private EntityRepository|ProductRepository $productRepository;
     protected Product $product;
@@ -39,11 +39,11 @@ final class Manage implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly RendererInterface $renderer,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->productRepository->find(
@@ -79,7 +79,6 @@ final class Manage implements ModelInterface
             'form' => $this->renderer->output(),
             'subtitle' => 'Установка цен',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер цен: %s', $this->product->getName()),

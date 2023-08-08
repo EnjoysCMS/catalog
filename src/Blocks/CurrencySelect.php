@@ -20,7 +20,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class CurrencySelect extends AbstractBlock
+final class CurrencySelect
 {
 
     /**
@@ -35,7 +35,6 @@ final class CurrencySelect extends AbstractBlock
         private ServerRequestInterface $request,
         Entity $block
     ) {
-        parent::__construct($block);
         /** @var Currency[] $currencies */
         $this->currencies = $this->em->getRepository(Currency::class)->findAll();
     }

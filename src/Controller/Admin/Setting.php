@@ -16,11 +16,11 @@ use Symfony\Component\Routing\Annotation\Route;
 final class Setting extends AdminController
 {
 
-    public function __invoke(): ResponseInterface
+    public function __invoke(\EnjoysCMS\Module\Catalog\Crud\Setting $setting): ResponseInterface
     {
-        return $this->responseText($this->view(
+        return $this->response($this->twig->render(
             $this->templatePath . '/setting.twig',
-            $this->getContext($this->container->get(\EnjoysCMS\Module\Catalog\Crud\Setting::class))
+            $setting->getContext()
         ));
     }
 

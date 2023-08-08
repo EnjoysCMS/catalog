@@ -30,12 +30,12 @@ final class Urls extends AdminController
             'comment' => '[ADMIN] Просмотр URLs товара'
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Manage $manage): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/urls/manage.twig',
-                $this->getContext($this->container->get(Manage::class))
+                $manage->getContext()
             )
         );
     }
@@ -47,12 +47,12 @@ final class Urls extends AdminController
             'comment' => '[ADMIN] Редактирование URL'
         ]
     )]
-    public function edit(): ResponseInterface
+    public function edit(EditUrl $editUrl): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/urls/edit.twig',
-                $this->getContext($this->container->get(EditUrl::class))
+                $editUrl->getContext()
             )
         );
     }
@@ -64,12 +64,12 @@ final class Urls extends AdminController
             'comment' => '[ADMIN] Добавление URL'
         ]
     )]
-    public function add(): ResponseInterface
+    public function add(AddUrl $addUrl): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/urls/add.twig',
-                $this->getContext($this->container->get(AddUrl::class))
+                $addUrl->getContext()
             )
         );
     }
@@ -81,12 +81,12 @@ final class Urls extends AdminController
             'comment' => '[ADMIN] Удаление URL'
         ]
     )]
-    public function delete(): ResponseInterface
+    public function delete(DeleteUrl $deleteUrl): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/urls/delete.twig',
-                $this->getContext($this->container->get(DeleteUrl::class))
+                $deleteUrl->getContext()
             )
         );
     }

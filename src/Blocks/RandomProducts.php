@@ -22,7 +22,7 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
 
-final class RandomProducts extends AbstractBlock
+final class RandomProducts
 {
     /**
      * @var \EnjoysCMS\Module\Catalog\Repositories\Product
@@ -41,7 +41,6 @@ final class RandomProducts extends AbstractBlock
      */
     public function __construct(private  ContainerInterface $container, Entity $block)
     {
-        parent::__construct($block);
 
         $em = $this->container->get(EntityManager::class);
         $em->getConfiguration()->addCustomStringFunction('RAND', Rand::class);

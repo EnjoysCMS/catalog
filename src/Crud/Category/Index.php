@@ -17,15 +17,14 @@ use Doctrine\ORM\Query\QueryException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use function json_decode;
 
-final class Index implements ModelInterface
+final class Index
 {
 
     private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
@@ -35,11 +34,10 @@ final class Index implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private RendererInterface $renderer,
-        private RedirectInterface $redirect,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly RendererInterface $renderer,
+        private readonly RedirectInterface $redirect,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
     }
@@ -70,15 +68,9 @@ final class Index implements ModelInterface
         }
         $this->renderer->setForm($form);
 
-
         return [
             'form' => $this->renderer->output(),
             'categories' => $this->categoryRepository->getChildNodes(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                'Категории',
-            ],
         ];
     }
 

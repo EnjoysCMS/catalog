@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use EnjoysCMS\Module\Catalog\Crud\Product\Quantity\Manage;
-use EnjoysCMS\Module\Catalog\Crud\Product\Quantity\Params;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -19,12 +18,12 @@ final class Quantity extends AdminController
             "comment" => "[ADMIN] Установка количества на товар"
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Manage $manage): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/quantity/manage.twig',
-                $this->getContext($this->container->get(Manage::class))
+                $manage->getContext()
             )
         );
     }

@@ -23,7 +23,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class SearchBlock extends AbstractBlock
+final class SearchBlock
 {
     private Environment $twig;
     private string $templatePath;
@@ -36,7 +36,6 @@ final class SearchBlock extends AbstractBlock
      */
     public function __construct(private ContainerInterface $container, Entity $block)
     {
-        parent::__construct($block);
         $this->twig = $this->container->get(Environment::class);
         $this->templatePath = (string)$this->getOption('template');
     }

@@ -13,7 +13,7 @@ class SaveCategoryStructure
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
 
-    public function __construct(private EntityManager $em)
+    public function __construct(private readonly EntityManager $em)
     {
         $this->categoryRepository = $this->em->getRepository(Category::class);
 

@@ -22,9 +22,9 @@ final class ManageImage
     private array $productImages;
 
     public function __construct(
-        private Product $product,
-        private EntityManager $entityManager,
-        private Config $config
+        private readonly Product $product,
+        private readonly EntityManager $entityManager,
+        private readonly Config $config,
     ) {
         $this->productImages = $entityManager->getRepository(Image::class)->findBy(['product' => $this->product]);
     }

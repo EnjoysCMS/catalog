@@ -10,12 +10,13 @@ use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
-use EnjoysCMS\Core\Components\Modules\ModuleCollection;
+use EnjoysCMS\Core\Modules\ModuleCollection;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
 use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use Exception;
+use Gedmo\Tree\TreeListener;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -38,6 +39,10 @@ final class Config
         private LoggerInterface $logger,
         ModuleCollection $moduleCollection
     ) {
+        $evm = $this->em->getEventManager();
+        $treeListener = new TreeListener();
+        $evm->addEventSubscriber($treeListener);
+
         $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
             sprintf(
                 'Module %s not found. Name must be same like packageName in module composer.json',

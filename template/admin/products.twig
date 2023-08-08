@@ -91,7 +91,7 @@
                                 <i class="fas fa-ellipsis-h"></i>
                               </button>
                               <div class="dropdown-menu">
-                                 {% if access2route('catalog/admin/product/edit') %}
+                                 {% if access('catalog/admin/product/edit') %}
                                  <li>
                                     <a class="dropdown-item"
                                        href="/?_route=catalog/admin/product/edit&id=${data.id}"
@@ -99,7 +99,7 @@
                                     </a>
                                  </li>
                                 {% endif %}
-                                   {% if access2route('@a/catalog/product/quantity') %}
+                                   {% if access('@a/catalog/product/quantity') %}
                                     <li>
                                         <a class="dropdown-item"
                                             href="/?_route=@a/catalog/product/quantity&id=${data.id}" title="Количество">
@@ -107,7 +107,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('catalog/admin/product/images') %}
+                                {% if access('catalog/admin/product/images') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=catalog/admin/product/images&product_id=${data.id}"
@@ -116,7 +116,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/tags') %}
+                                {% if access('@a/catalog/product/tags') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/tags&id=${data.id}"
@@ -124,7 +124,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/options') %}
+                                {% if access('@a/catalog/product/options') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/options&id=${data.id}"
@@ -132,7 +132,7 @@
                                        </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/urls') %}
+                                {% if access('@a/catalog/product/urls') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/urls&id=${data.id}"
@@ -140,7 +140,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/files') %}
+                                {% if access('@a/catalog/product/files') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/files&id=${data.id}"
@@ -148,7 +148,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/prices') %}
+                                {% if access('@a/catalog/product/prices') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/prices&id=${data.id}"
@@ -156,7 +156,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('@a/catalog/product/meta') %}
+                                {% if access('@a/catalog/product/meta') %}
                                     <li>
                                         <a class="dropdown-item"
                                            href="/?_route=@a/catalog/product/meta&id=${data.id}"
@@ -164,7 +164,7 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access2route('catalog/admin/product/delete') %}
+                                {% if access('catalog/admin/product/delete') %}
                                     <li>
                                         <a class="dropdown-item bg-danger"
                                            href="/?_route=catalog/admin/product/delete&id=${data.id}"

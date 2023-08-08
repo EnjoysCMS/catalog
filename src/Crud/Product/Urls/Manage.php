@@ -6,6 +6,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Urls;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -18,13 +19,15 @@ final class Manage implements ModelInterface
     private EntityRepository|ProductRepository $productRepository;
     protected Product $product;
 
+
     /**
+     * @throws NotSupported
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly UrlGeneratorInterface $urlGenerator
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->productRepository->find(
@@ -38,7 +41,6 @@ final class Manage implements ModelInterface
             'product' => $this->product,
             'subtitle' => 'URLs',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер ссылок: %s', $this->product->getName()),

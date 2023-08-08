@@ -43,6 +43,6 @@ final class Unit extends AdminController
             'total_count' => count($matched)
         ];
 
-        return $this->responseJson($result);
+        return $this->jsonResponse($result);
     }
 }

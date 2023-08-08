@@ -17,7 +17,7 @@ use Doctrine\ORM\PersistentCollection;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
@@ -35,10 +35,10 @@ final class SetExtraFieldsToChildren implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private RendererInterface $renderer,
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private RedirectInterface $redirect,
+        private readonly RendererInterface $renderer,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly RedirectInterface $redirect,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
 

@@ -26,8 +26,8 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Components\ContentEditor\ContentEditor;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\ContentEditor\ContentEditor;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
@@ -51,14 +51,14 @@ final class Edit implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private RendererInterface $renderer,
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private Config $config,
-        private ContentEditor $contentEditor,
-        private RedirectInterface $redirect,
-        private EventDispatcherInterface $dispatcher,
+        private readonly RendererInterface $renderer,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly Config $config,
+        private readonly ContentEditor $contentEditor,
+        private readonly RedirectInterface $redirect,
+        private readonly EventDispatcherInterface $dispatcher,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
 
@@ -111,7 +111,6 @@ final class Edit implements ModelInterface
                     ->setSelector('#shortDescription')
                     ->getEmbedCode(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
                 sprintf('Редактирование категории `%s`', $this->category->getTitle()),

@@ -17,7 +17,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use Enjoys\Upload\UploadProcessing;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -43,13 +43,13 @@ final class Upload implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $em,
-        private RendererInterface $renderer,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private EventDispatcherInterface $dispatcher,
-        private Config $config
+        private readonly EntityManager $em,
+        private readonly RendererInterface $renderer,
+        private readonly ServerRequestInterface $request,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly Config $config
     ) {
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->productRepository->find(
@@ -79,7 +79,6 @@ final class Upload implements ModelInterface
             'form' => $this->renderer,
             'subtitle' => 'Загрузка файла',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 $this->urlGenerator->generate('@a/catalog/product/files', ['id' => $this->product->getId()]

@@ -11,7 +11,7 @@ use EnjoysCMS\Core\Components\Helpers\HelpersBase;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
 
-final class ProductOptions extends HelpersBase
+final class ProductOptions
 {
 
     public static function getOptionKey(string $name, string $unit = null): ?OptionKey

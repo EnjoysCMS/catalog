@@ -20,12 +20,12 @@ final class Price extends AdminController
             'comment' => '[ADMIN] Установка цен товару'
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Manage $manage): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/prices/manage.twig',
-                $this->getContext($this->container->get(Manage::class))
+                $manage->getContext()
             )
         );
     }

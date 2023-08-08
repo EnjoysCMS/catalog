@@ -10,7 +10,6 @@ use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupAdd;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupDelete;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupEdit;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupList;
-use EnjoysCMS\Module\Catalog\Crud\PriceGroupModel;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -27,11 +26,11 @@ final class PriceGroup extends AdminController
         path: 'admin/catalog/pricegroup',
         name: 'catalog/admin/pricegroup'
     )]
-    public function list(): ResponseInterface
+    public function list(PriceGroupList $priceGroupList): ResponseInterface
     {
-        return $this->responseText($this->view(
+        return $this->response($this->twig->render(
             $this->templatePath . '/PriceGroup/price_group_list.twig',
-            $this->getContext($this->getContainer()->get(PriceGroupList::class))
+            $priceGroupList->getContext()
         ));
     }
 
@@ -43,11 +42,11 @@ final class PriceGroup extends AdminController
         path: 'admin/catalog/pricegroup/add',
         name: 'catalog/admin/pricegroup/add'
     )]
-    public function add(): ResponseInterface
+    public function add(PriceGroupAdd $priceGroupAdd): ResponseInterface
     {
-        return $this->responseText($this->view(
+        return $this->response($this->twig->render(
             $this->templatePath . '/PriceGroup/price_group_add.twig',
-            $this->getContext($this->getContainer()->get(PriceGroupAdd::class))
+            $priceGroupAdd->getContext()
         ));
     }
 
@@ -59,11 +58,11 @@ final class PriceGroup extends AdminController
         path: 'admin/catalog/pricegroup/edit',
         name: 'catalog/admin/pricegroup/edit'
     )]
-    public function edit(): ResponseInterface
+    public function edit(PriceGroupEdit $priceGroupEdit): ResponseInterface
     {
-        return $this->responseText($this->view(
+        return $this->response($this->twig->render(
             $this->templatePath . '/PriceGroup/price_group_edit.twig',
-            $this->getContext($this->getContainer()->get(PriceGroupEdit::class))
+            $priceGroupEdit->getContext()
         ));
     }
 
@@ -75,11 +74,11 @@ final class PriceGroup extends AdminController
         path: 'admin/catalog/pricegroup/delete',
         name: 'catalog/admin/pricegroup/delete'
     )]
-    public function delete(): ResponseInterface
+    public function delete(PriceGroupDelete $priceGroupDelete): ResponseInterface
     {
-        return $this->responseText($this->view(
+        return $this->response($this->twig->render(
             $this->templatePath . '/PriceGroup/price_group_delete.twig',
-            $this->getContext($this->container->get(PriceGroupDelete::class))
+            $priceGroupDelete->getContext()
         ));
     }
 }

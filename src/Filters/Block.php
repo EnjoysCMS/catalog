@@ -23,7 +23,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class Block extends AbstractBlock
+class Block
 {
 
     public function __construct(
@@ -34,7 +34,7 @@ class Block extends AbstractBlock
         private RendererInterface $renderForm,
         Entity $block
     ) {
-        parent::__construct($block);
+
     }
 
     public static function getBlockDefinitionFile(): string

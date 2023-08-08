@@ -22,7 +22,7 @@ final class Upload implements LoadImage
     private string $name;
     private string $extension;
 
-    public function __construct(private UploadHandler $uploadHandler)
+    public function __construct(private readonly UploadHandler $uploadHandler)
     {
     }
 

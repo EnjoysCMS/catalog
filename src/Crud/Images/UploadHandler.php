@@ -30,8 +30,10 @@ final class UploadHandler
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function __construct(private Config $config, private EventDispatcherInterface $dispatcher)
-    {
+    public function __construct(
+        private readonly Config $config,
+        private readonly EventDispatcherInterface $dispatcher
+    ) {
         $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
         $this->thumbnailService = $this->config->getThumbnailCreationService();
     }

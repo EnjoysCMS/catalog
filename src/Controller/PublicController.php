@@ -6,8 +6,8 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
-use EnjoysCMS\Core\Components\Composer\Utils;
-use EnjoysCMS\Core\Components\Modules\Module;
+use EnjoysCMS\Core\Extensions\Composer\Utils;
+use EnjoysCMS\Core\Modules\Module;
 use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

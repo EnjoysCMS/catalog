@@ -16,7 +16,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -39,12 +39,12 @@ final class Add implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $entityManager,
-        private ServerRequestInterface $request,
-        private RendererInterface $renderer,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private Config $config,
+        private readonly EntityManager $entityManager,
+        private readonly ServerRequestInterface $request,
+        private readonly RendererInterface $renderer,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
+        private readonly Config $config,
         FactoryInterface $factory
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
@@ -95,7 +95,6 @@ final class Add implements ModelInterface
             'product' => $this->product,
             'subtitle' => 'Загрузка изображения для продукта',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Добавление нового изображения: `%s`', $this->product->getName()),

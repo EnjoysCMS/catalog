@@ -31,12 +31,12 @@ final class Options extends AdminController
             'comment' => 'Просмотр опций товара'
         ]
     )]
-    public function manageOptions(): ResponseInterface
+    public function manageOptions(ModelOptions\Manage $manage): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig(
                 $this->templatePath . '/product/options/options.twig',
-                $this->getContext($this->container->get(ModelOptions\Manage::class))
+                $manage->getContext()
             )
         );
     }
@@ -77,7 +77,7 @@ final class Options extends AdminController
         EntityManager $entityManager,
         ServerRequestInterface $request
     ): ResponseInterface {
-        return $this->responseJson(
+        return $this->jsonResponse(
             $entityManager->getRepository(OptionKey::class)->like('name', $request->getQueryParams()['query'])
         );
     }
@@ -99,7 +99,7 @@ final class Options extends AdminController
                 'unit' => $request->getQueryParams()['unit'] ?? null
             ]
         );
-        return $this->responseJson(
+        return $this->jsonResponse(
             $entityManager->getRepository(OptionValue::class)->like(
                 'value',
                 $request->getQueryParams()['query'] ?? null,

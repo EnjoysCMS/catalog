@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class CategoryModel implements ModelInterface
 {
 
-    use Options;
+
 
     private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
 

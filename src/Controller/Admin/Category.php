@@ -33,12 +33,14 @@ final class Category extends AdminController
             'comment' => 'Просмотр списка категорий в админке'
         ]
     )]
-    public function index(): ResponseInterface
+    public function index(Index $index): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        $this->breadcrumbs->setLastBreadcrumb('Категории');
+
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/category.twig',
-                $this->getContext($this->container->get(Index::class))
+                $index->getContext()
             )
         );
     }
@@ -55,12 +57,12 @@ final class Category extends AdminController
             'comment' => 'Добавление категорий'
         ]
     )]
-    public function add(): ResponseInterface
+    public function add(Add $add): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/addcategory.twig',
-                $this->getContext($this->container->get(Add::class))
+                $add->getContext()
             )
         );
     }
@@ -77,12 +79,12 @@ final class Category extends AdminController
             'comment' => 'Редактирование категорий'
         ]
     )]
-    public function edit(): ResponseInterface
+    public function edit(Edit $edit): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/editcategory.twig',
-                $this->getContext($this->container->get(Edit::class))
+                $edit->getContext()
             )
         );
     }
@@ -108,9 +110,9 @@ final class Category extends AdminController
                 ['data' => \json_decode($request->getBody()->getContents())]
             );
             $em->flush();
-            return $this->responseJson('saved');
+            return $this->jsonResponse('saved');
         } catch (\Throwable $e) {
-            $response = $this->responseJson($e->getMessage());
+            $response = $this->jsonResponse($e->getMessage());
             return $response->withStatus(401);
         }
     }
@@ -127,12 +129,12 @@ final class Category extends AdminController
             'comment' => 'Удаление категорий'
         ]
     )]
-    public function delete(): ResponseInterface
+    public function delete(Delete $delete): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/form.twig',
-                $this->getContext($this->container->get(Delete::class))
+                $delete->getContext()
             )
         );
     }
@@ -169,7 +171,7 @@ final class Category extends AdminController
             $result[$key->getId()] = $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : '');
         }
 
-        return $this->responseJson($result);
+        return $this->jsonResponse($result);
     }
 
     #[Route(
@@ -179,13 +181,12 @@ final class Category extends AdminController
             'comment' => '[ADMIN] Установка extra fields всем дочерним категориям'
         ]
     )]
-    public function setExtraFieldsToAllChildren(): ResponseInterface
+    public function setExtraFieldsToAllChildren(SetExtraFieldsToChildren $setExtraFieldsToChildren): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/form.twig',
-                $this->getContext($this->container->get(SetExtraFieldsToChildren::class))
-            )
+                $setExtraFieldsToChildren->getContext()            )
         );
     }
 }

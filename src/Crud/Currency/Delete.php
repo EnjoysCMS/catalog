@@ -16,7 +16,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
@@ -36,11 +36,11 @@ final class Delete implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private RendererInterface $renderer,
-        private EntityManager $entityManager,
-        private ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
+        private readonly RendererInterface $renderer,
+        private readonly EntityManager $entityManager,
+        private readonly ServerRequestInterface $request,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
     ) {
         $currencyId = $this->request->getQueryParams()['id']
             ?? throw new InvalidArgumentException('Currency id was not transmitted');
@@ -93,7 +93,6 @@ final class Delete implements ModelInterface
             'subtitle' => $this->currency->getName(),
             'form' => $this->renderer,
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
                 sprintf('Удаление валюты: %s', $this->currency->getName())

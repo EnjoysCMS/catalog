@@ -11,7 +11,6 @@ use DI\NotFoundException;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Events\PostLoadAndSaveImage;
-use Exception;
 use Generator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -34,8 +33,10 @@ final class Download implements LoadImage
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function __construct(private Config $config, private EventDispatcherInterface $dispatcher)
-    {
+    public function __construct(
+        private readonly Config $config,
+        private readonly EventDispatcherInterface $dispatcher
+    ) {
         $this->filesystem = $this->config->getImageStorageUpload()->getFileSystem();
         $this->thumbnailService = $this->config->getThumbnailCreationService();
     }

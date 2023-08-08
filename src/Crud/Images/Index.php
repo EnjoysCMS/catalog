@@ -6,7 +6,6 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
-use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -22,9 +21,9 @@ final class Index implements ModelInterface
      * @throws NoResultException
      */
     public function __construct(
-        private EntityManager $entityManager,
+        private readonly EntityManager $entityManager,
+        private readonly UrlGeneratorInterface $urlGenerator,
         ServerRequestInterface $request,
-        private UrlGeneratorInterface $urlGenerator
     ) {
         $this->product = $entityManager->getRepository(Product::class)->find(
             $request->getQueryParams()['product_id'] ?? null
@@ -37,7 +36,6 @@ final class Index implements ModelInterface
             'product' => $this->product,
             'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $this->product]),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер изображений: `%s`', $this->product->getName()),

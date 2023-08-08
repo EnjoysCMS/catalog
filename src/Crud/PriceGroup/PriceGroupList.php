@@ -14,8 +14,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class PriceGroupList implements ModelInterface
 {
 
-    public function __construct(private EntityManager $em, private UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private readonly EntityManager $em,
+        private readonly UrlGeneratorInterface $urlGenerator
+    ) {
     }
 
     public function getContext(): array
@@ -23,7 +25,6 @@ final class PriceGroupList implements ModelInterface
         return [
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('admin/index') => 'Главная',
                 $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
                 'Группы цен',
             ],

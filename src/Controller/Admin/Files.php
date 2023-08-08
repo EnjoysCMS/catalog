@@ -11,7 +11,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Functions\TwigExtension\ConvertSize;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Manage;
 use EnjoysCMS\Module\Catalog\Crud\Product\Files\Upload;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
@@ -35,14 +35,14 @@ final class Files extends AdminController
             "comment" => "[ADMIN] Менеджер файлов"
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Manage $manage): ResponseInterface
     {
-        $this->getTwig()->addExtension($this->container->get(ConvertSize::class));
+        $this->twig->addExtension($this->container->get(ConvertSize::class));
 
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/files/manage.twig',
-                $this->getContext($this->container->get(Manage::class))
+                $manage->getContext()
             )
         );
     }
@@ -58,12 +58,12 @@ final class Files extends AdminController
             "comment" => "[ADMIN] Загрузить файл для продукта"
         ]
     )]
-    public function upload(): ResponseInterface
+    public function upload(Upload $upload): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/form.twig',
-                $this->getContext($this->container->get(Upload::class))
+                $upload->getContext()
             )
         );
     }

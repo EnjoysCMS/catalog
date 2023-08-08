@@ -38,7 +38,7 @@
                 params.push('left=' + (screen.width - width) / 2);
                 params.push('top=' + ((screen.height - height) / 2) - 50);
 
-                window.open('{{ path('elfinder/popup') }}', 'FileBrowser', params.join(','));
+                window.open('{{ path('@elfinder_popup') }}', 'FileBrowser', params.join(','));
             });
         });
 

@@ -25,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 final class Search
 {
 
-    use Options;
+//    use Options;
 
     private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
     private string $searchQuery;

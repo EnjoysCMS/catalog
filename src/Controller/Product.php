@@ -10,7 +10,9 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
@@ -27,11 +29,11 @@ final class Product extends PublicController
 {
 
     /**
-     * @throws SyntaxError
-     * @throws NotFoundException
-     * @throws RuntimeError
-     * @throws DependencyException
      * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
 
     public function __invoke(ContainerInterface $container): ResponseInterface

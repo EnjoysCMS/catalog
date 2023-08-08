@@ -29,12 +29,15 @@ final class Currency extends AdminController
             'comment' => '[ADMIN] Просмотр списка валют в админке'
         ]
     )]
-    public function manage(): ResponseInterface
+    public function manage(Manage $manage): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/currency.twig',
-            $this->getContext($this->container->get(Manage::class))
-        ));
+        $this->breadcrumbs->setLastBreadcrumb('Список валют', 'catalog/admin/currency');
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/currency.twig',
+                $manage->getContext()
+            )
+        );
     }
 
     #[Route(
@@ -46,10 +49,12 @@ final class Currency extends AdminController
     )]
     public function add(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Add::class))
-        ));
+        return $this->response(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Add::class))
+            )
+        );
     }
 
     #[Route(
@@ -61,10 +66,12 @@ final class Currency extends AdminController
     )]
     public function edit(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Edit::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Edit::class))
+            )
+        );
     }
 
 
@@ -77,9 +84,11 @@ final class Currency extends AdminController
     )]
     public function delete(): ResponseInterface
     {
-        return $this->responseText($this->view(
-            $this->templatePath . '/form.twig',
-            $this->getContext($this->container->get(Delete::class))
-        ));
+        return $this->responseText(
+            $this->view(
+                $this->templatePath . '/form.twig',
+                $this->getContext($this->container->get(Delete::class))
+            )
+        );
     }
 }

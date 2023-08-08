@@ -14,7 +14,6 @@ use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class Product extends AdminController
 {
@@ -26,20 +25,12 @@ final class Product extends AdminController
             'comment' => 'Просмотр товаров в админке'
         ]
     )]
-    public function index(
-        UrlGeneratorInterface $urlGenerator
-    ): ResponseInterface {
-
-        return $this->responseText(
-            $this->view(
-                $this->templatePath . '/products.twig',
-                [
-                    'breadcrumbs' => [
-                        $urlGenerator->generate('admin/index') => 'Главная',
-                        $urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                        'Список товаров (продуктов)',
-                    ],
-                ],
+    public function index(): ResponseInterface
+    {
+        $this->breadcrumbs->setLastBreadcrumb('Список товаров (продуктов)');
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/products.twig'
             )
         );
     }
@@ -52,12 +43,12 @@ final class Product extends AdminController
             'comment' => 'Добавление товара'
         ]
     )]
-    public function add(): ResponseInterface
+    public function add(Add $add): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/addproduct.twig',
-                $this->getContext($this->container->get(Add::class))
+                $add->getContext()
             )
         );
     }
@@ -70,12 +61,12 @@ final class Product extends AdminController
             'comment' => 'Редактирование товара'
         ]
     )]
-    public function edit(): ResponseInterface
+    public function edit(Edit $edit): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/editproduct.twig',
-                $this->getContext($this->container->get(Edit::class))
+                $edit->getContext()
             )
         );
     }
@@ -87,12 +78,12 @@ final class Product extends AdminController
             'comment' => 'Удаление товара'
         ]
     )]
-    public function delete(): ResponseInterface
+    public function delete(Delete $delete): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/form.twig',
-                $this->getContext($this->container->get(Delete::class))
+                $delete->getContext()
             )
         );
     }
@@ -104,12 +95,12 @@ final class Product extends AdminController
             'comment' => 'Просмотр тегов товара'
         ]
     )]
-    public function manageTags(): ResponseInterface
+    public function manageTags(TagsList $tagsList): ResponseInterface
     {
-        return $this->responseText(
-            $this->view(
+        return $this->response(
+            $this->twig->render(
                 $this->templatePath . '/product/tags/tags_list.twig',
-                $this->getContext($this->container->get(TagsList::class))
+                $tagsList->getContext()
             )
         );
     }
@@ -141,7 +132,7 @@ final class Product extends AdminController
             }, $matched),
             'total_count' => count($matched)
         ];
-        return $this->responseJson($result);
+        return $this->jsonResponse($result);
     }
 
 

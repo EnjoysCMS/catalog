@@ -8,7 +8,6 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
-use EnjoysCMS\Core\BaseController;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
 use Psr\Http\Message\ResponseInterface;
@@ -25,7 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
         "comment" => "[PUBLIC] Скачивание файлов"
     ]
 )]
-final class DownloadProductFiles extends BaseController
+final class DownloadProductFiles extends PublicController
 {
     public function __invoke(
         EntityManagerInterface $em,
