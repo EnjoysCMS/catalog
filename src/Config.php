@@ -39,10 +39,6 @@ final class Config
         private LoggerInterface $logger,
         ModuleCollection $moduleCollection
     ) {
-        $evm = $this->em->getEventManager();
-        $treeListener = new TreeListener();
-        $evm->addEventSubscriber($treeListener);
-
         $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
             sprintf(
                 'Module %s not found. Name must be same like packageName in module composer.json',
