@@ -52,8 +52,8 @@ final class Setting
      */
     private function fetchSetting(): array
     {
-        /** @var \EnjoysCMS\Core\Repositories\Setting $repositoryCoreSetting */
-        $repositoryCoreSetting = $this->em->getRepository(\EnjoysCMS\Core\Entities\Setting::class);
+        /** @var \EnjoysCMS\Core\Setting\Repository\Setting $repositoryCoreSetting */
+        $repositoryCoreSetting = $this->em->getRepository(\EnjoysCMS\Core\Setting\Entity\Setting::class);
 
         /** @var \EnjoysCMS\Module\Catalog\Repositories\Setting $repositoryCatalogSetting */
         $repositoryCatalogSetting = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);

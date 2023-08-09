@@ -18,7 +18,7 @@
 
             $.ajax({
                 method: "GET",
-                url: "{{ path('catalog/admin/api/get-category-tree') }}"
+                url: "{{ path('@catalog_admin_api~category_get_tree') }}"
             })
                 .done(function (data) {
                     Object.values(data).forEach(function (v) {

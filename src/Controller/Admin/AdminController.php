@@ -31,7 +31,7 @@ abstract class AdminController extends AdminBaseController
         $this->twig->addGlobal('module', $this->module);
         $this->twig->addGlobal('config', $this->config);
 
-        $this->breadcrumbs->add('@a/catalog/dashboard', 'Каталог' );
+        $this->breadcrumbs->add('@catalog_admin', 'Каталог' );
     }
 
 }

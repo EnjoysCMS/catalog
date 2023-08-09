@@ -72,7 +72,7 @@ final class Add implements ModelInterface
             $this->dispatcher->dispatch(new PreAddCategoryEvent());
             $category = $this->doAction();
             $this->dispatcher->dispatch(new PostAddCategoryEvent($category));
-            $this->redirect->toRoute('catalog/admin/category', emit: true);
+            $this->redirect->toRoute('@catalog_admin_category_list', emit: true);
         }
 
         return [
@@ -86,11 +86,6 @@ final class Add implements ModelInterface
                     ->withConfig($this->config->getEditorConfigCategoryShortDescription())
                     ->setSelector('#shortDescription')
                     ->getEmbedCode(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
-                'Добавление новой категории',
-            ],
         ];
     }
 

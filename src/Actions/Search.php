@@ -12,9 +12,8 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Traits\Options;
-use EnjoysCMS\Core\Components\Pagination\Pagination;
 use EnjoysCMS\Core\Exception\NotFoundException;
+use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
@@ -37,9 +36,8 @@ final class Search
         private ServerRequestInterface $request,
         private EntityManager $em,
         private Setting $setting,
-        Config $config
+        private Config $config
     ) {
-        $this->setOptions($config->get());
         $this->searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
         $this->productRepository = $this->em->getRepository(Entities\Product::class);
     }
@@ -51,7 +49,7 @@ final class Search
     {
         $this->validateSearchQuery();
 
-        $pagination = new Pagination($this->request->getQueryParams()['page'] ?? 1, $this->getOption('limitItems'));
+        $pagination = new Pagination($this->request->getQueryParams()['page'] ?? 1, $this->config->get('limitItems'));
 
         $qb = $this->getFoundProducts($optionKeys);
         $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
@@ -103,8 +101,13 @@ final class Search
 
     private function validateSearchQuery(): void
     {
-        if (mb_strlen($this->searchQuery) < $this->getOption('minSearchChars', 3)) {
-            throw new \InvalidArgumentException(sprintf('Слишком короткое слово для поиска (нужно минимум %s символа)', $this->getOption('minSearchChars', 3)));
+        if (mb_strlen($this->searchQuery) < $this->config->get('minSearchChars', 3)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Слишком короткое слово для поиска (нужно минимум %s символа)',
+                    $this->getOption('minSearchChars', 3)
+                )
+            );
         }
     }
 

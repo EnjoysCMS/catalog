@@ -10,15 +10,13 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
-use Enjoys\Traits\Options;
-use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Components\Pagination\Pagination;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
 use EnjoysCMS\Core\Exception\NotFoundException;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
@@ -32,7 +30,6 @@ final class CategoryModel implements ModelInterface
 {
 
 
-
     private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
 
     private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
@@ -44,7 +41,7 @@ final class CategoryModel implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface $breadcrumbs,
+        private BreadcrumbCollection $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
         private FilterFactory $filterFactory,
@@ -76,7 +73,6 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->updateConfigValues();
-        $this->setOptions($this->config->get());
     }
 
 
@@ -92,7 +88,8 @@ final class CategoryModel implements ModelInterface
             $this->config->getPerPage()
         );
 
-        if ($this->getOption('showSubcategoryProducts', false)) {
+
+        if ($this->config->get('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
             $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
         } else {
@@ -114,7 +111,7 @@ final class CategoryModel implements ModelInterface
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
-        if (false !== $o = $this->getOption('withImageFirst', false)) {
+        if (false !== $o = $this->config->get('withImageFirst', false)) {
             $qb->orderBy('i.filename', strtoupper($o));
         }
 
@@ -177,7 +174,7 @@ final class CategoryModel implements ModelInterface
     }
 
 
-    private function getBreadcrumbs(): array
+    private function getBreadcrumbs(): iterable
     {
         $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
         foreach ($this->category->getBreadcrumbs() as $breadcrumb) {
@@ -187,7 +184,7 @@ final class CategoryModel implements ModelInterface
             );
         }
 
-        return $this->breadcrumbs->get();
+        return $this->breadcrumbs;
     }
 
     private function updateConfigValues(): void

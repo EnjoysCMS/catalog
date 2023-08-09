@@ -100,7 +100,7 @@
             $("#fill-from-parent").on('click', function () {
                 $.ajax({
                     method: "POST",
-                    url: "{{ path('@a/catalog/tools/category/get-extra-fields') }}",
+                    url: "{{ path('@catalog_admin_api~category_get_extra_fields') }}",
                     data: {id: $(this).data('id')}
                 }).done(function (result) {
                     Object.keys(result).forEach(function (key) {

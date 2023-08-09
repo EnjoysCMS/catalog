@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
+use EnjoysCMS\Core\Routing\Annotation\Route;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
     path: "admin/catalog",
-    name: '@a/catalog/dashboard'
+    name: '@catalog_admin'
 )]
 final class Dashboard extends AdminController
 {

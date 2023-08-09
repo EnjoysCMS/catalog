@@ -64,7 +64,7 @@ final class Index
             );
 
             $this->em->flush();
-            $this->redirect->toRoute('catalog/admin/category', emit: true);
+            $this->redirect->toRoute('@catalog_admin_category_list', emit: true);
         }
         $this->renderer->setForm($form);
 

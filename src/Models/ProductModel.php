@@ -11,8 +11,8 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use EnjoysCMS\Core\Components\Breadcrumbs\BreadcrumbsInterface;
-use EnjoysCMS\Core\Interfaces\RedirectInterface;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
@@ -40,7 +40,7 @@ class ProductModel implements ModelInterface
     public function __construct(
         private EntityManager $em,
         private ServerRequestInterface $request,
-        private BreadcrumbsInterface $breadcrumbs,
+        private BreadcrumbCollection $breadcrumbs,
         private UrlGeneratorInterface $urlGenerator,
         private RedirectInterface $redirect,
         private Setting $setting,
@@ -124,6 +124,6 @@ class ProductModel implements ModelInterface
             );
         }
         $this->breadcrumbs->add(null, $this->product->getName());
-        return $this->breadcrumbs->get();
+        return $this->breadcrumbs->getBreadcrumbs();
     }
 }

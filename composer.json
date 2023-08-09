@@ -29,7 +29,7 @@
     "extra": {
         "module-name": "Каталог",
         "admin-links": {
-            "catalog/admin/category": "Категории",
+            "@catalog_admin_category_list": "Категории",
             "catalog/admin/products": "Продукты",
             "catalog/manage-filters": "Фильтры (настройка)",
             "catalog/admin/pricegroup": "Группы цен",

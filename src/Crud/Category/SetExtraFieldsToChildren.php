@@ -57,7 +57,7 @@ final class SetExtraFieldsToChildren implements ModelInterface
         $form = $this->getForm();
         if ($form->isSubmitted()) {
             $this->doActionRecursive($this->category->getChildren());
-            $this->redirect->toRoute('catalog/admin/category', emit: true);
+            $this->redirect->toRoute('@catalog_admin_category_list', emit: true);
         }
 
         $this->renderer->setForm($form);

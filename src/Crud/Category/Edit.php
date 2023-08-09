@@ -94,7 +94,7 @@ final class Edit implements ModelInterface
             $this->dispatcher->dispatch(new PreEditCategoryEvent($oldCategory));
             $this->doAction();
             $this->dispatcher->dispatch(new PostEditCategoryEvent($oldCategory, $this->category));
-            $this->redirect->toRoute('catalog/admin/category', emit: true);
+            $this->redirect->toRoute('@catalog_admin_category_list', emit: true);
         }
 
 
@@ -110,11 +110,7 @@ final class Edit implements ModelInterface
                     ->withConfig($this->config->getEditorConfigCategoryShortDescription())
                     ->setSelector('#shortDescription')
                     ->getEmbedCode(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
-                sprintf('Редактирование категории `%s`', $this->category->getTitle()),
-            ],
+
         ];
     }
 

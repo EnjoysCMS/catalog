@@ -65,18 +65,13 @@ final class Delete implements ModelInterface
             $this->dispatcher->dispatch(new PreDeleteCategoryEvent($this->category));
             $this->doAction();
             $this->dispatcher->dispatch(new PostDeleteCategoryEvent($this->category));
-            $this->redirect->toRoute('catalog/admin/category', emit: true);
+            $this->redirect->toRoute('@catalog_admin_category_list', emit: true);
         }
 
         return [
             'title' => $this->category->getTitle(),
             'subtitle' => 'Удаление категории',
             'form' => $this->renderer,
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/category') => 'Категории',
-                sprintf('Удаление категории `%s`', $this->category->getTitle()),
-            ],
         ];
     }
 
