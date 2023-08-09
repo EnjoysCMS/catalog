@@ -105,7 +105,7 @@ final class Search
             throw new \InvalidArgumentException(
                 sprintf(
                     'Слишком короткое слово для поиска (нужно минимум %s символа)',
-                    $this->getOption('minSearchChars', 3)
+                    $this->config->get('minSearchChars', 3)
                 )
             );
         }
