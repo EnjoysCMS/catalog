@@ -18,14 +18,13 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class EditUrl implements ModelInterface
+final class EditUrl
 {
     private ObjectRepository|EntityRepository|ProductRepository $productRepository;
     protected Product $product;

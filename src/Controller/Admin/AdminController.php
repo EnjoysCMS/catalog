@@ -9,10 +9,9 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 use DI\Container;
 use EnjoysCMS\Core\Extensions\Composer\Utils;
 use EnjoysCMS\Core\Modules\Module;
-use EnjoysCMS\Module\Admin\AdminBaseController;
 use EnjoysCMS\Module\Catalog\Config;
 
-abstract class AdminController extends AdminBaseController
+abstract class AdminController extends \EnjoysCMS\Module\Admin\AdminController
 {
     protected Module $module;
     protected string $templatePath;

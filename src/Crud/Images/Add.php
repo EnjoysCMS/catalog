@@ -17,7 +17,6 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,7 +24,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
 
-final class Add implements ModelInterface
+final class Add
 {
 
     private Product $product;

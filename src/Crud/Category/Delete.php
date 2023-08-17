@@ -15,7 +15,6 @@ use Doctrine\Persistence\Mapping\MappingException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Events\PostDeleteCategoryEvent;
@@ -24,7 +23,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Delete implements ModelInterface
+final class Delete
 {
     private Category $category;
     private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;

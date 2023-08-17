@@ -11,7 +11,6 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Events\PostDeleteProductEvent;
@@ -21,7 +20,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Delete implements ModelInterface
+final class Delete
 {
 
     private Product $product;

@@ -14,7 +14,6 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -25,7 +24,7 @@ use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Manage implements ModelInterface
+final class Manage
 {
     private EntityRepository|ProductRepository $productRepository;
     private Product $product;

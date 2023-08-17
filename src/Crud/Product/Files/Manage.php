@@ -7,14 +7,13 @@ namespace EnjoysCMS\Module\Catalog\Crud\Product\Files;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Manage implements ModelInterface
+final class Manage
 {
     private EntityRepository|ProductRepository $productRepository;
     protected Product $product;

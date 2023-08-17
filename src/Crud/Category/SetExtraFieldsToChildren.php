@@ -18,11 +18,10 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class SetExtraFieldsToChildren implements ModelInterface
+final class SetExtraFieldsToChildren
 {
 
     private Category $category;

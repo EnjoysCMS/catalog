@@ -6,13 +6,12 @@ namespace EnjoysCMS\Module\Catalog\Crud\Images;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
-use EnjoysCMS\Module\Admin\Core\ModelInterface;
 use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Index implements ModelInterface
+final class Index
 {
 
     private Product $product;
