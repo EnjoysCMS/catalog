@@ -165,7 +165,7 @@
         };
 
         const fillCategorySelect = function () {
-            fetch("{{ path('catalog/admin/api/get-category-tree') }}", {
+            fetch("{{ path('@catalog_admin_api~category_get_tree') }}", {
                 method: 'GET'
             })
                 .then(response => response.json())

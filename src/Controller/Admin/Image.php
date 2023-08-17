@@ -60,13 +60,12 @@ final class Image extends AdminController
             'comment' => 'Загрузка изображения к товару'
         ]
     )]
-    public function add(Add $add): ResponseInterface
+    public function add(Add $addImageService): ResponseInterface
     {
-        /** @var Add $addImageService */
         return $this->response(
             $this->twig->render(
                 $addImageService->getTemplatePath($this->templatePath),
-                $add->getContext()
+                $addImageService->getContext()
             )
         );
     }
