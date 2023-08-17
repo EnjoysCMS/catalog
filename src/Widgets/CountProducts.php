@@ -7,25 +7,31 @@ namespace EnjoysCMS\Module\Catalog\Widgets;
 
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Core\Components\Widgets\AbstractWidgets;
-use EnjoysCMS\Core\Entities\Widget;
+use Doctrine\ORM\Exception\NotSupported;
+use EnjoysCMS\Core\Block\AbstractWidget;
+use EnjoysCMS\Core\Block\Annotation\Widget;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Yaml\Yaml;
-use Twig\Environment;
 
-final class CountProducts 
+#[Widget('Общее количество товаров в каталоге')]
+final class CountProducts extends AbstractWidget
 {
 
-    /**
-     * @return string
-     */
-    public function view()
-    {
-        /** @var \EnjoysCMS\Module\Catalog\Repositories\Product $repository */
-        $repository = $this->getContainer()->get(EntityManager::class)->getRepository(Product::class);
+    public function __construct(
+        private readonly EntityManager $em,
+        private readonly UrlGeneratorInterface $urlGenerator
+    ) {
+    }
 
-        $url = $this->getContainer()->get(UrlGeneratorInterface::class)->generate('catalog/admin/products');
+
+    /**
+     * @throws NotSupported
+     */
+    public function view(): string
+    {
+        $repository = $this->em->getRepository(Product::class);
+
+        $url = $this->urlGenerator->generate('catalog/admin/products');
         return <<<HTML
 <div class="small-box bg-warning">
     <div class="inner">
@@ -40,13 +46,4 @@ final class CountProducts
 HTML;
     }
 
-    public static function getWidgetDefinitionFile(): string
-    {
-        return __DIR__ . '/../../widgets.yml';
-    }
-
-    public static function getMeta(): array
-    {
-        return Yaml::parseFile(static::getWidgetDefinitionFile())[static::class];
-    }
 }
