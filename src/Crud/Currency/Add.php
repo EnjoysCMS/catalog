@@ -52,7 +52,7 @@ final class Add
             'subtitle' => '',
             'form' => $this->renderer,
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
                 'Добавление валюты'
             ],

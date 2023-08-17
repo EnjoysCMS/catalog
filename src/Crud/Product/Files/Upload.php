@@ -78,7 +78,7 @@ final class Upload
             'form' => $this->renderer,
             'subtitle' => 'Загрузка файла',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 $this->urlGenerator->generate('@a/catalog/product/files', ['id' => $this->product->getId()]
                 ) => 'Менеджер файлов',

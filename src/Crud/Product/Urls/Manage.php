@@ -40,7 +40,7 @@ final class Manage
             'product' => $this->product,
             'subtitle' => 'URLs',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер ссылок: %s', $this->product->getName()),
             ],

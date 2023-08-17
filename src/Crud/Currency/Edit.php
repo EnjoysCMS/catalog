@@ -72,7 +72,7 @@ final class Edit
             'subtitle' => $this->currency->getName(),
             'form' => $this->renderer,
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/currency') => 'Список валют',
                 sprintf('Редактирование валюты: %s', $this->currency->getName())
             ],

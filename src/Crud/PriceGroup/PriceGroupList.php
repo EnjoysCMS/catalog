@@ -24,7 +24,7 @@ final class PriceGroupList
         return [
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 'Группы цен',
             ],
         ];

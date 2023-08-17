@@ -69,7 +69,7 @@ final class MetaManage
             'subtitle' => 'Установка META данных HTML',
             'form' => $this->renderer->output(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('META-данные: %s', $this->product->getName()),
             ],

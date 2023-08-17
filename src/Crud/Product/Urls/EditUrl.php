@@ -69,7 +69,7 @@ final class EditUrl
             'form' => $this->renderer->output(),
             'subtitle' => 'Редактирование URL',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 $this->urlGenerator->generate('@a/catalog/product/urls', ['id' => $this->product->getId()]
                 ) => 'Менеджер URLs',

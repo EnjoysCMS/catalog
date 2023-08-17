@@ -61,7 +61,7 @@ final class Manage
             'form' => $this->renderer->output(),
             'subtitle' => 'Установка количества',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Настройка количества: `%s`', $this->product->getName()),
             ],

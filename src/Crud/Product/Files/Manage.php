@@ -40,7 +40,7 @@ final class Manage
             'config' => $this->config,
             'subtitle' => 'Управление файлами',
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Менеджер файлов: %s', $this->product->getName()),
             ],

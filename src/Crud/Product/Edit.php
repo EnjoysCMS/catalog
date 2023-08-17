@@ -116,7 +116,7 @@ final class Edit
                 ->setSelector('#description')
                 ->getEmbedCode(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
                 sprintf('Редактирование общей информации `%s`', $this->product->getName()),
             ],

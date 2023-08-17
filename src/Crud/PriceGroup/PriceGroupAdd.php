@@ -45,7 +45,7 @@ final class PriceGroupAdd
         return [
             'form' => $this->renderer->output(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 $this->urlGenerator->generate('catalog/admin/pricegroup') =>'Группы цен',
                 'Добавление новой группы цен'
             ],

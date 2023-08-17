@@ -50,7 +50,7 @@ final class Setting
         return [
             'form' => $this->renderer->output(),
             'breadcrumbs' => [
-                $this->urlGenerator->generate('@a/catalog/dashboard') => 'Каталог',
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
                 'Настройки',
             ],
         ];
