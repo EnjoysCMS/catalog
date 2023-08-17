@@ -7,10 +7,11 @@ namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Module\Catalog\Crud\Product\Add;
-use EnjoysCMS\Module\Catalog\Crud\Product\Delete;
-use EnjoysCMS\Module\Catalog\Crud\Product\Edit;
-use EnjoysCMS\Module\Catalog\Crud\Product\Tags\TagsList;
+use EnjoysCMS\Module\Catalog\Admin\AdminController;
+use EnjoysCMS\Module\Catalog\Admin\Product\Add;
+use EnjoysCMS\Module\Catalog\Admin\Product\Delete;
+use EnjoysCMS\Module\Catalog\Admin\Product\Edit;
+use EnjoysCMS\Module\Catalog\Admin\Product\Tags\TagsList;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;

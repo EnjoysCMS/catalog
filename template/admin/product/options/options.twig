@@ -113,7 +113,7 @@
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             remote: {
-                url: "{{ path('@a/catalog/tools/find-option-keys', {'query' : '_QUERY'}) }}",
+                url: "{{ path('@catalog_product_options_find_option_keys', {'query' : '_QUERY'}) }}",
                 wildcard: '_QUERY'
             }
         });
@@ -152,7 +152,7 @@
                         let unit = this.$el.parents('.form-row').find('.filter-unit').val();
 
                         $.ajax({
-                            url: "{{ path('@a/catalog/tools/find-option-values') }}",
+                            url: "{{ path('@catalog_product_options_find_option_values') }}",
                             data: {query: query, option: option, unit: unit},
                             type: "GET",
                             success: function (data) {
@@ -338,7 +338,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="fillFromProduct" action="{{ path('@a/catalog/product/options/fill-from-product') }}" method="POST">
+                    <form name="fillFromProduct" action="{{ path('@catalog_product_options_fill_from_product') }}" method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
                         <select name="fillFromProduct" class="fillby form-control" onchange="this.form.submit()"></select>
                     </form>
@@ -359,7 +359,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="fillFromText" action="{{ path('@a/catalog/product/options/fill-from-text') }}" method="POST">
+                    <form name="fillFromText" action="{{ path('@catalog_product_options_fill_from_text') }}" method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
                         <textarea name="text" class="form-control" rows="10"></textarea>
                         <input type="submit" class="my-3 btn btn-primary form-control">

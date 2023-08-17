@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 use EnjoysCMS\Core\Routing\Annotation\Route;
+use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use Psr\Http\Message\ResponseInterface;
 
 #[Route(

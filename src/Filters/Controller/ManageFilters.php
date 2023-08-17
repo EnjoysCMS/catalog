@@ -2,7 +2,7 @@
 
 namespace EnjoysCMS\Module\Catalog\Filters\Controller;
 
-use EnjoysCMS\Module\Catalog\Controller\Admin\AdminController;
+use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

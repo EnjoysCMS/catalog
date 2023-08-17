@@ -6,10 +6,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller\Admin;
 
 
+use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupAdd;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupDelete;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupEdit;
 use EnjoysCMS\Module\Catalog\Crud\PriceGroup\PriceGroupList;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -19,8 +22,8 @@ final class PriceGroup extends AdminController
 
 
     /**
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route(
         path: 'admin/catalog/pricegroup',
@@ -35,8 +38,8 @@ final class PriceGroup extends AdminController
     }
 
     /**
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route(
         path: 'admin/catalog/pricegroup/add',
@@ -51,8 +54,8 @@ final class PriceGroup extends AdminController
     }
 
     /**
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route(
         path: 'admin/catalog/pricegroup/edit',
@@ -67,8 +70,8 @@ final class PriceGroup extends AdminController
     }
 
     /**
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route(
         path: 'admin/catalog/pricegroup/delete',

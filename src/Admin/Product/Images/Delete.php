@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+namespace EnjoysCMS\Module\Catalog\Admin\Product\Images;
+
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Enjoys\Forms\Form;
+use Enjoys\Forms\Interfaces\RendererInterface;
+use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entities\Image;
+use League\Flysystem\FilesystemException;
+use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+final class Delete
+{
+
+    private Image $image;
+
+    /**
+     * @throws NoResultException
+     * @throws NotSupported
+     */
+    public function __construct(
+        private readonly EntityManager $entityManager,
+        private readonly ServerRequestInterface $request,
+        private readonly RendererInterface $renderer,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
+        private readonly Config $config
+    ) {
+        $this->image = $this->entityManager->getRepository(Image::class)->find(
+            $this->request->getQueryParams()['id'] ?? 0
+        ) ?? throw new NoResultException();
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws FilesystemException
+     * @throws ORMException
+     */
+    public function getContext(): array
+    {
+        $form = $this->getForm();
+
+        $this->renderer->setForm($form);
+
+        if ($form->isSubmitted()) {
+            $this->doAction();
+        }
+
+
+        return [
+            'form' => $this->renderer,
+            'breadcrumbs' => [
+                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
+                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                'Удаление изображения',
+            ],
+        ];
+    }
+
+    private function getForm(): Form
+    {
+        $form = new Form();
+
+        $form->header('Подтвердите удаление!');
+        $form->submit('delete');
+        return $form;
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws FilesystemException
+     */
+    private function doAction(): void
+    {
+        $filesystem = $this->config->getImageStorageUpload($this->image->getStorage())->getFileSystem();
+
+
+        $product = $this->image->getProduct();
+
+        $filesystem->delete($this->image->getFilename() . '.' . $this->image->getExtension());
+        $filesystem->delete($this->image->getFilename() . '_small.' . $this->image->getExtension());
+        $filesystem->delete($this->image->getFilename() . '_large.' . $this->image->getExtension());
+
+        $this->entityManager->remove($this->image);
+        $this->entityManager->flush();
+
+        if ($this->image->isGeneral()) {
+            $nextImage = $product->getImages()->first();
+            if ($nextImage instanceof Image) {
+                $nextImage->setGeneral(true);
+            }
+            $this->entityManager->flush();
+        }
+
+        $this->redirect->toRoute(
+            'catalog/admin/product/images', ['product_id' => $product->getId()],
+            emit: true
+        );
+    }
+}

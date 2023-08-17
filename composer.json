@@ -19,7 +19,8 @@
         "enjoys/forms": ">= 5.4.2",
         "patchranger/cartesian-iterator": "^0.07.0",
         "symfony/property-access": "^6.0",
-        "symfony/serializer": "^6.0"
+        "symfony/serializer": "^6.0",
+        "guzzlehttp/guzzle": "^7.7"
     },
     "autoload": {
         "psr-4": {
@@ -29,11 +30,11 @@
     "extra": {
         "module-name": "Каталог",
         "admin-links": {
-            "@catalog_admin_category_list": "Категории",
+            "@catalog_category_list": "Категории",
             "catalog/admin/products": "Продукты",
             "catalog/manage-filters": "Фильтры (настройка)",
             "catalog/admin/pricegroup": "Группы цен",
-            "catalog/admin/currency": "Валюты",
+            "@catalog_currency_list": "Валюты",
             "catalog/admin/setting": "Настройки"
         }
     },

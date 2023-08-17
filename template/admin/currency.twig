@@ -8,7 +8,7 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <a href="{{ url('catalog/admin/currency/add') }}" class="btn btn-primary btn-sm mb-3">Добавить
+                <a href="{{ url('@catalog_currency_add') }}" class="btn btn-primary btn-sm mb-3">Добавить
                     валюту</a>
 
 
@@ -21,8 +21,8 @@
                                 <br><small>{{ currency.code }} {{ currency.dCode ? '('~currency.dCode~')' }}</small>
                             </td>
                             <td>
-                                <a href="{{ path('catalog/admin/currency/edit', {'id': currency.getId }) }}">редактировать</a>
-                                <a href="{{ path('catalog/admin/currency/delete', {'id': currency.getId }) }}">удалить</a>
+                                <a href="{{ path('@catalog_currency_edit', {'id': currency.getId }) }}">редактировать</a>
+                                <a href="{{ path('@catalog_currency_delete', {'id': currency.getId }) }}">удалить</a>
                             </td>
                         </tr>
                     {% endfor %}

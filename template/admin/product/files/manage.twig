@@ -18,7 +18,7 @@
 
             <!-- /.card-header -->
             <div class="card-body">
-                <a class="btn btn-primary mb-3" href="{{ path('@a/catalog/product/files/upload', {"id": product.getId}) }}">Загрузить файл</a>
+                <a class="btn btn-primary mb-3" href="{{ path('@catalog_product_files_upload', {"id": product.getId}) }}">Загрузить файл</a>
 
 
                 <table class="table table-hover color-table inverse-table">
@@ -49,7 +49,7 @@
                             <td><span class="badge bg-dark">{{ file.getDownloads }}</span></td>
                             <td>
                                 <a class="btn btn-primary"
-                                   href="{{ path('@a/catalog/product/files/delete', {"id": file.getId, "product": product.getId }) }}">Удалить</a>
+                                   href="{{ path('@catalog_product_files_delete', {"id": file.getId, "product": product.getId }) }}">Удалить</a>
                                 <a class="btn btn-primary"
                                    href="{{ path('@a/catalog/download-file', {'filepath': file.getFilePath}) }}">Скачать</a>
                             </td>

@@ -20,7 +20,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <a class="btn btn-primary"
-                   href="{{ path('@a/catalog/product/urls/add', {'product_id': product.getId}) }}">Добавить</a>
+                   href="{{ path('@catalog_product_urls_add', {'product_id': product.getId}) }}">Добавить</a>
 
                 <table class="table table-hover color-table inverse-table">
                     <thead>
@@ -43,12 +43,12 @@
                             </td>
                             <td>
                                 <a class="btn btn-primary"
-                                   href="{{ path('@a/catalog/product/urls/edit', {'url_id': url.getId, 'product_id': product.getId}) }}">Редактировать</a>
+                                   href="{{ path('@catalog_product_urls_edit', {'url_id': url.getId, 'product_id': product.getId}) }}">Редактировать</a>
                                 {% if not url.isDefault %}
                                     <a class="btn btn-primary"
-                                       href="{{ path('@a/catalog/product/urls/delete', {'url_id': url.getId, 'product_id': product.getId}) }}">Удалить</a>
+                                       href="{{ path('@catalog_product_urls_delete', {'url_id': url.getId, 'product_id': product.getId}) }}">Удалить</a>
                                     <a class="btn btn-primary"
-                                       href="{{ path('@a/catalog/product/urls/makedefault', {'url_id': url.getId, 'product_id': product.getId}) }}">Сделать
+                                       href="{{ path('@catalog_product_urls_makedefault', {'url_id': url.getId, 'product_id': product.getId}) }}">Сделать
                                         основным</a>
                                 {% endif %}
                             </td>

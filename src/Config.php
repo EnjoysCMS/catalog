@@ -10,69 +10,32 @@ use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
-use EnjoysCMS\Core\Modules\ModuleCollection;
+use EnjoysCMS\Core\Modules\AbstractModuleConfig;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
-use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService;
-use EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\ThumbnailServiceInterface;
+use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService;
+use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
-use Exception;
-use Gedmo\Tree\TreeListener;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
-use Symfony\Component\Yaml\Yaml;
 
-final class Config
+final class Config extends AbstractModuleConfig
 {
 
-    private const MODULE_NAME = 'enjoyscms/catalog';
-
-
-    /**
-     * @throws Exception
-     */
     public function __construct(
-        private \Enjoys\Config\Config $config,
-        private Container $container,
-        private Session $session,
-        private EntityManager $em,
-        private LoggerInterface $logger,
-        ModuleCollection $moduleCollection
+        \Enjoys\Config\Config $config,
+        private readonly Container $container,
+        private readonly Session $session,
+        private readonly EntityManager $em,
+        private readonly LoggerInterface $logger,
     ) {
-        $module = $moduleCollection->find(self::MODULE_NAME) ?? throw new InvalidArgumentException(
-            sprintf(
-                'Module %s not found. Name must be same like packageName in module composer.json',
-                self::MODULE_NAME
-            )
-        );
-
-
-        if (file_exists($module->path . '/config.yml')) {
-            $config->addConfig(
-                [
-                    self::MODULE_NAME => file_get_contents($module->path . '/config.yml')
-                ],
-                ['flags' => Yaml::PARSE_CONSTANT],
-                \Enjoys\Config\Config::YAML,
-                false
-            );
-        }
+        parent::__construct($config);
     }
 
-    public function get(string $key = null, mixed $default = null): mixed
+    public function getModulePackageName(): string
     {
-        if ($key === null) {
-            return $this->config->get(self::MODULE_NAME);
-        }
-        return $this->config->get(sprintf('%s->%s', self::MODULE_NAME, $key), $default);
+        return 'enjoyscms/catalog';
     }
-
-
-    public function all(): array
-    {
-        return $this->config->get();
-    }
-
 
     public function getCurrentCurrencyCode(): string
     {
@@ -199,7 +162,13 @@ final class Config
             }
             return $this->container->get($classString);
         } catch (DependencyException|NotFoundException) {
-            $this->logger->warning(sprintf('ThumbnailService %s not found. Use %s', $classString, ThumbnailService\DefaultThumbnailCreationService::class));
+            $this->logger->warning(
+                sprintf(
+                    'ThumbnailService %s not found. Use %s',
+                    $classString,
+                    ThumbnailService\DefaultThumbnailCreationService::class
+                )
+            );
             return $this->container->get(ThumbnailService\DefaultThumbnailCreationService::class);
         }
     }

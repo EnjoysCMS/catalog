@@ -10,9 +10,12 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
 use EnjoysCMS\Core\Routing\Annotation\Route;
-use EnjoysCMS\Module\Catalog\Crud\Category\SaveCategoryStructure;
+use EnjoysCMS\Module\Catalog\Admin\Category\SaveCategoryStructure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
+
+use function json_decode;
 
 #[Route('admin/catalog/api/category', '@catalog_admin_api~category_')]
 class Category
@@ -86,14 +89,14 @@ class Category
         try {
             $this->container->call(
                 SaveCategoryStructure::class,
-                ['data' => \json_decode($request->getBody()->getContents())]
+                ['data' => json_decode($request->getBody()->getContents())]
             );
             $em->flush();
             $this->response->getBody()->write(
                 json_encode('saved')
             );
             return $this->response;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->response->getBody()->write(
                 json_encode($e->getMessage())
             );
