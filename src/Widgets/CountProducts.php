@@ -31,7 +31,7 @@ final class CountProducts extends AbstractWidget
     {
         $repository = $this->em->getRepository(Product::class);
 
-        $url = $this->urlGenerator->generate('catalog/admin/products');
+        $url = $this->urlGenerator->generate('@catalog_product_list');
         return <<<HTML
 <div class="small-box bg-warning">
     <div class="inner">

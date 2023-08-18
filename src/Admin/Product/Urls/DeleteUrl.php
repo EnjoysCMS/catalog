@@ -7,24 +7,17 @@ namespace EnjoysCMS\Module\Catalog\Admin\Product\Urls;
 
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\Url;
-use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class DeleteUrl
 {
-    private EntityRepository|ProductRepository $productRepository;
-    protected Product $product;
-    private Url $url;
-
     /**
      * @throws NoResultException
      * @throws NotSupported
@@ -33,19 +26,18 @@ final class DeleteUrl
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
     ) {
-        $this->productRepository = $this->em->getRepository(Product::class);
-        $this->product = $this->productRepository->find(
-            $this->request->getQueryParams()['product_id'] ?? null
-        ) ?? throw new NoResultException();
-        $this->url = $this->product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? null));
+
     }
 
 
 
-    public function getForm(): Form
+    public function getForm(Product $product): Form
     {
+        $url = $product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? null));
+
+
         $form = new Form();
-        $form->header(sprintf('Удалить ссылку: %s?', $this->url->getPath()));
+        $form->header(sprintf('Удалить ссылку: %s?', $url->getPath()));
         $form->submit('save', 'Удалить');
         return $form;
     }
@@ -54,12 +46,15 @@ final class DeleteUrl
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function doAction(): void
+    public function doAction(Product $product): void
     {
-        if ($this->url->isDefault()) {
+        $url = $product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? null));
+
+
+        if ($url->isDefault()) {
             throw new InvalidArgumentException('You cannot delete the main link');
         }
-        $this->em->remove($this->url);
+        $this->em->remove($url);
         $this->em->flush();
     }
 }

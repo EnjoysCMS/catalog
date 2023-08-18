@@ -31,7 +31,7 @@
         "module-name": "Каталог",
         "admin-links": {
             "@catalog_category_list": "Категории",
-            "catalog/admin/products": "Продукты",
+            "@catalog_product_list": "Продукты",
             "catalog/manage-filters": "Фильтры (настройка)",
             "catalog/admin/pricegroup": "Группы цен",
             "@catalog_currency_list": "Валюты",

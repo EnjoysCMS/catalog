@@ -36,7 +36,7 @@ final class Index
             'images' => $this->entityManager->getRepository(Image::class)->findBy(['product' => $this->product]),
             'breadcrumbs' => [
                 $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                $this->urlGenerator->generate('@catalog_product_list') => 'Список продуктов',
                 sprintf('Менеджер изображений: `%s`', $this->product->getName()),
             ],
         ];

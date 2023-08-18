@@ -40,7 +40,7 @@ final class ProductFilesController extends AdminController
             $this->request->getQueryParams()['id'] ?? null
         ) ?? throw new NoResultException();
 
-        $this->breadcrumbs->add('catalog/admin/products', 'Список продуктов')
+        $this->breadcrumbs->add('@catalog_product_list', 'Список продуктов')
             ->add(['@catalog_product_files_list', ['id' => $this->product->getId()]], 'Менеджер файлов');
     }
 

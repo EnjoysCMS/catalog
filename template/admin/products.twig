@@ -91,83 +91,83 @@
                                 <i class="fas fa-ellipsis-h"></i>
                               </button>
                               <div class="dropdown-menu">
-                                 {% if access('catalog/admin/product/edit') %}
+                                 {% if access('@catalog_product_edit') %}
                                  <li>
                                     <a class="dropdown-item"
-                                       href="/?_route=catalog/admin/product/edit&id=${data.id}"
+                                       href="/?_route=@catalog_product_edit&product_id=${data.id}"
                                        title="Редактирование"> Редактирование
                                     </a>
                                  </li>
                                 {% endif %}
-                                   {% if access('@a/catalog/product/quantity') %}
+                                   {% if access('@catalog_product_quantity') %}
                                     <li>
                                         <a class="dropdown-item"
-                                            href="/?_route=@a/catalog/product/quantity&id=${data.id}" title="Количество">
+                                            href="/?_route=@catalog_product_quantity&product_id=${data.id}" title="Количество">
                                              Количество
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('catalog/admin/product/images') %}
+                                {% if access('@catalog_product_images') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=catalog/admin/product/images&product_id=${data.id}"
+                                           href="/?_route=@catalog_product_images&product_id=${data.id}"
                                            title="Управление изображениями">
                                                  Изображения <span class="badge badge-warning">${data.images.length}</span>
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/tags') %}
+                                {% if access('@catalog_product_tags') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/tags&id=${data.id}"
+                                           href="/?_route=@catalog_product_tags&product_id=${data.id}"
                                            title="Теги"> Теги
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/options') %}
+                                {% if access('@catalog_product_options') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/options&id=${data.id}"
+                                           href="/?_route=@catalog_product_options&product_id=${data.id}"
                                            title="Параметры">Параметры
                                        </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/urls') %}
+                                {% if access('@catalog_product_urls') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/urls&id=${data.id}"
+                                           href="/?_route=@catalog_product_urls&product_id=${data.id}"
                                            title="URLs">URLs
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/files') %}
+                                {% if access('@catalog_product_files') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/files&id=${data.id}"
+                                           href="/?_route=@catalog_product_files&product_id=${data.id}"
                                            title="Файлы">Файлы
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/prices') %}
+                                {% if access('@catalog_product_prices') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/prices&id=${data.id}"
+                                           href="/?_route=@catalog_product_prices&product_id=${data.id}"
                                            title="Цены">Цены
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('@a/catalog/product/meta') %}
+                                {% if access('@catalog_product_meta') %}
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/?_route=@a/catalog/product/meta&id=${data.id}"
+                                           href="/?_route=@catalog_product_meta&product_id=${data.id}"
                                            title="SEO">SEO
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if access('catalog/admin/product/delete') %}
+                                {% if access('@catalog_product_delete') %}
                                     <li>
                                         <a class="dropdown-item bg-danger"
-                                           href="/?_route=catalog/admin/product/delete&id=${data.id}"
+                                           href="/?_route=@catalog_product_delete&product_id=${data.id}"
                                            title="Удаление">Удаление
                                         </a>
                                     </li>
@@ -223,7 +223,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div class="mb-5">
-                    <a href="{{ path('catalog/admin/product/add') }}" class="btn btn-primary">Добавить новый продукт</a>
+                    <a href="{{ path('@catalog_product_add') }}" class="btn btn-primary">Добавить новый продукт</a>
                 </div>
                 <div>
                     <label for="category">Категория</label>

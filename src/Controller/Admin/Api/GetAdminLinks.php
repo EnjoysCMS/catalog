@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouteCollection;
+use Throwable;
 
 #[Route(
     path: 'admin/catalog/api/get-admin-links',
@@ -33,7 +34,7 @@ class GetAdminLinks
             'icon' => 'fa fa-edit'
         ],
         [
-            'route' => '@a/catalog/product/quantity',
+            'route' => '@catalog_product_quantity',
             'params' => [
                 'id'
             ],
@@ -50,7 +51,7 @@ class GetAdminLinks
             'icon' => 'fa fa-image'
         ],
         [
-            'route' => '@a/catalog/product/tags',
+            'route' => '@catalog_product_tags',
             'params' => [
                 'id'
             ],
@@ -58,7 +59,7 @@ class GetAdminLinks
             'icon' => 'fa fa-tags'
         ],
         [
-            'route' => '@a/catalog/product/options',
+            'route' => '@catalog_product_options',
             'params' => [
                 'id'
             ],
@@ -66,7 +67,7 @@ class GetAdminLinks
             'icon' => 'fa fa-list'
         ],
         [
-            'route' => '@a/catalog/product/urls',
+            'route' => '@catalog_product_urls',
             'params' => [
                 'id'
             ],
@@ -74,7 +75,7 @@ class GetAdminLinks
             'icon' => 'fa fa-link'
         ],
         [
-            'route' => '@a/catalog/product/files',
+            'route' => '@catalog_product_files',
             'params' => [
                 'id'
             ],
@@ -153,7 +154,7 @@ class GetAdminLinks
         $result = [];
         foreach ($params as $param) {
             $result[$param] = $this->request->getParsedBody(
-            )[$this->mapParams[$param] ?? throw new \InvalidArgumentException(
+            )[$this->mapParams[$param] ?? throw new InvalidArgumentException(
                 sprintf('%s not associated', $param)
             )] ?? null;
         }
@@ -173,7 +174,7 @@ class GetAdminLinks
             }
             $comment = $routeInfo->getOption('aclComment');
             return [$action, (string)$comment];
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
     }

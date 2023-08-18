@@ -95,7 +95,7 @@ final class Add
             'subtitle' => 'Загрузка изображения для продукта',
             'breadcrumbs' => [
                 $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                $this->urlGenerator->generate('@catalog_product_list') => 'Список продуктов',
                 sprintf('Добавление нового изображения: `%s`', $this->product->getName()),
             ],
         ];

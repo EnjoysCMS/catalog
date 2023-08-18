@@ -60,7 +60,7 @@ final class Delete
             'form' => $this->renderer,
             'breadcrumbs' => [
                 $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
-                $this->urlGenerator->generate('catalog/admin/products') => 'Список продуктов',
+                $this->urlGenerator->generate('@catalog_product_list') => 'Список продуктов',
                 'Удаление изображения',
             ],
         ];

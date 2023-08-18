@@ -7,7 +7,9 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Exception;
+
+use function trim;
 
 /**
  * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
@@ -148,7 +150,7 @@ class Product
 
     public function setName(string $name): void
     {
-        $this->name = \trim($name);
+        $this->name = trim($name);
     }
 
     public function getDescription(): string
@@ -204,7 +206,7 @@ class Product
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSlug(string $lastPartSlug = null): string
     {
@@ -361,7 +363,7 @@ class Product
     private ?Url $currentUrl = null;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCurrentUrl(): Url
     {
@@ -385,7 +387,7 @@ class Product
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getUrl(): Url
     {
@@ -403,14 +405,14 @@ class Product
 //        throw new \Exception(sprintf('Not set urls for product with id: %d', $this->getId()));
     }
 
-    public function getUrlById(int $id): Url
+    public function getUrlById(int $id): ?Url
     {
         foreach ($this->getUrls() as $url) {
             if ($url->getId() === $id) {
                 return $url;
             }
         }
-        throw new \InvalidArgumentException(sprintf('Not found url with this id: %d', $id));
+        return null;
     }
 
     /**
