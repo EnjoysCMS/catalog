@@ -188,7 +188,7 @@ final class Edit implements ModelInterface
                         ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
                     );
 
-                    if ($this->product->getProductCode() === $check->getProductCode()){
+                    if ($this->product->getProductCode() === $check?->getProductCode()){
                         return true;
                     }
                     return false;
