@@ -10,7 +10,6 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductTag;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,7 +22,6 @@ class TagsProductForm
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
-        private readonly RedirectInterface $redirect
     ) {
     }
 

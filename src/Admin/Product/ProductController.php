@@ -22,7 +22,7 @@ use Enjoys\Forms\Exception\ExceptionRule;
 use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
-use EnjoysCMS\Module\Catalog\Admin\Product\Form\AddEditProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
@@ -98,7 +98,7 @@ final class ProductController extends AdminController
         name: 'add',
         comment: 'Добавление товара'
     )]
-    public function add(AddEditProductForm $add, ContentEditor $contentEditor): ResponseInterface
+    public function add(CreateUpdateProductForm $add, ContentEditor $contentEditor): ResponseInterface
     {
         $this->breadcrumbs->setLastBreadcrumb('Добавление товара');
 
@@ -136,7 +136,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Редактирование товара'
     )]
-    public function edit(AddEditProductForm $edit, ContentEditor $contentEditor): ResponseInterface
+    public function edit(CreateUpdateProductForm $edit, ContentEditor $contentEditor): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $this->breadcrumbs->setLastBreadcrumb(

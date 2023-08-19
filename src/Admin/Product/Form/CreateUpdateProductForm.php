@@ -21,7 +21,7 @@ use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class AddEditProductForm
+final class CreateUpdateProductForm
 {
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
