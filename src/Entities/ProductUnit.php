@@ -6,24 +6,21 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repositories\Unit;
 
-/**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Unit")
- * @ORM\Table(name="catalog_units")
- */
+
+#[ORM\Entity(repositoryClass: Unit::class)]
+#[ORM\Table(name: 'catalog_units')]
 class ProductUnit
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=50, unique=true)
-     */
+
+    #[ORM\Column(type: 'string', length: 50, unique: true)]
     private string $name;
 
 

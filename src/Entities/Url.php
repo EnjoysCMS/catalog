@@ -5,38 +5,26 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repository\UrlRepository;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="catalog_product_urls")
- */
+#[ORM\Entity(repositoryClass: UrlRepository::class)]
 class Url
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\Column(type="string", length=500)
-     */
+    #[ORM\Column(type: 'string', length: 500)]
     private string $path;
 
-    /**
-     * @ORM\Column(type="boolean", name="`default`")
-     */
+    #[ORM\Column(name: '`default`', type: 'boolean')]
     private bool $default;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="urls")
-     */
+    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'urls')]
     private Product $product;
-
-
 
 
     public function isDefault(): bool

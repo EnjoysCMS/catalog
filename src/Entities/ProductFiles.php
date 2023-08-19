@@ -7,69 +7,46 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="catalog_product_files")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'catalog_product_files')]
 class ProductFiles
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $title = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $description = null;
 
-    /**
-     * @ORM\Column(type="string", name="file_path")
-     */
+    #[ORM\Column(name: 'file_path', type: 'string')]
     private string $filePath;
 
-    /**
-     * @ORM\Column(type="string", name="original_filename")
-     */
+    #[ORM\Column(name: 'original_filename', type: 'string')]
     private string $originalFilename;
 
-    /**
-     * @ORM\Column(type="string", name="file_extension")
-     */
+    #[ORM\Column(name: 'file_extension', type: 'string')]
     private string $fileExtension;
 
-    /**
-     * @ORM\Column(type="integer", name="file_size")
-     */
+    #[ORM\Column(name: 'file_size', type: 'integer')]
     private int $fileSize;
 
-    /**
-     * @ORM\Column(type="boolean", options={"default": true})
-     */
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $status = true;
 
-    /**
-     * @ORM\Column(type="integer", options={"default": 0})
-     */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $downloads = 0;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="files")
-     */
+    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'files')]
     private Product $product;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=50, options={"default": "file_default"})
-     */
+
+    #[ORM\Column(type: 'string', length: 50, options: ['default' => 'file_default'])]
     private string $storage;
 
     public function getProduct(): Product

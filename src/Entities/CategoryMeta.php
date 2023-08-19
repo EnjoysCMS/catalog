@@ -7,42 +7,28 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="catalog_category_meta")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'catalog_category_meta')]
 final class CategoryMeta
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=70, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 70, nullable: true)]
     private ?string $title = null;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
+
+    #[ORM\Column(type: 'string', length: 500, nullable: true)]
     private ?string $keyword = null;
 
-
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 500, nullable: true)]
     private ?string $description = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Category", inversedBy="meta")
-     * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
-     */
+    #[ORM\OneToOne(inversedBy: 'meta', targetEntity: Category::class)]
+    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id')]
     private Category $category;
 
 
@@ -64,7 +50,7 @@ final class CategoryMeta
 
     public function setTitle(?string $title): void
     {
-        if(empty($title)){
+        if (empty($title)) {
             $title = null;
         }
         $this->title = $title;
@@ -72,13 +58,12 @@ final class CategoryMeta
 
     public function getKeyword(): ?string
     {
-
         return $this->keyword;
     }
 
     public function setKeyword(?string $keyword): void
     {
-        if(empty($keyword)){
+        if (empty($keyword)) {
             $keyword = null;
         }
         $this->keyword = $keyword;

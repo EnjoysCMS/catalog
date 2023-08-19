@@ -7,36 +7,26 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
 
-/**
- * @ORM\Table(name="catalog_product_option_values")
- * @ORM\Entity(repositoryClass="\EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository")
- */
+#[ORM\Table(name: 'catalog_product_option_values')]
+#[ORM\Entity(repositoryClass: OptionValueRepository::class)]
 class OptionValue
 {
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private string $value;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="OptionKey")
-     * @ORM\JoinColumn(name="key_id", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: OptionKey::class)]
+    #[ORM\JoinColumn(name: 'key_id', referencedColumnName: 'id')]
     private $optionKey;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Product", mappedBy="options")
-     */
+    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'options')]
     private $products;
 
     public function __construct() {

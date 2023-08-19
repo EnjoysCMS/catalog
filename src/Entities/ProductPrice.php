@@ -5,49 +5,40 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Entity
- * @ORM\EntityListeners({"ProductPriceEntityListener"})
- * @ORM\Table(name="catalog_product_prices")
- */
+#[ORM\Entity]
+#[ORM\EntityListeners([ProductPriceEntityListener::class])]
+#[ORM\Table(name: 'catalog_product_prices')]
 final class ProductPrice
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\Column(type="integer", length=11)
-     */
+
+    #[ORM\Column(type: 'integer', length: 11)]
     private int $price;
 
-    /**
-     * @ORM\Column(name="updated_at", type="datetime")
-     * @Gedmo\Timestampable(on="update")
-     */
-    private \DateTime $updatedAt;
+    #[ORM\Column(name: 'updated_at', type: 'datetime')]
+    #[Gedmo\Timestampable(on: 'update')]
+    private DateTime $updatedAt;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="PriceGroup")
-     */
+
+    #[ORM\ManyToOne(targetEntity: PriceGroup::class)]
     private $priceGroup;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="prices", cascade={"persist"})
-     */
+
+    #[ORM\ManyToOne(targetEntity: Product::class, cascade: ['persist'], inversedBy: 'prices')]
     private Product $product;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="EnjoysCMS\Module\Catalog\Entities\Currency\Currency")
-     */
+    #[ORM\ManyToOne(targetEntity: Currency::class)]
     private Currency $currency;
 
     private ?Currency $currentCurrency = null;
@@ -55,7 +46,7 @@ final class ProductPrice
 
     public function __construct()
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     public function __toString(): string
@@ -110,7 +101,7 @@ final class ProductPrice
     }
 
 
-    public function getUpdatedAt(): \DateTime
+    public function getUpdatedAt(): DateTime
     {
         return $this->updatedAt;
     }

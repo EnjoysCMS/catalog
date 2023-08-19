@@ -5,75 +5,61 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities\Currency;
 
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
+use NumberFormatter;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="catalog_currency")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'catalog_currency')]
 class Currency
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\Column(type="string", length=3)
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\Column(type: 'string', length: 3)]
     private string $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private string $name;
 
-    /**
-     * @ORM\Column(type="smallint", nullable=true)
-     */
+    #[ORM\Column(type: 'smallint', nullable: true)]
     private ?int $dCode = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $symbol = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $pattern = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="monetary_separator")
-     */
+    #[ORM\Column(name: 'monetary_separator', type: 'string', nullable: true)]
     private ?string $monetarySeparator = null;
 
-
-    /**
-     * @ORM\Column(type="string", nullable=true, name="monetary_group_separator")
-     */
+    #[ORM\Column(name: 'monetary_group_separator', type: 'string', nullable: true)]
     private ?string $monetaryGroupSeparator = null;
 
     /**
-     * @ORM\Column(type="string", name="left_char", length=50, nullable=true)
      * @deprecated
      */
+    #[ORM\Column(name: 'left_char', type: 'string', length: 50, nullable: true)]
     private ?string $left = null;
 
     /**
-     * @ORM\Column(type="string", name="right_char", length=50, nullable=true)
      * @deprecated
      */
+    #[ORM\Column(name: 'right_char', type: 'string', length: 50, nullable: true)]
     private ?string $right = null;
 
     /**
      * Количество знаков для округления в большую сторону
-     * @ORM\Column(type="integer", name="precisions", options={"default": 0})
      * @deprecated
      */
+    #[ORM\Column(name: 'precisions', type: 'integer', options: ['default' => 0])]
     private int $precision = 0;
 
 
     /**
      * Количество знаков для округления в большую сторону
-     * @ORM\Column(type="integer", name="fraction_digits", nullable=true)
      */
+    #[ORM\Column(name: 'fraction_digits', type: 'integer', nullable: true)]
     private ?int $fractionDigits = null;
 
     /**
@@ -222,39 +208,39 @@ class Currency
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function format(float|int $amount, $locale = 'ru_RU'): string
     {
-        $numberFormatter = new \NumberFormatter(
+        $numberFormatter = new NumberFormatter(
             $locale . sprintf(
                 '@currency=%s',
                 strtoupper($this->getId())
-            ), \NumberFormatter::CURRENCY
+            ), NumberFormatter::CURRENCY
         );
-        $numberFormatter->setAttribute(\NumberFormatter::ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP);
+        $numberFormatter->setAttribute(NumberFormatter::ROUNDING_MODE, NumberFormatter::ROUND_HALFUP);
 
         if (!is_null($this->getFractionDigits())) {
-            $numberFormatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $this->getFractionDigits());
+            $numberFormatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $this->getFractionDigits());
         }
 
         if (!is_null($this->getSymbol())) {
-            $numberFormatter->setSymbol(\NumberFormatter::CURRENCY_SYMBOL, $this->getSymbol());
+            $numberFormatter->setSymbol(NumberFormatter::CURRENCY_SYMBOL, $this->getSymbol());
         }
         if (!is_null($this->getPattern())) {
             $numberFormatter->setPattern($this->getPattern());
         }
         if (!is_null($this->getMonetaryGroupSeparator())) {
             $numberFormatter->setSymbol(
-                \NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL,
+                NumberFormatter::MONETARY_GROUPING_SEPARATOR_SYMBOL,
                 $this->getMonetaryGroupSeparator()
             );
         }
         if (!is_null($this->getMonetarySeparator())) {
-            $numberFormatter->setSymbol(\NumberFormatter::MONETARY_SEPARATOR_SYMBOL, $this->getMonetarySeparator());
+            $numberFormatter->setSymbol(NumberFormatter::MONETARY_SEPARATOR_SYMBOL, $this->getMonetarySeparator());
         }
         if (false === $result = $numberFormatter->formatCurrency($amount, $this->getId())) {
-            throw new \Exception('An error occurred. Format currency is failed');
+            throw new Exception('An error occurred. Format currency is failed');
         }
         return $result;
     }

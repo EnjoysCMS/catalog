@@ -7,24 +7,18 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Setting")
- * @ORM\Table(name="catalog_setting")
- */
+#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repositories\Setting::class)]
+#[ORM\Table(name: 'catalog_setting')]
 final class Setting
 {
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\Column(name="`key`", type="string", length=255, unique=true)
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\Column(name: '`key`', type: 'string', length: 255, unique: true)]
     private string $key;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=50)
-     */
+    #[ORM\Column(type: 'string', length: 50)]
     private string $value;
 
 
@@ -47,7 +41,6 @@ final class Setting
     {
         $this->key = $key;
     }
-
 
 
 }

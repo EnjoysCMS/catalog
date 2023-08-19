@@ -7,114 +7,78 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
 use function trim;
 
-/**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Product")
- * @ORM\Table(name="catalog_products")
- */
+
+#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repositories\Product::class)]
+#[ORM\Table(name: 'catalog_products')]
 class Product
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
-    /**
-     * @ORM\Column(type="string")
-     */
+
+    #[ORM\Column(type: 'string')]
     private string $name;
-    /**
-     * @ORM\Column(type="text")
-     */
+
+    #[ORM\Column(type: 'text')]
     private string $description;
-    /**
-     * @ORM\Column(type="string", length=64, nullable=true, unique=true, options={"default": null})
-     */
+
+    #[ORM\Column(type: 'string', length: 64, unique: true, nullable: true, options: ['default' => null])]
     private ?string $productCode = null;
 
-    /**
-     * @ORM\Column(type="boolean", options={"default": false})
-     */
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $hide = false;
-    /**
-     * @ORM\Column(type="boolean", options={"default": true})
-     */
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $active = true;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Category")
-     */
+    #[ORM\ManyToOne(targetEntity: Category::class)]
     private ?Category $category = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ProductGroup")
-     */
+    #[ORM\ManyToOne(targetEntity: ProductGroup::class)]
     private $group = null;
 
-    /**
-     * @var Collection<Image>
-     * @ORM\OneToMany(targetEntity="Image", mappedBy="product")
-     */
+
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: Image::class)]
     private Collection $images;
 
-    /**
-     * @var Collection<ProductFiles>
-     * @ORM\OneToMany(targetEntity="ProductFiles", mappedBy="product")
-     */
+
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductFiles::class)]
     private Collection $files;
 
-    /**
-     * @ORM\OneToOne(targetEntity="ProductMeta", mappedBy="product", cascade={"persist", "remove"})
-     */
+
+    #[ORM\OneToOne(mappedBy: 'product', targetEntity: ProductMeta::class, cascade: ['persist', 'remove'])]
     private ?ProductMeta $meta = null;
 
-    /**
-     * @var Collection<ProductTag>
-     * @ORM\ManyToMany(targetEntity="ProductTag")
-     * @ORM\JoinTable(name="catalog_products_tags",
-     *      joinColumns={@ORM\JoinColumn(name="product_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
-     *      )
-     */
+    #[ORM\JoinTable(name: 'catalog_products_tags')]
+    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id')]
+    #[ORM\ManyToMany(targetEntity: ProductTag::class)]
     private Collection $tags;
 
-    /**
-     * @var Collection<OptionValue>
-     * @ORM\ManyToMany(targetEntity="OptionValue")
-     * @ORM\JoinTable(name="catalog_products_options")
-     */
+    #[ORM\ManyToMany(targetEntity: OptionValue::class)]
+    #[ORM\JoinTable(name: 'catalog_products_options')]
     private Collection $options;
 
-    /**
-     * @var Collection<Url>
-     * @ORM\OneToMany(targetEntity="Url", mappedBy="product", cascade={"persist"})
-     */
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: Url::class, cascade: ['persist'])]
     private Collection $urls;
 
-    /**
-     * @var Collection<ProductPrice>
-     * @ORM\OneToMany(targetEntity="ProductPrice", mappedBy="product", cascade={"persist"})
-     */
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductPrice::class, cascade: ['persist'])]
     private Collection $prices;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Quantity", mappedBy="product", cascade={"persist"})
-     */
+    #[ORM\OneToOne(mappedBy: 'product', targetEntity: Quantity::class, cascade: ['persist'])]
     private $quantity;
 
-    /**
-     * @var int|null
-     * @ORM\Column(name="max_discount", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'max_discount', type: 'integer', nullable: true)]
     private ?int $maxDiscount = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ProductUnit")
-     */
+    #[ORM\ManyToOne(targetEntity: ProductUnit::class)]
     private ?ProductUnit $unit = null;
 
     public function __construct()

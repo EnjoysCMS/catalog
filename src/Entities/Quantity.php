@@ -6,63 +6,49 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use InvalidArgumentException;
 
-/**
- * @ORM\Table(name="catalog_product_quantity")
- * @ORM\Entity
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'catalog_product_quantity')]
 final class Quantity
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Product", inversedBy="quantity")
-     */
+
+    #[ORM\OneToOne(inversedBy: 'quantity', targetEntity: Product::class)]
     private $product;
 
-    /**
-     * @ORM\Column(type="float", options={"default": 0})
-     */
+    #[ORM\Column(type: 'float', options: ['default' => 0])]
     private float $qty = 0;
 
-    /**
-     * @ORM\Column(type="float", options={"default": 1})
-     */
+    #[ORM\Column(type: 'float', options: ['default' => 1])]
     private float $step = 1;
 
-    /**
-     * @ORM\Column(type="float", options={"default": 1})
-     */
+    #[ORM\Column(type: 'float', options: ['default' => 1])]
     private float $min = 1;
 
-    /**
-     * @ORM\Column(type="float", options={"default": 0})
-     */
+    #[ORM\Column(type: 'float', options: ['default' => 0])]
     private float $reserve = 0;
 
-    /**
-     * @var bool
-     * @ORM\Column(type="boolean", options={"default": false})
-     */
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $updated = false;
 
-    /**
-     * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-     * @Gedmo\Timestampable(on="update")
-     */
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+    #[Gedmo\Timestampable(on: 'update')]
+    private ?DateTimeInterface $updatedAt = null;
 
-    /**
-     * @ORM\Column(name="arrival_date", type="datetime", nullable=true)
-     */
-    private \DateTimeInterface $arrivalDate;
+
+    #[ORM\Column(name: 'arrival_date', type: 'datetime', nullable: true)]
+    private DateTimeInterface $arrivalDate;
 
 
     public function isUpdated(): bool
@@ -78,7 +64,7 @@ final class Quantity
 
     public function __construct()
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -108,7 +94,7 @@ final class Quantity
     public function setQty(float|int|string $qty): self
     {
         if (!is_numeric($qty)) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $this->qty = (float)$qty;
         return $this;
@@ -120,7 +106,7 @@ final class Quantity
         $this->product = $product;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -131,12 +117,12 @@ final class Quantity
         return $this->product;
     }
 
-    public function getArrivalDate(): \DateTimeInterface
+    public function getArrivalDate(): DateTimeInterface
     {
         return $this->arrivalDate;
     }
 
-    public function setArrivalDate(\DateTimeInterface $arrivalDate): void
+    public function setArrivalDate(DateTimeInterface $arrivalDate): void
     {
         $this->arrivalDate = $arrivalDate;
     }
@@ -156,7 +142,7 @@ final class Quantity
     public function setStep(float|int|string $step): void
     {
         if (!is_numeric($step)) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $this->step = (float)$step;
     }
@@ -171,7 +157,7 @@ final class Quantity
     public function setMin(float|int|string $min): void
     {
         if (!is_numeric($min)) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $this->min = (float)$min;
     }

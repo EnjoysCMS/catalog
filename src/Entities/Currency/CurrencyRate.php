@@ -6,29 +6,25 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities\Currency;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository;
 
-/**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository")
- * @ORM\Table(name="catalog_currency_rate")
- */
+
+#[ORM\Entity(repositoryClass: CurrencyRateRepository::class)]
+#[ORM\Table(name: 'catalog_currency_rate')]
 class CurrencyRate
 {
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Currency")
-     * @ORM\JoinColumn(name="`main`")
-     */
+
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Currency::class)]
+    #[ORM\JoinColumn(name: '`main`')]
     private Currency $currencyMain;
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Currency")
-     * @ORM\JoinColumn(name="`convert`")
-     */
+
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Currency::class)]
+    #[ORM\JoinColumn(name: '`convert`')]
     private Currency $currencyConvert;
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type: 'float')]
     private float $rate;
 
     public function __toString(): string {

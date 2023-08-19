@@ -5,49 +5,34 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Entities;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
+use Stringable;
 
-/**
- * @ORM\Entity(repositoryClass="\EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository")
- * @ORM\Table(name="catalog_product_option_keys")
- */
-class OptionKey implements \Stringable
+
+#[ORM\Entity(repositoryClass: OptionKeyRepository::class)]
+#[ORM\Table(name: 'catalog_product_option_keys')]
+class OptionKey implements Stringable
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=50)
-     */
+    #[ORM\Column(type: 'string', length: 50)]
     private string $name;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $unit = null;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $note = null;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", options={"default": 0})
-     */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $weight = 0;
 
-    /**
-     * @ORM\Column(type="boolean", options={"default":true})
-     */
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $multiple = true;
 
     public function getWeight(): int

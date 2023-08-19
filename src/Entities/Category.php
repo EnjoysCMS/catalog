@@ -11,96 +11,71 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-
 /**
  * @Gedmo\Tree(type="closure")
- * @Gedmo\TreeClosure(class="EnjoysCMS\Module\Catalog\Entities\CategoryClosure")
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\Category")
- * @ORM\Table(name="catalog_categories")
+ * @Gedmo\TreeClosure(class="CategoryClosure")
  */
+#[Gedmo\Tree(type: 'closure')]
+#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repositories\Category::class)]
+#[ORM\Table(name: 'catalog_categories')]
 class Category
 {
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="title", type="string", length=255)
-     */
+    #[ORM\Column(name: 'title', type: 'string', length: 255)]
     private string $title;
 
+
     /**
-     * This parameter is optional for the closure strategy
-     *
-     * @ORM\Column(name="level", type="integer", nullable=true)
-     * @Gedmo\TreeLevel
+     * @Gedmo\TreeLevel()
      */
+    #[ORM\Column(name: 'level', type: 'integer', nullable: true)]
     private int $level;
 
 
-    /**
-     * @ORM\Column(name="sort", type="integer", options={"default": 0})
-     */
+    #[ORM\Column(name: 'sort', type: 'integer', options: ['default' => 0])]
     private int $sort;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     private string $url;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 500, nullable: true)]
     private ?string $shortDescription = null;
 
-    /**
-     * @var bool
-     * @ORM\Column(type="boolean", options={"default": true})
-     */
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $status = true;
+
+
     /**
-     * @Gedmo\TreeParent
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
-     * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
+     * @Gedmo\TreeParent()
      */
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'children')]
     private ?Category $parent;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Category", mappedBy="parent")
-     */
+    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: Category::class)]
     private Collection $children;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
+
+    #[ORM\Column(type: 'string', length: 500, nullable: true)]
     private ?string $img = null;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="OptionKey")
-     * @ORM\JoinTable(name="catalog_category_optionkey")
-     */
+    #[ORM\ManyToMany(targetEntity: OptionKey::class)]
+    #[ORM\JoinTable(name: 'catalog_category_optionkey')]
     private Collection $extraFields;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, options={"default": null})
-     */
+
+    #[ORM\Column(type: 'string', nullable: true, options: ['default' => null])]
     private ?string $customTemplatePath = null;
 
-    /**
-     * @ORM\OneToOne(targetEntity="CategoryMeta", mappedBy="category", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToOne(mappedBy: 'category', targetEntity: CategoryMeta::class, cascade: ['persist', 'remove'])]
     private ?CategoryMeta $meta = null;
 
     public function __construct()

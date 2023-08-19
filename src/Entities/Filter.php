@@ -3,39 +3,28 @@
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repositories\FilterRepository;
 
-/**
- * @ORM\Entity(repositoryClass="EnjoysCMS\Module\Catalog\Repositories\FilterRepository")
- * @ORM\Table(name="catalog_filters")
- */
+#[ORM\Entity(repositoryClass: FilterRepository::class)]
+#[ORM\Table(name: 'catalog_filters')]
 class Filter
 {
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Category")
-     */
+    #[ORM\ManyToOne(targetEntity: Category::class)]
     private Category $category;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="OptionKey")
-     */
+    #[ORM\ManyToOne(targetEntity: OptionKey::class)]
     private OptionKey $optionKey;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     private string $type;
 
-    /**
-     * @ORM\Column(name="order_filter", type="integer", options={"default": 0})
-     */
+    #[ORM\Column(name: 'order_filter', type: 'integer', options: ['default' => 0])]
     private int $order;
 
     public function getId(): int
