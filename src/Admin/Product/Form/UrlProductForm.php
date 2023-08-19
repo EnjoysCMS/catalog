@@ -37,9 +37,9 @@ final class UrlProductForm
     }
 
 
-    public function getForm(Product $product = null): Form
+    public function getForm(Product $product): Form
     {
-        $url = $product?->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
+        $url = $product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
 
         $form = new Form();
 
@@ -82,7 +82,7 @@ final class UrlProductForm
      */
     public function doAction(Product $product): void
     {
-        $url = $product?->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
+        $url = $product->getUrlById((int)($this->request->getQueryParams()['url_id'] ?? 0));
 
 
         $url = $url ?? new Url();

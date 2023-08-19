@@ -257,7 +257,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Просмотр URLs товара'
     )]
-    public function manage(): ResponseInterface
+    public function manageUrls(): ResponseInterface
     {
 
         $product = $this->product ?? throw new NoResultException();
