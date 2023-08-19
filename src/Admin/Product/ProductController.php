@@ -23,9 +23,10 @@ use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\AddEditProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
-use EnjoysCMS\Module\Catalog\Admin\Product\Form\UrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Urls\DeleteUrl;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities\Product;
@@ -259,7 +260,6 @@ final class ProductController extends AdminController
     )]
     public function manageUrls(): ResponseInterface
     {
-
         $product = $this->product ?? throw new NoResultException();
 
         $this->breadcrumbs
@@ -268,11 +268,12 @@ final class ProductController extends AdminController
                 sprintf('Менеджер ссылок: %s', $this->product->getName())
             );
 
+
         return $this->response(
             $this->twig->render(
                 $this->templatePath . '/product/urls/manage.twig',
                 [
-                    'product' => $this->product,
+                    'product' => $product,
                     'subtitle' => 'URLs',
                 ]
             )
@@ -287,30 +288,29 @@ final class ProductController extends AdminController
         ],
         comment: 'Редактирование URL'
     )]
-    public function editUrls(UrlProductForm $editUrl): ResponseInterface
+    public function editUrls(CreateUpdateUrlProductForm $editUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
+        $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
 
         $form = $editUrl->getForm($product);
 
         if ($form->isSubmitted()) {
             $editUrl->doAction($product);
-            return $this->redirect->toRoute(
-                '@catalog_product_urls',
-                ['product_id' => $product->getId()]
-            );
+            return $this->redirect->toRoute(...$routeData);
         }
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
-        $this->breadcrumbs->setLastBreadcrumb('Редактирование ссылки');
+        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+            ->setLastBreadcrumb('Редактирование ссылки');
 
         return $this->response(
             $this->twig->render(
-                $this->templatePath . '/product/urls/edit.twig',
+                $this->templatePath . '/form.twig',
                 [
                     'product' => $this->product,
-                    'form' => $rendererForm->output(),
+                    'form' => $rendererForm,
                     'subtitle' => 'Редактирование URL',
                 ]
             )
@@ -325,27 +325,25 @@ final class ProductController extends AdminController
         ],
         comment: 'Добавление URL'
     )]
-    public function addUrl(UrlProductForm $addUrl): ResponseInterface
+    public function addUrl(CreateUpdateUrlProductForm $addUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
-
+        $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
         $form = $addUrl->getForm($product);
 
         if ($form->isSubmitted()) {
             $addUrl->doAction($product);
-            return $this->redirect->toRoute(
-                '@catalog_product_urls',
-                ['product_id' => $product->getId()]
-            );
+            return $this->redirect->toRoute(...$routeData);
         }
         $rendererForm = $this->adminConfig->getRendererForm($form);
-        $this->breadcrumbs->setLastBreadcrumb('Добавление ссылки');
+        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+            ->setLastBreadcrumb('Добавление ссылки');
         return $this->response(
             $this->twig->render(
-                $this->templatePath . '/product/urls/add.twig',
+                $this->templatePath . '/form.twig',
                 [
                     'product' => $this->product,
-                    'form' => $rendererForm->output(),
+                    'form' => $rendererForm,
                     'subtitle' => 'Добавление URL',
                 ]
             )
@@ -360,21 +358,21 @@ final class ProductController extends AdminController
         ],
         comment: 'Удаление URL'
     )]
-    public function deleteUrl(DeleteUrl $deleteUrl): ResponseInterface
+    public function deleteUrl(DeleteUrlProductForm $deleteUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
+
+        $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
 
         $form = $deleteUrl->getForm($product);
 
         if ($form->isSubmitted()) {
             $deleteUrl->doAction($product);
-            return $this->redirect->toRoute(
-                '@catalog_product_urls',
-                ['product_id' => $this->product->getId()]
-            );
+            return $this->redirect->toRoute(...$routeData);
         }
         $rendererForm = $this->adminConfig->getRendererForm($form);
-        $this->breadcrumbs->setLastBreadcrumb('Удаление ссылки');
+        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+            ->setLastBreadcrumb('Удаление ссылки');
         return $this->response(
             $this->twig->render(
                 $this->templatePath . '/product/urls/delete.twig',
@@ -399,6 +397,8 @@ final class ProductController extends AdminController
     {
         $product = $this->product ?? throw new NoResultException();
 
+        $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
+
 
         $setFlag = false;
         /** @var Url $url */
@@ -417,9 +417,6 @@ final class ProductController extends AdminController
 
         $em->flush();
 
-        return $this->redirect->toRoute(
-            '@catalog_product_urls',
-            ['product_id' => $this->product->getId()]
-        );
+        return $this->redirect->toRoute(...$routeData);
     }
 }

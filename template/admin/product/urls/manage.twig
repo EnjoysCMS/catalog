@@ -30,7 +30,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for url in product.getUrls %}
+                    {% for url in product.urls %}
                         {% set link = url('catalog/product', {'slug': product.getSlug(url.getPath)}) %}
                         <tr class="{% if url.isDefault %}table-success{% else %}table-default{% endif %}">
                             <td><b>{{ url.getPath }}</b><br>

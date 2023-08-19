@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Admin\Product\Urls;
+namespace EnjoysCMS\Module\Catalog\Admin\Product\Form;
 
 
 use Doctrine\ORM\EntityManager;
@@ -16,7 +16,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class DeleteUrl
+final class DeleteUrlProductForm
 {
     /**
      * @throws NoResultException

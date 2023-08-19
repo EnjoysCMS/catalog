@@ -19,7 +19,7 @@ use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class UrlProductForm
+final class CreateUpdateUrlProductForm
 {
 
     private EntityRepository|ProductRepository $productRepository;
@@ -44,7 +44,8 @@ final class UrlProductForm
         $form = new Form();
 
         $form->setDefaults([
-            'path' => $url?->getPath()
+            'path' => $url?->getPath(),
+            'default' => [$url?->isDefault() ? 1 : 0]
         ]);
 
         $form->checkbox('default')
@@ -88,13 +89,13 @@ final class UrlProductForm
         $url = $url ?? new Url();
         $url->setPath($this->request->getParsedBody()['path'] ?? null);
 
-        $newDefault = (bool)($this->request->getParsedBody()['default'] ?? false);
-        if ($newDefault) {
+        $default = (bool)($this->request->getParsedBody()['default'] ?? false);
+        if ($default) {
             foreach ($product->getUrls() as $item) {
                 $item->setDefault(false);
             }
-            $url->setDefault($newDefault);
         }
+        $url->setDefault($default);
         $url->setProduct($product);
 
         $this->em->persist($url);
