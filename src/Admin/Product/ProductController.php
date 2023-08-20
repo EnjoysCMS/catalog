@@ -26,6 +26,8 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\MetaProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\QuantityProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Urls\DeleteUrl;
 use EnjoysCMS\Module\Catalog\Config;
@@ -221,8 +223,11 @@ final class ProductController extends AdminController
     }
 
     #[Route(
-        path: '/tags',
+        path: '/{product_id}/tags',
         name: 'tags',
+        requirements: [
+            'product_id' => '\d'
+        ],
         comment: 'Теги товара'
     )]
     public function manageTags(TagsProductForm $tagsProductForm): ResponseInterface
@@ -245,6 +250,93 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'subtitle' => 'Управление тегами',
                     'form' => $rendererForm->output(),
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: '/{product_id}/quantity',
+        name: 'quantity',
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Установка количества на товар'
+    )]
+    public function manage(QuantityProductForm $quantityProductForm): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+        $form = $quantityProductForm->getForm($product);
+        $this->breadcrumbs->setLastBreadcrumb(
+            sprintf('Настройка количества: `%s`', $product->getName())
+        );
+
+        if ($form->isSubmitted()) {
+            $quantityProductForm->doAction($product);
+
+            return$this->redirect->toUrl();
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/form.twig',
+                [
+                    'product' => $product,
+                    'form' => $rendererForm,
+                    'subtitle' => 'Установка количества',
+                ]
+            )
+        );
+    }
+
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
+    #[Route(
+        path: '/{product_id}/meta',
+        name: 'meta',
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Управление Meta-tags (продукт)'
+    )]
+    public function manageMeta(MetaProductForm $metaProductForm): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+        $form = $metaProductForm->getForm($product);
+
+        if ($form->isSubmitted()) {
+            $metaProductForm->doAction($product);
+            return $this->redirect->toUrl();
+        }
+
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        $this->breadcrumbs
+            ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
+            ->setLastBreadcrumb(
+                sprintf('META-данные: %s', $product->getName())
+            );
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/form.twig',
+                [
+                    'product' => $product,
+                    'subtitle' => 'Установка META данных HTML',
+                    'form' => $rendererForm,
                 ]
             )
         );
