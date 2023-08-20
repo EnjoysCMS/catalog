@@ -42,7 +42,7 @@
             <div class="card-body">
                 <div class="my-3">
                     <h4>Мультизагрузка (рекомендуется)</h4>
-                    <form action="{{ path('catalog/admin/product/images/upload-dropzone', {"product_id": product.id}) }}" class="dropzone" id="upload-dropzone">
+                    <form action="{{ path('@catalog_product_images_upload_dropzone', {"product_id": product.id}) }}" class="dropzone" id="upload-dropzone">
                     </form>
                 </div>
                 <div class="my-3">

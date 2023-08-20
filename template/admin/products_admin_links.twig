@@ -9,9 +9,9 @@
            href="{{ path('@catalog_product_quantity', {"product_id": product.getId}) }}" title="Количество"><i
                 class="fa fa-cubes"></i></a>
     {% endif %}
-    {% if access('catalog/admin/product/images') %}
+    {% if access('@catalog_product_images') %}
         <a class="btn btn-default"
-           href="{{ path('catalog/admin/product/images', {"product_id": product.getId}) }}"
+           href="{{ path('@catalog_product_images', {"product_id": product.getId}) }}"
            title="Управление изображениями"><i class="fa fa-image"></i></a>
     {% endif %}
     {% if access('@catalog_product_tags') %}

@@ -12,13 +12,16 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\QueryException;
 use Enjoys\Cookie\Exception;
+use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Exception\ExceptionRule;
+use Enjoys\Forms\Form;
 use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
@@ -29,8 +32,11 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\MetaProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\QuantityProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
-use EnjoysCMS\Module\Catalog\Admin\Product\Urls\DeleteUrl;
+use EnjoysCMS\Module\Catalog\Admin\Product\Images\LoadImage;
+use EnjoysCMS\Module\Catalog\Admin\Product\Images\ManageImage;
+use EnjoysCMS\Module\Catalog\Admin\Product\Images\UploadHandler;
 use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entities\Image;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
 use EnjoysCMS\Module\Catalog\Events\PostAddProductEvent;
@@ -40,7 +46,9 @@ use EnjoysCMS\Module\Catalog\Events\PreAddProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreDeleteProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
 use InvalidArgumentException;
+use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -230,7 +238,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Теги товара'
     )]
-    public function manageTags(TagsProductForm $tagsProductForm): ResponseInterface
+    public function tags(TagsProductForm $tagsProductForm): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $form = $tagsProductForm->getForm($product);
@@ -263,7 +271,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Установка количества на товар'
     )]
-    public function manage(QuantityProductForm $quantityProductForm): ResponseInterface
+    public function quantity(QuantityProductForm $quantityProductForm): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $form = $quantityProductForm->getForm($product);
@@ -274,11 +282,10 @@ final class ProductController extends AdminController
         if ($form->isSubmitted()) {
             $quantityProductForm->doAction($product);
 
-            return$this->redirect->toUrl();
+            return $this->redirect->toUrl();
         }
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
-
 
 
         return $this->response(
@@ -311,7 +318,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Управление Meta-tags (продукт)'
     )]
-    public function manageMeta(MetaProductForm $metaProductForm): ResponseInterface
+    public function meta(MetaProductForm $metaProductForm): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $form = $metaProductForm->getForm($product);
@@ -350,14 +357,14 @@ final class ProductController extends AdminController
         ],
         comment: 'Просмотр URLs товара'
     )]
-    public function manageUrls(): ResponseInterface
+    public function urls(): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
 
         $this->breadcrumbs
             ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
             ->setLastBreadcrumb(
-                sprintf('Менеджер ссылок: %s', $this->product->getName())
+                sprintf('Менеджер ссылок: %s', $product->getName())
             );
 
 
@@ -380,7 +387,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Редактирование URL'
     )]
-    public function editUrls(CreateUpdateUrlProductForm $editUrl): ResponseInterface
+    public function urlsEdit(CreateUpdateUrlProductForm $editUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
@@ -417,7 +424,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Добавление URL'
     )]
-    public function addUrl(CreateUpdateUrlProductForm $addUrl): ResponseInterface
+    public function urlsAdd(CreateUpdateUrlProductForm $addUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
         $routeData = ['@catalog_product_urls', ['product_id' => $this->product->getId()]];
@@ -450,7 +457,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Удаление URL'
     )]
-    public function deleteUrl(DeleteUrlProductForm $deleteUrl): ResponseInterface
+    public function urlsDelete(DeleteUrlProductForm $deleteUrl): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
 
@@ -485,7 +492,7 @@ final class ProductController extends AdminController
         ],
         comment: 'Сделать URL основным'
     )]
-    public function makeDefault(EntityManager $em): ResponseInterface
+    public function urlsMakeDefault(EntityManager $em): ResponseInterface
     {
         $product = $this->product ?? throw new NoResultException();
 
@@ -510,5 +517,232 @@ final class ProductController extends AdminController
         $em->flush();
 
         return $this->redirect->toRoute(...$routeData);
+    }
+
+    #[Route(
+        path: '/{product_id}/images',
+        name: 'images',
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Управление изображениями товара'
+    )]
+    public function images(EntityManager $em): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+
+        $this->breadcrumbs
+            ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
+            ->setLastBreadcrumb(
+                sprintf('Менеджер изображений: `%s`', $product->getName())
+            );
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/images/manage.twig',
+                [
+                    'product' => $product,
+                    'images' => $em->getRepository(Image::class)->findBy(['product' => $this->product])
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: '/{product_id}/images/add',
+        name: 'images_add',
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Загрузка изображения к товару'
+    )]
+    public function imagesAdd(EntityManager $em): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+        $method = $this->request->getQueryParams()['method'] ?? 'upload';
+
+        $this->breadcrumbs
+            ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
+            ->setLastBreadcrumb(
+                sprintf('Добавление нового изображения: `%s`', $product->getName())
+            );
+
+        if (!in_array($method, ['upload', 'download'], true)) {
+            $method = 'upload';
+        }
+
+        /** @var class-string<LoadImage> $method */
+        $method = 'EnjoysCMS\Module\Catalog\Admin\Product\Images\\' . ucfirst($method);
+
+        $uploadMethod = $this->container->make($method);
+
+        $form = $uploadMethod->getForm();
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        if ($form->isSubmitted()) {
+            try {
+                foreach ($uploadMethod->upload($this->request) as $item) {
+                    $manageImage = new ManageImage($product, $em, $this->config);
+                    $manageImage->addToDB(
+                        $item->getName(),
+                        $item->getExtension()
+                    );
+                }
+
+                return $this->redirect->toRoute(
+                    '@catalog_product_images',
+                    ['product_id' => $product->getId()]
+                );
+            } catch (Throwable $e) {
+                /** @var File $image */
+                $image = $form->getElement('image');
+                $image->setRuleError(htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage())));
+            }
+        }
+
+        return $this->response(
+            $this->twig->render(
+                $uploadMethod->getTemplatePath($this->templatePath),
+                [
+                    'form' => $rendererForm,
+                    'product' => $product,
+                    'subtitle' => 'Загрузка изображения для продукта',
+                ]
+            )
+        );
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws NotFoundException
+     * @throws NotSupported
+     */
+    #[Route(
+        path: '/images/make_general',
+        name: 'images_make_general',
+        options: [
+            'comment' => 'Переключение основного изображения'
+        ]
+    )]
+    public function imagesMakeGeneral(
+        EntityManager $em
+    ): ResponseInterface {
+        $repository = $em->getRepository(Image::class);
+        $image = $repository->find($this->request->getQueryParams()['id'] ?? null) ?? throw new NotFoundException(
+            sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
+        );
+
+        $images = $repository->findBy(['product' => $image->getProduct()]);
+        foreach ($images as $item) {
+            $item->setGeneral(false);
+        }
+        $image->setGeneral(true);
+        $em->flush();
+
+        return $this->redirect->toRoute(
+            '@catalog_product_images',
+            ['product_id' => $image->getProduct()->getId()]
+        );
+    }
+
+    /**
+     * @throws ORMException
+     * @throws FilesystemException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NotSupported
+     * @throws NoResultException
+     */
+    #[Route(
+        path: '/images/delete',
+        name: 'images_delete',
+        options: [
+            'comment' => 'Удаление изображения к товару'
+        ]
+    )]
+    public function imagesDelete(EntityManager $em): ResponseInterface
+    {
+        $image = $em->getRepository(Image::class)->find(
+            $this->request->getQueryParams()['id'] ?? 0
+        ) ?? throw new NoResultException();
+
+        $this->breadcrumbs
+            ->setLastBreadcrumb('Удаление изображения');
+
+
+        $form = new Form();
+
+        $form->header('Подтвердите удаление!');
+        $form->submit('delete');
+
+        if ($form->isSubmitted()) {
+            $filesystem = $this->config->getImageStorageUpload($image->getStorage())->getFileSystem();
+
+
+            $product = $image->getProduct();
+
+            $filesystem->delete($image->getFilename() . '.' . $image->getExtension());
+            $filesystem->delete($image->getFilename() . '_small.' . $image->getExtension());
+            $filesystem->delete($image->getFilename() . '_large.' . $image->getExtension());
+
+            $em->remove($image);
+            $em->flush();
+
+            if ($image->isGeneral()) {
+                $nextImage = $product->getImages()->first();
+                if ($nextImage instanceof Image) {
+                    $nextImage->setGeneral(true);
+                }
+                $em->flush();
+            }
+
+            return $this->redirect->toRoute(
+                '@catalog_product_images', ['product_id' => $product->getId()]
+            );
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/form.twig',
+                [
+                    'form' => $rendererForm
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: '/images/upload-dropzone',
+        name: 'images_upload_dropzone',
+        options: [
+            'comment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js'
+        ]
+    )]
+    public function imagesUploadDropzone(
+        EntityManager $em,
+        UploadHandler $uploadHandler
+    ): ResponseInterface {
+        try {
+            $product = $this->product ?? throw new NoResultException();
+
+            $file = $uploadHandler->uploadFile($this->request->getUploadedFiles()['image']);
+            $manageImage = new ManageImage($product, $em, $this->config);
+            $manageImage->addToDB(
+                str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()),
+                $file->getFileInfo()->getExtension()
+            );
+        } catch (Throwable $e) {
+            $this->response = $this->response->withStatus(500);
+            $errorMessage = htmlspecialchars(sprintf('%s: %s', $e::class, $e->getMessage()));
+        }
+        return $this->jsonResponse($errorMessage ?? 'uploaded');
     }
 }

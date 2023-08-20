@@ -16,10 +16,10 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <a class="btn btn-primary my-3"
-                   href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить
+                   href="{{ path('@catalog_product_images_add', {"product_id": product.getId, "method": "upload"}) }}">Загрузить
                     с компьютера</a>
                 <a class="btn btn-primary my-3"
-                   href="{{ path('catalog/admin/product/images/add', {"product_id": product.getId, "method": "download"}) }}">Скачать
+                   href="{{ path('@catalog_product_images_add', {"product_id": product.getId, "method": "download"}) }}">Скачать
                     из интернета</a>
                 <div class="row">
                     {% for image in images %}
@@ -32,10 +32,10 @@
                                         {% if image.isGeneral %}
                                             Основное изображение
                                         {% else %}
-                                            <a href="{{ path("catalog/admin/product/images/make_general", {"id": image.getId}) }}">Сделать
+                                            <a href="{{ path("@catalog_product_images_make_general", {"id": image.getId}) }}">Сделать
                                                 основным</a>
                                         {% endif %}
-                                        <a href="{{ path("catalog/admin/product/images/delete", {"id": image.getId}) }}">Удалить</a>
+                                        <a href="{{ path("@catalog_product_images_delete", {"id": image.getId}) }}">Удалить</a>
                                     </div>
                                 </div>
 
