@@ -32,6 +32,7 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\FileUploadProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\MetaProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\PriceProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\QuantityProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\LoadImage;
@@ -850,6 +851,52 @@ final class ProductController extends AdminController
         return $this->redirect->toRoute('@catalog_product_files', [
             'product_id' => $product->getId()
         ]);
+    }
+
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
+    #[Route(
+        path: '/prices',
+        name: 'prices',
+        comment: 'Установка цен товару'
+    )]
+    public function prices(PriceProductForm $priceProductForm): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+
+        $form = $priceProductForm->getForm($product);
+
+        if ($form->isSubmitted()) {
+            $priceProductForm->doAction($product);
+
+            return $this->redirect->toUrl();
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        $this->breadcrumbs->setLastBreadcrumb(
+            sprintf('Менеджер цен: %s', $this->product->getName())
+        );
+
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/prices/manage.twig',
+                [
+                    'product' => $this->product,
+                    'form' => $rendererForm->output(),
+                    'subtitle' => 'Установка цен'
+                ]
+            )
+        );
     }
 
 }
