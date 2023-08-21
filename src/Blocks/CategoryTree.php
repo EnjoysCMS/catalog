@@ -11,9 +11,9 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
+use EnjoysCMS\Core\Block\Entity\Block;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Block as Entity;
-use EnjoysCMS\Module\Catalog\Entities;
+use EnjoysCMS\Module\Catalog\Entity;
 use EnjoysCMS\Module\Catalog\Repository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -37,14 +37,14 @@ final class CategoryTree
 
     /**
      * @param ContainerInterface&FactoryInterface $container
-     * @param Entity $block
+     * @param Block $block
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __construct(private ContainerInterface $container, Entity $block)
+    public function __construct(private ContainerInterface $container, Block $block)
     {
         $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(
-            Entities\Category::class
+            Entity\Category::class
         );
         $this->twig = $this->container->get(Environment::class);
         $this->request = $this->container->get(ServerRequestInterface::class);

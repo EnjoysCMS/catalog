@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Entities;
+namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repository\Unit;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'catalog_product_tags')]
-final class ProductTag
+
+#[ORM\Entity(repositoryClass: Unit::class)]
+#[ORM\Table(name: 'catalog_units')]
+class ProductUnit
 {
 
     #[ORM\Id]
@@ -17,13 +19,11 @@ final class ProductTag
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+
+    #[ORM\Column(type: 'string', length: 50, unique: true)]
     private string $name;
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
+
 
     public function getName(): string
     {
@@ -35,10 +35,8 @@ final class ProductTag
         $this->name = $name;
     }
 
-    public function __toString(): string
+    public function getId(): int
     {
-        return $this->getName();
+        return $this->id;
     }
-
-
 }

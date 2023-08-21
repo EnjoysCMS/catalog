@@ -9,7 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\ProductFiles;
+use EnjoysCMS\Module\Catalog\Entity\ProductFiles;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;

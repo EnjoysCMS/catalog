@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Service\Search;
 
 
-use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use Traversable;
 
 final class SearchResult

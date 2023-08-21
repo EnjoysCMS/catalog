@@ -3,8 +3,8 @@
 namespace EnjoysCMS\Module\Catalog\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Entities\OptionValue;
+use EnjoysCMS\Module\Catalog\Entity\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 
 class FilterRepository extends EntityRepository
 {

@@ -51,10 +51,10 @@ final class Category extends PublicController
             $template_path = __DIR__ . '/../../template/category.twig';
         }
 
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
+        /** @var \EnjoysCMS\Module\Catalog\Entity\Category $category */
         $category = $container
             ->get(EntityManager::class)
-            ->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)
+            ->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class)
             ->findByPath(
                 $this->request->getAttribute('slug', '')
             ) ?? throw new \EnjoysCMS\Core\Exception\NotFoundException(

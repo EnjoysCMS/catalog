@@ -6,8 +6,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Entities\OptionValue;
+use EnjoysCMS\Module\Catalog\Entity\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
 use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 

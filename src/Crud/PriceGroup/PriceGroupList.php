@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Crud\PriceGroup;
 
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
+use EnjoysCMS\Module\Catalog\Entity\PriceGroup;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class PriceGroupList

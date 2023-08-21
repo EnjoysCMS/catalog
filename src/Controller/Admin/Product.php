@@ -34,13 +34,13 @@ final class Product extends AdminController
         EntityManager $entityManager,
         ServerRequestInterface $request
     ): ResponseInterface {
-        $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Product::class)->like(
+        $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class)->like(
             $request->getQueryParams()['query'] ?? null
         );
 
         $result = [
             'items' => array_map(function ($item) {
-                /** @var \EnjoysCMS\Module\Catalog\Entities\Product $item */
+                /** @var \EnjoysCMS\Module\Catalog\Entity\Product $item */
                 return [
                     'id' => $item->getId(),
                     'title' => $item->getName(),

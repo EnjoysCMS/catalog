@@ -14,8 +14,8 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\ProductMeta;
+use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\ProductMeta;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class MetaProductForm

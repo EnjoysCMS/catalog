@@ -3,14 +3,14 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Entities;
+namespace EnjoysCMS\Module\Catalog\Entity;
 
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ObjectManager;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
+use EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate;
 
 final class ProductPriceEntityListener
 {

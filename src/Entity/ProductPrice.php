@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Entities;
+namespace EnjoysCMS\Module\Catalog\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
 use Gedmo\Mapping\Annotation as Gedmo;
 

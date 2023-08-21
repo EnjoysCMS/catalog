@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use EnjoysCMS\Core\Block\AbstractWidget;
 use EnjoysCMS\Core\Block\Annotation\Widget;
-use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Widget('Общее количество товаров в каталоге')]

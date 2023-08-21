@@ -46,7 +46,7 @@ class Category
     public function getCategoryListForFormSelectElement(EntityManager $em): ResponseInterface
     {
         /** @var \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository */
-        $categoryRepository = $em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
+        $categoryRepository = $em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class);
 
         $node = null;
         $criteria = [];
@@ -119,8 +119,8 @@ class Category
     ): ResponseInterface {
         $result = [];
 
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Category $category */
-        $category = $em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class)->find(
+        /** @var \EnjoysCMS\Module\Catalog\Entity\Category $category */
+        $category = $em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class)->find(
             $request->getParsedBody()['id'] ?? ''
         );
 

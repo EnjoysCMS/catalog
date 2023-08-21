@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use PatchRanger\CartesianIterator;
@@ -62,12 +62,12 @@ final class CurrencyRate extends Command
         foreach ($result as $currencyPair) {
             $_currencyMain = $currencyPair[0];
             $_currencyConvert = $currencyPair[1];
-            $currencyRate = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate::class)->find(
+            $currencyRate = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate::class)->find(
                 ['currencyMain' => $_currencyMain->getId(), 'currencyConvert' => $_currencyConvert->getId()]
             );
 
             if ($currencyRate === null) {
-                $currencyRate = new \EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate();
+                $currencyRate = new \EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate();
                 $currencyRate->setCurrencyMain($_currencyMain);
                 $currencyRate->setCurrencyConvert($_currencyConvert);
             }
@@ -100,7 +100,7 @@ final class CurrencyRate extends Command
         return (float)$this->rates['rates'][$_currencyConvert->getId()] / (float)$this->rates['rates'][$_currencyMain->getId()];
     }
 
-    private function getRatio(\EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate $currencyRate)
+    private function getRatio(\EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate $currencyRate)
     {
         $ratio = $this->config->get('currency->ratio', []);
         return $ratio[$currencyRate->__toString()] ?? 1;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Events;
 
-use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 use Symfony\Contracts\EventDispatcher\Event;
 
 final class PreDeleteCategoryEvent extends Event

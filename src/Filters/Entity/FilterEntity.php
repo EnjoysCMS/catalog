@@ -3,7 +3,7 @@
 namespace EnjoysCMS\Module\Catalog\Filters\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 
 /**
@@ -21,7 +21,7 @@ class FilterEntity
     private int $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="EnjoysCMS\Module\Catalog\Entities\Category")
+     * @ORM\ManyToOne(targetEntity="EnjoysCMS\Module\Catalog\Entity\Category")
      */
     private Category $category;
 

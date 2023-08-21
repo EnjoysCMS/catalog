@@ -25,7 +25,7 @@ use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Events\PostAddCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PostDeleteCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;

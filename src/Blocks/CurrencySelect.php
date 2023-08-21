@@ -9,10 +9,10 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
+use EnjoysCMS\Core\Block\Entity\Block;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use NumberFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
@@ -33,7 +33,7 @@ final class CurrencySelect
         private Environment $twig,
         private EntityManager $em,
         private ServerRequestInterface $request,
-        Entity $block
+        Block $block
     ) {
         /** @var Currency[] $currencies */
         $this->currencies = $this->em->getRepository(Currency::class)->findAll();

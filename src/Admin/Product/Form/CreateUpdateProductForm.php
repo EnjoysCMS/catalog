@@ -14,10 +14,10 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\ProductUnit;
-use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Entity\Category;
+use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\ProductUnit;
+use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Helpers\URLify;
 use Psr\Http\Message\ServerRequestInterface;
 

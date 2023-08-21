@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Repository;
 
 
 use Doctrine\ORM\EntityRepository;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 
 class CurrencyRateRepository extends EntityRepository
 {

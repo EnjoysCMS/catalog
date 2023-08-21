@@ -56,7 +56,7 @@ final class Setting
         $repositoryCoreSetting = $this->em->getRepository(\EnjoysCMS\Core\Setting\Entity\Setting::class);
 
         /** @var \EnjoysCMS\Module\Catalog\Repository\Setting $repositoryCatalogSetting */
-        $repositoryCatalogSetting = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
+        $repositoryCatalogSetting = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Setting::class);
 
         return array_merge($repositoryCoreSetting->findAllKeyVar(), $repositoryCatalogSetting->findAllKeyVar());
     }

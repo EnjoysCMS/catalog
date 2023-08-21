@@ -15,7 +15,7 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 

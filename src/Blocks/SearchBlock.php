@@ -12,8 +12,8 @@ use Enjoys\Forms\Elements\Submit;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use Enjoys\Forms\Rules;
+use EnjoysCMS\Core\Block\Entity\Block;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Block as Entity;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -30,11 +30,11 @@ final class SearchBlock
 
     /**
      * @param ContainerInterface&FactoryInterface $container
-     * @param Entity $block
+     * @param Block $block
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __construct(private ContainerInterface $container, Entity $block)
+    public function __construct(private ContainerInterface $container, Block $block)
     {
         $this->twig = $this->container->get(Environment::class);
         $this->templatePath = (string)$this->getOption('template');

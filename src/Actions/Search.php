@@ -15,7 +15,7 @@ use Doctrine\Persistence\ObjectRepository;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
-use EnjoysCMS\Module\Catalog\Entities;
+use EnjoysCMS\Module\Catalog\Entity;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repository;
 use Psr\Container\ContainerInterface;
@@ -39,7 +39,7 @@ final class Search
         private Config $config
     ) {
         $this->searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
-        $this->productRepository = $this->em->getRepository(Entities\Product::class);
+        $this->productRepository = $this->em->getRepository(Entity\Product::class);
     }
 
     /**

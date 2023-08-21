@@ -16,7 +16,7 @@ use Enjoys\Forms\Elements\Hidden;
 use Enjoys\Forms\Exception\ExceptionRule;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use Twig\Error\LoaderError;

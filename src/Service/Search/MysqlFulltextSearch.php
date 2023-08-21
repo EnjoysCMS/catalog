@@ -10,7 +10,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use DoctrineExtensions\Query\Mysql\MatchAgainst;
-use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 
 final class MysqlFulltextSearch implements SearchInterface
 {

@@ -46,7 +46,7 @@ final class Index extends PublicController
         /**
          * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository
          */
-        $categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
+        $categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class);
 
         $breadcrumbs->add(null, 'Каталог');
 

@@ -10,8 +10,8 @@ use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\ProductTag;
+use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\ProductTag;
 use Psr\Http\Message\ServerRequestInterface;
 
 use function trim;

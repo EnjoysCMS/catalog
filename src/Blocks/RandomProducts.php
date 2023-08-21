@@ -10,9 +10,9 @@ use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use DoctrineExtensions\Query\Mysql\Rand;
+use EnjoysCMS\Core\Block\Entity\Block;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Block as Entity;
-use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -35,11 +35,11 @@ final class RandomProducts
 
     /**
      * @param ContainerInterface&FactoryInterface $container
-     * @param Entity $block
+     * @param Block $block
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __construct(private  ContainerInterface $container, Entity $block)
+    public function __construct(private  ContainerInterface $container, Block $block)
     {
 
         $em = $this->container->get(EntityManager::class);

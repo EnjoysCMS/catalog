@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CatalogTest\Entities;
 
-use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 use PHPUnit\Framework\TestCase;
 
 class CategoryTest extends TestCase

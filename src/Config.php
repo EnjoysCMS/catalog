@@ -14,7 +14,7 @@ use EnjoysCMS\Core\Modules\AbstractModuleConfig;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService\ThumbnailServiceInterface;
-use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;

@@ -12,7 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use EnjoysCMS\Module\Catalog\Entities\Category;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 
 final class Product extends EntityRepository
 {
@@ -36,7 +36,7 @@ final class Product extends EntityRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function findBySlug(string $slugs): \EnjoysCMS\Module\Catalog\Entities\Product|null
+    public function findBySlug(string $slugs): \EnjoysCMS\Module\Catalog\Entity\Product|null
     {
         $slugs = explode('/', $slugs);
         $slug = array_pop($slugs);
@@ -52,7 +52,7 @@ final class Product extends EntityRepository
 
         $dql->andWhere('p.active = true');
 
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Product $product */
+        /** @var \EnjoysCMS\Module\Catalog\Entity\Product $product */
         $product = $dql->getQuery()->getOneOrNullResult();
 
         if ($product === null) {

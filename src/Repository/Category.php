@@ -40,7 +40,7 @@ class Category extends ClosureTreeRepository
             $alias = $alias . $k;
             //
             $dql->leftJoin(
-                \EnjoysCMS\Module\Catalog\Entities\Category::class,
+                \EnjoysCMS\Module\Catalog\Entity\Category::class,
                 $alias,
                 Expr\Join::WITH,
                 "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k} AND {$alias}.status = true"
@@ -222,7 +222,7 @@ class Category extends ClosureTreeRepository
 
     public function getAllIds($node = null): array
     {
-        /** @var \EnjoysCMS\Module\Catalog\Entities\Category[] $nodes */
+        /** @var \EnjoysCMS\Module\Catalog\Entity\Category[] $nodes */
         $nodes = $this->getChildren($node);
         $ids = array_filter(array_map(
             function ($node) {
@@ -242,7 +242,7 @@ class Category extends ClosureTreeRepository
         $nodes = $this->getAllIds($node);
         return $this->getEntityManager()->createQueryBuilder()
             ->select('count(p.id)')
-            ->from(\EnjoysCMS\Module\Catalog\Entities\Product::class, 'p')
+            ->from(\EnjoysCMS\Module\Catalog\Entity\Product::class, 'p')
             ->where('p.category IN (:ids)')
             ->setParameter('ids', $nodes)
             ->getQuery()->getSingleScalarResult();

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Entities\Currency;
+namespace EnjoysCMS\Module\Catalog\Entity\Currency;
 
 use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Repository\CurrencyRateRepository;

@@ -8,7 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Repository;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 
 final class OptionKeyRepository extends EntityRepository
 {

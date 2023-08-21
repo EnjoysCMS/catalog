@@ -14,8 +14,8 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
-use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Entities\Url;
+use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 

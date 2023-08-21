@@ -13,8 +13,8 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\Mapping\MappingException;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Module\Catalog\Entities\Category;
-use EnjoysCMS\Module\Catalog\Entities\Product;
+use EnjoysCMS\Module\Catalog\Entity\Category;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class Delete

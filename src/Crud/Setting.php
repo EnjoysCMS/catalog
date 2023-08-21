@@ -13,7 +13,7 @@ use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
-use EnjoysCMS\Module\Catalog\Entities\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -32,7 +32,7 @@ final class Setting
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly RedirectInterface $redirect,
     ) {
-        $this->settingRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Setting::class);
+        $this->settingRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Setting::class);
     }
 
     /**
@@ -63,7 +63,7 @@ final class Setting
         $form->setDefaults(function () {
             $setting = $this->settingRepository->findAll();
             $defaults = [];
-            /** @var \EnjoysCMS\Module\Catalog\Entities\Setting $item */
+            /** @var \EnjoysCMS\Module\Catalog\Entity\Setting $item */
             foreach ($setting as $item) {
                 $defaults[$item->getKey()] = explode(',', $item->getValue());
             }
@@ -156,7 +156,7 @@ final class Setting
                     }
                     $setting = $this->settingRepository->findOneBy(['key' => $key]);
                     if ($setting === null) {
-                        $setting = new \EnjoysCMS\Module\Catalog\Entities\Setting();
+                        $setting = new \EnjoysCMS\Module\Catalog\Entity\Setting();
                     }
                     $setting->setKey($key);
                     $setting->setValue($value);
