@@ -6,43 +6,31 @@ use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="catalog_category_filters")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'catalog_category_filters')]
 class FilterEntity
 {
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="EnjoysCMS\Module\Catalog\Entity\Category")
-     */
+
+    #[ORM\ManyToOne(targetEntity: Category::class)]
     private Category $category;
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type: 'json')]
     private array $params;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     private string $filterType;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     private string $hash;
 
-    /**
-     * @ORM\Column(name="order_filter", type="integer", options={"default": 0})
-     */
+    #[ORM\Column(name: 'order_filter', type: 'integer', options: ['default' => 0])]
     private int $order;
 
     public function getId(): int
