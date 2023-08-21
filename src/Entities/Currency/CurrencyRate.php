@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities\Currency;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository;
+use EnjoysCMS\Module\Catalog\Repository\CurrencyRateRepository;
 
 
 #[ORM\Entity(repositoryClass: CurrencyRateRepository::class)]

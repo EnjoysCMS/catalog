@@ -23,7 +23,7 @@ final class SetExtraFieldsToChildren
 
     private Category $category;
 
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository;
 
 
     /**

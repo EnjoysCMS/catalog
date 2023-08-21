@@ -16,7 +16,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\Url;
-use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class CreateUpdateUrlProductForm

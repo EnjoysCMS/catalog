@@ -67,7 +67,7 @@ final class Controller extends AdminController
     {
         $this->breadcrumbs->remove('@catalog_category_list')->setLastBreadcrumb('Категории');
 
-        /** @var \EnjoysCMS\Module\Catalog\Repositories\Category $repository */
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Category $repository */
         $repository = $em->getRepository(Category::class);
 
         $form = new Form();

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Repositories;
+namespace EnjoysCMS\Module\Catalog\Repository;
 
 
 use Doctrine\ORM\EntityRepository;
@@ -41,7 +41,7 @@ final class Product extends EntityRepository
         $slugs = explode('/', $slugs);
         $slug = array_pop($slugs);
 
-        /** @var  \EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository */
+        /** @var  \EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository */
         $categoryRepository = $this->getEntityManager()->getRepository(
             Category::class
         );

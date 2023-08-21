@@ -21,7 +21,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Helpers\MetaHelpers;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
-use EnjoysCMS\Module\Catalog\Repositories;
+use EnjoysCMS\Module\Catalog\Repository;
 use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class ProductModel implements ModelInterface
 {
 
-    private EntityRepository|Repositories\Product $productRepository;
+    private EntityRepository|Repository\Product $productRepository;
     private Product $product;
 
     /**

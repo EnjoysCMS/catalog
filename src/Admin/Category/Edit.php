@@ -29,7 +29,7 @@ final class Edit
 
     private Category $category;
 
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $repository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $repository;
 
 
     /**

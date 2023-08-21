@@ -22,7 +22,7 @@ use EnjoysCMS\Module\Catalog\Entities\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
-use EnjoysCMS\Module\Catalog\Repositories;
+use EnjoysCMS\Module\Catalog\Repository;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -30,9 +30,9 @@ final class CategoryModel implements ModelInterface
 {
 
 
-    private Repositories\Category|ObjectRepository|EntityRepository $categoryRepository;
+    private Repository\Category|ObjectRepository|EntityRepository $categoryRepository;
 
-    private Repositories\Product|ObjectRepository|EntityRepository $productRepository;
+    private Repository\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
 
     /**

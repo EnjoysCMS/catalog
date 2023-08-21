@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repositories\Setting::class)]
+#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repository\Setting::class)]
 #[ORM\Table(name: 'catalog_setting')]
 final class Setting
 {

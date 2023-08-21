@@ -17,7 +17,7 @@ use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entities;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
-use EnjoysCMS\Module\Catalog\Repositories;
+use EnjoysCMS\Module\Catalog\Repository;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -26,7 +26,7 @@ final class Search
 
 //    use Options;
 
-    private ObjectRepository|EntityRepository|Repositories\Product $productRepository;
+    private ObjectRepository|EntityRepository|Repository\Product $productRepository;
     private string $searchQuery;
     private array $optionKeys = [];
 

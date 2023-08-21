@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Repositories\Unit;
+use EnjoysCMS\Module\Catalog\Repository\Unit;
 
 
 #[ORM\Entity(repositoryClass: Unit::class)]

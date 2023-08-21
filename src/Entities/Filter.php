@@ -3,7 +3,7 @@
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Repositories\FilterRepository;
+use EnjoysCMS\Module\Catalog\Repository\FilterRepository;
 
 #[ORM\Entity(repositoryClass: FilterRepository::class)]
 #[ORM\Table(name: 'catalog_filters')]

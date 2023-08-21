@@ -13,7 +13,7 @@ use Exception;
 use function trim;
 
 
-#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repositories\Product::class)]
+#[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repository\Product::class)]
 #[ORM\Table(name: 'catalog_products')]
 class Product
 {

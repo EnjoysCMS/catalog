@@ -95,7 +95,7 @@ class ProductController
         $page = ((int)($this->request->getQueryParams()['start'] ?? 0) / $limit) + 1;
 
 
-        /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository */
         $categoryRepository = $this->em->getRepository(Category::class);
 
 

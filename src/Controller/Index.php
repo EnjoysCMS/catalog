@@ -44,7 +44,7 @@ final class Index extends PublicController
     ): ResponseInterface
     {
         /**
-         * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository
+         * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository
          */
         $categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
 

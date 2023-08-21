@@ -16,7 +16,7 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\Currency\CurrencyRate;
-use EnjoysCMS\Module\Catalog\Repositories\CurrencyRateRepository;
+use EnjoysCMS\Module\Catalog\Repository\CurrencyRateRepository;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 

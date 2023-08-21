@@ -45,7 +45,7 @@ class Category
     )]
     public function getCategoryListForFormSelectElement(EntityManager $em): ResponseInterface
     {
-        /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository */
         $categoryRepository = $em->getRepository(\EnjoysCMS\Module\Catalog\Entities\Category::class);
 
         $node = null;

@@ -16,9 +16,9 @@ use EnjoysCMS\Module\Catalog\Entities\OptionKey;
 use EnjoysCMS\Module\Catalog\Entities\OptionValue;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
-use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
-use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
-use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
+use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
+use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class Manage

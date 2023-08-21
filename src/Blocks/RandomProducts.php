@@ -25,7 +25,7 @@ use Twig\Error\SyntaxError;
 final class RandomProducts
 {
     /**
-     * @var \EnjoysCMS\Module\Catalog\Repositories\Product
+     * @var \EnjoysCMS\Module\Catalog\Repository\Product
      */
     private $repository;
 

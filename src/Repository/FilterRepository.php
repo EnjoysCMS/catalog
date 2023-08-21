@@ -1,6 +1,6 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Repositories;
+namespace EnjoysCMS\Module\Catalog\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;

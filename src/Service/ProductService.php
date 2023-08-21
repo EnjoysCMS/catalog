@@ -12,12 +12,12 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Core\Pagination\Pagination;
 use EnjoysCMS\Module\Catalog\Entities\Product;
-use EnjoysCMS\Module\Catalog\Repositories;
+use EnjoysCMS\Module\Catalog\Repository;
 
 final class ProductService
 {
 
-    private Repositories\Product|EntityRepository $productRepository;
+    private Repository\Product|EntityRepository $productRepository;
 
     public function __construct(
         private EntityManager $em

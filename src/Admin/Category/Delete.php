@@ -20,8 +20,8 @@ use Psr\Http\Message\ServerRequestInterface;
 final class Delete
 {
     private Category $category;
-    private \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository;
-    private \EnjoysCMS\Module\Catalog\Repositories\Product|EntityRepository $productRepository;
+    private \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository;
+    private \EnjoysCMS\Module\Catalog\Repository\Product|EntityRepository $productRepository;
 
 
     /**

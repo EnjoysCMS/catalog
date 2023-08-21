@@ -24,8 +24,8 @@ use Psr\Http\Message\ServerRequestInterface;
 final class CreateUpdateProductForm
 {
 
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $productRepository;
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $categoryRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Product $productRepository;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository;
 
 
     public function __construct(

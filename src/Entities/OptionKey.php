@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
+use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 use Stringable;
 
 

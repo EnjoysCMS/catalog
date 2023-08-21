@@ -22,7 +22,7 @@ use EnjoysCMS\Module\Catalog\Entities\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entities\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Entities\ProductPrice;
-use EnjoysCMS\Module\Catalog\Repositories\Product as ProductRepository;
+use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Twig\Error\LoaderError;

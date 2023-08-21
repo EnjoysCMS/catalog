@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Repositories;
+namespace EnjoysCMS\Module\Catalog\Repository;
 
 
 use Doctrine\ORM\AbstractQuery;

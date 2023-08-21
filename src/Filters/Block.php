@@ -16,7 +16,7 @@ use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entities\Category;
 use EnjoysCMS\Module\Catalog\Entities\Product;
 use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
-use EnjoysCMS\Module\Catalog\Repositories\FilterRepository;
+use EnjoysCMS\Module\Catalog\Repository\FilterRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -54,7 +54,7 @@ class Block
      */
     public function view(): string
     {
-        /** @var \EnjoysCMS\Module\Catalog\Repositories\Category|EntityRepository $categoryRepository */
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository */
         $categoryRepository = $this->em->getRepository(Category::class);
         /** @var Category $category */
         $category = $categoryRepository->findByPath($this->request->getAttribute('slug', ''));

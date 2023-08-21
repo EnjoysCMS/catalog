@@ -19,8 +19,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class CatalogSitemapCollector implements SitemapCollectorInterface
 {
 
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Category $repositoryCategory;
-    private EntityRepository|\EnjoysCMS\Module\Catalog\Repositories\Product $repositoryProduct;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $repositoryCategory;
+    private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Product $repositoryProduct;
 
     /**
      * @throws NotSupported

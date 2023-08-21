@@ -15,7 +15,7 @@ use EnjoysCMS\Module\Catalog\Entities\Product;
 final class MysqlFulltextSearch implements SearchInterface
 {
 
-    private \EnjoysCMS\Module\Catalog\Repositories\Product|EntityRepository $productRepository;
+    private \EnjoysCMS\Module\Catalog\Repository\Product|EntityRepository $productRepository;
     private ?string $searchQuery = null;
     private array $optionKeys = [];
 

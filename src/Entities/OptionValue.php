@@ -7,7 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Entities;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Repositories\OptionValueRepository;
+use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 
 #[ORM\Table(name: 'catalog_product_option_values')]
 #[ORM\Entity(repositoryClass: OptionValueRepository::class)]

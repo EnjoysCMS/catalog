@@ -9,7 +9,7 @@ namespace EnjoysCMS\Module\Catalog\Helpers;
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Core\Components\Helpers\HelpersBase;
 use EnjoysCMS\Module\Catalog\Entities\OptionKey;
-use EnjoysCMS\Module\Catalog\Repositories\OptionKeyRepository;
+use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 
 final class ProductOptions
 {

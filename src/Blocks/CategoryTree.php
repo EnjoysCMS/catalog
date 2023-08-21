@@ -14,7 +14,7 @@ use Doctrine\ORM\Query\QueryException;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entities;
-use EnjoysCMS\Module\Catalog\Repositories;
+use EnjoysCMS\Module\Catalog\Repository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -28,7 +28,7 @@ use Twig\Error\SyntaxError;
 final class CategoryTree
 {
 
-    private Repositories\Category $categoryRepository;
+    private Repository\Category $categoryRepository;
 
     private Environment $twig;
 
