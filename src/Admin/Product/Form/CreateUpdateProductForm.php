@@ -128,7 +128,7 @@ final class CreateUpdateProductForm
                     }
 
                     /** @var Url $url */
-                    foreach ($product->getUrls() as $url) {
+                    foreach ($product?->getUrls() ?? [] as $url) {
                         if ($url->getProduct()->getId() === $product->getId()) {
                             return true;
                         }
