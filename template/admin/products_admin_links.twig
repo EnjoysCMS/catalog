@@ -28,9 +28,9 @@
         <a class="btn btn-default"
            href="{{ path('@catalog_product_urls', {"product_id": product.getId}) }}" title="URLs"><i class="fas fa-link"></i></a>
     {% endif %}
-    {% if access('@catalog_product_files_list') %}
+    {% if access('@catalog_product_files') %}
         <a class="btn btn-default"
-           href="{{ path('@catalog_product_files_list', {"product_id": product.getId}) }}" title="Файлы"><i
+           href="{{ path('@catalog_product_files', {"product_id": product.getId}) }}" title="Файлы"><i
                     class="fa fa-file"></i></a>
     {% endif %}
     {% if access('@catalog_product_prices') %}

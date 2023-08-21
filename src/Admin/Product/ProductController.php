@@ -22,6 +22,7 @@ use Enjoys\Cookie\Exception;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
+use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
@@ -29,6 +30,7 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\CreateUpdateUrlProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\DeleteUrlProductForm;
+use EnjoysCMS\Module\Catalog\Admin\Product\Form\FileUploadProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\MetaProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\QuantityProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
@@ -38,10 +40,12 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Images\UploadHandler;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Image;
 use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\ProductFiles;
 use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Events\PostAddProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PostDeleteProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PostEditProductEvent;
+use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
 use EnjoysCMS\Module\Catalog\Events\PreAddProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreDeleteProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
@@ -745,4 +749,107 @@ final class ProductController extends AdminController
         }
         return $this->jsonResponse($errorMessage ?? 'uploaded');
     }
+
+    #[Route(
+        path: '/{product_id}/files',
+        name: "files",
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Менеджер файлов (продукт)'
+    )]
+    public function files(): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+
+        $this->twig->addExtension($this->container->get(ConvertSize::class));
+
+        $this->breadcrumbs
+            ->add(['@catalog_product_files', ['product_id' => $product->getId()]], 'Менеджер файлов')
+            ->setLastBreadcrumb(
+                sprintf('Менеджер файлов: %s', $product->getName())
+            );
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/files/manage.twig',
+                [
+                    'product' => $product,
+                    'config' => $this->config,
+                    'subtitle' => 'Управление файлами'
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: "/{product_id}/files/upload",
+        name: "files_upload",
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Загрузка файла (продукт)'
+    )]
+    public function filesUpload(FileUploadProductForm $upload, EntityManager $em): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+
+        $form = $upload->getForm();
+
+        if ($form->isSubmitted()) {
+            $file = $upload->doAction($em, $this->request, $product, $this->config);
+            $this->dispatcher->dispatch(new PostUploadFile($file));
+            return $this->redirect->toRoute(
+                '@catalog_product_files',
+                ['product_id' => $this->product->getId()]
+            );
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        $this->breadcrumbs
+            ->add(['@catalog_product_files', ['product_id' => $product->getId()]], 'Менеджер файлов')
+            ->setLastBreadcrumb(sprintf('Загрузка файла для %s', $product->getName()));
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/form.twig',
+                [
+                    'product' => $product,
+                    'form' => $rendererForm,
+                    'subtitle' => 'Загрузка файла',
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: "/{product_id}/files/delete",
+        name: "files_delete",
+        requirements: [
+            'product_id' => '\d'
+        ],
+        comment: 'Удалить загруженный файл (продукт)'
+    )]
+    public function filesDelete(EntityManager $em): ResponseInterface
+    {
+        $product = $this->product ?? throw new NoResultException();
+
+        /** @var ProductFiles $file */
+        $file = $em->getRepository(ProductFiles::class)->findOneBy([
+            'id' => $this->request->getQueryParams()['id'] ?? 0,
+            'product' => $product,
+        ]) ?? throw new NoResultException();
+
+        $em->remove($file);
+        $em->flush();
+
+        $filesystem = $this->config->getFileStorageUpload($file->getStorage())->getFileSystem();
+        $filesystem->delete($file->getFilePath());
+
+        return $this->redirect->toRoute('@catalog_product_files', [
+            'product_id' => $product->getId()
+        ]);
+    }
+
 }

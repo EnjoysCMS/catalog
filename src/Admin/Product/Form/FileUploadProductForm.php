@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Admin\Product\Files;
+namespace EnjoysCMS\Module\Catalog\Admin\Product\Form;
 
 
 use Doctrine\ORM\EntityManager;
@@ -16,13 +16,12 @@ use Enjoys\Upload\UploadProcessing;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductFiles;
-use EnjoysCMS\Module\Catalog\Events\PreUploadFile;
 use Exception;
 use InvalidArgumentException;
 use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class Upload
+final class FileUploadProductForm
 {
 
 
