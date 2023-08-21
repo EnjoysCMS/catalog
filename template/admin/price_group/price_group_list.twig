@@ -16,7 +16,7 @@
             <!-- /.card-header -->
             <div class="card-body">
                 <div>
-                    <a class="btn btn-primary" href="{{ path('catalog/admin/pricegroup/add') }}">Добавить новую группу цен</a>
+                    <a class="btn btn-primary" href="{{ path('@catalog_pricegroup_add') }}">Добавить новую группу цен</a>
                 </div>
                 <hr>
                 <table class="table table-bordered table-hover">
@@ -24,8 +24,8 @@
                     <tr>
                         <td>{{ priceGroup.getTitle }} <br> <small>{{ priceGroup.getCode }}</small></td>
                         <td>
-                            <a class="btn btn-secondary" href="{{ path('catalog/admin/pricegroup/edit', {'id': priceGroup.getId}) }}">Редактировать</a>
-                            <a class="btn btn-danger" href="{{ path('catalog/admin/pricegroup/delete', {'id': priceGroup.getId}) }}">Удалить</a>
+                            <a class="btn btn-secondary" href="{{ path('@catalog_pricegroup_edit', {'id': priceGroup.getId}) }}">Редактировать</a>
+                            <a class="btn btn-danger" href="{{ path('@catalog_pricegroup_delete', {'id': priceGroup.getId}) }}">Удалить</a>
                         </td>
                     </tr>
                 {% endfor %}
