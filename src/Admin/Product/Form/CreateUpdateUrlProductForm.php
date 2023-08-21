@@ -56,6 +56,10 @@ final class CreateUpdateUrlProductForm
             ->fill([1 => 'Сделать основным?']);
 
         $form->text('path', 'Путь')->addRule(Rules::REQUIRED)
+            ->addRule(Rules::CALLBACK, 'Не допустимые символы', function (){
+                preg_match('/[.\/]/',  $this->request->getParsedBody()['path'] ?? '', $matches);
+                return !$matches;
+            })
             ->addRule(
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',

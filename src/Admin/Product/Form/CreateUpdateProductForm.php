@@ -110,6 +110,10 @@ final class CreateUpdateProductForm
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
+            ->addRule(Rules::CALLBACK, 'Не допустимые символы', function (){
+                preg_match('/[.\/]/',  $this->request->getParsedBody()['url'] ?? '', $matches);
+                return !$matches;
+            })
             ->addRule(
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
