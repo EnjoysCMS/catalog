@@ -37,7 +37,7 @@ final class PriceGroupController extends AdminController
     {
         parent::__construct($container, $config, $adminConfig);
 
-        $this->breadcrumbs->add('@catalog_pricegroup_list','Группы цен');
+        $this->breadcrumbs->add('@catalog_pricegroup_list', 'Группы цен');
     }
 
 
@@ -48,12 +48,15 @@ final class PriceGroupController extends AdminController
     #[Route(
         name: 'list'
     )]
-    public function list(PriceGroupList $priceGroupList): ResponseInterface
+    public function list(EntityManager $em): ResponseInterface
     {
+        $this->breadcrumbs->setLastBreadcrumb('Группы цен');
         return $this->response(
             $this->twig->render(
                 $this->templatePath . '/price_group/price_group_list.twig',
-                $priceGroupList->getContext()
+                [
+                    'priceGroups' => $em->getRepository(PriceGroup::class)->findAll(),
+                ]
             )
         );
     }
@@ -76,7 +79,7 @@ final class PriceGroupController extends AdminController
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
-        $this->breadcrumbs->setLastBreadcrumb(  'Добавление новой группы цен');
+        $this->breadcrumbs->setLastBreadcrumb('Добавление новой группы цен');
 
         return $this->response(
             $this->twig->render(
@@ -98,7 +101,6 @@ final class PriceGroupController extends AdminController
     )]
     public function edit(CreateUpdatePriceGroupForm $createUpdatePriceGroupForm, EntityManager $em): ResponseInterface
     {
-
         $priceGroup = $em->getRepository(PriceGroup::class)->find(
             $this->request->getQueryParams()['id'] ?? null
         ) ?? throw new NoResultException();
@@ -111,7 +113,7 @@ final class PriceGroupController extends AdminController
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
-        $this->breadcrumbs->setLastBreadcrumb( 'Редактирование группы цен');
+        $this->breadcrumbs->setLastBreadcrumb('Редактирование группы цен');
 
         return $this->response(
             $this->twig->render(
@@ -153,7 +155,7 @@ final class PriceGroupController extends AdminController
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
-        $this->breadcrumbs->setLastBreadcrumb( 'Удаление группы цен');
+        $this->breadcrumbs->setLastBreadcrumb('Удаление группы цен');
 
         return $this->response(
             $this->twig->render(
