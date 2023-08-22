@@ -1,6 +1,6 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Filter;
+namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
@@ -11,9 +11,9 @@ use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entity\ProductPrice;
-use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
-use EnjoysCMS\Module\Catalog\Filters\FilterParams;
 use EnjoysCMS\Module\Catalog\Helpers\Normalize;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 
 class PriceFilter implements FilterInterface
 {

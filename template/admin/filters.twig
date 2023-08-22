@@ -19,7 +19,7 @@
                 allowClear: true,
                 placeholder: 'select..',
                 ajax: {
-                    url: "{{ path('@a/catalog/tools/find-option-keys') }}",
+                    url: "{{ path('@catalog_product_options_find_option_keys') }}",
                     dataType: 'json',
                     // delay: 250,
                     data: function (params) {
@@ -73,7 +73,7 @@
 
             document.getElementById('add-price-filter').addEventListener('click', function (e) {
                 e.preventDefault()
-                fetch("{{ path('catalog/filter/add') }}", {
+                fetch("{{ path('@catalog_filters_add') }}", {
                     method: 'PUT',
                     headers: {
                         "Accept": "application/json"
@@ -88,7 +88,7 @@
 
             document.getElementById('add-stock-filter').addEventListener('click', function (e) {
                 e.preventDefault()
-                fetch("{{ path('catalog/filter/add') }}", {
+                fetch("{{ path('@catalog_filters_add') }}", {
                     method: 'PUT',
                     headers: {
                         "Accept": "application/json"
@@ -126,7 +126,7 @@
 
                 row.querySelector('.delete-filter').addEventListener('click', function (e) {
                     e.preventDefault()
-                    fetch("{{ path('catalog/filter/delete') }}", {
+                    fetch("{{ path('@catalog_filters_delete') }}", {
                         method: 'DELETE',
                         body: JSON.stringify({
                             filterId: tr.dataset.filterId
@@ -137,7 +137,7 @@
                 [selectFormType, order].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
-                        fetch("{{ path('catalog/filter/update') }}", {
+                        fetch("{{ path('@catalog_filters_update') }}", {
                             method: 'PATCH',
                             body: JSON.stringify({
                                 filterId: tr.dataset.filterId,
@@ -156,7 +156,7 @@
 
         const loadCategoryFilters = function () {
 
-            const url = new URL("{{ url('catalog/get-filters') }}");
+            const url = new URL("{{ url('@catalog_api_get_filters') }}");
             url.searchParams.append('category', categoryId);
             fetch(url.toString(), {
                 method: 'GET'
@@ -196,7 +196,7 @@
                 optionKeys.push(v)
             });
 
-            fetch("{{ path('catalog/filter/add') }}", {
+            fetch("{{ path('@catalog_filters_add') }}", {
                 method: 'PUT',
                 headers: {
                     "Accept": "application/json"

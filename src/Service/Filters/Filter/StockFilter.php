@@ -1,10 +1,10 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Filter;
+namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Module\Catalog\Filters\FilterInterface;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 
 class StockFilter implements FilterInterface
 {

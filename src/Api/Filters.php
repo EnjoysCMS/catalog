@@ -1,20 +1,21 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Controller;
+namespace EnjoysCMS\Module\Catalog\Api;
 
+use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
-use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
-use EnjoysCMS\Module\Catalog\Filters\FilterFactory;
+use EnjoysCMS\Core\AbstractController;
+use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterFactory;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
-    path: 'admin/catalog/get-filters',
-    name: 'catalog/get-filters',
+    path: 'admin/catalog/api/filters/get',
+    name: '@catalog_api_get_filters',
     options: [
         'comment' => 'API: получение списка фильтров категорий '
     ],
@@ -22,38 +23,35 @@ use Symfony\Component\Routing\Annotation\Route;
         'GET'
     ]
 )]
-class GetFilters
+class Filters extends AbstractController
 {
-    public function __construct(
-        private ServerRequestInterface $request,
-        private ResponseInterface $response,
-        private FilterFactory $filterFactory,
-    ) {
-        $this->response = $this->response->withHeader('content-type', 'application/json');
+
+    public function __construct(Container $container, private FilterFactory $filterFactory,)
+    {
+        parent::__construct($container);
     }
+
 
     /**
      * @throws DependencyException
      * @throws NotFoundException
      * @throws NotSupported
      */
-    public function __invoke(EntityManager $em): ResponseInterface
-    {
-        /** @var FilterEntity[] $filters */
-        $filters = $em->getRepository(FilterEntity::class)->findBy([
+    public function __invoke(
+        EntityManager $em,
+    ): ResponseInterface {
+        /** @var CategoryFilter[] $filters */
+        $filters = $em->getRepository(CategoryFilter::class)->findBy([
             'category' => $this->request->getQueryParams()['category'] ?? throw new \InvalidArgumentException(
                     sprintf('Category id not sent')
                 )
         ], ['order' => 'asc']);
 
-        $this->response->getBody()->write(
-            json_encode($this->normalizeData($filters))
-        );
-        return $this->response;
+        return $this->json($this->normalizeData($filters));
     }
 
     /**
-     * @param FilterEntity[] $filters
+     * @param CategoryFilter[] $filters
      * @throws DependencyException
      * @throws NotFoundException
      */
@@ -62,7 +60,7 @@ class GetFilters
         $result = [];
         foreach ($filters as $filterMetaData) {
             $filter = $this->filterFactory->create($filterMetaData->getFilterType(), $filterMetaData->getParams());
-            if ($filter === null){
+            if ($filter === null) {
                 continue;
             }
             $result[] = [

@@ -1,14 +1,13 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Entity;
+namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use EnjoysCMS\Module\Catalog\Entity\Category;
-use EnjoysCMS\Module\Catalog\Filters\FilterParams;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'catalog_category_filters')]
-class FilterEntity
+class CategoryFilter
 {
 
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters;
+namespace EnjoysCMS\Module\Catalog\Blocks;
 
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -14,16 +14,17 @@ use Enjoys\Forms\Interfaces\RendererInterface;
 use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Core\Entities\Block as Entity;
 use EnjoysCMS\Module\Catalog\Entity\Category;
+use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
 use EnjoysCMS\Module\Catalog\Entity\Product;
-use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
 use EnjoysCMS\Module\Catalog\Repository\FilterRepository;
+use EnjoysCMS\Module\Catalog\Service\Filters\FilterFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class Block
+class FilterBlock
 {
 
     public function __construct(
@@ -60,9 +61,9 @@ class Block
         $category = $categoryRepository->findByPath($this->request->getAttribute('slug', ''));
 
         /** @var EntityRepository|FilterRepository $filterRepository */
-        $filterRepository = $this->em->getRepository(FilterEntity::class);
+        $filterRepository = $this->em->getRepository(CategoryFilter::class);
 
-        /** @var FilterEntity[] $allowedFilters */
+        /** @var CategoryFilter[] $allowedFilters */
         $allowedFilters = $filterRepository->findBy(['category' => $category], ['order' => 'asc']);
 
         /** @var int[] $productIds id всех продуктов в этой категории */

@@ -1,13 +1,13 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters;
+namespace EnjoysCMS\Module\Catalog\Service\Filters;
 
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
-use EnjoysCMS\Module\Catalog\Filters\Filter\OptionFilter;
-use EnjoysCMS\Module\Catalog\Filters\Filter\PriceFilter;
-use EnjoysCMS\Module\Catalog\Filters\Filter\StockFilter;
+use EnjoysCMS\Module\Catalog\Service\Filters\Filter\OptionFilter;
+use EnjoysCMS\Module\Catalog\Service\Filters\Filter\PriceFilter;
+use EnjoysCMS\Module\Catalog\Service\Filters\Filter\StockFilter;
 
 class FilterFactory
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters;
+namespace EnjoysCMS\Module\Catalog\Service\Filters;
 
 use Doctrine\ORM\QueryBuilder;
 use Enjoys\Forms\Form;

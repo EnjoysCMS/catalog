@@ -1,27 +1,30 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Controller;
+namespace EnjoysCMS\Module\Catalog\Admin\Filters;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Entity\Category;
-use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
+use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use RuntimeException;
+use stdClass;
 
 #[Route(
-    path: 'admin/catalog/filter',
-    name: 'catalog/filter/delete',
+    path: 'admin/catalog/filters/update',
+    name: '@catalog_filters_update',
     methods: [
-        'DELETE'
+        'PATCH'
     ]
 )]
-class DeleteFilters
+class Update
 {
-    private \stdClass $input;
+    private stdClass $input;
 
     public function __construct(
         private ServerRequestInterface $request,
@@ -40,11 +43,13 @@ class DeleteFilters
     public function __invoke(): ResponseInterface
     {
         /** @var Category $category */
-        $filter = $this->em->getRepository(FilterEntity::class)->find(
-            $this->input->filterId ?? throw new \InvalidArgumentException('Filter id not found')
-        ) ?? throw new \RuntimeException('Filter not found');
+        $filter = $this->em->getRepository(CategoryFilter::class)->find(
+            $this->input->filterId ?? throw new InvalidArgumentException('Filter id not found')
+        ) ?? throw new RuntimeException('Filter not found');
 
-        $this->em->remove($filter);
+        $filter->setOrder((int)($this->input->order ?? 0));
+        $filter->setParams(array_merge($filter->getParams()->getParams(), (array)$this->input->filterParams));
+
         $this->em->flush();
         return $this->response;
     }

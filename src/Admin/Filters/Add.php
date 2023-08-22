@@ -1,27 +1,30 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Filters\Controller;
+namespace EnjoysCMS\Module\Catalog\Admin\Filters;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Entity\Category;
-use EnjoysCMS\Module\Catalog\Filters\Entity\FilterEntity;
+use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use RuntimeException;
+use stdClass;
 
 #[Route(
-    path: 'admin/catalog/filter',
-    name: 'catalog/filter/add',
+    path: 'admin/catalog/filters/add',
+    name: '@catalog_filters_add',
     methods: [
         'PUT'
     ]
 )]
-class AddFilters
+class Add
 {
-    private \stdClass $input;
+    private stdClass $input;
 
     public function __construct(
         private ServerRequestInterface $request,
@@ -43,8 +46,8 @@ class AddFilters
 
         /** @var Category $category */
         $category = $this->em->getRepository(Category::class)->find(
-            $this->input->category ?? throw new \InvalidArgumentException('category id not found')
-        ) ?? throw new \RuntimeException('Category not found');
+            $this->input->category ?? throw new InvalidArgumentException('category id not found')
+        ) ?? throw new RuntimeException('Category not found');
 
         switch ($this->input->filterType) {
             case 'option':
@@ -75,7 +78,7 @@ class AddFilters
                 continue;
             }
 
-            $filter = new FilterEntity();
+            $filter = new CategoryFilter();
             $filter->setCategory($category);
             $filter->setFilterType($this->input->filterType);
             $filter->setParams([
@@ -98,7 +101,7 @@ class AddFilters
         if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
             return;
         }
-        $filter = new FilterEntity();
+        $filter = new CategoryFilter();
         $filter->setCategory($category);
         $filter->setFilterType($this->input->filterType);
         $filter->setParams([]);
@@ -118,7 +121,7 @@ class AddFilters
         if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
             return;
         }
-        $filter = new FilterEntity();
+        $filter = new CategoryFilter();
         $filter->setCategory($category);
         $filter->setFilterType($this->input->filterType);
         $filter->setParams([]);
@@ -133,7 +136,7 @@ class AddFilters
      */
     public function isFilterExist(Category $category, string $filterType, string $hash): bool
     {
-        return null !== $this->em->getRepository(FilterEntity::class)->findOneBy(
+        return null !== $this->em->getRepository(CategoryFilter::class)->findOneBy(
                 ['category' => $category, 'filterType' => $filterType, 'hash' => $hash]
             );
     }
