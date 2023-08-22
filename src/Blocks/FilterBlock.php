@@ -11,8 +11,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Core\Entities\Block as Entity;
+use EnjoysCMS\Core\Block\AbstractBlock;
+use EnjoysCMS\Core\Block\Annotation\Block;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
 use EnjoysCMS\Module\Catalog\Entity\Product;
@@ -24,23 +24,37 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class FilterBlock
+#[Block(
+    name: 'Фильтр товаров',
+    options: [
+        'template' => [
+            'value' => '',
+            'name' => 'Путь до template',
+            'description' => 'Обязательно',
+        ],
+        'title' => [
+            'value' => '',
+            'name' => 'Заголовок блока',
+            'description' => 'Для отображения в шаблоне (необязательно)',
+        ],
+        'description' => [
+            'value' => '',
+            'name' => 'Небольшое описание блока',
+            'description' => 'Для отображения в шаблоне (необязательно)',
+        ],
+    ]
+)]
+class FilterBlock extends AbstractBlock
 {
 
     public function __construct(
-        private Environment $twig,
-        private ServerRequestInterface $request,
-        private EntityManager $em,
-        private FilterFactory $filterFactory,
-        private RendererInterface $renderForm,
-        Entity $block
+        private readonly Environment $twig,
+        private readonly ServerRequestInterface $request,
+        private readonly EntityManager $em,
+        private readonly FilterFactory $filterFactory,
+        private readonly RendererInterface $renderForm,
     ) {
 
-    }
-
-    public static function getBlockDefinitionFile(): string
-    {
-        return __DIR__ . '/../../blocks.yml';
     }
 
     /**
@@ -105,15 +119,15 @@ class FilterBlock
 
         $this->renderForm->setForm($form);
 
-        $template = empty($this->getOption('template'))
-            ? '../modules/catalog/template/blocks/filter.twig' : $this->getOption('template');
+        $template = empty($this->getBlockOptions()->getValue('template'))
+            ? '../modules/catalog/template/blocks/filter.twig' : $this->getBlockOptions()->getValue('template');
 
         return $this->twig->render(
             $template,
             [
 //                'filters' => $filters,
                 'form' => $hasFilters ? $this->renderForm->output() : null,
-                'blockOptions' => $this->getOptions()
+                'blockOptions' => $this->getBlockOptions()
             ]
         );
     }

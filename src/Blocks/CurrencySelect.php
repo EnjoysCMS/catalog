@@ -9,8 +9,8 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 use Doctrine\ORM\EntityManager;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use EnjoysCMS\Core\Block\Entity\Block;
-use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
+use EnjoysCMS\Core\Block\AbstractBlock;
+use EnjoysCMS\Core\Block\Annotation\Block;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use NumberFormatter;
@@ -20,7 +20,29 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-final class CurrencySelect
+#[Block(
+    name: 'Выбор валюты',
+    options: [
+        'template' => [
+            'value' => '',
+            'name' => 'Путь до template',
+            'description' => 'Обязательно',
+        ],
+        'name-as' => [
+            'value' => 'code',
+            'name' => ' При выборе валюты показывать как...',
+            'form' => [
+                'type' => 'select',
+                'data' => [
+                    'code' => 'код валюты (USD, RUB и тд)',
+                    'name' => 'наименование валюты (Российский рубль ... и тд)',
+                    'symbol' => 'символ валюты ($, ₽, € ... и тд)',
+                ]
+            ]
+        ]
+    ]
+)]
+final class CurrencySelect extends AbstractBlock
 {
 
     /**
@@ -29,19 +51,13 @@ final class CurrencySelect
     private array $currencies;
 
     public function __construct(
-        private Config $config,
-        private Environment $twig,
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        Block $block
+        private readonly Config $config,
+        private readonly Environment $twig,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
     ) {
         /** @var Currency[] $currencies */
         $this->currencies = $this->em->getRepository(Currency::class)->findAll();
-    }
-
-    public static function getBlockDefinitionFile(): string
-    {
-        return __DIR__ . '/../../blocks.yml';
     }
 
     /**
@@ -63,10 +79,9 @@ final class CurrencySelect
         $select = $form->select('currency')
             ->addAttribute(AttributeFactory::create('onchange', 'this.form.submit();'))
             ->addClass('form-select form-select-sm')
-            ->fill($this->getFillData())
-        ;
+            ->fill($this->getFillData());
 
-        if (empty($this->getOption('template'))) {
+        if (empty($this->getBlockOptions()->getValue('template'))) {
             $result = sprintf('<form><select%s>', $select->getAttributesString());
             foreach ($select->getElements() as $element) {
                 $result .= $element->baseHtml();
@@ -75,13 +90,13 @@ final class CurrencySelect
             return $result;
         } else {
             return $this->twig->render(
-                $this->getOption('template'),
+                $this->getBlockOptions()->getValue('template'),
                 [
                     'form' => $form,
                     'data' => $this->getFillData(),
                     'currencies' => $this->currencies,
                     'currentCurrencyCode' => $currentCurrencyCode,
-                    'blockOptions' => $this->getOptions()
+                    'blockOptions' => $this->getBlockOptions()
                 ]
             );
         }
@@ -90,8 +105,7 @@ final class CurrencySelect
 
     public function getFillData(): array
     {
-
-        return match ($this->getOption('name-as')) {
+        return match ($this->getBlockOptions()->getValue('name-as')) {
             'code' => array_merge(...array_map(fn($item) => [$item->getCode() => $item->getCode()], $this->currencies)),
             'name' => array_merge(...array_map(fn($item) => [$item->getCode() => $item->getName()], $this->currencies)),
             'symbol' => array_merge(
@@ -102,7 +116,11 @@ final class CurrencySelect
                             $item->getCode()
                         ), NumberFormatter::CURRENCY
                     );
-                    return [$item->getCode() => $item->getSymbol() ?? $numberFormatter->getSymbol(NumberFormatter::CURRENCY_SYMBOL)];
+                    return [
+                        $item->getCode() => $item->getSymbol() ?? $numberFormatter->getSymbol(
+                                NumberFormatter::CURRENCY_SYMBOL
+                            )
+                    ];
                 }, $this->currencies)
             ),
             default => [],

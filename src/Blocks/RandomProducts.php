@@ -8,10 +8,13 @@ namespace EnjoysCMS\Module\Catalog\Blocks;
 
 use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\Persistence\ObjectRepository;
 use DoctrineExtensions\Query\Mysql\Rand;
+use EnjoysCMS\Core\Block\AbstractBlock;
 use EnjoysCMS\Core\Block\Entity\Block;
-use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -21,40 +24,57 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-
-final class RandomProducts
+#[\EnjoysCMS\Core\Block\Annotation\Block(
+    name: 'Продукты (рандомно)',
+    options: [
+        'template' => [
+            'value' => '',
+            'name' => 'Путь до template',
+            'description' => 'Обязательно',
+        ],
+        'title' => [
+            'value' => '',
+            'name' => 'Заголовок блока',
+            'description' => 'Для отображения в шаблоне (необязательно)',
+        ],
+        'limit' => [
+            'value' => 3,
+            'name' => 'Лимит возвращаемых записей',
+            'description' => 'Обязательно',
+        ],
+        'cacheLimit' => [
+            'value' => 0,
+            'name' => 'Время кэша в секундах',
+            'description' => 'Необязательно',
+        ],
+        'only_with_images' => [
+            'value' => ['withimg'],
+            'name' => '&nbsp;',
+            'description' => '',
+            'form' => [
+                'type' => 'checkbox',
+                'data' => [
+                    'withimg' => 'Показывать товары только с фото'
+                ]
+            ]
+        ],
+    ]
+)]
+final class RandomProducts extends AbstractBlock
 {
-    /**
-     * @var \EnjoysCMS\Module\Catalog\Repository\Product
-     */
-    private $repository;
 
-    private Environment $twig;
-    private ?string $templatePath;
+    private \EnjoysCMS\Module\Catalog\Repository\Product|EntityRepository $repository;
 
 
     /**
-     * @param ContainerInterface&FactoryInterface $container
-     * @param Block $block
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws NotSupported
      */
-    public function __construct(private  ContainerInterface $container, Block $block)
+    public function __construct(EntityManager $em, private readonly Environment $twig)
     {
-
-        $em = $this->container->get(EntityManager::class);
         $em->getConfiguration()->addCustomStringFunction('RAND', Rand::class);
-
         $this->repository = $em->getRepository(Product::class);
-        $this->twig = $this->container->get(Environment::class);
-        $this->templatePath = $this->getOption('template');
     }
 
-
-    public static function getBlockDefinitionFile(): string
-    {
-        return __DIR__ . '/../../blocks.yml';
-    }
 
     /**
      * @throws SyntaxError
@@ -84,7 +104,7 @@ final class RandomProducts
         ;
 
         return $this->twig->render(
-            (string)$this->templatePath,
+            (string)$this->getOption('template'),
             [
                 'products' => $qb->getResult(),
                 'blockOptions' => $this->getOptions()

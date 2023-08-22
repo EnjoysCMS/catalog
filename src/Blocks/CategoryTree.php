@@ -6,55 +6,49 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Blocks;
 
 
-use DI\FactoryInterface;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
-use EnjoysCMS\Core\Block\Entity\Block;
-use EnjoysCMS\Core\Components\Blocks\AbstractBlock;
-use EnjoysCMS\Module\Catalog\Entity;
+use EnjoysCMS\Core\Block\AbstractBlock;
+use EnjoysCMS\Core\Block\Annotation\Block;
+use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Repository;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-
-final class CategoryTree
+#[Block(
+    name: 'Категории (tree)',
+    options: [
+        'template' => [
+            'value' => '',
+            'name' => 'Путь до template',
+            'description' => 'Обязательно',
+        ],
+        'title' => [
+            'value' => '',
+            'name' => 'Заголовок блока',
+            'description' => 'Для отображения в шаблоне (необязательно)',
+        ],
+        'description' => [
+            'value' => '',
+            'name' => 'Небольшое описание блока',
+            'description' => 'Для отображения в шаблоне (необязательно)',
+        ],
+    ]
+)]
+final class CategoryTree extends AbstractBlock
 {
 
-    private Repository\Category $categoryRepository;
+    private EntityRepository|Repository\Category $categoryRepository;
 
-    private Environment $twig;
-
-    private ServerRequestInterface $request;
-    private string $templatePath;
-
-    /**
-     * @param ContainerInterface&FactoryInterface $container
-     * @param Block $block
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function __construct(private ContainerInterface $container, Block $block)
+    public function __construct(EntityManager $em, private readonly Environment $twig, private readonly ServerRequestInterface $request)
     {
-        $this->categoryRepository = $this->container->get(EntityManager::class)->getRepository(
-            Entity\Category::class
-        );
-        $this->twig = $this->container->get(Environment::class);
-        $this->request = $this->container->get(ServerRequestInterface::class);
-        $this->templatePath = (string)$this->getOption('template');
-    }
-
-
-    public static function getBlockDefinitionFile(): string
-    {
-        return __DIR__ . '/../../blocks.yml';
+        $this->categoryRepository = $em->getRepository(Category::class);
     }
 
 
@@ -69,10 +63,10 @@ final class CategoryTree
     public function view(): string
     {
         return $this->twig->render(
-            $this->templatePath,
+            $this->getBlockOptions()->getValue('template'),
             [
                 'tree' => $this->categoryRepository->getChildNodes(null, ['status' => true]),
-                'blockOptions' => $this->getOptions(),
+                'blockOptions' => $this->getBlockOptions(),
                 'currentSlug' => $this->request->getAttribute('slug')
             ]
         );
