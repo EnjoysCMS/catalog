@@ -38,6 +38,7 @@ use EnjoysCMS\Module\Catalog\Admin\Product\Form\TagsProductForm;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\LoadImage;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ManageImage;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\UploadHandler;
+use EnjoysCMS\Module\Catalog\Admin\Product\Options\ManageOptions;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Image;
 use EnjoysCMS\Module\Catalog\Entity\Product;
@@ -50,6 +51,7 @@ use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
 use EnjoysCMS\Module\Catalog\Events\PreAddProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreDeleteProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
+use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use InvalidArgumentException;
 use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ResponseInterface;
@@ -894,6 +896,37 @@ final class ProductController extends AdminController
                     'product' => $this->product,
                     'form' => $rendererForm->output(),
                     'subtitle' => 'Установка цен'
+                ]
+            )
+        );
+    }
+
+    #[Route(
+        path: '/options',
+        name: 'options',
+        comment: 'Просмотр опций товара'
+    )]
+    public function options(ManageOptions $manageOptions, Setting $setting): ResponseInterface
+    {
+        $form = $manageOptions->getForm();
+
+        if ($form->isSubmitted()) {
+            $manageOptions->doSave();
+            return $this->redirect->toUrl();
+        }
+
+        $this->breadcrumbs->setLastBreadcrumb(
+            sprintf('Характеристики: %s', $manageOptions->getProduct()->getName())
+        );
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/options/options.twig',
+                [
+                    'product' => $manageOptions->getProduct(),
+                    'form' => $form,
+                    'delimiterOptions' => $setting->get('delimiterOptions', '|'),
+                    'subtitle' => 'Параметры'
                 ]
             )
         );

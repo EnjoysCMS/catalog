@@ -21,8 +21,11 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
+/**
+ * @TODO need refactor
+ */
 #[Route('/admin/catalog/product/options', '@catalog_product_options_')]
-final class Options extends AdminController
+final class OptionsController extends AdminController
 {
 
 
@@ -32,35 +35,7 @@ final class Options extends AdminController
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    #[Route(
-        name: 'list',
-        comment: 'Просмотр опций товара'
-    )]
-    public function manageOptions(ModelOptions\Manage $manage, Setting $setting): ResponseInterface
-    {
-        $form = $manage->getForm();
 
-        if ($form->isSubmitted()) {
-            $manage->doSave();
-            return $this->redirect->toUrl();
-        }
-
-        $this->breadcrumbs->add('@catalog_products', 'Список продуктов')->setLastBreadcrumb(
-            sprintf('Характеристики: %s', $manage->getProduct()->getName())
-        );
-
-        return $this->response(
-            $this->twig->render(
-                $this->templatePath . '/product/options/options.twig',
-                [
-                    'product' => $manage->getProduct(),
-                    'form' => $form,
-                    'delimiterOptions' => $setting->get('delimiterOptions', '|'),
-                    'subtitle' => 'Параметры'
-                ]
-            )
-        );
-    }
 
     #[Route(
         path: '/fill-from-product',

@@ -26,9 +26,9 @@ class GetAdminLinks
 
     private const ROUTES = [
         [
-            'route' => 'catalog/admin/product/edit',
+            'route' => '@catalog_product_edit',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Редактирование',
             'icon' => 'fa fa-edit'
@@ -36,14 +36,14 @@ class GetAdminLinks
         [
             'route' => '@catalog_product_quantity',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Количество',
             'icon' => 'fa fa-cubes'
         ],
 
         [
-            'route' => 'catalog/admin/product/images',
+            'route' => '@catalog_product_images',
             'params' => [
                 'product_id'
             ],
@@ -53,15 +53,15 @@ class GetAdminLinks
         [
             'route' => '@catalog_product_tags',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Теги',
             'icon' => 'fa fa-tags'
         ],
         [
-            'route' => '@catalog_product_options',
+            'route' => '@catalog_product_options_list',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Параметры',
             'icon' => 'fa fa-list'
@@ -69,7 +69,7 @@ class GetAdminLinks
         [
             'route' => '@catalog_product_urls',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'URLs',
             'icon' => 'fa fa-link'
@@ -77,31 +77,31 @@ class GetAdminLinks
         [
             'route' => '@catalog_product_files',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Файлы',
             'icon' => 'fa fa-file'
         ],
         [
-            'route' => '@a/catalog/product/prices',
+            'route' => '@catalog_product_prices',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Цены',
             'icon' => 'fa fa-dollar-sign'
         ],
         [
-            'route' => '@a/catalog/product/meta',
+            'route' => '@catalog_product_meta',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'SEO',
             'icon' => 'fa fa-globe'
         ],
         [
-            'route' => 'catalog/admin/product/delete',
+            'route' => '@catalog_product_delete',
             'params' => [
-                'id'
+                'product_id'
             ],
             'title' => 'Удаление',
             'icon' => 'fa fa-trash',

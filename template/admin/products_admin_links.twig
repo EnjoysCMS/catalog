@@ -19,9 +19,9 @@
            href="{{ path('@catalog_product_tags', {"product_id": product.getId}) }}" title="Теги"><i
                     class="fa fa-tags"></i></a>
     {% endif %}
-    {% if access('@catalog_product_options_list') %}
+    {% if access('@catalog_product_options') %}
         <a class="btn btn-default"
-           href="{{ path('@catalog_product_options_list', {"product_id": product.getId}) }}" title="Параметры"><i
+           href="{{ path('@catalog_product_options', {"product_id": product.getId}) }}" title="Параметры"><i
                     class="fa fa-list"></i></a>
     {% endif %}
     {% if access('@catalog_product_urls') %}

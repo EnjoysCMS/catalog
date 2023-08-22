@@ -21,7 +21,7 @@ use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class Manage
+final class ManageOptions
 {
     private EntityRepository|ProductRepository $productRepository;
     private Product $product;
@@ -41,7 +41,7 @@ final class Manage
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
         $this->productRepository = $this->em->getRepository(Product::class);
         $this->product = $this->productRepository->find(
-            $this->request->getQueryParams()['id'] ?? null
+            $this->request->getQueryParams()['product_id'] ?? null
         ) ?? throw new NoResultException();
     }
 
