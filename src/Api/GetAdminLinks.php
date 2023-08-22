@@ -1,8 +1,7 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
+namespace EnjoysCMS\Module\Catalog\Api;
 
-use EnjoysCMS\Core\Components\AccessControl\ACL;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -119,7 +118,7 @@ class GetAdminLinks
         $this->response = $this->response->withHeader('content-type', 'application/json');
     }
 
-    public function __invoke(UrlGeneratorInterface $urlGenerator, ACL $ACL, RouteCollection $routeCollection): ResponseInterface
+    public function __invoke(UrlGeneratorInterface $urlGenerator,  RouteCollection $routeCollection): ResponseInterface
     {
         $result = [];
         foreach (self::ROUTES as $route) {

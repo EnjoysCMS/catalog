@@ -1,6 +1,6 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
+namespace EnjoysCMS\Module\Catalog\Api;
 
 use DI\Container;
 use Doctrine\ORM\EntityManager;
@@ -9,23 +9,21 @@ use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
+use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\Category\SaveCategoryStructure;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 use function json_decode;
 
 #[Route('admin/catalog/api/category', '@catalog_admin_api~category_')]
-class Category
+class Category extends AbstractController
 {
 
-    public function __construct(
-        private ResponseInterface $response,
-        private readonly Container $container,
-    ) {
-        $this->response = $this->response->withHeader('content-type', 'application/json');
+    public function __construct(Container $container, private readonly EntityManager $em)
+    {
+        parent::__construct($container);
     }
 
     /**
@@ -43,10 +41,10 @@ class Category
         ],
         comment: 'API: получение списка категорий '
     )]
-    public function getCategoryListForFormSelectElement(EntityManager $em): ResponseInterface
+    public function getCategoryListForFormSelectElement(): ResponseInterface
     {
         /** @var \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository */
-        $categoryRepository = $em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class);
+        $categoryRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class);
 
         $node = null;
         $criteria = [];
@@ -61,19 +59,15 @@ class Category
         );
 
 
-        $this->response->getBody()->write(
-            json_encode(
-                array_merge([['id' => 0, 'title' => 'Все категории']],
-                    array_map(function ($id, $title) {
-                        return [
-                            'id' => (string)$id,
-                            'title' => $title
-                        ];
-                    }, array_keys($categories), $categories)),
-            )
+        return $this->json(
+            array_merge([['id' => 0, 'title' => 'Все категории']],
+                array_map(function ($id, $title) {
+                    return [
+                        'id' => (string)$id,
+                        'title' => $title
+                    ];
+                }, array_keys($categories), $categories))
         );
-
-        return $this->response;
     }
 
     #[Route(
@@ -84,23 +78,17 @@ class Category
         ],
         comment: 'Редактирование категорий (структура, json)'
     )]
-    public function saveCategoryStructure(EntityManager $em, ServerRequestInterface $request): ResponseInterface
+    public function saveCategoryStructure(): ResponseInterface
     {
         try {
             $this->container->call(
                 SaveCategoryStructure::class,
-                ['data' => json_decode($request->getBody()->getContents())]
+                ['data' => json_decode($this->request->getBody()->getContents())]
             );
-            $em->flush();
-            $this->response->getBody()->write(
-                json_encode('saved')
-            );
-            return $this->response;
+            $this->em->flush();
+            return $this->json('saved');
         } catch (Throwable $e) {
-            $this->response->getBody()->write(
-                json_encode($e->getMessage())
-            );
-            return $this->response->withStatus(401);
+            return $this->json($e->getMessage(), 401);
         }
     }
 
@@ -113,15 +101,13 @@ class Category
         name: 'get_extra_fields',
         comment: '[JSON] Получение списка extra fields'
     )]
-    public function getExtraFieldsJson(
-        EntityManager $em,
-        ServerRequestInterface $request
-    ): ResponseInterface {
+    public function getExtraFieldsJson(): ResponseInterface
+    {
         $result = [];
 
         /** @var \EnjoysCMS\Module\Catalog\Entity\Category $category */
-        $category = $em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class)->find(
-            $request->getParsedBody()['id'] ?? ''
+        $category = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class)->find(
+            $this->request->getParsedBody()['id'] ?? ''
         );
 
         if ($category === null) {
@@ -134,10 +120,7 @@ class Category
             $result[$key->getId()] = $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : '');
         }
 
-        $this->response->getBody()->write(
-            json_encode($result)
-        );
-        return $this->response;
+        return $this->json($result);
     }
 
 }

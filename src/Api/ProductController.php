@@ -1,12 +1,14 @@
 <?php
 
-namespace EnjoysCMS\Module\Catalog\Controller\Admin\Api;
+namespace EnjoysCMS\Module\Catalog\Api;
 
+use DI\Container;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\QueryException;
+use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Category;
@@ -29,7 +31,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-class ProductController
+class ProductController extends AbstractController
 {
 
     /**
@@ -39,15 +41,45 @@ class ProductController
 
 
     public function __construct(
-        private ServerRequestInterface $request,
-        private ResponseInterface $response,
+        Container $container,
         private UrlGeneratorInterface $urlGenerator,
         private EntityManager $em,
         private Config $config
     ) {
-        $this->response = $this->response->withHeader('content-type', 'application/json');
+        parent::__construct($container);
         $this->encoders = [new XmlEncoder(), new JsonEncoder()];
     }
+
+
+    #[Route(
+        path: 'admin/catalog/tools/find-products',
+        name: '@a/catalog/tools/find-products',
+        options: [
+            'comment' => '[JSON] Получение списка продукции (поиск)'
+        ]
+    )]
+    public function findProductsByLike(
+        EntityManager $entityManager,
+        ServerRequestInterface $request
+    ): ResponseInterface {
+        $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class)->like(
+            $request->getQueryParams()['query'] ?? null
+        );
+
+        $result = [
+            'items' => array_map(function ($item) {
+                /** @var \EnjoysCMS\Module\Catalog\Entity\Product $item */
+                return [
+                    'id' => $item->getId(),
+                    'title' => $item->getName(),
+                    'category' => $item->getCategory()->getFullTitle()
+                ];
+            }, $matched),
+            'total_count' => count($matched)
+        ];
+        return $this->json($result);
+    }
+
 
     /**
      * @throws ExceptionInterface
@@ -141,42 +173,58 @@ class ProductController
             criteria: $criteria,
             orders: $orders
         );
-        $this->response->getBody()->write(
-            json_encode([
-                'draw' => $this->request->getQueryParams()['draw'] ?? null,
-                'recordsTotal' => $products['pagination']->getTotalItems(),
-                'recordsFiltered' => $products['pagination']->getTotalItems(),
-                'data' => $serializer->normalize($products['products'], JsonEncoder::FORMAT, [
-                    AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                        return match ($object::class) {
-                            Category::class => $object->getTitle(),
-                            Product::class => $object->getName(),
-                        };
-                    },
-                    AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
-                    AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
-                    AbstractNormalizer::ATTRIBUTES => [
-                        'id',
-                        'name',
-                        'productCode',
-                        'hide',
-                        'active',
-                        'category' => [
-                            'title',
-                            'slug',
-                            'breadcrumbs'
-                        ],
+
+        return $this->json([
+            'draw' => $this->request->getQueryParams()['draw'] ?? null,
+            'recordsTotal' => $products['pagination']->getTotalItems(),
+            'recordsFiltered' => $products['pagination']->getTotalItems(),
+            'data' => $serializer->normalize($products['products'], JsonEncoder::FORMAT, [
+                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return match ($object::class) {
+                        Category::class => $object->getTitle(),
+                        Product::class => $object->getName(),
+                    };
+                },
+                AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
+                AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
+                AbstractNormalizer::ATTRIBUTES => [
+                    'id',
+                    'name',
+                    'productCode',
+                    'hide',
+                    'active',
+                    'category' => [
+                        'title',
                         'slug',
-                        'urls',
-                        'prices',
-                        'defaultImage',
-                        'images'
+                        'breadcrumbs'
                     ],
-                    AbstractNormalizer::CALLBACKS => [
-                        'defaultImage' => function (?Image $image) {
-                            if ($image === null) {
-                                return null;
-                            }
+                    'slug',
+                    'urls',
+                    'prices',
+                    'defaultImage',
+                    'images'
+                ],
+                AbstractNormalizer::CALLBACKS => [
+                    'defaultImage' => function (?Image $image) {
+                        if ($image === null) {
+                            return null;
+                        }
+                        $storage = $this->config->getImageStorageUpload($image->getStorage());
+                        return [
+                            'original' => $storage->getUrl(
+                                $image->getFilename() . '.' . $image->getExtension()
+                            ),
+                            'small' => $storage->getUrl(
+                                $image->getFilename() . '_small.' . $image->getExtension()
+                            ),
+                            'large' => $storage->getUrl(
+                                $image->getFilename() . '_large.' . $image->getExtension()
+                            ),
+                        ];
+                    },
+                    'images' => function (Collection $images) {
+                        return array_map(function ($image) {
+                            /** @var Image $image */
                             $storage = $this->config->getImageStorageUpload($image->getStorage());
                             return [
                                 'original' => $storage->getUrl(
@@ -189,50 +237,31 @@ class ProductController
                                     $image->getFilename() . '_large.' . $image->getExtension()
                                 ),
                             ];
-                        },
-                        'images' => function (Collection $images) {
-                            return array_map(function ($image) {
-                                /** @var Image $image */
-                                $storage = $this->config->getImageStorageUpload($image->getStorage());
+                        }, $images->toArray());
+                    },
+                    'prices' => function (Collection $prices) {
+                        foreach ($prices as $price) {
+                            /** @var ProductPrice $price */
+                            if ($price->getPriceGroup()->getCode() === 'PUBLIC') {
                                 return [
-                                    'original' => $storage->getUrl(
-                                        $image->getFilename() . '.' . $image->getExtension()
-                                    ),
-                                    'small' => $storage->getUrl(
-                                        $image->getFilename() . '_small.' . $image->getExtension()
-                                    ),
-                                    'large' => $storage->getUrl(
-                                        $image->getFilename() . '_large.' . $image->getExtension()
-                                    ),
+                                    'price' => $price->getPrice(),
+                                    'currency' => $price->getCurrency()->getCode(),
+                                    'format' => $price->format()
                                 ];
-                            }, $images->toArray());
-                        },
-                        'prices' => function (Collection $prices) {
-                            foreach ($prices as $price) {
-                                /** @var ProductPrice $price */
-                                if ($price->getPriceGroup()->getCode() === 'PUBLIC') {
-                                    return [
-                                        'price' => $price->getPrice(),
-                                        'currency' => $price->getCurrency()->getCode(),
-                                        'format' => $price->format()
-                                    ];
-                                }
                             }
-                            return null;
-                        },
-                        'urls' => function (Collection $urls) {
-                            return array_map(function ($url) {
-                                /** @var Url $url */
-                                return $this->urlGenerator->generate('catalog/product', [
-                                    'slug' => $url->getProduct()->getSlug($url->getPath())
-                                ]);
-                            }, $urls->toArray());
                         }
-                    ],
-                ])
+                        return null;
+                    },
+                    'urls' => function (Collection $urls) {
+                        return array_map(function ($url) {
+                            /** @var Url $url */
+                            return $this->urlGenerator->generate('catalog/product', [
+                                'slug' => $url->getProduct()->getSlug($url->getPath())
+                            ]);
+                        }, $urls->toArray());
+                    }
+                ],
             ])
-        );
-
-        return $this->response;
+        ]);
     }
 }

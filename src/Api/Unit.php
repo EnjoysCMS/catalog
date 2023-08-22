@@ -3,15 +3,12 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Controller\Admin;
+namespace EnjoysCMS\Module\Catalog\Api;
 
 
 use Doctrine\ORM\EntityManager;
-use EnjoysCMS\Module\Catalog\Admin\AdminController;
+use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Module\Catalog\Entity\ProductUnit;
-use HttpSoft\Emitter\SapiEmitter;
-use HttpSoft\Message\Response;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -21,19 +18,16 @@ use Symfony\Component\Routing\Annotation\Route;
         'comment' => '[JSON] Получение списка unit'
     ]
 )]
-final class Unit extends AdminController
+final class Unit extends AbstractController
 {
     public function __invoke(
-        EntityManager $entityManager,
-        ServerRequestInterface $request,
-        Response $response,
-        SapiEmitter $emitter
+        EntityManager $em,
     ) {
-        $matched = $entityManager->getRepository(ProductUnit::class)->like(
-            $request->getQueryParams()['query'] ?? null
+        $matched = $em->getRepository(ProductUnit::class)->like(
+            $this->request->getQueryParams()['query'] ?? null
         );
 
-        $result = [
+        return $this->json([
             'items' => array_map(function ($item) {
                 /** @var ProductUnit $item */
                 return [
@@ -42,8 +36,6 @@ final class Unit extends AdminController
                 ];
             }, $matched),
             'total_count' => count($matched)
-        ];
-
-        return $this->jsonResponse($result);
+        ]);
     }
 }
