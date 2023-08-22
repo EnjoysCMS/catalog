@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 
-namespace EnjoysCMS\Module\Catalog\Console;
+namespace EnjoysCMS\Module\Catalog\Command;
 
 
 use ArrayIterator;

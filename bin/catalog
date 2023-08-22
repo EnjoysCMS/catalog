@@ -19,6 +19,6 @@ foreach ($autoloadPaths as $autoloadFile) {
 $application = new Application();
 /** @var ContainerInterface $container */
 $application->addCommands([
-    $container->get(\EnjoysCMS\Module\Catalog\Console\CurrencyRate::class),
+    $container->get(\EnjoysCMS\Module\Catalog\Command\CurrencyRate::class),
 ]);
 $application->run();
