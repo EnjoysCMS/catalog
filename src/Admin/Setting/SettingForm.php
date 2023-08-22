@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EnjoysCMS\Module\Catalog\Crud;
+namespace EnjoysCMS\Module\Catalog\Admin\Setting;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -11,13 +11,11 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
-use Enjoys\Forms\Interfaces\RendererInterface;
-use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\Setting;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Setting
+final class SettingForm
 {
 
     private EntityRepository $settingRepository;
@@ -28,42 +26,19 @@ final class Setting
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
-        private readonly RendererInterface $renderer,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly RedirectInterface $redirect,
     ) {
-        $this->settingRepository = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Setting::class);
+        $this->settingRepository = $this->em->getRepository(Setting::class);
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
-    public function getContext(): array
-    {
-        $form = $this->getForm();
-        if ($form->isSubmitted()) {
-            $this->doAction();
-        }
 
-        $this->renderer->setForm($form);
-        return [
-            'form' => $this->renderer->output(),
-            'breadcrumbs' => [
-                $this->urlGenerator->generate('@catalog_admin') => 'Каталог',
-                'Настройки',
-            ],
-        ];
-    }
-
-    private function getForm(): Form
+    public function getForm(): Form
     {
         $form = new Form();
 
         $form->setDefaults(function () {
             $setting = $this->settingRepository->findAll();
             $defaults = [];
-            /** @var \EnjoysCMS\Module\Catalog\Entity\Setting $item */
+            /** @var Setting $item */
             foreach ($setting as $item) {
                 $defaults[$item->getKey()] = explode(',', $item->getValue());
             }
@@ -139,7 +114,7 @@ final class Setting
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    private function doAction(): void
+    public function doAction(): void
     {
         foreach ($this->settingRepository->findAll() as $item) {
             $this->em->remove($item);
@@ -156,7 +131,7 @@ final class Setting
                     }
                     $setting = $this->settingRepository->findOneBy(['key' => $key]);
                     if ($setting === null) {
-                        $setting = new \EnjoysCMS\Module\Catalog\Entity\Setting();
+                        $setting = new Setting();
                     }
                     $setting->setKey($key);
                     $setting->setValue($value);
@@ -166,6 +141,5 @@ final class Setting
             }
         }
         $this->em->flush();
-        $this->redirect->toUrl(emit: true);
     }
 }
