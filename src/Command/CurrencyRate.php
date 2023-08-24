@@ -59,7 +59,9 @@ final class CurrencyRate extends Command
         foreach ($cartesianIterator as $currencyPair) {
             $_currencyMain = $currencyPair[0];
             $_currencyConvert = $currencyPair[1];
-            $currencyRate = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate::class)->find(
+            $currencyRate = $this->em->getRepository(
+                \EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate::class
+            )->find(
                 ['currencyMain' => $_currencyMain->getId(), 'currencyConvert' => $_currencyConvert->getId()]
             );
 
@@ -72,8 +74,16 @@ final class CurrencyRate extends Command
             $rate = $this->getRate($_currencyMain, $_currencyConvert);
             $currencyRate->setRate($rate * $ratio);
 
+            $output->writeln(
+                sprintf(
+                    '%s/%s -> %f',
+                    $_currencyMain->getCode(),
+                    $_currencyConvert->getCode(),
+                    $currencyRate->getRate()
+                ),
+                OutputInterface::VERBOSITY_VERBOSE
+            );
             $this->em->persist($currencyRate);
-
         }
         $this->em->flush();
         return self::SUCCESS;
@@ -81,7 +91,6 @@ final class CurrencyRate extends Command
 
     protected function getRate(Currency $_currencyMain, Currency $_currencyConvert): float
     {
-
         if ($_currencyMain->getId() === $_currencyConvert->getId()) {
             return 1;
         }
@@ -94,7 +103,8 @@ final class CurrencyRate extends Command
             return 1 / (float)$this->rates['rates'][$_currencyMain->getId()];
         }
 
-        return (float)$this->rates['rates'][$_currencyConvert->getId()] / (float)$this->rates['rates'][$_currencyMain->getId()];
+        return (float)$this->rates['rates'][$_currencyConvert->getId(
+            )] / (float)$this->rates['rates'][$_currencyMain->getId()];
     }
 
     private function getRatio(\EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate $currencyRate)
