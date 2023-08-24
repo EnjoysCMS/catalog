@@ -10,11 +10,11 @@ use ArrayIterator;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use Enjoys\CartesianIterator\CartesianIterator;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
-use PatchRanger\CartesianIterator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,12 +54,9 @@ final class CurrencyRate extends Command
         $cartesianIterator = new CartesianIterator();
         $cartesianIterator->attachIterator(new ArrayIterator($currencies));
         $cartesianIterator->attachIterator(new ArrayIterator($currencies));
-        $result = iterator_to_array($cartesianIterator);
-
-
 
         /** @var Currency[] $currencyPair */
-        foreach ($result as $currencyPair) {
+        foreach ($cartesianIterator as $currencyPair) {
             $_currencyMain = $currencyPair[0];
             $_currencyConvert = $currencyPair[1];
             $currencyRate = $this->em->getRepository(\EnjoysCMS\Module\Catalog\Entity\Currency\CurrencyRate::class)->find(
