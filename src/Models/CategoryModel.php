@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Models;
 
 use DI\DependencyException;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -122,8 +123,13 @@ final class CategoryModel implements ModelInterface
             $qb->orderBy('i.filename', strtoupper($o));
         }
 
-        $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
-        $qb->setParameter('current_currency', $this->config->getCurrentCurrencyCode());
+        if (!in_array($this->em->getConnection()->getDatabasePlatform()::class, [SqlitePlatform::class])){
+            $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
+            $qb->setParameter('current_currency', $this->config->getCurrentCurrencyCode());
+        }else{
+            $qb->addSelect('pr.price as HIDDEN converted_price');
+        }
+
 
         match ($this->config->getSortMode()) {
             'price.desc' => $qb->addOrderBy('converted_price', 'DESC'),

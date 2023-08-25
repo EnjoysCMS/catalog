@@ -66,7 +66,7 @@ final class Category extends PublicController
                 $category->getCustomTemplatePath() ?: $template_path,
                 array_merge($categoryModel->getContext(), [
                     '_title' => $invoker->call(
-                        $this->config->get('categoryTitleCreatorCallback', static function (CategoryModel $item) {
+                        $this->config->get('categoryTitleCreatorCallback', function (CategoryModel $item) {
                             return strtr('{category} - {sitename} ({currentPage}/{totalPage})', [
                                 '{category}' => $item->getCategory()->getFullTitle(reverse: true) ?? 'Каталог',
                                 '{sitename}' => $this->setting->get('sitename'),

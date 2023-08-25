@@ -2,6 +2,7 @@
 
 namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
@@ -42,24 +43,28 @@ class PriceFilter implements FilterInterface
             return $this->possibleValues;
         }
 
-        /** @var array<array-key, int|float> $minmaxRaw */
-        $minmaxRaw = $this->em
-            ->createQueryBuilder()
-            ->select(
+        $minmaxRawQb = $this->em->createQueryBuilder();
+        if (!in_array($this->em->getConnection()->getDatabasePlatform()::class, [SqlitePlatform::class])) {
+            $minmaxRawQb->select(
                 'MIN(CONVERT_PRICE(pr.price, pr.currency, :current_currency)) as min, MAX(CONVERT_PRICE(pr.price, pr.currency, :current_currency)) as max'
-            )
-            ->from(ProductPrice::class, 'pr')
+            );
+        } else {
+            $minmaxRawQb->select(
+                'MIN(pr.price) as min, MAX(pr.price) as max'
+            );
+        }
+        $minmaxRawQb->from(ProductPrice::class, 'pr')
             ->where('pr.product IN (:pids)')
             ->setParameters([
                 'pids' => $productIds,
                 'current_currency' => $this->config->getCurrentCurrencyCode()
-            ])
-            ->getQuery()
-            ->getOneOrNullResult();
+            ]);
 
         $this->possibleValues = array_map(function ($value) {
             return (int)ceil(Normalize::intPriceToFloat($value));
-        }, $minmaxRaw);
+        },
+            $minmaxRawQb->getQuery()
+                ->getOneOrNullResult());
 
         return $this->possibleValues;
     }
@@ -89,8 +94,8 @@ class PriceFilter implements FilterInterface
 
     public function getFormElement(Form $form, $values): Form
     {
-        $min = $values['min'] === null ? 0 : $values['min']-1;
-        $max = $values['max'] === null ? $min +1 : $values['max'] + 1;
+        $min = $values['min'] === null ? 0 : $values['min'] - 1;
+        $max = $values['max'] === null ? $min + 1 : $values['max'] + 1;
 
         $form->setDefaults([
             'filter' => [
