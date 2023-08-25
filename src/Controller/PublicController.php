@@ -8,6 +8,7 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 use EnjoysCMS\Core\Extensions\Composer\Utils;
 use EnjoysCMS\Core\Modules\Module;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Catalog\Config;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -22,6 +23,7 @@ abstract class PublicController
         protected ServerRequestInterface $request,
         protected Environment $twig,
         protected Config $config,
+        protected Setting $setting,
         protected ResponseInterface $response
     ) {
         $this->module = new Module(

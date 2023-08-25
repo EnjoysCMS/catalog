@@ -34,19 +34,19 @@ final class CategoryModel implements ModelInterface
 
     private Repository\Product|ObjectRepository|EntityRepository $productRepository;
     private Category $category;
+    private Pagination $pagination;
 
     /**
      * @throws NotFoundException
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private BreadcrumbCollection $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private FilterFactory $filterFactory,
-        private Config $config,
-        private Setting $setting,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly BreadcrumbCollection $breadcrumbs,
+        private readonly RedirectInterface $redirect,
+        private readonly FilterFactory $filterFactory,
+        private readonly Config $config,
+        private readonly Setting $setting,
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
@@ -55,6 +55,11 @@ final class CategoryModel implements ModelInterface
             $this->request->getAttribute('slug', '')
         ) ?? throw new NotFoundException(
             sprintf('Not found by slug: %s', $this->request->getAttribute('slug', ''))
+        );
+
+        $this->pagination = new Pagination(
+            $this->request->getAttribute('page', 1),
+            $this->config->getPerPage()
         );
 
         $globalExtraFields = array_filter(
@@ -73,6 +78,14 @@ final class CategoryModel implements ModelInterface
         $this->em->getConfiguration()->addCustomStringFunction('CONVERT_PRICE', ConvertPrice::class);
 
         $this->updateConfigValues();
+
+        $this->breadcrumbs->add('catalog/index', 'Каталог');
+        foreach ($this->category->getBreadcrumbs() as $breadcrumb) {
+            $this->breadcrumbs->add(
+                ['catalog/category', ['slug' => $breadcrumb['slug']]],
+                $breadcrumb['title']
+            );
+        }
     }
 
 
@@ -83,12 +96,6 @@ final class CategoryModel implements ModelInterface
      */
     public function getContext(): array
     {
-        $pagination = new Pagination(
-            $this->request->getAttribute('page', 1),
-            $this->config->getPerPage()
-        );
-
-
         if ($this->config->get('showSubcategoryProducts', false)) {
             $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
             $qb = $this->productRepository->getFindByCategorysIdsDQL($allCategoryIds);
@@ -128,12 +135,12 @@ final class CategoryModel implements ModelInterface
 
 //        dd($qb->getQuery()->getSQL());
 
-        $qb->setFirstResult($pagination->getOffset())->setMaxResults($pagination->getLimitItems());
+        $qb->setFirstResult($this->pagination->getOffset())->setMaxResults($this->pagination->getLimitItems());
 
         $result = new Paginator($qb);
-        $pagination->setTotalItems($result->count());
+        $this->pagination->setTotalItems($result->count());
 
-        if ($this->config->get('redirectCategoryToProductIfIsOne', false) && $pagination->getTotalItems() === 1) {
+        if ($this->config->get('redirectCategoryToProductIfIsOne', false) && $this->pagination->getTotalItems() === 1) {
             $redirectAllow = false;
 
             if ($this->config->get('allowRedirectForAllCategories', false)) {
@@ -155,37 +162,20 @@ final class CategoryModel implements ModelInterface
             }
         }
 
+
         return [
-            '_title' => sprintf(
-                '%2$s #страница %3$d - %1$s',
-                $this->setting->get('sitename'),
-                $this->category->getFullTitle(reverse: true) ?? 'Каталог',
-                $pagination->getCurrentPage()
-            ),
             'category' => $this->category,
             'categoryRepository' => $this->categoryRepository,
-            'pagination' => $pagination,
+            'pagination' => $this->pagination,
             'products' => $result,
             'config' => $this->config,
-            'breadcrumbs' => $this->getBreadcrumbs(),
+            'setting' => $this->setting,
+            'breadcrumbs' => $this->breadcrumbs,
             'filtered' => $filtered,
-            'usedFilters' => $usedFilters
+            'usedFilters' => $usedFilters,
         ];
     }
 
-
-    private function getBreadcrumbs(): iterable
-    {
-        $this->breadcrumbs->add($this->urlGenerator->generate('catalog/index'), 'Каталог');
-        foreach ($this->category->getBreadcrumbs() as $breadcrumb) {
-            $this->breadcrumbs->add(
-                $this->urlGenerator->generate('catalog/category', ['slug' => $breadcrumb['slug']]),
-                $breadcrumb['title']
-            );
-        }
-
-        return $this->breadcrumbs;
-    }
 
     private function updateConfigValues(): void
     {
@@ -220,5 +210,14 @@ final class CategoryModel implements ModelInterface
         }
     }
 
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
+    public function getPagination(): Pagination
+    {
+        return $this->pagination;
+    }
 
 }

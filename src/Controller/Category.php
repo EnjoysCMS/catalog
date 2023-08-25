@@ -5,11 +5,11 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Controller;
 
-use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use EnjoysCMS\Module\Catalog\Models\CategoryModel;
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
@@ -25,6 +25,7 @@ final class Category extends PublicController
      * @throws NotFoundException
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws \EnjoysCMS\Core\Exception\NotFoundException
      */
     #[Route(
         path: 'catalog/{slug}@{page}',
@@ -42,7 +43,7 @@ final class Category extends PublicController
         ],
         priority: 1
     )]
-    public function view(Container $container): ResponseInterface
+    public function view(InvokerInterface $invoker, EntityManager $em, CategoryModel $categoryModel): ResponseInterface
     {
         $template_path = '@m/catalog/category.twig';
 
@@ -52,8 +53,7 @@ final class Category extends PublicController
         }
 
         /** @var \EnjoysCMS\Module\Catalog\Entity\Category $category */
-        $category = $container
-            ->get(EntityManager::class)
+        $category = $em
             ->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class)
             ->findByPath(
                 $this->request->getAttribute('slug', '')
@@ -64,7 +64,18 @@ final class Category extends PublicController
         return $this->responseText(
             $this->twig->render(
                 $category->getCustomTemplatePath() ?: $template_path,
-                $container->get(CategoryModel::class)->getContext()
+                array_merge($categoryModel->getContext(), [
+                    '_title' => $invoker->call(
+                        $this->config->get('categoryTitleCreatorCallback', static function (CategoryModel $item) {
+                            return strtr('{category} - {sitename} ({currentPage}/{totalPage})', [
+                                '{category}' => $item->getCategory()->getFullTitle(reverse: true) ?? 'Каталог',
+                                '{sitename}' => $this->setting->get('sitename'),
+                                '{currentPage}' => $item->getPagination()->getCurrentPage(),
+                                '{totalPage}' => $item->getPagination()->getTotalPages(),
+                            ]);
+                        }), ['item' => $categoryModel]
+                    )
+                ])
             )
         );
     }
