@@ -12,6 +12,9 @@ sort: name.asc
 minSearchChars: 3
 showSubcategoryProducts: true
 delimiterOptions: "|"
+
+categoryTitlePattern: "%2$s - %1$s (стр. %3$d/%4$d)"
+
 mailer:
   from: [email, name]
   address: []
