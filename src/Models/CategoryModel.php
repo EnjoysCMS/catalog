@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Models;
 
 use DI\DependencyException;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ObjectRepository;
@@ -24,8 +28,12 @@ use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repository;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterFactory;
+use Invoker\Exception\InvocationException;
+use Invoker\Exception\NotCallableException;
+use Invoker\Exception\NotEnoughParametersException;
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use RuntimeException;
 
 final class CategoryModel implements ModelInterface
 {
@@ -39,9 +47,13 @@ final class CategoryModel implements ModelInterface
 
     /**
      * @throws NotFoundException
+     * @throws NotSupported
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     public function __construct(
         private readonly EntityManager $em,
+        private readonly InvokerInterface $invoker,
         private readonly ServerRequestInterface $request,
         private readonly BreadcrumbCollection $breadcrumbs,
         private readonly RedirectInterface $redirect,
@@ -91,9 +103,13 @@ final class CategoryModel implements ModelInterface
 
 
     /**
-     * @throws NotFoundException
      * @throws DependencyException
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     * @throws NotFoundException
      * @throws \DI\NotFoundException
+     * @throws Exception
      */
     public function getContext(): array
     {
@@ -123,10 +139,10 @@ final class CategoryModel implements ModelInterface
             $qb->orderBy('i.filename', strtoupper($o));
         }
 
-        if (!in_array($this->em->getConnection()->getDatabasePlatform()::class, [SqlitePlatform::class])){
+        if (!in_array($this->em->getConnection()->getDatabasePlatform()::class, [SqlitePlatform::class])) {
             $qb->addSelect('CONVERT_PRICE(pr.price, pr.currency, :current_currency) as HIDDEN converted_price');
             $qb->setParameter('current_currency', $this->config->getCurrentCurrencyCode());
-        }else{
+        } else {
             $qb->addSelect('pr.price as HIDDEN converted_price');
         }
 
@@ -138,8 +154,6 @@ final class CategoryModel implements ModelInterface
             'custom' => $this->addCustomOrderBy($qb),
             default => $qb->addOrderBy('p.name', 'ASC'),
         };
-
-//        dd($qb->getQuery()->getSQL());
 
         $qb->setFirstResult($this->pagination->getOffset())->setMaxResults($this->pagination->getLimitItems());
 
@@ -170,6 +184,7 @@ final class CategoryModel implements ModelInterface
 
 
         return [
+            'meta' => $this->getMeta(),
             'category' => $this->category,
             'categoryRepository' => $this->categoryRepository,
             'pagination' => $this->pagination,
@@ -208,7 +223,7 @@ final class CategoryModel implements ModelInterface
     private function addCustomOrderBy(QueryBuilder $qb): void
     {
         foreach (
-            $this->config->get('customSortParams') ?? throw new \RuntimeException(
+            $this->config->get('customSortParams') ?? throw new RuntimeException(
             'Need set customSortParams'
         ) as $order
         ) {
@@ -224,6 +239,44 @@ final class CategoryModel implements ModelInterface
     public function getPagination(): Pagination
     {
         return $this->pagination;
+    }
+
+    /**
+     * @return array
+     * @throws InvocationException
+     * @throws NotCallableException
+     * @throws NotEnoughParametersException
+     */
+    public function getMeta(): array
+    {
+        return [
+            'title' => $this->category->getMeta()->getTitle() ?? $this->invoker->call(
+                    $this->config->get('categoryMetaTitleCallback') ?? function (
+                    Category $category,
+                    Pagination $pagination
+                ) {
+                    return strtr('{category} - {sitename} ({currentPage}/{totalPage})', [
+                        '{category}' => $category->getFullTitle(reverse: true),
+                        '{sitename}' => $this->setting->get('sitename'),
+                        '{currentPage}' => $pagination->getCurrentPage(),
+                        '{totalPage}' => $pagination->getTotalPages(),
+                    ]);
+                },
+                    ['category' => $this->category, 'pagination' => $this->pagination,]
+                ),
+            'description' => $this->invoker->call(
+                $this->config->get('categoryMetaDescriptionCallback') ?? function (Category $category) {
+                return $category->getMeta()->getDescription();
+            },
+                ['category' => $this->category, 'pagination' => $this->pagination,]
+            ),
+            'keywords' => $this->category->getMeta()->getKeyword() ?? $this->invoker->call(
+                    $this->config->get('categoryMetaKeywordsCallback') ?? function (Category $category) {
+                    return $category->getMeta()->getKeyword();
+                },
+                    ['category' => $this->category, 'pagination' => $this->pagination,]
+                ),
+        ];
     }
 
 }

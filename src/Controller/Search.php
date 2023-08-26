@@ -7,17 +7,22 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
+use Doctrine\ORM\Exception\NotSupported;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
 use EnjoysCMS\Core\Pagination\Pagination;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\Image;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Entity\Product;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Service\Search\DefaultSearch;
 use EnjoysCMS\Module\Catalog\Service\Search\SearchInterface;
 use Exception;
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,12 +38,19 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
+use function trim;
+
 final class Search extends PublicController
 {
     private array $optionKeys;
     private SearchInterface $searchClass;
 
 
+    /**
+     * @throws NotSupported
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function __construct(
         ServerRequestInterface $request,
         Environment $twig,
@@ -47,7 +59,8 @@ final class Search extends PublicController
         ResponseInterface $response,
         Container $container
     ) {
-        parent::__construct($request, $twig, $config, $response);
+        parent::__construct($request, $twig, $config, $setting, $response);
+
         $this->optionKeys = explode(',', $setting->get('searchOptionField', ''));
         $this->searchClass = $container->get($config->get('searchClass', DefaultSearch::class));
         $this->searchClass->setOptionKeys($this->optionKeys);
@@ -56,10 +69,10 @@ final class Search extends PublicController
 
     private function getSearchQuery(): string
     {
-        $searchQuery = \trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
+        $searchQuery = trim($this->request->getQueryParams()['q'] ?? $this->request->getParsedBody()['q'] ?? '');
 
         if (mb_strlen($searchQuery) < $this->config->get('minSearchChars', 3)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Слишком короткое слово для поиска (нужно минимум %s символа)',
                     $this->config->get('minSearchChars', 3)
@@ -172,7 +185,7 @@ final class Search extends PublicController
         priority: 2
     )]
     public function search(
-        BreadcrumbsInterface $breadcrumbs,
+        BreadcrumbCollection $breadcrumbs,
         UrlGeneratorInterface $urlGenerator
     ): ResponseInterface {
         $pagination = new Pagination(
@@ -189,7 +202,7 @@ final class Search extends PublicController
         }
 
         $breadcrumbs->add($urlGenerator->generate('catalog/index'), 'Каталог');
-        $breadcrumbs->add(null, 'Поиск');
+        $breadcrumbs->setLastBreadcrumb('Поиск');
 
         $template_path = '@m/catalog/search.twig';
 
@@ -201,7 +214,7 @@ final class Search extends PublicController
             $this->twig->render($template_path, [
                 'pagination' => $pagination,
                 'searchResult' => $searchResult,
-                'breadcrumbs' => $breadcrumbs->get()
+                'breadcrumbs' => $breadcrumbs
             ])
         );
     }

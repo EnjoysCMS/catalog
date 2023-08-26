@@ -42,6 +42,18 @@ productImageStorage: image_default
 productFileStorage: file_default
 allocatedMemoryDynamically: true
 
+categoryMetaTitleCallback: ~
+categoryMetaDescriptionCallback: ~
+categoryMetaKeywordsCallback: ~
+
+productMetaTitleCallback: ~
+productMetaDescriptionCallback: ~
+productMetaKeywordsCallback: ~
+
+indexMetaTitleCallback: ~
+indexMetaDescriptionCallback: ~
+indexMetaKeywordsCallback: ~
+
 currency:
   default: RUB
   ratio:

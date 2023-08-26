@@ -4,6 +4,8 @@
 
 {% include module.path ~ '/template/_breadcrumbs.twig' %}
 
+{{ dump(meta) }}
+
 <h1>{{ category.getTitle }}</h1>
 {% if category.getChildren|length %}
     <h2>Подкатегории</h2>

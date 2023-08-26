@@ -12,7 +12,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\Persistence\ObjectRepository;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
+use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Error\LoaderError;
@@ -39,34 +40,51 @@ final class Index extends PublicController
     )]
     public function view(
         EntityManager $entityManager,
-        BreadcrumbsInterface $breadcrumbs,
-        Setting $setting
-    ): ResponseInterface
-    {
+        BreadcrumbCollection $breadcrumbs,
+        InvokerInterface $invoker
+    ): ResponseInterface {
         /**
          * @var EntityRepository|ObjectRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository
          */
         $categoryRepository = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entity\Category::class);
 
-        $breadcrumbs->add(null, 'Каталог');
+        $breadcrumbs->setLastBreadcrumb('Каталог');
 
         $template_path = '@m/catalog/category_index.twig';
         if (!$this->twig->getLoader()->exists($template_path)) {
             $template_path = __DIR__ . '/../../template/category_index.twig';
         }
 
+        $categories = $categoryRepository->getChildNodes(null, ['status' => true]);
+
         return $this->responseText(
             $this->twig->render(
                 $template_path,
                 [
-                    '_title' => sprintf(
-                        '%2$s - %1$s',
-                        $setting->get('sitename'),
-                        'Каталог'
-                    ),
-                    'categories' => $categoryRepository->getChildNodes(null, ['status' => true]),
+                    'meta' => [
+                        'title' => $invoker->call(
+                            $this->config->get('indexMetaTitleCallback') ?? function () {
+                            return sprintf(
+                                '%2$s - %1$s',
+                                $this->setting->get('sitename'),
+                                'Каталог'
+                            );
+                        }, ['categories' => $categories]
+                        ),
+                        'keywords' => $invoker->call(
+                            $this->config->get('indexMetaKeywordsCallback') ?? function () {
+                            return null;
+                        }, ['categories' => $categories]
+                        ),
+                        'description' => $invoker->call(
+                            $this->config->get('indexMetaDescriptionCallback') ?? function () {
+                            return null;
+                        }, ['categories' => $categories]
+                        ),
+                    ],
+                    'categories' => $categories,
                     'categoryRepository' => $categoryRepository,
-                    'breadcrumbs' => $breadcrumbs->get(),
+                    'breadcrumbs' => $breadcrumbs,
                 ]
             )
         );

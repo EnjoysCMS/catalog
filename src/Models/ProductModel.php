@@ -19,10 +19,11 @@ use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Entity\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductPriceEntityListener;
-use EnjoysCMS\Module\Catalog\Helpers\MetaHelpers;
 use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repository;
+use EnjoysCMS\Module\Catalog\Service\MetaGenerator;
 use Exception;
+use Invoker\InvokerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -38,13 +39,15 @@ class ProductModel implements ModelInterface
      * @throws NotSupported
      */
     public function __construct(
-        private EntityManager $em,
-        private ServerRequestInterface $request,
-        private BreadcrumbCollection $breadcrumbs,
-        private UrlGeneratorInterface $urlGenerator,
-        private RedirectInterface $redirect,
-        private Setting $setting,
-        private Config $config
+        private readonly InvokerInterface $invoker,
+        private readonly EntityManager $em,
+        private readonly ServerRequestInterface $request,
+        private readonly BreadcrumbCollection $breadcrumbs,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RedirectInterface $redirect,
+        private readonly Setting $setting,
+        private readonly Config $config,
+        private readonly MetaGenerator $metaGenerator
     ) {
         $entityListenerResolver = $this->em->getConfiguration()->getEntityListenerResolver();
         $entityListenerResolver->register(new ProductPriceEntityListener($this->config));
@@ -79,19 +82,32 @@ class ProductModel implements ModelInterface
         // $this->em->flush();
         //dd($this->product->getPrice('ROZ')->format());
         return [
-            '_title' => sprintf(
-                '%2$s - %3$s - %1$s',
-                $this->setting->get('sitename'),
-                $this->product->getMeta()?->getTitle() ?? $this->product->getName(),
-                $this->product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
-            ),
-            '_keywords' => $this->product->getMeta()?->getKeyword() ?? MetaHelpers::generateKeywords(
-                    $this->product
-                ) ?? $this->setting->get('site-keywords'),
-            '_description' => $this->product->getMeta()?->getDescription() ?? MetaHelpers::generateDescription(
-                    $this->product
-                ) ?? $this->setting->get('site-description'),
-
+            'meta' => [
+                'title' => $this->invoker->call(
+                    $this->config->get('productMetaTitleCallback') ?? function (Product $product) {
+                    return sprintf(
+                        '%2$s - %3$s - %1$s',
+                        $this->setting->get('sitename'),
+                        $product->getMeta()?->getTitle() ?? $this->product->getName(),
+                        $product->getCategory()?->getFullTitle(reverse: true) ?? 'Каталог'
+                    );
+                }, ['product' => $this->product]
+                ),
+                'keywords' => $this->invoker->call(
+                    $this->config->get('productMetaKeywordsCallback') ?? function (Product $product) {
+                    return $product->getMeta()?->getKeyword() ?? $this->metaGenerator->generateProductKeywords(
+                        $product
+                    );
+                }, ['product' => $this->product]
+                ),
+                'description' => $this->invoker->call(
+                    $this->config->get('productMetaDescriptionCallback') ?? function (Product $product) {
+                    return $product->getMeta()?->getDescription() ?? $this->metaGenerator->generateProductDescription(
+                        $product
+                    );
+                }, ['product' => $this->product]
+                ),
+            ],
             'product' => $this->product,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
             'optionValueRepository' => $this->em->getRepository(OptionValue::class),
