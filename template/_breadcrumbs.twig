@@ -7,7 +7,7 @@
     <nav>
         <ul class="breadcrumb">
             {% for breadcrumb in breadcrumbs %}
-                {% if not loop.last %}
+                {% if breadcrumbs.iterator|last is not same as (breadcrumb) %}
                     <li><a href="{{ breadcrumb.url }}">{{ breadcrumb.title }}</a></li>
                     <li>&nbsp;/&nbsp;</li>
                 {% endif %}
