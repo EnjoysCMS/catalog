@@ -316,9 +316,6 @@ class Product
         $this->options->add($option);
     }
 
-    /**
-     * @return Collection<Url>
-     */
     public function getUrls(): Collection
     {
         return $this->urls;

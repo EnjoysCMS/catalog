@@ -8,9 +8,15 @@ namespace EnjoysCMS\Module\Catalog\Admin\Product\Form;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\Query\QueryException;
 use Enjoys\Cookie\Cookie;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Config;
@@ -28,6 +34,9 @@ final class CreateUpdateProductForm
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $categoryRepository;
 
 
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
@@ -38,6 +47,12 @@ final class CreateUpdateProductForm
         $this->categoryRepository = $em->getRepository(Category::class);
     }
 
+    /**
+     * @throws ExceptionRule
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getForm(Product $product = null): Form
     {
         $defaults = [
@@ -150,6 +165,11 @@ final class CreateUpdateProductForm
         return $form;
     }
 
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws NotSupported
+     */
     public function doAction(Product $product = null): Product
     {
         $product = $product ?? new Product();
@@ -169,7 +189,7 @@ final class CreateUpdateProductForm
         $product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
-        $unitValue = $this->request->getParsedBody()['unit'] ?? null;
+        $unitValue = $this->request->getParsedBody()['unit'] ?? '';
         $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
         if ($unit === null) {
             $unit = new ProductUnit();
@@ -185,9 +205,7 @@ final class CreateUpdateProductForm
 
         $this->em->persist($product);
 
-        $urlString = (empty($this->request->getParsedBody()['url'] ?? null))
-            ? URLify::slug($product->getName())
-            : $this->request->getParsedBody()['url'] ?? null;
+        $urlString = $this->request->getParsedBody()['url'] ?? '';
 
         /** @var Url $url */
         $urlSetFlag = false;
