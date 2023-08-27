@@ -64,11 +64,6 @@ composer migrate
 - `storageUploads` **array**
 - `productFileStorage` **string**
 - `thumbnailService` **array**
-- `adminTemplateDir` **string**
-- `editor` **array**
-  - `productDescription`
-  - `categoryDescription`
-  - `categoryShortDescription`
 - `allowedPerPage` **int[]**
 - `sort` **string**
 - `minSearchChars` **int**
@@ -79,5 +74,10 @@ composer migrate
   - `default` **string**
   - `ratio` **array**
 - `admin` **array**
+  - `template_dir` **string**
   - `searchFields` **array**
+  - `editor` **array**
+    - `productDescription`
+    - `categoryDescription`
+    - `categoryShortDescription`
 

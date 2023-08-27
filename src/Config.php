@@ -10,6 +10,7 @@ use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Session\Session;
+use EnjoysCMS\Core\ContentEditor\EditorConfig;
 use EnjoysCMS\Core\Modules\AbstractModuleConfig;
 use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService;
@@ -177,7 +178,7 @@ final class Config extends AbstractModuleConfig
     {
         try {
             $templatePath = getenv('ROOT_PATH') . $this->get(
-                    'adminTemplateDir',
+                    'admin->template_dir',
                     throw new InvalidArgumentException()
                 );
         } catch (InvalidArgumentException) {
@@ -189,7 +190,7 @@ final class Config extends AbstractModuleConfig
         if ($realpath === false) {
             throw new InvalidArgumentException(
                 sprintf(
-                    'Template admin path is invalid: %s. Check parameter `adminTemplateDir` in config',
+                    'Template admin path is invalid: %s. Check parameter `admin->template_dir` in config',
                     $templatePath
                 )
             );
@@ -197,22 +198,22 @@ final class Config extends AbstractModuleConfig
         return $realpath;
     }
 
-    public function getEditorConfigProductDescription()
+    public function getEditorConfigProductDescription(): array|string|null|EditorConfig
     {
-        return $this->get('editor->productDescription');
+        return $this->get('admin->editor->productDescription');
     }
 
-    public function getEditorConfigCategoryDescription()
+    public function getEditorConfigCategoryDescription(): array|string|null|EditorConfig
     {
-        return $this->get('editor->categoryDescription');
+        return $this->get('admin->editor->categoryDescription');
     }
 
-    public function getEditorConfigCategoryShortDescription()
+    public function getEditorConfigCategoryShortDescription(): array|string|null|EditorConfig
     {
-        return $this->get('editor->categoryShortDescription');
+        return $this->get('admin->editor->categoryShortDescription');
     }
 
-    public function getDefaultPriceGroup()
+    public function getDefaultPriceGroup(): string
     {
         return $this->get('priceGroup->default', 'ROZ');
     }

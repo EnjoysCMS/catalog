@@ -1,25 +1,25 @@
-editor:
-  productDescription: null
-  categoryShortDescription: null
-  categoryDescription: null
-
 limitItems: 12
 allowedPerPage:
   - 12
   - 24
   - 36
 sort: name.asc
+
 minSearchChars: 3
 showSubcategoryProducts: true
 delimiterOptions: "|"
-mailer:
-  from: [email, name]
-  address: []
-formSendRequest:
-  useCaptcha: true
-  captchaClass: Enjoys\Forms\Captcha\reCaptcha\reCaptcha
 
-thumbnailCreationService: \EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailCreationService
+categoryMetaTitleCallback: ~
+categoryMetaDescriptionCallback: ~
+categoryMetaKeywordsCallback: ~
+
+productMetaTitleCallback: ~
+productMetaDescriptionCallback: ~
+productMetaKeywordsCallback: ~
+
+indexMetaTitleCallback: ~
+indexMetaDescriptionCallback: ~
+indexMetaKeywordsCallback: ~
 
 storageUploads:
   image_default:
@@ -41,18 +41,7 @@ storageUploads:
 productImageStorage: image_default
 productFileStorage: file_default
 allocatedMemoryDynamically: true
-
-categoryMetaTitleCallback: ~
-categoryMetaDescriptionCallback: ~
-categoryMetaKeywordsCallback: ~
-
-productMetaTitleCallback: ~
-productMetaDescriptionCallback: ~
-productMetaKeywordsCallback: ~
-
-indexMetaTitleCallback: ~
-indexMetaDescriptionCallback: ~
-indexMetaKeywordsCallback: ~
+thumbnailCreationService: \EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailCreationService
 
 currency:
   default: RUB
@@ -60,6 +49,10 @@ currency:
 #    USDRUB: 1.15
 
 admin:
+  editor:
+    productDescription: null
+    categoryShortDescription: null
+    categoryDescription: null
   searchFields:
     - p.name
     - p.productCode
