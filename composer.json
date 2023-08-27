@@ -39,8 +39,8 @@
         }
     },
     "scripts": {
-        "post-install-cmd": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall",
-        "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Composer::assetsInstall"
+        "post-install-cmd": "EnjoysCMS\\Module\\Catalog\\Assets::install",
+        "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Assets::install"
     },
     "bin": [
         "bin/catalog"
