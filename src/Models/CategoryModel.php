@@ -19,12 +19,12 @@ use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
 use EnjoysCMS\Core\Pagination\Pagination;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductPriceEntityListener;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repository;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterFactory;
@@ -78,8 +78,11 @@ final class CategoryModel implements ModelInterface
         $globalExtraFields = array_filter(
             array_map(function ($item) {
                 return $this->em->getRepository(OptionKey::class)->find($item);
-            }, explode(',', $setting->get('globalExtraFields', '')))
+            }, explode(',', $this->config->getGlobalExtraFields()))
         );
+
+$this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
+$this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
 
         foreach ($globalExtraFields as $globalExtraField) {
             $this->category->addExtraField($globalExtraField);

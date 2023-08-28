@@ -16,12 +16,15 @@ use EnjoysCMS\Core\StorageUpload\StorageUploadInterface;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService;
 use EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService\ThumbnailServiceInterface;
 use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
+use EnjoysCMS\Module\Catalog\Entity\Setting;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 final class Config extends AbstractModuleConfig
 {
+
+    private ?array $dbConfig = null;
 
     public function __construct(
         \Enjoys\Config\Config $config,
@@ -36,6 +39,14 @@ final class Config extends AbstractModuleConfig
     public function getModulePackageName(): string
     {
         return 'enjoyscms/catalog';
+    }
+
+    /**
+     * @throws NotSupported
+     */
+    private function fetchDbConfig(): array
+    {
+        return   $this->em->getRepository(Setting::class)->findAllKeyVar();
     }
 
     public function getCurrentCurrencyCode(): string
@@ -216,6 +227,29 @@ final class Config extends AbstractModuleConfig
     public function getDefaultPriceGroup(): string
     {
         return $this->get('priceGroup->default', 'ROZ');
+    }
+
+    public function getDelimiterOptions(string $default = '|'): string
+    {
+        return $this->get('delimiterOptions') ?? $default;
+    }
+
+    /**
+     * @throws NotSupported
+     */
+    public function getSearchOptionField(): string
+    {
+        $this->dbConfig ??= $this->fetchDbConfig();
+        return $this->dbConfig['searchOptionField'] ?? '';
+    }
+
+    /**
+     * @throws NotSupported
+     */
+    public function getGlobalExtraFields(): string
+    {
+        $this->dbConfig ??= $this->fetchDbConfig();
+        return $this->dbConfig['globalExtraFields'] ?? '';
     }
 
 }

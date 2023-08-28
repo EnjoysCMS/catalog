@@ -51,7 +51,6 @@ use EnjoysCMS\Module\Catalog\Events\PostUploadFile;
 use EnjoysCMS\Module\Catalog\Events\PreAddProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreDeleteProductEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditProductEvent;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use InvalidArgumentException;
 use League\Flysystem\FilesystemException;
 use Psr\Http\Message\ResponseInterface;
@@ -906,7 +905,7 @@ final class ProductController extends AdminController
         name: 'options',
         comment: 'Просмотр опций товара'
     )]
-    public function options(ManageOptions $manageOptions, Setting $setting): ResponseInterface
+    public function options(ManageOptions $manageOptions): ResponseInterface
     {
         $form = $manageOptions->getForm();
 
@@ -925,7 +924,7 @@ final class ProductController extends AdminController
                 [
                     'product' => $manageOptions->getProduct(),
                     'form' => $form,
-                    'delimiterOptions' => $setting->get('delimiterOptions', '|'),
+                    'delimiterOptions' => $this->config->getDelimiterOptions(),
                     'subtitle' => 'Параметры'
                 ]
             )

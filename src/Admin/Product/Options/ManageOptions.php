@@ -12,10 +12,10 @@ use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
+use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Entity\Product;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
@@ -35,7 +35,7 @@ final class ManageOptions
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
-        private readonly Setting $setting
+        private readonly Config $config
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -98,7 +98,7 @@ final class ManageOptions
             $defaults['options'][$key]['option'] = $option['key']->getName();
             $defaults['options'][$key]['unit'] = $option['key']->getUnit();
             $defaults['options'][$key]['value'] = implode(
-                $this->setting->get('delimiterOptions', '|'),
+                $this->config->getDelimiterOptions(),
                 array_map(function ($item) {
                     return $item->getValue();
                 }, $option['values'])
@@ -120,7 +120,7 @@ final class ManageOptions
                 continue;
             }
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
-            foreach (explode($this->setting->get('delimiterOptions', '|'), $option['value']) as $value) {
+            foreach (explode($this->config->getDelimiterOptions(), $option['value']) as $value) {
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
                 $this->em->persist($optionValue);
                 $this->product->addOption($optionValue);

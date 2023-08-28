@@ -13,13 +13,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Breadcrumbs\BreadcrumbCollection;
 use EnjoysCMS\Core\Http\Response\RedirectInterface;
+use EnjoysCMS\Core\Setting\Setting;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Entity\PriceGroup;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductPriceEntityListener;
-use EnjoysCMS\Module\Catalog\Helpers\Setting;
 use EnjoysCMS\Module\Catalog\Repository;
 use EnjoysCMS\Module\Catalog\Service\MetaGenerator;
 use Exception;
@@ -58,7 +58,7 @@ class ProductModel implements ModelInterface
         $globalExtraFields = array_filter(
             array_map(function ($item) {
                 return $this->em->getRepository(OptionKey::class)->find($item);
-            }, explode(',', $setting->get('globalExtraFields', '')))
+            }, explode(',', $this->config->getGlobalExtraFields()))
         );
 
         foreach ($globalExtraFields as $globalExtraField) {

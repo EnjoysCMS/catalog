@@ -61,7 +61,7 @@ final class Search extends PublicController
     ) {
         parent::__construct($request, $twig, $config, $setting, $response);
 
-        $this->optionKeys = explode(',', $setting->get('searchOptionField', ''));
+        $this->optionKeys = explode(',', $this->config->getSearchOptionField());
         $this->searchClass = $container->get($config->get('searchClass', DefaultSearch::class));
         $this->searchClass->setOptionKeys($this->optionKeys);
         $this->searchClass->setSearchQuery($this->getSearchQuery());
