@@ -24,7 +24,7 @@ use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entity\Url;
-use EnjoysCMS\Module\Catalog\Helpers\URLify;
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class CreateUpdateProductForm
@@ -52,6 +52,7 @@ final class CreateUpdateProductForm
      * @throws QueryException
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws Exception
      */
     public function getForm(Product $product = null): Form
     {
