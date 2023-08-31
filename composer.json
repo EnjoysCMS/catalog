@@ -40,11 +40,11 @@
         }
     },
     "scripts": {
-        "post-install-cmd": [
+        "post-package-update": [
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
         ],
-        "post-update-cmd": [
+        "post-package-install": [
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
         ],

@@ -21,16 +21,22 @@ class Composer
         return dirname($event->getComposer()->getConfig()->getConfigSource()->getName());
     }
 
-    public static function assetsInstall(): void
+    public static function assetsInstall(PackageEvent $event): void
     {
+        if ($event->getOperation()->getPackage()->getName() !== "enjoyscms/catalog"){
+            return;
+        }
         passthru(sprintf('cd %s && yarn install', realpath(__DIR__ . '/..')));
     }
 
     /**
      * @throws Exception
      */
-    public static function registerCommands(Event $event): void
+    public static function registerCommands(PackageEvent $event): void
     {
+        if ($event->getOperation()->getPackage()->getName() !== "enjoyscms/catalog"){
+            return;
+        }
         $manage = new CommandsManage(self::getRootPath($event) . '/console.yml');
         $manage->registerCommands(self::$commands);
         $manage->save();
@@ -41,13 +47,12 @@ class Composer
      */
     public static function unregisterCommands(PackageEvent $event): void
     {
-        $event->stopPropagation();
+
         if ($event->getOperation()->getPackage()->getName() !== "enjoyscms/catalog"){
             return;
         }
         $manage = new CommandsManage(self::getRootPath($event) . '/console.yml');
         $manage->unregisterCommands(array_keys(self::$commands));
         $manage->save();
-
     }
 }
