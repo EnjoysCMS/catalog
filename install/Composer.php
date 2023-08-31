@@ -3,7 +3,9 @@
 namespace EnjoysCMS\Module\Catalog\Install;
 
 use App\Install\Functions\CommandsManage;
+use Composer\Installer\PackageEvent;
 use Composer\Script\Event;
+use Composer\EventDispatcher\Event as BaseEvent;
 use EnjoysCMS\Module\Catalog\Command\CurrencyRate;
 use Exception;
 
@@ -14,7 +16,7 @@ class Composer
         CurrencyRate::class => []
     ];
 
-    private static function getRootPath(Event $event): string
+    private static function getRootPath(BaseEvent $event): string
     {
         return dirname($event->getComposer()->getConfig()->getConfigSource()->getName());
     }
@@ -37,7 +39,7 @@ class Composer
     /**
      * @throws Exception
      */
-    public static function unregisterCommands(Event $event): void
+    public static function unregisterCommands(PackageEvent $event): void
     {
         $manage = new CommandsManage(self::getRootPath($event) . '/console.yml');
         $manage->unregisterCommands(array_keys(self::$commands));
