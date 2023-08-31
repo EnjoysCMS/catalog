@@ -48,7 +48,7 @@
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
         ],
-        "post-package-uninstall": [
+        "pre-package-uninstall": [
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::unregisterCommands"
         ]
     },
