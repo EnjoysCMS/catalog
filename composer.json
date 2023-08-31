@@ -48,7 +48,9 @@
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
         ],
-        "post-package-uninstall": [ "App\\Install\\Functions\\CommandsManage::actualize"]
+        "pre-package-uninstall": [
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::unregisterCommands"
+        ]
     },
     "require-dev": {
         "vimeo/psalm": "^4.20 | ^5.9"
