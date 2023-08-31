@@ -47,9 +47,6 @@
         "post-update-cmd": [
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
             "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
-        ],
-        "pre-package-uninstall": [
-            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::unregisterCommands"
         ]
     },
     "require-dev": {
