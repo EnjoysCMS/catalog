@@ -41,8 +41,13 @@ class Composer
      */
     public static function unregisterCommands(PackageEvent $event): void
     {
+        $event->stopPropagation();
+        if ($event->getOperation()->getPackage()->getName() !== "enjoyscms/catalog"){
+            return;
+        }
         $manage = new CommandsManage(self::getRootPath($event) . '/console.yml');
         $manage->unregisterCommands(array_keys(self::$commands));
         $manage->save();
+
     }
 }
