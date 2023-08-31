@@ -43,7 +43,7 @@
         "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Assets::install"
     },
     "bin": [
-        "bin/catalog"
+        "bin/enjoys-catalog"
     ],
     "require-dev": {
         "vimeo/psalm": "^4.20 | ^5.9"

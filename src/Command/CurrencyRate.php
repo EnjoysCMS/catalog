@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'currency-rate-update',
+    name: 'catalog:currency:rate-update',
     description: 'Обновление котировок валют'
 )]
 final class CurrencyRate extends Command
