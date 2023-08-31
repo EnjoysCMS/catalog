@@ -24,7 +24,8 @@
     },
     "autoload": {
         "psr-4": {
-            "EnjoysCMS\\Module\\Catalog\\": "src/"
+            "EnjoysCMS\\Module\\Catalog\\": "src/",
+            "EnjoysCMS\\Module\\Catalog\\Install\\": "install/"
         }
     },
     "extra": {
@@ -39,12 +40,18 @@
         }
     },
     "scripts": {
-        "post-install-cmd": "EnjoysCMS\\Module\\Catalog\\Assets::install",
-        "post-update-cmd": "EnjoysCMS\\Module\\Catalog\\Assets::install"
+        "post-install-cmd": [
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
+        ],
+        "post-update-cmd": [
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
+        ],
+        "post-package-uninstall": [
+            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::unregisterCommands"
+        ]
     },
-    "bin": [
-        "bin/enjoys-catalog"
-    ],
     "require-dev": {
         "vimeo/psalm": "^4.20 | ^5.9"
     },
