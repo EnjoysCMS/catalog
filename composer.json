@@ -43,10 +43,12 @@
         "catalog-assets-install": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\AssetsInstallCommand",
         "catalog-register-console-commands": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\ConsoleCommandsRegisterCommand",
         "post-install-cmd": [
+            "echo -e \"\\x1b[1mCatalog\\x1b[00m\"",
             "@catalog-assets-install",
             "@catalog-register-console-commands"
         ],
         "post-update-cmd":  [
+            "echo -e \"\\x1b[1mCatalog\\x1b[00m\"",
             "@catalog-assets-install",
             "@catalog-register-console-commands"
         ]
