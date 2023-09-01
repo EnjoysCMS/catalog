@@ -2,10 +2,8 @@
 
 namespace EnjoysCMS\Module\Catalog\Install;
 
-use App\Install\Functions\CommandsManage;
-use Composer\EventDispatcher\Event as BaseEvent;
-use Composer\Installer\PackageEvent;
-use Composer\Script\Event;
+use Enjoys\Config\Config;
+use EnjoysCMS\Core\Console\Utils\CommandsManage;
 use EnjoysCMS\Module\Catalog\Command\CurrencyRate;
 use Exception;
 
@@ -25,11 +23,10 @@ class Composer
     /**
      * @throws Exception
      */
-    public static function registerCommands(Event $event): void
+    public static function registerCommands(): void
     {
-        $manage = new CommandsManage(
-            dirname($event->getComposer()->getConfig()->getConfigSource()->getName()) . '/console.yml'
-        );
+        $container = include __DIR__ . '/../../../bootstrap.php';
+        $manage = new CommandsManage(config: $container->get(Config::class));
         $manage->registerCommands(self::$commands);
         $manage->save();
     }
