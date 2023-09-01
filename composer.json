@@ -40,10 +40,13 @@
         }
     },
     "scripts": {
-        "post-update-cmd": "@post-install-cmd",
         "catalog-assets-install": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\AssetsInstallCommand",
         "catalog-register-console-commands": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\ConsoleCommandsRegisterCommand",
         "post-install-cmd": [
+            "@catalog-assets-install",
+            "@catalog-register-console-commands"
+        ],
+        "post-update-cmd":  [
             "@catalog-assets-install",
             "@catalog-register-console-commands"
         ]
