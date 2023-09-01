@@ -25,7 +25,7 @@
     "autoload": {
         "psr-4": {
             "EnjoysCMS\\Module\\Catalog\\": "src/",
-            "EnjoysCMS\\Module\\Catalog\\Install\\": "install/"
+            "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\": "scripts/"
         }
     },
     "extra": {
@@ -40,13 +40,12 @@
         }
     },
     "scripts": {
+        "post-update-cmd": "@post-install-cmd",
+        "catalog-assets-install": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\AssetsInstallCommand",
+        "catalog-register-console-commands": "EnjoysCMS\\Module\\Catalog\\Composer\\Scripts\\ConsoleCommandsRegisterCommand",
         "post-install-cmd": [
-            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
-            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
-        ],
-        "post-update-cmd": [
-            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::assetsInstall",
-            "EnjoysCMS\\Module\\Catalog\\Install\\Composer::registerCommands"
+            "@catalog-assets-install",
+            "@catalog-register-console-commands"
         ]
     },
     "require-dev": {
