@@ -17,6 +17,14 @@ use EnjoysCMS\Module\Catalog\Entity\Category;
 final class Product extends EntityRepository
 {
 
+    public function find($id, $lockMode = null, $lockVersion = null)
+    {
+        if (empty($id)){
+            return null;
+        }
+        return parent::find($id, $lockMode, $lockVersion);
+    }
+
     public function getFindAllBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('p')

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use Ramsey\Uuid\Uuid;
 
 use function trim;
 
@@ -19,9 +20,9 @@ class Product
 {
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(type: 'integer')]
-    private int $id;
+    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\Column(type: 'uuid')]
+    private string $id;
 
     #[ORM\Column(type: 'string')]
     private string $name;
@@ -90,8 +91,10 @@ class Product
     #[ORM\ManyToOne(targetEntity: ProductUnit::class)]
     private ?ProductUnit $unit = null;
 
-    public function __construct()
+    public function __construct(string $id = null)
     {
+        $this->id = $id ?? Uuid::uuid7()->toString();
+
         $this->tags = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->options = new ArrayCollection();
@@ -100,9 +103,14 @@ class Product
         $this->files = new ArrayCollection();
     }
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): void
+    {
+        $this->id = $id;
     }
 
 
@@ -412,11 +420,6 @@ class Product
 
         $productPrice->setProduct($this);
         $this->prices->set($productPrice->getPriceGroup()->getCode(), $productPrice);
-    }
-
-    public function setId(int $id): void
-    {
-        $this->id = $id;
     }
 
     public function getQuantity(): Quantity

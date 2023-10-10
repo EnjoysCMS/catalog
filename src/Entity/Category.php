@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Ramsey\Uuid\Uuid;
 
 /**
  * @Gedmo\Tree(type="closure")
@@ -18,13 +19,13 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[Gedmo\Tree(type: 'closure')]
 #[ORM\Entity(repositoryClass: \EnjoysCMS\Module\Catalog\Repository\Category::class)]
 #[ORM\Table(name: 'catalog_categories')]
-class Category
+class Category implements \Stringable
 {
 
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(type: 'integer')]
-    private int $id;
+    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\Column(type: 'uuid')]
+    private string $id;
 
     #[ORM\Column(name: 'title', type: 'string', length: 255)]
     private string $title;
@@ -78,14 +79,26 @@ class Category
     #[ORM\OneToOne(mappedBy: 'category', targetEntity: CategoryMeta::class, cascade: ['persist', 'remove'])]
     private ?CategoryMeta $meta = null;
 
-    public function __construct()
+    public function __construct(string $id = null)
     {
+        $this->id = $id ?? Uuid::uuid7()->toString();
         $this->extraFields = new ArrayCollection();
     }
+
 
     public function __toString(): string
     {
         return $this->getTitle();
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function setId(string $id): void
+    {
+        $this->id = $id;
     }
 
     public function getDescription(): ?string
@@ -129,11 +142,6 @@ class Category
     public function setImg(?string $img): void
     {
         $this->img = $img;
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
     }
 
     public function setTitle($title): void
@@ -299,4 +307,6 @@ class Category
         $meta->setCategory($this);
         $this->meta = $meta;
     }
+
+
 }

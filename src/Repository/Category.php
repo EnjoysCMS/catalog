@@ -20,6 +20,14 @@ use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 class Category extends ClosureTreeRepository
 {
 
+    public function find($id, $lockMode = null, $lockVersion = null)
+    {
+        if (empty($id)){
+            return null;
+        }
+        return parent::find($id, $lockMode, $lockVersion);
+    }
+
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
