@@ -58,6 +58,9 @@ final class CreateUpdateProductForm
     {
         $defaults = [
             'name' => $product?->getName(),
+            'sku' => $product?->getSku(),
+            'barcodes' => implode(' ', $product?->getBarCodes() ?? []),
+            'vendorCode' => $product?->getVendorCode(),
             'productCode' => $product?->getProductCode(),
             'url' => $product?->getUrl()->getPath(),
             'description' => $product?->getDescription(),
@@ -98,7 +101,7 @@ final class CreateUpdateProductForm
         $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
-        $productCodeElem = $form->text('productCode', 'Уникальный код продукта')
+        $skuCodeElem = $form->text('sku', 'SKU')
             ->setDescription(
                 'Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
             в системе учета или что-то подобное, используется для внутренних команд и запросов,
@@ -106,28 +109,38 @@ final class CreateUpdateProductForm
             )
             ->addRule(
                 Rules::CALLBACK,
-                'Ошибка, productCode уже используется',
+                'Ошибка, SKU уже используется',
                 function () use ($product) {
                     /** @var Product $check */
                     $check = $this->productRepository->findOneBy(
-                        ['productCode' => $this->request->getParsedBody()['productCode'] ?? '']
+                        ['sku' => $this->request->getParsedBody()['sku'] ?? '']
                     );
 
-                    if ($product?->getProductCode() === $check?->getProductCode()) {
+                    if ($product?->getSku() === $check?->getSku()) {
                         return true;
                     }
                     return false;
                 }
             );
 
-        if ($this->config->get('disableEditProductCode', false)) {
-            $productCodeElem->setAttribute(AttributeFactory::create('disabled'));
+        if ($this->config->get('disableEditSku', false)) {
+            $skuCodeElem->setAttribute(AttributeFactory::create('disabled'));
         }
+
+        $form->text('barcodes', 'Штрих-коды')
+            ->setDescription(
+                'Не обязательно. Штрих-коды, если их несколько можно указать через пробел.'
+            );
+
+        $form->text('vendorCode', 'Артикул')
+            ->setDescription(
+                'Не обязательно. Артикул товара, так как он значится у поставщика.'
+            );
 
         $form->text('url', 'URL')
             ->addRule(Rules::REQUIRED)
-            ->addRule(Rules::CALLBACK, 'Не допустимые символы', function (){
-                preg_match('/[.\/]/',  $this->request->getParsedBody()['url'] ?? '', $matches);
+            ->addRule(Rules::CALLBACK, 'Не допустимые символы', function () {
+                preg_match('/[.\/]/', $this->request->getParsedBody()['url'] ?? '', $matches);
                 return !$matches;
             })
             ->addRule(
@@ -182,11 +195,22 @@ final class CreateUpdateProductForm
 
         $product->setName($this->request->getParsedBody()['name'] ?? null);
 
-        if (!$this->config->get('disableEditProductCode', false)) {
-            $productCode = $this->request->getParsedBody()['productCode'] ?? null;
-            $product->setProductCode(empty($productCode) ? null : $productCode);
+        if (!$this->config->get('disableEditSku', false)) {
+            $sku = $this->request->getParsedBody()['sku'] ?? null;
+            $product->setProductCode(empty($sku) ? null : $sku);
         }
 
+        $product->setVendorCode($this->request->getParsedBody()['vendorCode'] ?? null);
+        $product->setBarCodes(
+            $this->request->getParsedBody()['barcodes'] ? array_values(
+                array_filter(
+                    explode(
+                        ' ',
+                        $this->request->getParsedBody()['barcodes']
+                    ), static fn($i) => !empty($i)
+                )
+            ) : null
+        );
         $product->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
