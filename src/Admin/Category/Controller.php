@@ -240,7 +240,7 @@ final class Controller extends AdminController
             $this->dispatcher->dispatch(new PreDeleteCategoryEvent($delete->getCategory()));
             $delete->doAction();
             $this->dispatcher->dispatch(new PostDeleteCategoryEvent($delete->getCategory()));
-            return $this->redirect->toRoute('@catalog_  category_list');
+            return $this->redirect->toRoute('@catalog_category_list');
         }
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
