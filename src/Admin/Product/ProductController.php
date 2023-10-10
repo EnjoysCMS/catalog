@@ -192,6 +192,7 @@ final class ProductController extends AdminController
                 $this->templatePath . '/editproduct.twig',
                 [
                     'form' => $rendererForm,
+                    'auto_urlify' => false,
                     'product' => $product,
                     'subtitle' => 'Редактирование',
                     'editorEmbedCode' => $contentEditor

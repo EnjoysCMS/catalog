@@ -1,23 +1,26 @@
 {% extends '@catalog_admin/form.twig' %}
 
 {% block additional %}
-    {% do asset('js', [
-        'modules/catalog/node_modules/urlify/dist/urlify.js'
-    ]) %}
 
-    <script>
-    let urlify = Urlify.create({
-      spaces:"-",
-      trim:true,
-      toLower:true
-    });
+    {% if auto_urlify ?? true %}
+        {% do asset('js', [
+            'modules/catalog/node_modules/urlify/dist/urlify.js'
+        ]) %}
 
-    $(document).ready(
-        function () {
-            $("#name").on('click keyup', function () {
-                $("#url").val(urlify($(this).prop('value')));
+        <script>
+            let urlify = Urlify.create({
+                spaces: "-",
+                trim: true,
+                toLower: true
             });
-        }
-    );
-    </script>
+
+            $(document).ready(
+                function () {
+                    $("#name").on('click keyup', function () {
+                        $("#url").val(urlify($(this).prop('value')));
+                    });
+                }
+            );
+        </script>
+    {% endif %}
 {% endblock %}
