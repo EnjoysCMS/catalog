@@ -21,19 +21,17 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class Edit
+final class CreateUpdateCategoryForm
 {
-
-    private Category $category;
 
     private EntityRepository|\EnjoysCMS\Module\Catalog\Repository\Category $repository;
 
 
     /**
-     * @throws NoResultException
      * @throws NotSupported
      */
     public function __construct(
@@ -42,10 +40,6 @@ final class Edit
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {
         $this->repository = $this->em->getRepository(Category::class);
-
-        $this->category = $this->repository->find(
-            $this->request->getQueryParams()['id'] ?? 0
-        ) ?? throw new NoResultException();
     }
 
 
@@ -56,30 +50,30 @@ final class Edit
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function getForm(): Form
+    public function getForm(?Category $category = null): Form
     {
         $form = new Form();
 
 
         $form->setDefaults(
             [
-                'parent' => $this->category->getParent()?->getId(),
-                'title' => $this->category->getTitle(),
-                'description' => $this->category->getDescription(),
-                'shortDescription' => $this->category->getShortDescription(),
-                'url' => $this->category->getUrl(),
-                'img' => $this->category->getImg(),
-                'status' => [(int)$this->category->isStatus()],
+                'parent' => $category?->getParent()?->getId() ?? $this->request->getQueryParams()['parent_id'] ?? null,
+                'title' =>$category?->getTitle(),
+                'description' => $category?->getDescription(),
+                'shortDescription' => $category?->getShortDescription(),
+                'url' => $category?->getUrl(),
+                'img' => $category?->getImg(),
+                'status' => [(int)($category?->isStatus() ?? true)],
                 'extraFields' => array_map(
                     function ($item) {
                         return $item->getId();
                     },
-                    $this->category->getExtraFields()->toArray()
+                    $category?->getExtraFields()->toArray() ?? []
                 ),
-                'customTemplatePath' => $this->category->getCustomTemplatePath(),
-                'meta-title' => $this->category->getMeta()->getTitle(),
-                'meta-description' => $this->category->getMeta()->getDescription(),
-                'meta-keywords' => $this->category->getMeta()->getKeyword(),
+                'customTemplatePath' => $category?->getCustomTemplatePath(),
+                'meta-title' => $category?->getMeta()->getTitle(),
+                'meta-description' => $category?->getMeta()->getDescription(),
+                'meta-keywords' => $category?->getMeta()->getKeyword(),
             ]
         );
 
@@ -95,7 +89,7 @@ final class Edit
             ->addRule(Rules::REQUIRED)
             ->fill(
                 ['0' => '_без родительской категории_'] + $this->repository->getFormFillArray(criteria: [
-                    Criteria::create()->where(Criteria::expr()->neq('id', $this->category->getId()))
+                    Criteria::create()->where(Criteria::expr()->neq('id', $category?->getId() ?? ''))
                 ])
             );
 
@@ -107,17 +101,17 @@ final class Edit
             ->addRule(
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
-                function () {
+                function () use ($category) {
                     $url = $this->request->getParsedBody()['url'] ?? null;
 
-                    if ($url === $this->category->getUrl()) {
+                    if ($url === $category?->getUrl()) {
                         return true;
                     }
 
                     $check = $this->repository->findOneBy(
                         [
                             'url' => $url,
-                            'parent' => $this->category->getParent()
+                            'parent' => $category?->getParent()
                         ]
                     );
                     return is_null($check);
@@ -141,18 +135,18 @@ HTML
                 ]
             );
 
-        $linkFillFromParent = $this->category->getParent() ? '<a class="align-top btn btn-xs btn-warning"
+        $linkFillFromParent = $category?->getParent() ? '<a class="align-top btn btn-xs btn-warning"
                 id="fill-from-parent"
-                data-id="' . $this->category->getId() . '">
-                заполнить из родительской категории</a>' : '';
+                data-id="' . $category?->getId() . '">
+                Заполнить из родительской категории</a>' : '';
 
-        $linkFillAllChildren = $this->category->getChildren()->count() ? '<a class="align-top btn btn-xs btn-info"
+        $linkFillAllChildren = $category?->getChildren()->count() ? '<a class="align-top btn btn-xs btn-info"
                 id="fill-all-children"
                 href="' . $this->urlGenerator->generate(
-                '@a/catalog/tools/category/set-extra-fields-to-children',
-                ['id' => $this->category->getId()]
+                '@catalog_category_set-extra-fields-to-children',
+                ['id' => $category?->getId()]
             ) . '">
-                    заполнить все дочерние категории</a>' : '';
+                    Заполнить все дочерние категории</a>' : '';
 
 
         $form->select(
@@ -164,14 +158,14 @@ HTML
                 Берутся из параметров товара (опций)'
             )->addClass('set-extra-fields')
             ->setMultiple()
-            ->fill(function () {
+            ->fill(function () use ($category) {
                 $optionKeys = $this->em->getRepository(OptionKey::class)->findBy(
                     [
                         'id' => array_map(
                             function ($item) {
                                 return $item->getId();
                             },
-                            $this->category->getExtraFields()->toArray()
+                            $category?->getExtraFields()->toArray() ?? []
                         )
                     ]
                 );
@@ -202,38 +196,39 @@ HTML
      * @throws NotSupported
      * @throws ORMException
      */
-    public function doAction(): void
+    public function doAction(Category $category = null): Category
     {
-        $this->category->setParent($this->repository->find($this->request->getParsedBody()['parent'] ?? 0));
-        $this->category->setTitle($this->request->getParsedBody()['title'] ?? null);
-        $this->category->setDescription($this->request->getParsedBody()['description'] ?? null);
-        $this->category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
-        $this->category->setUrl($this->request->getParsedBody()['url'] ?? null);
-        $this->category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
-        $this->category->setImg($this->request->getParsedBody()['img'] ?? null);
-        $this->category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+        $category = $category ?? new Category();
+        $category->setSort(0);
+        $category->setParent($this->repository->find($this->request->getParsedBody()['parent'] ?? 0));
+        $category->setTitle($this->request->getParsedBody()['title'] ?? null);
+        $category->setDescription($this->request->getParsedBody()['description'] ?? null);
+        $category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
+        $category->setUrl($this->request->getParsedBody()['url'] ?? null);
+        $category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
+        $category->setImg($this->request->getParsedBody()['img'] ?? null);
+        $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
-        $meta = $this->category->getMeta();
+        $meta =$category->getMeta();
         $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
         $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
         $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
         $this->em->persist($meta);
 
-        $this->category->setMeta($meta);
+        $category->setMeta($meta);
 
         $extraFields = $this->em->getRepository(OptionKey::class)->findBy(
             ['id' => $this->request->getParsedBody()['extraFields'] ?? 0]
         );
 
-        $this->category->removeExtraFields();
+        $category->removeExtraFields();
         foreach ($extraFields as $extraField) {
-            $this->category->addExtraField($extraField);
+            $category->addExtraField($extraField);
         }
+        $this->em->persist($category);
         $this->em->flush();
+
+        return $category;
     }
 
-    public function getCategory(): Category
-    {
-        return $this->category;
-    }
 }

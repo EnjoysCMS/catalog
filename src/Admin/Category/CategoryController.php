@@ -26,6 +26,7 @@ use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Category;
+use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Events\PostAddCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PostDeleteCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PostEditCategoryEvent;
@@ -33,16 +34,24 @@ use EnjoysCMS\Module\Catalog\Events\PreAddCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PreDeleteCategoryEvent;
 use EnjoysCMS\Module\Catalog\Events\PreEditCategoryEvent;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
 #[Route('admin/catalog/category', '@catalog_category_')]
-final class Controller extends AdminController
+final class CategoryController extends AdminController
 {
+    private ?Category $category;
+
     public function __construct(Container $container, Config $config, \EnjoysCMS\Module\Admin\Config $adminConfig)
     {
         parent::__construct($container, $config, $adminConfig);
+
+        $this->category = $container->get(EntityManager::class)->getRepository(Category::class)->find(
+            $this->request->getAttribute('category_id') ?? $this->request->getQueryParams()['category_id'] ?? null
+        );
+
         $this->breadcrumbs->add('@catalog_category_list', 'Список категорий');
     }
 
@@ -114,7 +123,7 @@ final class Controller extends AdminController
         name: 'add',
         comment: 'Добавление категорий'
     )]
-    public function add(Add $add, ContentEditor $contentEditor): ResponseInterface
+    public function add(CreateUpdateCategoryForm $add, ContentEditor $contentEditor): ResponseInterface
     {
         $this->breadcrumbs->setLastBreadcrumb('Добавление новой категории');
 
@@ -131,7 +140,7 @@ final class Controller extends AdminController
 
         return $this->response(
             $this->twig->render(
-                $this->templatePath . '/addcategory.twig',
+                $this->templatePath . '/editcategory.twig',
                 [
                     'subtitle' => 'Добавление категории',
                     'form' => $rendererForm,
@@ -163,17 +172,22 @@ final class Controller extends AdminController
      * @throws NoResultException
      */
     #[Route(
-        path: '/edit',
+        path: '/{category_id}/edit',
         name: 'edit',
+        requirements: [
+            'product_id' => Requirement::UUID_V7
+        ],
         comment: 'Редактирование категорий'
     )]
-    public function edit(Edit $edit, ContentEditor $contentEditor): ResponseInterface
+    public function edit(CreateUpdateCategoryForm $edit, ContentEditor $contentEditor): ResponseInterface
     {
+        $category = $this->category ?? throw new NoResultException();
+
         $this->breadcrumbs->setLastBreadcrumb(
-            sprintf("Редактирование категории [%s]", $edit->getCategory()->getTitle())
+            sprintf("Редактирование категории [%s]", $category->getTitle())
         );
 
-        $form = $edit->getForm();
+        $form = $edit->getForm($category);
 
         if ($form->isSubmitted()) {
             $copier = new DeepCopy();
@@ -182,10 +196,10 @@ final class Controller extends AdminController
                 new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
             );
             /** @var Category $oldCategory */
-            $oldCategory = $copier->copy($edit->getCategory());
+            $oldCategory = $copier->copy($category);
             $this->dispatcher->dispatch(new PreEditCategoryEvent($oldCategory));
-            $edit->doAction();
-            $this->dispatcher->dispatch(new PostEditCategoryEvent($oldCategory, $edit->getCategory()));
+            $edit->doAction($category);
+            $this->dispatcher->dispatch(new PostEditCategoryEvent($oldCategory, $category));
             return $this->redirect->toRoute('@catalog_category_list');
         }
 
@@ -195,7 +209,7 @@ final class Controller extends AdminController
             $this->twig->render(
                 $this->templatePath . '/editcategory.twig',
                 [
-                    'title' => $edit->getCategory()->getTitle(),
+                    'title' => $category->getTitle(),
                     'subtitle' => 'Изменение категории',
                     'form' => $rendererForm,
                     'editorEmbedCode' => $contentEditor
@@ -224,22 +238,27 @@ final class Controller extends AdminController
      * @throws SyntaxError
      */
     #[Route(
-        path: '/delete',
+        path: '/{category_id}/delete',
         name: 'delete',
+        requirements: [
+            'product_id' => Requirement::UUID_V7
+        ],
         comment: 'Удаление категорий'
     )]
     public function delete(Delete $delete): ResponseInterface
     {
+        $category = $this->category ?? throw new NoResultException();
+
         $this->breadcrumbs->setLastBreadcrumb(
-            sprintf("Удаление категории [%s]", $delete->getCategory()->getTitle())
+            sprintf("Удаление категории [%s]", $category->getTitle())
         );
 
-        $form = $delete->getForm();
+        $form = $delete->getForm($category);
 
         if ($form->isSubmitted()) {
-            $this->dispatcher->dispatch(new PreDeleteCategoryEvent($delete->getCategory()));
-            $delete->doAction();
-            $this->dispatcher->dispatch(new PostDeleteCategoryEvent($delete->getCategory()));
+            $this->dispatcher->dispatch(new PreDeleteCategoryEvent($category));
+            $delete->doAction($category);
+            $this->dispatcher->dispatch(new PostDeleteCategoryEvent($category));
             return $this->redirect->toRoute('@catalog_category_list');
         }
 
@@ -249,7 +268,7 @@ final class Controller extends AdminController
             $this->twig->render(
                 $this->templatePath . '/form.twig',
                 [
-                    'title' => $delete->getCategory()->getTitle(),
+                    'title' => $category->getTitle(),
                     'subtitle' => 'Удаление категории',
                     'form' => $rendererForm,
                 ]

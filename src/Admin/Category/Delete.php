@@ -19,7 +19,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class Delete
 {
-    private Category $category;
     private \EnjoysCMS\Module\Catalog\Repository\Category|EntityRepository $categoryRepository;
     private \EnjoysCMS\Module\Catalog\Repository\Product|EntityRepository $productRepository;
 
@@ -34,13 +33,10 @@ final class Delete
     ) {
         $this->categoryRepository = $this->em->getRepository(Category::class);
         $this->productRepository = $this->em->getRepository(Product::class);
-        $this->category = $this->categoryRepository->find(
-            $this->request->getQueryParams()['id'] ?? 0
-        ) ?? throw new NoResultException();
     }
 
 
-    public function getForm(): Form
+    public function getForm(Category $category): Form
     {
         $form = new Form();
         $form->setDefaults([
@@ -52,7 +48,7 @@ final class Delete
             [
                 sprintf(
                     'Установить для продуктов из удаляемых категорий родительскую категорию (%s)',
-                    $this->category->getParent()?->getTitle() ?? 'без родительской категории'
+                    $category->getParent()?->getTitle() ?? 'без родительской категории'
                 )
             ]
         );
@@ -65,28 +61,28 @@ final class Delete
      * @throws ORMException
      * @throws MappingException
      */
-    public function doAction(): void
+    public function doAction(Category $category): void
     {
         $setCategory = (($this->request->getParsedBody(
-            )['set_parent_category'] ?? null) !== null) ? $this->category->getParent() : null;
+            )['set_parent_category'] ?? null) !== null) ? $category->getParent() : null;
 
-        $this->em->remove($this->category->getMeta());
+        $this->em->remove($category->getMeta());
 
         if (($this->request->getParsedBody()['remove_childs'] ?? null) !== null) {
             /** @var array $allCategoryIds */
-            $allCategoryIds = $this->categoryRepository->getAllIds($this->category);
+            $allCategoryIds = $this->categoryRepository->getAllIds($category);
             /** @var Product[] $products */
             $products = $this->productRepository->findByCategorysIds($allCategoryIds);
             $this->setCategory($products, $setCategory);
 
-            $this->em->remove($this->category);
+            $this->em->remove($category);
             $this->em->flush();
         } else {
             /** @var Product[] $products */
-            $products = $this->productRepository->findByCategory($this->category);
+            $products = $this->productRepository->findByCategory($category);
             $this->setCategory($products, $setCategory);
 
-            $this->categoryRepository->removeFromTree($this->category);
+            $this->categoryRepository->removeFromTree($category);
             $this->categoryRepository->updateLevelValues();
             $this->em->clear();
         }
@@ -105,8 +101,4 @@ final class Delete
         $this->em->flush();
     }
 
-    public function getCategory(): Category
-    {
-        return $this->category;
-    }
 }

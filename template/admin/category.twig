@@ -28,8 +28,8 @@
                             class="fa fa-external-link-square-alt"></i></a>
                 </span>
                 <div class="small text-dark">
-                    <a href="{{ path('@catalog_category_delete', {"id": category.getId}) }}">[удалить]</a>
-                    <a href="{{ path('@catalog_category_edit', {"id": category.getId}) }}">[редактировать]</a>
+                    <a href="{{ path('@catalog_category_delete', {"category_id": category.getId}) }}">[удалить]</a>
+                    <a href="{{ path('@catalog_category_edit', {"category_id": category.getId}) }}">[редактировать]</a>
                     <a href="{{ path('@catalog_category_add', {"parent_id": category.getId}) }}">[добавить]</a>
                 </div>
 
