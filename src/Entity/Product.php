@@ -32,6 +32,15 @@ class Product
     #[ORM\Column(type: 'string', length: 64, unique: true, nullable: true, options: ['default' => null])]
     private ?string $productCode = null;
 
+    #[ORM\Column(type: 'string', length: 255, unique: true, nullable: true, options: ['default' => null])]
+    private ?string $sku = null;
+
+    #[ORM\Column(type: 'json', nullable: true, options: ['default' => null])]
+    private ?array $barCodes = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['default' => null])]
+    private ?string $vendorCode = null;
+
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $hide = false;
 
@@ -446,6 +455,36 @@ class Product
     public function setUnit(?ProductUnit $unit): void
     {
         $this->unit = $unit;
+    }
+
+    public function getSku(): ?string
+    {
+        return $this->sku;
+    }
+
+    public function setSku(?string $sku): void
+    {
+        $this->sku = $sku;
+    }
+
+    public function getBarCodes(): ?array
+    {
+        return $this->barCodes;
+    }
+
+    public function setBarCodes(?array $barCodes): void
+    {
+        $this->barCodes = $barCodes;
+    }
+
+    public function getVendorCode(): ?string
+    {
+        return $this->vendorCode;
+    }
+
+    public function setVendorCode(?string $vendorCode): void
+    {
+        $this->vendorCode = $vendorCode;
     }
 
 
