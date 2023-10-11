@@ -28,7 +28,7 @@ final class CategoryMeta
     private ?string $description = null;
 
     #[ORM\OneToOne(inversedBy: 'meta', targetEntity: Category::class)]
-    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'category_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Category $category;
 
 
