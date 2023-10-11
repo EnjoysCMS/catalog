@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Admin\Category;
 
 
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\NotSupported;
@@ -21,7 +22,6 @@ use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
-use EnjoysCMS\Module\Catalog\Entity\Product;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -43,7 +43,6 @@ final class CreateUpdateCategoryForm
     }
 
 
-
     /**
      * @throws ExceptionRule
      * @throws QueryException
@@ -58,7 +57,7 @@ final class CreateUpdateCategoryForm
         $form->setDefaults(
             [
                 'parent' => $category?->getParent()?->getId() ?? $this->request->getQueryParams()['parent_id'] ?? null,
-                'title' =>$category?->getTitle(),
+                'title' => $category?->getTitle(),
                 'description' => $category?->getDescription(),
                 'shortDescription' => $category?->getShortDescription(),
                 'url' => $category?->getUrl(),
@@ -103,7 +102,7 @@ final class CreateUpdateCategoryForm
                 'Ошибка, такой url уже существует',
                 function () use ($category) {
                     $url = $this->request->getParsedBody()['url'] ?? null;
-                    $parent =  $this->repository->find(
+                    $parent = $this->repository->find(
                         $this->request->getParsedBody()['parent'] ?? null
                     );
                     if ($url === $category?->getUrl() && $parent === $category?->getParent()) {
@@ -183,7 +182,9 @@ HTML
             });
 
         $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
-            ->setDescription('(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе');
+            ->setDescription(
+                '(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе'
+            );
 
 
         $form->text('meta-title', 'meta-title');
@@ -212,7 +213,7 @@ HTML
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
         $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
 
-        $meta =$category->getMeta();
+        $meta = $category->getMeta();
         $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
         $meta->setDescription($this->request->getParsedBody()['meta-description'] ?? null);
         $meta->setKeyword($this->request->getParsedBody()['meta-keywords'] ?? null);
@@ -229,7 +230,14 @@ HTML
             $category->addExtraField($extraField);
         }
         $this->em->persist($category);
-        $this->em->flush();
+
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            $this->repository->recover();
+            $this->repository->updateLevelValues();
+            $this->em->flush();
+        }
 
         return $category;
     }
