@@ -147,7 +147,7 @@ final class CreateUpdateProductForm
                 Rules::CALLBACK,
                 'Ошибка, такой url уже существует',
                 function () use ($product) {
-                    $category = $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? 0);
+                    $category = $this->categoryRepository->find($this->request->getParsedBody()['category'] ?? null);
 
                     try {
                         if ($this->productRepository->getFindByUrlBuilder(
