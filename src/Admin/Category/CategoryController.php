@@ -81,14 +81,20 @@ final class CategoryController extends AdminController
 
         $form = new Form();
         $form->hidden('nestable-output')->setAttribute(AttributeFactory::create('id', 'nestable-output'));
-        $form->submit('save', 'Сохранить');
+        $form->submit('save', 'Восстановить связи между категориями');
 
 
         if ($form->isSubmitted()) {
+
+
+            $repository->recover();
+            $repository->updateLevelValues();
+
             (new SaveCategoryStructure($em))
             (
                 json_decode($this->request->getParsedBody()['nestable-output'] ?? '')
             );
+
 
             $em->flush();
             return $this->redirect->toRoute('@catalog_category_list');

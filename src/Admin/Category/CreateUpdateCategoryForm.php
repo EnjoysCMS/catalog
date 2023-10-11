@@ -103,17 +103,20 @@ final class CreateUpdateCategoryForm
                 'Ошибка, такой url уже существует',
                 function () use ($category) {
                     $url = $this->request->getParsedBody()['url'] ?? null;
-
-                    if ($url === $category?->getUrl()) {
+                    $parent =  $this->repository->find(
+                        $this->request->getParsedBody()['parent'] ?? null
+                    );
+                    if ($url === $category?->getUrl() && $parent === $category?->getParent()) {
                         return true;
                     }
 
                     $check = $this->repository->findOneBy(
                         [
                             'url' => $url,
-                            'parent' => $category?->getParent()
+                            'parent' => $parent
                         ]
                     );
+
                     return is_null($check);
                 }
             );
@@ -200,7 +203,7 @@ HTML
     {
         $category = $category ?? new Category();
         $category->setSort(0);
-        $category->setParent($this->repository->find($this->request->getParsedBody()['parent'] ?? 0));
+        $category->setParent($this->repository->find($this->request->getParsedBody()['parent'] ?? null));
         $category->setTitle($this->request->getParsedBody()['title'] ?? null);
         $category->setDescription($this->request->getParsedBody()['description'] ?? null);
         $category->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
