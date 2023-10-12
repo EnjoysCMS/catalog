@@ -9,6 +9,9 @@ $evm->addEventSubscriber($treeListener);
 ```
 1.2 Added to root composer.json to extra->patches section
 
+```shell
+ composer require cweagans/composer-patches:^1.7
+```
 ```json
     "extra": {
         "patches": {
