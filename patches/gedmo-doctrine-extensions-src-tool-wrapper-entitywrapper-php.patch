@@ -1,0 +1,13 @@
+--- /dev/null
++++ ../src/Tool/Wrapper/EntityWrapper.php
+@@ -86,9 +86,7 @@
+         $flatten = 1 < \func_num_args() && true === func_get_arg(1);
+         if (null === $this->identifier) {
+             $uow = $this->om->getUnitOfWork();
+-            $this->identifier = $uow->isInIdentityMap($this->object)
+-                ? $uow->getEntityIdentifier($this->object)
+-                : $this->meta->getIdentifierValues($this->object);
++            $this->identifier = $this->meta->getIdentifierValues($this->object);
+             if (is_array($this->identifier) && empty($this->identifier)) {
+                 $this->identifier = null;
+             }
