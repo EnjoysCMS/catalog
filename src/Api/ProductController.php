@@ -190,7 +190,9 @@ class ProductController extends AbstractController
                 AbstractNormalizer::ATTRIBUTES => [
                     'id',
                     'name',
-                    'productCode',
+                    'sku',
+                    'vendorCode',
+                    'barCodes',
                     'hide',
                     'active',
                     'category' => [
