@@ -7,6 +7,17 @@ $evm = new EventManager();
 $treeListener = new TreeListener();
 $evm->addEventSubscriber($treeListener);
 ```
+1.2 Added to root composer.json to extra->patches section
+
+```json
+    "extra": {
+        "patches": {
+            "gedmo/doctrine-extensions": [
+                "modules/catalog/patches/gedmo-doctrine-extensions-src-tool-wrapper-entitywrapper-php.patch"
+            ]
+        }
+    }
+```
 
 2. Define in DI `\Psr\EventDispatcher\EventDispatcherInterface`
 
