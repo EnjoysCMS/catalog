@@ -38,6 +38,11 @@
             "@catalog_pricegroup_list": "Группы цен",
             "@catalog_currency_list": "Валюты",
             "catalog/admin/setting": "Настройки"
+        },
+        "patches": {
+            "gedmo/doctrine-extensions": [
+                "patches/gedmo-doctrine-extensions-src-tool-wrapper-entitywrapper-php.patch"
+            ]
         }
     },
     "scripts": {
