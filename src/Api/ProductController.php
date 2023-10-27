@@ -140,8 +140,7 @@ class ProductController extends AbstractController
                         $categoryRepository->find($categoryId)
                     )
                 )
-            )
-        ;
+            );
 
         if ($categoryId === '0') {
             $categoryCriteria->orWhere(Criteria::expr()->eq('p.category', null));
@@ -191,6 +190,10 @@ class ProductController extends AbstractController
                     'id',
                     'name',
                     'sku',
+                    'vendor' => [
+                        'id',
+                        'name'
+                    ],
                     'vendorCode',
                     'barCodes',
                     'hide',

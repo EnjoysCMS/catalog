@@ -39,6 +39,9 @@ class Product
     #[ORM\Column(type: 'json', nullable: true, options: ['default' => null])]
     private ?array $barCodes = null;
 
+    #[ORM\ManyToOne(targetEntity: Vendor::class)]
+    private ?Vendor $vendor= null;
+
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $vendorCode = null;
 
@@ -488,6 +491,16 @@ class Product
     public function setVendorCode(?string $vendorCode): void
     {
         $this->vendorCode = $vendorCode;
+    }
+
+    public function getVendor(): ?Vendor
+    {
+        return $this->vendor;
+    }
+
+    public function setVendor(?Vendor $vendor): void
+    {
+        $this->vendor = $vendor;
     }
 
 

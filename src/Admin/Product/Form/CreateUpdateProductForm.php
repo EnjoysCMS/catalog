@@ -24,8 +24,10 @@ use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entity\Url;
+use EnjoysCMS\Module\Catalog\Entity\Vendor;
 use Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
 
 final class CreateUpdateProductForm
 {
@@ -60,6 +62,7 @@ final class CreateUpdateProductForm
             'name' => $product?->getName(),
             'sku' => $product?->getSku(),
             'barcodes' => implode(' ', $product?->getBarCodes() ?? []),
+            'vendor' => $product?->getVendor()?->getName(),
             'vendorCode' => $product?->getVendorCode(),
             'productCode' => $product?->getProductCode(),
             'url' => $product?->getUrl()->getPath(),
@@ -132,6 +135,12 @@ final class CreateUpdateProductForm
                 'Не обязательно. Штрих-коды, если их несколько можно указать через пробел.'
             );
 
+        $form->text('vendor', 'Бренд или производитель')
+            ->setDescription(
+                'Не обязательно.'
+            );
+
+
         $form->text('vendorCode', 'Артикул')
             ->setDescription(
                 'Не обязательно. Артикул товара, так как он значится у поставщика.'
@@ -199,6 +208,21 @@ final class CreateUpdateProductForm
             $sku = $this->request->getParsedBody()['sku'] ?? null;
             $product->setProductCode(empty($sku) ? null : $sku);
         }
+
+        $vendorName = $this->request->getParsedBody()['vendor'] ?? '';
+        if (!empty($vendorName)) {
+            $vendor = $this->em->getRepository(Vendor::class)->findOneBy(
+                ['name' => $vendorName]
+            );
+            if ($vendor === null) {
+                $vendor = new Vendor();
+                $vendor->setId(Uuid::uuid7()->toString());
+                $vendor->setName($vendorName);
+                $this->em->persist($vendor);
+            }
+            $product->setVendor($vendor);
+        }
+
 
         $product->setVendorCode($this->request->getParsedBody()['vendorCode'] ?? null);
         $product->setBarCodes(
