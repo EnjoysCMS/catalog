@@ -181,7 +181,7 @@ final class CategoryController extends AdminController
         path: '/{category_id}/edit',
         name: 'edit',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Редактирование категорий'
     )]
@@ -247,7 +247,7 @@ final class CategoryController extends AdminController
         path: '/{category_id}/delete',
         name: 'delete',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Удаление категорий'
     )]

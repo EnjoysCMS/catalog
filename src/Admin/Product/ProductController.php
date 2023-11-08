@@ -149,7 +149,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/edit',
         name: 'edit',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Редактирование товара'
     )]
@@ -209,7 +209,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/delete',
         name: 'delete',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Удаление товара'
     )]
@@ -242,7 +242,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/tags',
         name: 'tags',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Теги товара'
     )]
@@ -275,7 +275,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/quantity',
         name: 'quantity',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Установка количества на товар'
     )]
@@ -322,7 +322,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/meta',
         name: 'meta',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Управление Meta-tags (продукт)'
     )]
@@ -361,7 +361,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls',
         name: 'urls',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Просмотр URLs товара'
     )]
@@ -391,7 +391,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/edit',
         name: 'urls_edit',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Редактирование URL'
     )]
@@ -428,7 +428,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/add',
         name: 'urls_add',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Добавление URL'
     )]
@@ -461,7 +461,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/delete',
         name: 'urls_delete',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Удаление URL'
     )]
@@ -496,7 +496,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/makedefault',
         name: 'urls_make_default',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Сделать URL основным'
     )]
@@ -531,7 +531,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/images',
         name: 'images',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Управление изображениями товара'
     )]
@@ -560,7 +560,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/images/add',
         name: 'images_add',
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Загрузка изображения к товару'
     )]
@@ -758,7 +758,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/files',
         name: "files",
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Менеджер файлов (продукт)'
     )]
@@ -790,7 +790,7 @@ final class ProductController extends AdminController
         path: "/{product_id}/files/upload",
         name: "files_upload",
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Загрузка файла (продукт)'
     )]
@@ -831,7 +831,7 @@ final class ProductController extends AdminController
         path: "/{product_id}/files/delete",
         name: "files_delete",
         requirements: [
-            'product_id' => Requirement::UUID_V7
+            'product_id' => Requirement::UUID
         ],
         comment: 'Удалить загруженный файл (продукт)'
     )]
