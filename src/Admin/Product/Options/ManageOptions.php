@@ -12,6 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
+use EnjoysCMS\Module\Catalog\Api\ProductOptions;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
@@ -19,6 +20,7 @@ use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
+use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class ManageOptions
@@ -35,7 +37,8 @@ final class ManageOptions
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly ProductOptions $productOptionsController,
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -46,37 +49,50 @@ final class ManageOptions
     }
 
 
-
     public function getForm(): Form
     {
-        $options = $this->product->getOptions();
+        $serializer = SerializerBuilder::create()->build();
 
+//        $options = json_decode((string)$this->productOptionsController->getProductOptionsKeysByCategory($this->product->getCategory())->getBody());
+        //  dd($this->product->getOptions());
+//        $options = $this->product->getOptions();
+        $options = $serializer->deserialize(
+            (string)$this->productOptionsController->getProductOptionsKeysByCategory(
+                $this->product->getCategory()
+            )->getBody(),
+            'array<EnjoysCMS\Module\Catalog\Entity\OptionKey>',
+            'json'
+        );
+//        dd($options);
         $form = new Form();
-        $form->setDefaults($this->getDefaultsOptions($options));
+        $form->setDefaults($this->getDefaultsOptions($this->product->getOptions()));
 
 
-        foreach ($options as $key => $option) {
+        foreach ($options as $option) {
+            $key = $option;
             $form->group()->setAttribute(AttributeFactory::create('id', 'group'))->add([
                 (new Text(
-                    'options[' . $key . '][option]'
+                    'options[' . $key->getId() . '][option]'
                 ))->setAttributes(
                     AttributeFactory::createFromArray([
                         'class' => 'filter-option form-control',
                         'placeholder' => 'Опция',
-                        'grid' => 'col-md-3'
+                        'grid' => 'col-md-3',
+                        'value' => $key->getName()
                     ])
                 ),
                 (new Text(
-                    'options[' . $key . '][unit]'
+                    'options[' . $key->getId() . '][unit]'
                 ))->setAttributes(
                     AttributeFactory::createFromArray([
                         'class' => 'filter-unit form-control',
                         'placeholder' => 'ед.изм.',
-                        'grid' => 'col-md-1'
+                        'grid' => 'col-md-1',
+                        'value' => $key->getUnit()
                     ])
                 ),
                 (new Text(
-                    'options[' . $key . '][value]'
+                    'options[' . $key->getId() . '][value]'
                 ))->setAttributes(
                     AttributeFactory::createFromArray([
                         'class' => 'filter-value form-control',
@@ -94,10 +110,8 @@ final class ManageOptions
     {
         $defaults = [];
 
-        foreach ($options as $key => $option) {
-            $defaults['options'][$key]['option'] = $option['key']->getName();
-            $defaults['options'][$key]['unit'] = $option['key']->getUnit();
-            $defaults['options'][$key]['value'] = implode(
+        foreach ($options as $option) {
+            $defaults['options'][$option['key']->getId()]['value'] = implode(
                 $this->config->getDelimiterOptions(),
                 array_map(function ($item) {
                     return $item->getValue();
