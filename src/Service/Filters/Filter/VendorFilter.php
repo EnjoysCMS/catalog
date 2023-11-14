@@ -39,7 +39,11 @@ class VendorFilter implements FilterInterface
 
         $values = [];
         foreach ($vendors as $vendor) {
-            $values[$vendor->getId()] = $vendor->getName();
+            $vendorName = $vendor->getName();
+            if (empty($vendorName)){
+                continue;
+            }
+            $values[$vendor->getId()] = $vendorName;
         }
         return $values;
     }
