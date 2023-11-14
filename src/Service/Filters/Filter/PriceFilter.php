@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Number;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Config;
@@ -111,10 +112,22 @@ class PriceFilter implements FilterInterface
             ->add([
                 (new Number('filter[price][min]'))
                     ->addClass('minInput')
+                    ->addAttribute(
+                        AttributeFactory::create(
+                            'placeholder',
+                            sprintf('от %s', $this->config->getCurrentCurrency()->format($min))
+                        )
+                    )
                     ->setMin($min)
                     ->setMax($max),
                 (new Number('filter[price][max]'))
                     ->addClass('maxInput')
+                    ->addAttribute(
+                        AttributeFactory::create(
+                            'placeholder',
+                            sprintf('до %s', $this->config->getCurrentCurrency()->format($max))
+                        )
+                    )
                     ->setMin($min)
                     ->setMax($max)
                 ,
