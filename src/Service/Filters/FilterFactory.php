@@ -8,13 +8,15 @@ use DI\NotFoundException;
 use EnjoysCMS\Module\Catalog\Service\Filters\Filter\OptionFilter;
 use EnjoysCMS\Module\Catalog\Service\Filters\Filter\PriceFilter;
 use EnjoysCMS\Module\Catalog\Service\Filters\Filter\StockFilter;
+use EnjoysCMS\Module\Catalog\Service\Filters\Filter\VendorFilter;
 
 class FilterFactory
 {
     public static array $filters = [
         'option' => OptionFilter::class,
         'price' => PriceFilter::class,
-        'stock' => StockFilter::class
+        'stock' => StockFilter::class,
+        'vendor' => VendorFilter::class,
     ];
 
     private array $result = [];

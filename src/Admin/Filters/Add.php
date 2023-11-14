@@ -54,10 +54,9 @@ class Add
                 $this->addOptionFilter($category);
                 break;
             case 'price':
-                $this->addPriceFilter($category);
-                break;
             case 'stock':
-                $this->addStockFilter($category);
+            case 'vendor':
+                $this->addFilter($category);
                 break;
         }
         $this->em->flush();
@@ -74,20 +73,9 @@ class Add
         foreach ($this->input->options ?? [] as $optionKeyId) {
             $hash = md5($this->input->filterType . $optionKeyId);
 
-            if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
-                continue;
-            }
-
-            $filter = new CategoryFilter();
-            $filter->setCategory($category);
-            $filter->setFilterType($this->input->filterType);
-            $filter->setParams([
+            $this->addFilter($category, [
                 'optionKey' => $optionKeyId
-            ]);
-            $filter->setOrder($this->input->order ?? 0);
-            $filter->setHash($hash);
-
-            $this->em->persist($filter);
+            ], $hash);
         }
     }
 
@@ -95,41 +83,25 @@ class Add
      * @throws NotSupported
      * @throws ORMException
      */
-    private function addPriceFilter(Category $category): void
+    private function addFilter(Category $category, array $params = [], string $hash = null): void
     {
-        $hash = md5($this->input->filterType);
+        $hash ??= md5($this->input->filterType);
         if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
             return;
         }
         $filter = new CategoryFilter();
         $filter->setCategory($category);
         $filter->setFilterType($this->input->filterType);
-        $filter->setParams([]);
+        $filter->setParams($params);
         $filter->setOrder($this->input->order ?? 0);
         $filter->setHash($hash);
 
         $this->em->persist($filter);
     }
 
-    /**
-     * @throws NotSupported
-     * @throws ORMException
-     */
-    private function addStockFilter(Category $category): void
-    {
-        $hash = md5($this->input->filterType);
-        if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
-            return;
-        }
-        $filter = new CategoryFilter();
-        $filter->setCategory($category);
-        $filter->setFilterType($this->input->filterType);
-        $filter->setParams([]);
-        $filter->setOrder($this->input->order ?? 0);
-        $filter->setHash($hash);
 
-        $this->em->persist($filter);
-    }
+
+
 
     /**
      * @throws NotSupported
@@ -140,5 +112,6 @@ class Add
                 ['category' => $category, 'filterType' => $filterType, 'hash' => $hash]
             );
     }
+
 
 }

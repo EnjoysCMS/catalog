@@ -80,7 +80,7 @@
                     },
                     body: JSON.stringify({
                         "category": categoryId,
-                        "order": 1,
+                        "order": 2,
                         "filterType": 'price'
                     })
                 }).then(() => loadCategoryFilters(categoryId))
@@ -95,8 +95,23 @@
                     },
                     body: JSON.stringify({
                         "category": categoryId,
-                        "order": 0,
+                        "order": 1,
                         "filterType": 'stock'
+                    })
+                }).then(() => loadCategoryFilters(categoryId))
+            })
+
+            document.getElementById('add-vendor-filter').addEventListener('click', function (e) {
+                e.preventDefault()
+                fetch("{{ path('@catalog_filters_add') }}", {
+                    method: 'PUT',
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "category": categoryId,
+                        "order": 0,
+                        "filterType": 'vendor'
                     })
                 }).then(() => loadCategoryFilters(categoryId))
             })
@@ -204,7 +219,7 @@
                 body: JSON.stringify({
                     "category": categoryId,
                     "options": optionKeys,
-                    "order": 2,
+                    "order": 100,
                     "filterType": 'option'
                 })
             }).then(function () {
@@ -284,6 +299,7 @@
         </button>
         <button id="add-stock-filter" class="btn btn-sm btn-primary mb-3">Добавить STOCK фильтр</button>
         <button id="add-price-filter" class="btn btn-sm btn-primary mb-3">Добавить PRICE фильтр</button>
+        <button id="add-vendor-filter" class="btn btn-sm btn-primary mb-3">Добавить BRAND(Vendor) фильтр</button>
     </template>
 
     <template id="filterRow">
