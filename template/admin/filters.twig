@@ -149,6 +149,21 @@
                     }).then(() => loadCategoryFilters(categoryId))
                 });
 
+
+                row.querySelector('.setup-to-child').addEventListener('click', function (e) {
+                    e.preventDefault()
+                    fetch("{{ path('@catalog_filters_setup_to_child') }}", {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            "category": categoryId,
+                            filterId: tr.dataset.filterId
+                        })
+                    }).then(function () {
+                        e.target.classList.add('btn-success');
+                        e.target.classList.remove('btn-warning');
+                    })
+                });
+
                 [selectFormType, order].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
@@ -317,6 +332,7 @@
             </td>
             <td class="action">
                 <button class="delete-filter btn btn-sm btn-danger">Удалить фильтр</button>
+                <button class="setup-to-child btn btn-sm btn-warning">Установить этот фильтр для дочерних категорий</button>
             </td>
         </tr>
 
