@@ -26,7 +26,7 @@ class VendorFilter implements FilterInterface
 
     public function getPossibleValues(array $productIds): array
     {
-        /** @var Vendor[] $vendors */
+        /** @var array<int, Vendor|null> $vendors */
         $vendors = $this->em
             ->createQueryBuilder()
             ->select('v')
@@ -39,7 +39,7 @@ class VendorFilter implements FilterInterface
 
         $values = [];
         foreach ($vendors as $vendor) {
-            $vendorName = $vendor->getName();
+            $vendorName = $vendor?->getName();
             if (empty($vendorName)){
                 continue;
             }
