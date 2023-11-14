@@ -9,8 +9,6 @@ use Doctrine\ORM\OptimisticLockException;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\CategoryFilter;
-use EnjoysCMS\Module\Catalog\Entity\Filter;
-use EnjoysCMS\Module\Catalog\Repository\FilterRepository;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
