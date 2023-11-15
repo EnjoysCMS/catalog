@@ -59,10 +59,16 @@
 
         let select = document.querySelector('select#category');
         let filtersBody = document.getElementById('filters');
-        let categoryId;
+        let categoryId, categoryName;
 
         function drawFilters(data) {
             filtersBody.innerHTML = '';
+
+
+            let category_container = document.createElement('h1');
+            category_container.classList.add('my-3');
+            category_container.innerHTML = categoryName.trim();
+            filtersBody.appendChild(category_container);
 
             let buttons = document.getElementById('buttons').content.cloneNode(true);
 
@@ -128,9 +134,9 @@
 
                 let optionFormType = row.querySelector('.optionFormType');
                 let selectFormType = optionFormType.querySelector('select[name="optionFormType"]');
-                if (item.filterType === 'option'){
+                if (item.filterType === 'option') {
                     selectFormType.value = item.filterParams.formType ?? 'checkbox';
-                }else{
+                } else {
                     optionFormType.innerHTML = ''
                 }
 
@@ -203,13 +209,14 @@
                     Object.values(data).forEach(function (v) {
                         let option = new Option(v.title.replaceAll("&nbsp;", "\u00A0"), v.id);
                         if (v.id === 0) {
-                            option = new Option('Выберите категорию...', v.id);
+                            option = new Option('Выберите категорию...', null);
                         }
                         select.append(option);
                     })
 
                     select.addEventListener('change', function () {
                         categoryId = select.value;
+                        categoryName = select.options[select.selectedIndex].text;
                         loadCategoryFilters()
                     })
                 })
@@ -242,7 +249,6 @@
                 return loadCategoryFilters(categoryId);
             })
         });
-
 
 
     </script>
@@ -308,6 +314,8 @@
         </div>
     </div>
 
+    <template id="category-template"></template>
+
     <template id="buttons">
         <button id="add-option-filter" data-toggle="modal" data-target="#addFilterModal"
                 class="btn btn-sm btn-primary mb-3">Добавить OPTION фильтр
@@ -332,7 +340,8 @@
             </td>
             <td class="action">
                 <button class="delete-filter btn btn-sm btn-danger">Удалить фильтр</button>
-                <button class="setup-to-child btn btn-sm btn-warning">Установить этот фильтр для дочерних категорий</button>
+                <button class="setup-to-child btn btn-sm btn-warning">Установить этот фильтр для дочерних категорий
+                </button>
             </td>
         </tr>
 
