@@ -197,7 +197,9 @@
             fetch(url.toString(), {
                 method: 'GET'
             }).then(response => response.json())
-                .then(data => drawFilters(data))
+                .then(data => drawFilters(data)).catch(() => {
+                filtersBody.innerHTML = '<h2>Выберите категорию</h2>';
+            })
         };
 
         const fillCategorySelect = function () {
