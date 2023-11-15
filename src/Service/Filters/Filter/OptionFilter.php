@@ -10,6 +10,9 @@ use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Checkbox;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Radio;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Select;
 
 class OptionFilter implements FilterInterface
 {
@@ -77,30 +80,40 @@ class OptionFilter implements FilterInterface
 
     public function getFormElement(Form $form, $values): Form
     {
-         switch ($this->getFormType()) {
+        switch ($this->getFormType()) {
             case 'checkbox':
-                $form->checkbox(
-                    sprintf('%s[]', $this->getFormName()),
-                    $this->__toString()
-                )->fill($values);
+                (new Checkbox($form, $this, $values))->create();
                 break;
             case 'select-multiply':
-                $form->select(sprintf('%s[]', $this->getFormName()), $this->__toString())
-                    ->setMultiple()
-                    ->fill($values);
+                (new Select($form, $this, $values))->multiple()->create();
                 break;
             case 'select':
-                $form->select(
-                    sprintf('%s[]', $this->getFormName()),
-                    $this->__toString()
-                )->fill($values);
+                (new Select($form, $this, $values))->create();
                 break;
             case 'radio':
-                $form->radio(
-                    sprintf('%s[]', $this->getFormName()),
-                    $this->__toString()
-                )->fill($values);
+                (new Radio($form, $this, $values))->create();
                 break;
+//            case 'slider':
+//
+//
+//                $min = min($values);
+//                $max = max($values);
+//
+//
+//                $form->group($this->__toString())
+//                    ->addClass('slider-group')
+//                    ->add([
+//                        (new Number('filter[price][min]'))
+//                            ->addClass('minInput')
+//                            ->setMin($min)
+//                            ->setMax($max),
+//                        (new Number('filter[price][max]'))
+//                            ->addClass('maxInput')
+//                            ->setMin($min)
+//                            ->setMax($max)
+//                        ,
+//                    ]);
+//                break;
             default:
                 throw new \RuntimeException('FormType not support');
         }

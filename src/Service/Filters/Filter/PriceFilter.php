@@ -20,6 +20,8 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 class PriceFilter implements FilterInterface
 {
 
+    private string $name = 'Цена';
+
     private ?array $possibleValues = null;
 
     public function __construct(
@@ -32,7 +34,7 @@ class PriceFilter implements FilterInterface
 
     public function __toString(): string
     {
-        return 'Фильтр по цене';
+        return $this->getName();
     }
 
     /**
@@ -134,5 +136,15 @@ class PriceFilter implements FilterInterface
             ]);
 
         return $form;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 }

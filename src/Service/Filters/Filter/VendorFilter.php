@@ -13,6 +13,8 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 
 class VendorFilter implements FilterInterface
 {
+    private string $name = 'Бренд (производитель)';
+
     public function __construct(
         private FilterParams $params,
         private EntityManager $em
@@ -21,7 +23,7 @@ class VendorFilter implements FilterInterface
 
     public function __toString(): string
     {
-        return 'Фильтр по бренду (производителю)';
+        return $this->getName();
     }
 
     public function getPossibleValues(array $productIds): array
@@ -59,5 +61,15 @@ class VendorFilter implements FilterInterface
         $form->checkbox('filter[vendor]', $this->__toString())
             ->fill($values);
         return $form;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 }

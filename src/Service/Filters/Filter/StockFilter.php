@@ -8,9 +8,11 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 
 class StockFilter implements FilterInterface
 {
+    private string $name = 'Только в наличии';
+
     public function __toString(): string
     {
-        return 'Только в наличии';
+        return $this->getName();
     }
 
     public function getPossibleValues(array $productIds): array
@@ -30,5 +32,15 @@ class StockFilter implements FilterInterface
             ->addClass('form-switch', Form::ATTRIBUTES_FILLABLE_BASE)
             ->fill([1 => $this->__toString()]);
         return $form;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 }
