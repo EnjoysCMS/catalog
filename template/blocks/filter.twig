@@ -9,6 +9,7 @@
         .filter-sidebar .form-label {
             font-weight: bold;
         }
+
         .slider-group {
             margin: 0;
         }
@@ -32,7 +33,7 @@
             border-radius: 9px;
         }
 
-        .noUi-horizontal .noUi-handle:before,   .noUi-horizontal .noUi-handle:after {
+        .noUi-horizontal .noUi-handle:before, .noUi-horizontal .noUi-handle:after {
             display: none;
         }
     </style>
@@ -66,6 +67,23 @@
                 });
             })
         })
+    </script>
+    <script>
+        document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
+            let options_container = node.parentNode.querySelectorAll('.form-check');
+            let collapsed = false;
+            options_container.forEach(function (el, i) {
+                if (i > 5) {
+                    collapsed = true;
+                    el.style.display = 'none';
+                }
+            })
+
+            if (collapsed === true) {
+                console.warn('collapsed')
+            }
+        })
+
     </script>
     <div class="filter-sidebar d-none d-xl-flex mt-3">
         <div class="card rounded-0 w-100">
