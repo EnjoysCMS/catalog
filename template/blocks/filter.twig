@@ -68,23 +68,63 @@
             })
         })
     </script>
+
     <script>
-        document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
-            let options_container = node.parentNode.querySelectorAll('.form-check');
+        function toCollapsed(container) {
             let collapsed = false;
-            options_container.forEach(function (el, i) {
+            container.forEach(function (el, i) {
                 if (i > 5) {
                     collapsed = true;
-                    el.style.display = 'none';
+                    if (!el.getElementsByTagName('input')[0].checked){
+                        el.style.display = 'none';
+                    }
                 }
             })
+            return collapsed;
+        }
+
+        function toShow(container) {
+            container.forEach(function (el) {
+                el.style.display = 'block';
+            })
+        }
+
+        document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
+            let checkbox_option_filter = node.parentNode;
+            checkbox_option_filter.style.maxHeight = '250px';
+            checkbox_option_filter.style.overflowY = 'auto';
+            let options_container = checkbox_option_filter.querySelectorAll('.form-check');
+            let collapsed = toCollapsed(options_container);
 
             if (collapsed === true) {
-                console.warn('collapsed')
+                let collapsed_btn = document.createElement('a');
+                collapsed_btn.href = '#'
+                collapsed_btn.classList.add('__show_all_options')
+                collapsed_btn.innerHTML = 'показать все варианты'
+                checkbox_option_filter.appendChild(collapsed_btn)
+
+                collapsed_btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    if (collapsed_btn.classList.contains('__show_all_options')) {
+                        collapsed_btn.classList.remove('__show_all_options')
+                        collapsed_btn.innerHTML = 'скрыть'
+                        toShow(options_container)
+                    }else {
+                        collapsed_btn.classList.add('__show_all_options')
+                        collapsed_btn.innerHTML = 'показать все варианты'
+                        toCollapsed(options_container)
+                    }
+                });
+
             }
+
+
         })
 
     </script>
+
+
     <div class="filter-sidebar d-none d-xl-flex mt-3">
         <div class="card rounded-0 w-100">
             <div class="card-body">
