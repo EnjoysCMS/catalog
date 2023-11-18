@@ -12,6 +12,7 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Checkbox;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Radio;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Range;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Select;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Slider;
 
@@ -65,26 +66,32 @@ class OptionFilter implements FilterInterface
 
     public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
-        if (in_array('max', array_keys($this->params->currentValues)) || in_array(
-                'min',
-                array_keys($this->params->currentValues)
-            )) {
+        if (in_array('max', array_keys($this->params->currentValues))
+            || in_array('min', array_keys($this->params->currentValues))
+        ) {
+            $min = (empty($this->params->currentValues['min'])) ? null : $this->params->currentValues['min'];
+            $max = (empty($this->params->currentValues['max'])) ? null : $this->params->currentValues['max'];
+
             $subSelect = $qb->getEntityManager()->createQueryBuilder()
                 ->select('v.id')
                 ->from(OptionValue::class, 'v')
                 ->where('v.optionKey = :optionKey')
-                ->setParameter('optionKey', $this->optionKey->getId())
-                ->andWhere(
-                    $qb->expr()->between(
-                        'v.value',
-                        ':minValue',
-                        ':maxValue'
-                    )
-                )
-                ->setParameter('minValue', $this->params->currentValues['min'])
-                ->setParameter('maxValue', $this->params->currentValues['max']);
-            return $qb->andWhere(':values MEMBER OF p.options')
-                ->setParameter('values', $subSelect->getQuery()->getResult());
+                ->setParameter('optionKey', $this->optionKey->getId());
+            if ($min) {
+                $subSelect->andWhere('v.value >=  :minValue')
+                    ->setParameter('minValue', $min);
+            }
+            if ($max) {
+                $subSelect->andWhere('v.value <=  :maxValue')
+                    ->setParameter('maxValue', $max);
+            }
+
+
+            if ($min || $max) {
+                return $qb->andWhere(':values MEMBER OF p.options')
+                    ->setParameter('values', $subSelect->getQuery()->getResult());
+            }
+            return $qb;
         }
 
         return $qb->andWhere(sprintf(':values%s MEMBER OF p.options', $this->optionKey->getId()))
@@ -119,6 +126,9 @@ class OptionFilter implements FilterInterface
                 break;
             case 'slider':
                 (new Slider($form, $this, $values))->create();
+                break;
+            case 'range':
+                (new Range($form, $this, $values))->create();
                 break;
             default:
                 throw new \RuntimeException('FormType not support');
