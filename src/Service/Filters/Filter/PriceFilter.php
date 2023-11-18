@@ -77,22 +77,30 @@ class PriceFilter implements FilterInterface
      */
     public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
-        return $qb->andWhere(
-            $qb->expr()->between(
-                'CONVERT_PRICE(pr.price, pr.currency, :current_currency)',
-                ':minPrice',
-                ':maxPrice'
-            )
-        )
-            ->andWhere('pr.priceGroup = :priceGroup')
+        $min = (empty($this->params->currentValues['min'])) ? null : $this->params->currentValues['min'];
+        $max = (empty($this->params->currentValues['max'])) ? null : $this->params->currentValues['max'];
+
+        if (!$min && !$max) {
+            return $qb;
+        }
+
+        if ($min) {
+            $qb->andWhere('CONVERT_PRICE(pr.price, pr.currency, :current_currency) >=  :minValue')
+                ->setParameter('minValue', Normalize::floatPriceToInt($min));
+        }
+        if ($max) {
+            $qb->andWhere('CONVERT_PRICE(pr.price, pr.currency, :current_currency) <=  :maxValue')
+                ->setParameter('maxValue', Normalize::floatPriceToInt($max));
+        }
+
+
+        return $qb->andWhere('pr.priceGroup = :priceGroup')
             ->setParameter('current_currency', $this->config->getCurrentCurrencyCode())
             ->setParameter(
                 'priceGroup',
                 $this->em->getRepository(PriceGroup::class)->findOneBy(['code' => $this->config->getDefaultPriceGroup()]
                 )
-            )
-            ->setParameter('minPrice', Normalize::floatPriceToInt($this->params->currentValues['min']))
-            ->setParameter('maxPrice', Normalize::floatPriceToInt($this->params->currentValues['max']));
+            );
     }
 
     public function getFormElement(Form $form, $values): Form
@@ -100,17 +108,8 @@ class PriceFilter implements FilterInterface
         $min = $values['min'] === null ? 0 : $values['min'] - 1;
         $max = $values['max'] === null ? $min + 1 : $values['max'] + 1;
 
-        $form->setDefaults([
-            'filter' => [
-                'price' => [
-                    'min' => $min,
-                    'max' => $max,
-                ]
-            ]
-        ]);
 
         $form->group($this->__toString())
-            ->addClass('slider-group')
             ->add([
                 (new Number('filter[price][min]'))
                     ->addClass('minInput')
