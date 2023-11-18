@@ -13,6 +13,7 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Checkbox;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Radio;
 use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Select;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Slider;
 
 class OptionFilter implements FilterInterface
 {
@@ -64,9 +65,32 @@ class OptionFilter implements FilterInterface
 
     public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
     {
+        if (in_array('max', array_keys($this->params->currentValues)) || in_array(
+                'min',
+                array_keys($this->params->currentValues)
+            )) {
+            $subSelect = $qb->getEntityManager()->createQueryBuilder()
+                ->select('v.id')
+                ->from(OptionValue::class, 'v')
+                ->where('v.optionKey = :optionKey')
+                ->setParameter('optionKey', $this->optionKey->getId())
+                ->andWhere(
+                    $qb->expr()->between(
+                        'v.value',
+                        ':minValue',
+                        ':maxValue'
+                    )
+                )
+                ->setParameter('minValue', $this->params->currentValues['min'])
+                ->setParameter('maxValue', $this->params->currentValues['max']);
+            return $qb->andWhere(':values MEMBER OF p.options')
+                ->setParameter('values', $subSelect->getQuery()->getResult());
+        }
+
         return $qb->andWhere(sprintf(':values%s MEMBER OF p.options', $this->optionKey->getId()))
             ->setParameter('values' . $this->optionKey->getId(), $this->params->currentValues ?? []);
     }
+
 
     public function getFormName(): string
     {
@@ -93,27 +117,9 @@ class OptionFilter implements FilterInterface
             case 'radio':
                 (new Radio($form, $this, $values))->create();
                 break;
-//            case 'slider':
-//
-//
-//                $min = min($values);
-//                $max = max($values);
-//
-//
-//                $form->group($this->__toString())
-//                    ->addClass('slider-group')
-//                    ->add([
-//                        (new Number('filter[price][min]'))
-//                            ->addClass('minInput')
-//                            ->setMin($min)
-//                            ->setMax($max),
-//                        (new Number('filter[price][max]'))
-//                            ->addClass('maxInput')
-//                            ->setMin($min)
-//                            ->setMax($max)
-//                        ,
-//                    ]);
-//                break;
+            case 'slider':
+                (new Slider($form, $this, $values))->create();
+                break;
             default:
                 throw new \RuntimeException('FormType not support');
         }
