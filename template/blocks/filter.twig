@@ -91,9 +91,17 @@
 
         document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
 
+            let label = document.querySelector('label[for=' + node.id + ']')
+
+            label.style.display = 'block';
+
+            if(node.dataset.isMain !== 'true'){
+                node.style.display = 'none';
+            }
+
             let options_container = node.querySelectorAll('.form-check');
 
-             let checkbox_option_filter = options_container[0].parentNode;
+            let checkbox_option_filter = options_container[0].parentNode;
             checkbox_option_filter.style.maxHeight = '250px';
             checkbox_option_filter.style.overflowY = 'auto';
 

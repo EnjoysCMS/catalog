@@ -87,7 +87,10 @@
                     body: JSON.stringify({
                         "category": categoryId,
                         "order": 2,
-                        "filterType": 'price'
+                        "filterType": 'price',
+                        "filterParams": {
+                            "main": true
+                        },
                     })
                 }).then(() => loadCategoryFilters(categoryId))
             })
@@ -102,7 +105,10 @@
                     body: JSON.stringify({
                         "category": categoryId,
                         "order": 1,
-                        "filterType": 'stock'
+                        "filterType": 'stock',
+                        "filterParams": {
+                            "main": true
+                        },
                     })
                 }).then(() => loadCategoryFilters(categoryId))
             })
@@ -117,7 +123,10 @@
                     body: JSON.stringify({
                         "category": categoryId,
                         "order": 0,
-                        "filterType": 'vendor'
+                        "filterType": 'vendor',
+                        "filterParams": {
+                            "main": true
+                        },
                     })
                 }).then(() => loadCategoryFilters(categoryId))
             })
@@ -133,6 +142,10 @@
                 let order = row.querySelector('.order input');
 
                 let optionFormType = row.querySelector('.optionFormType');
+                let optionIsMain = row.querySelector('input[name=optionIsMain]');
+
+                optionIsMain.checked = item.filterParams.main;
+
                 let selectFormType = optionFormType.querySelector('select[name="optionFormType"]');
                 if (item.filterType === 'option') {
                     selectFormType.value = item.filterParams.formType ?? 'checkbox';
@@ -170,7 +183,7 @@
                     })
                 });
 
-                [selectFormType, order].forEach(function (element) {
+                [selectFormType, order, optionIsMain].forEach(function (element) {
                     element.addEventListener('change', function (e) {
                         e.preventDefault()
                         fetch("{{ path('@catalog_filters_update') }}", {
@@ -178,7 +191,10 @@
                             body: JSON.stringify({
                                 filterId: tr.dataset.filterId,
                                 order: order.value,
-                                filterParams: {formType: selectFormType.value},
+                                filterParams: {
+                                    formType: selectFormType.value,
+                                    main: optionIsMain.checked
+                                },
                             })
                         }).then(() => loadCategoryFilters(categoryId))
                     });
@@ -339,6 +355,9 @@
                     <option value="slider">slider</option>
                     <option value="range">range</option>
                 </select>
+            </td>
+            <td class="optionIsMain">
+                <input title="Основной фильтр, если отмечен то всегда будет открытый" type="checkbox" name="optionIsMain" class="form-control">
             </td>
             <td class="order">
                 <input name="order" type="number" class="form-control">

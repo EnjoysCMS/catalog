@@ -5,6 +5,7 @@ namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\Vendor;
@@ -43,7 +44,7 @@ class VendorFilter implements FilterInterface
         $values = [];
         foreach ($vendors as $vendor) {
             $vendorName = $vendor?->getName();
-            if (empty($vendorName)){
+            if (empty($vendorName)) {
                 continue;
             }
             $values[$vendor->getId()] = $vendorName;
@@ -60,8 +61,9 @@ class VendorFilter implements FilterInterface
     public function getFormElement($form, $values): Form
     {
         (new Checkbox($form, $this, $values))->create();
-//        $form->checkbox('filter[vendor]', $this->__toString())
-//            ->fill($values);
+        $elements = $form->getElements();
+        $element = end($elements);
+        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
         return $form;
     }
 

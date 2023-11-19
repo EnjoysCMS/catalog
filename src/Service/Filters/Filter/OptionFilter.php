@@ -5,6 +5,7 @@ namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\QueryBuilder;
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
@@ -111,6 +112,7 @@ class OptionFilter implements FilterInterface
 
     public function getFormElement(Form $form, $values): Form
     {
+
         switch ($this->getFormType()) {
             case 'checkbox':
                 (new Checkbox($form, $this, $values))->create();
@@ -133,6 +135,10 @@ class OptionFilter implements FilterInterface
             default:
                 throw new \RuntimeException('FormType not support');
         }
+
+        $elements = $form->getElements();
+        $element = end($elements);
+        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
         return $form;
     }
 }

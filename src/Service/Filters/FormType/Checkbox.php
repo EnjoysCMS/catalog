@@ -31,6 +31,7 @@ final class Checkbox
             sprintf('%s[]', $this->filter->getFormName()),
         ))->addClass(uniqid())
             ->fill($this->values);
+
         $this->form->group($this->filter->__toString())->add($group)
             ->addClasses(['flex-column', 'checkbox-option-filter']);
     }

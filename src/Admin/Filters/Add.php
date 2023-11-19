@@ -41,7 +41,6 @@ class Add
      */
     public function __invoke(): ResponseInterface
     {
-
         $response = $this->response->withHeader('content-type', 'application/json');
 
         /** @var Category $category */
@@ -83,7 +82,7 @@ class Add
      * @throws NotSupported
      * @throws ORMException
      */
-    private function addFilter(Category $category, array $params = [], string $hash = null): void
+    private function addFilter(Category $category, array $params = null, string $hash = null): void
     {
         $hash ??= md5($this->input->filterType);
         if ($this->isFilterExist($category, $this->input->filterType, $hash)) {
@@ -92,15 +91,12 @@ class Add
         $filter = new CategoryFilter();
         $filter->setCategory($category);
         $filter->setFilterType($this->input->filterType);
-        $filter->setParams($params);
+        $filter->setParams((array)($params ?? $this->input->filterParams ?? []));
         $filter->setOrder($this->input->order ?? 0);
         $filter->setHash($hash);
 
         $this->em->persist($filter);
     }
-
-
-
 
 
     /**
