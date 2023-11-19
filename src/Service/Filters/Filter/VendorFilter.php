@@ -10,6 +10,7 @@ use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\Vendor;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterParams;
+use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Checkbox;
 
 class VendorFilter implements FilterInterface
 {
@@ -58,9 +59,15 @@ class VendorFilter implements FilterInterface
 
     public function getFormElement($form, $values): Form
     {
-        $form->checkbox('filter[vendor]', $this->__toString())
-            ->fill($values);
+        (new Checkbox($form, $this, $values))->create();
+//        $form->checkbox('filter[vendor]', $this->__toString())
+//            ->fill($values);
         return $form;
+    }
+
+    public function getFormName(): string
+    {
+        return 'filter[vendor]';
     }
 
     public function getName(): string
