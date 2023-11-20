@@ -128,7 +128,7 @@
         })
 
 
-            document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
+        document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
 
 
             let options_container = node.querySelectorAll('.form-check');
@@ -172,10 +172,19 @@
         document.querySelectorAll('.search_param').forEach(function (el) {
             let labels = el.closest('.checkbox-option-filter').querySelectorAll('label');
             el.addEventListener("input", function () {
-
+                let found = false
+                el.classList.remove('is-invalid')
                 Array.from(labels).forEach(function (element) {
-                    element.parentNode.style.display = element.innerText.toLowerCase().includes(el.value.toLowerCase()) ? "block" : "none";
+                    let display = element.innerText.toLowerCase().includes(el.value.toLowerCase()) ? "block" : "none"
+                    element.parentNode.style.display = display;
+                    if (display === 'block') {
+                        found = true
+                    }
                 });
+
+                if (found === false) {
+                    el.classList.add('is-invalid')
+                }
             })
         })
     </script>
