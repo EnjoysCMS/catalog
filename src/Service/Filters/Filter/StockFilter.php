@@ -28,7 +28,7 @@ class StockFilter implements FilterInterface
 
     public function getFormElement($form, $values): Form
     {
-        $form->checkbox('filter[stock]')
+        $form->checkbox($this->getFormName(), 'Наличие в магазине')
             ->addClass('form-switch', Form::ATTRIBUTES_FILLABLE_BASE)
             ->fill([1 => $this->__toString()]);
         return $form;
@@ -42,5 +42,10 @@ class StockFilter implements FilterInterface
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getFormName(): string
+    {
+        return 'filter[stock]';
     }
 }

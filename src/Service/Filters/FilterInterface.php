@@ -13,4 +13,6 @@ interface FilterInterface extends \Stringable
     public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder;
 
     public function getFormElement(Form $form, $values): Form;
+
+    public function getFormName(): string;
 }

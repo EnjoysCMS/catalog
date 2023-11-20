@@ -61,9 +61,6 @@ class VendorFilter implements FilterInterface
     public function getFormElement($form, $values): Form
     {
         (new Checkbox($form, $this, $values))->create();
-        $elements = $form->getElements();
-        $element = end($elements);
-        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
         return $form;
     }
 
@@ -80,5 +77,10 @@ class VendorFilter implements FilterInterface
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function getParams(): FilterParams
+    {
+        return $this->params;
     }
 }

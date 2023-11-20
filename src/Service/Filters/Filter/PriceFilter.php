@@ -110,6 +110,7 @@ class PriceFilter implements FilterInterface
 
 
         $form->group($this->__toString())
+            ->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'))
             ->add([
                 (new Number('filter[price][min]'))
                     ->addClass('minInput')
@@ -135,6 +136,11 @@ class PriceFilter implements FilterInterface
             ]);
 
         return $form;
+    }
+
+    public function getFormName(): string
+    {
+        return 'filter[price]';
     }
 
     public function getName(): string

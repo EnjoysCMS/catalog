@@ -136,9 +136,14 @@ class OptionFilter implements FilterInterface
                 throw new \RuntimeException('FormType not support');
         }
 
-        $elements = $form->getElements();
-        $element = end($elements);
-        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
+//        $elements = $form->getElements();
+//        $element = end($elements);
+//        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
         return $form;
+    }
+
+    public function getParams(): FilterParams
+    {
+        return $this->params;
     }
 }

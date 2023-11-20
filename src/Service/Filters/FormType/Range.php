@@ -18,13 +18,15 @@ final class Range
     ) {
     }
 
-    public function create(): void
+    public function create($min = null, $max = null): void
     {
-        $min = min($this->values);
-        $max = max($this->values);
+        $min = $min ?? min($this->values);
+        $max = $max ?? max($this->values);
 
 
         $this->form->group($this->filter->__toString())
+            ->addAttribute(AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false'))
+            ->addClasses(['filter-item'])
             ->add([
                 (new Number(sprintf('%s[min]', $this->filter->getFormName())))
                     ->addClass('minInput')

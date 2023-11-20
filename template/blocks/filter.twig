@@ -89,15 +89,47 @@
             })
         }
 
-        document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
+        function toggleHide(label, node) {
+            node.style.display = node.style.display === 'none' ? '' : 'none';
+
+            let arrow = label.querySelector('i');
+            arrow.classList.remove('fa-chevron-up', 'fa-chevron-down')
+            if (node.style.display === 'none') {
+                arrow.classList.add('fa-chevron-down')
+            } else {
+                arrow.classList.add('fa-chevron-up')
+            }
+
+        }
+
+        document.querySelectorAll('.filter-item').forEach(function (node) {
+            let arrow = document.createElement('i');
+            arrow.classList.add('fa');
+            arrow.classList.add('px-3');
+            arrow.classList.add('fa-chevron-up')
 
             let label = document.querySelector('label[for=' + node.id + ']')
-
+            label.role = 'button';
             label.style.display = 'block';
 
-            if(node.dataset.isMain !== 'true'){
+            if (node.dataset.isMain !== 'true') {
                 node.style.display = 'none';
+                arrow.classList.remove('fa-chevron-up')
+                arrow.classList.add('fa-chevron-down')
             }
+
+            label.appendChild(arrow)
+
+            label.addEventListener('click', function (e) {
+                e.preventDefault();
+                toggleHide(label, node)
+            })
+
+        })
+
+
+            document.querySelectorAll('.checkbox-option-filter').forEach(function (node) {
+
 
             let options_container = node.querySelectorAll('.form-check');
 

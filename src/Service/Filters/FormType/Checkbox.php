@@ -33,6 +33,7 @@ final class Checkbox
             ->fill($this->values);
 
         $this->form->group($this->filter->__toString())->add($group)
-            ->addClasses(['flex-column', 'checkbox-option-filter']);
+            ->addAttribute(AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false'))
+            ->addClasses(['flex-column', 'checkbox-option-filter', 'filter-item']);
     }
 }

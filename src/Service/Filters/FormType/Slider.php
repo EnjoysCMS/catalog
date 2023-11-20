@@ -25,7 +25,10 @@ final class Slider
 
 
         $this->form->group($this->filter->__toString())
-            ->addClass('slider-group')
+            ->addClasses(['slider-group', 'filter-item'])
+            ->addAttribute(
+                AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false')
+            )
             ->add([
                 (new Number(sprintf('%s[min]', $this->filter->getFormName())))
                     ->addClass('minInput')

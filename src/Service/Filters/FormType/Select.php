@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Service\Filters\FormType;
 
+use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 
@@ -20,14 +21,23 @@ final class Select
 
     public function create(): void
     {
-        $select = $this->form->select(
-            sprintf('%s[]', $this->filter->getFormName()),
-            $this->filter->__toString()
+        $select = new \Enjoys\Forms\Elements\Select(
+            sprintf('%s[]', $this->filter->getFormName())
         );
-        if ($this->multiple){
+
+        $select->addAttribute(
+            AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false')
+        );
+        if ($this->multiple) {
             $select->setMultiple();
         }
         $select->fill($this->values);
+
+        $this->form->group($this->filter->__toString())->add([$select])
+            ->addAttribute(
+                AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false')
+            )
+            ->addClasses(['flex-column', 'filter-item']);
     }
 
     public function multiple(): Select
