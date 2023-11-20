@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EnjoysCMS\Module\Catalog\Service\Filters\Filter;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\QueryBuilder;
-use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
@@ -20,6 +21,7 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FormType\Slider;
 class OptionFilter implements FilterInterface
 {
     private OptionKey $optionKey;
+    private bool $activeFilter = false;
 
     /**
      * @throws NotSupported
@@ -33,6 +35,18 @@ class OptionFilter implements FilterInterface
         ) ?? throw new \RuntimeException(
             'OptionKey Id not found'
         );
+
+        $currentValues = $this->params->getParams()['currentValues'];
+
+        if (in_array('max', array_keys($currentValues ?? []))
+            || in_array('min', array_keys($currentValues ?? []))
+        ) {
+            if (!empty($currentValues['max'] ?? null) || !empty($currentValues['min'] ?? null)) {
+                $this->activeFilter = true;
+            }
+        } elseif (!empty($currentValues)) {
+            $this->activeFilter = true;
+        }
     }
 
     public function __toString(): string
@@ -40,8 +54,55 @@ class OptionFilter implements FilterInterface
         return $this->optionKey->__toString();
     }
 
-    public function getPossibleValues(array $productIds): array
+    public function getBadgeData(): array
     {
+        return [
+            'name' => $this->__toString(),
+            'values' => implode(', ', $this->params->currentValues)
+        ];
+    }
+
+    public function getBadgeValue(): string
+    {
+        $values = $this->params->currentValues;
+        if (in_array('max', array_keys($values))
+            || in_array('min', array_keys($values))
+        ) {
+            $min = (empty($values['min'])) ? null : $values['min'];
+            $max = (empty($values['max'])) ? null : $values['max'];
+            $badge = '';
+            if ($min) {
+                $badge .= sprintf(' от %s', $min);
+            }
+            if ($max) {
+                $badge .= sprintf(' до %s', $max);
+            }
+            return $badge;
+        }
+
+        $countValues = count($values);
+
+        $value = $this->em
+            ->createQueryBuilder()
+            ->select('v')
+            ->from(OptionValue::class, 'v')
+            ->where('v.id = :value')
+            ->setParameter('value', current($values))
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return implode(
+            ', ',
+            array_filter([
+                $value,
+                ($countValues > 1) ? sprintf('+%s зн.', $countValues - 1) : null
+            ])
+        );
+    }
+
+    public function getPossibleValues(
+        array $productIds
+    ): array {
         $result = [];
 
         /** @var OptionValue[] $values */
@@ -65,8 +126,9 @@ class OptionFilter implements FilterInterface
         return $result;
     }
 
-    public function addFilterQueryBuilderRestriction(QueryBuilder $qb): QueryBuilder
-    {
+    public function addFilterQueryBuilderRestriction(
+        QueryBuilder $qb
+    ): QueryBuilder {
         if (in_array('max', array_keys($this->params->currentValues))
             || in_array('min', array_keys($this->params->currentValues))
         ) {
@@ -110,9 +172,10 @@ class OptionFilter implements FilterInterface
         return $this->params->formType ?? 'checkbox';
     }
 
-    public function getFormElement(Form $form, $values): Form
-    {
-
+    public function getFormElement(
+        Form $form,
+        $values
+    ): Form {
         switch ($this->getFormType()) {
             case 'checkbox':
                 (new Checkbox($form, $this, $values))->create();
@@ -135,10 +198,6 @@ class OptionFilter implements FilterInterface
             default:
                 throw new \RuntimeException('FormType not support');
         }
-
-//        $elements = $form->getElements();
-//        $element = end($elements);
-//        $element->addAttribute(AttributeFactory::create('data-is-main', ($this->params->main ?? false) ? 'true' : 'false'));
         return $form;
     }
 
@@ -149,6 +208,6 @@ class OptionFilter implements FilterInterface
 
     public function isActiveFilter(): bool
     {
-        return false;
+        return $this->activeFilter;
     }
 }

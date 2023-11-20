@@ -42,6 +42,21 @@ class PriceFilter implements FilterInterface
         return $this->getName();
     }
 
+
+    public function getBadgeValue(): string
+    {
+        $min = (empty($this->params->currentValues['min'])) ? null : $this->params->currentValues['min'];
+        $max = (empty($this->params->currentValues['max'])) ? null : $this->params->currentValues['max'];
+        $badge = '';
+        if ($min) {
+            $badge .= sprintf(' от %s', $this->config->getCurrentCurrency()->format($min));
+        }
+        if ($max) {
+            $badge .= sprintf(' до %s', $this->config->getCurrentCurrency()->format($max));
+        }
+        return $badge;
+    }
+
     /**
      * @throws NonUniqueResultException
      */

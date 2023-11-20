@@ -197,6 +197,7 @@ $this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
             'setting' => $this->setting,
             'breadcrumbs' => $this->breadcrumbs,
             'usedFilters' => $usedFilters,
+            'filtered' => $usedFilters !== []
         ];
     }
 

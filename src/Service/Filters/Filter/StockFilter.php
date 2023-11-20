@@ -8,12 +8,17 @@ use EnjoysCMS\Module\Catalog\Service\Filters\FilterInterface;
 
 class StockFilter implements FilterInterface
 {
-    private string $name = 'Только в наличии';
-
     public function __toString(): string
     {
-        return $this->getName();
+        return '';
     }
+
+
+    public function getBadgeValue(): string
+    {
+        return 'Только в наличии';
+    }
+
 
     public function getPossibleValues(array $productIds): array
     {
@@ -30,18 +35,8 @@ class StockFilter implements FilterInterface
     {
         $form->checkbox($this->getFormName(), 'Наличие в магазине')
             ->addClass('form-switch', Form::ATTRIBUTES_FILLABLE_BASE)
-            ->fill([1 => $this->__toString()]);
+            ->fill([1 => 'Только в наличии']);
         return $form;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
     }
 
     public function getFormName(): string
