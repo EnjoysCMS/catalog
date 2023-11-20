@@ -128,13 +128,14 @@ $this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
         $filtersQueryString = $this->request->getQueryParams()['filter'] ?? false;
         $usedFilters = [];
         if (!empty($filtersQueryString) && is_array($filtersQueryString)) {
-            $filtered = true;
-            $filters = $this->filterFactory->createFromQueryString($filtersQueryString);
-            foreach ($filters as $filter) {
+
+            $usedFilters = $this->filterFactory->createFromQueryString($filtersQueryString);
+
+            foreach ($usedFilters as $filter) {
                 $qb = $filter->addFilterQueryBuilderRestriction($qb);
             }
         }
-
+//dd($usedFilters);
         $qb->andWhere('p.hide = false');
         $qb->andWhere('p.active = true');
 
@@ -195,7 +196,6 @@ $this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
             'config' => $this->config,
             'setting' => $this->setting,
             'breadcrumbs' => $this->breadcrumbs,
-            'filtered' => $filtered,
             'usedFilters' => $usedFilters,
         ];
     }

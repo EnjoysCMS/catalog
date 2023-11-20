@@ -49,7 +49,9 @@ class FilterFactory
             $this->resolveFilters($filterType, $params);
         }
 
-        return array_filter($this->result);
+        return array_filter($this->result, function (FilterInterface $filter){
+            return is_null($filter) || $filter->isActiveFilter();
+        });
     }
 
 

@@ -48,4 +48,9 @@ class StockFilter implements FilterInterface
     {
         return 'filter[stock]';
     }
+
+    public function isActiveFilter(): bool
+    {
+        return true;
+    }
 }

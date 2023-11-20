@@ -15,4 +15,6 @@ interface FilterInterface extends \Stringable
     public function getFormElement(Form $form, $values): Form;
 
     public function getFormName(): string;
+
+    public function isActiveFilter(): bool;
 }

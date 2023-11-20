@@ -83,4 +83,9 @@ class VendorFilter implements FilterInterface
     {
         return $this->params;
     }
+
+    public function isActiveFilter(): bool
+    {
+        return true;
+    }
 }

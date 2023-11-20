@@ -24,11 +24,16 @@ class PriceFilter implements FilterInterface
 
     private ?array $possibleValues = null;
 
+    private bool $activeFilter = false;
+
     public function __construct(
         private EntityManager $em,
         private Config $config,
         private FilterParams $params
     ) {
+        if (!empty($this->params->currentValues['max']) || !empty($this->params->currentValues['min'])) {
+            $this->activeFilter = true;
+        }
     }
 
 
@@ -151,5 +156,10 @@ class PriceFilter implements FilterInterface
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    public function isActiveFilter(): bool
+    {
+        return $this->activeFilter;
     }
 }
