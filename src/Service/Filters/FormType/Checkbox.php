@@ -25,6 +25,7 @@ final class Checkbox
         if (count($this->values) > 8) {
             $group[] = (new Text(uniqid('searchparams')))
                 ->addClass('search_param')
+                ->removeAttribute('name')
                 ->addAttribute(AttributeFactory::create('placeholder', 'Поиск'));
         }
         $group[] = (new \Enjoys\Forms\Elements\Checkbox(

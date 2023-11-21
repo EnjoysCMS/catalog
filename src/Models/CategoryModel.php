@@ -28,6 +28,7 @@ use EnjoysCMS\Module\Catalog\Entity\ProductPriceEntityListener;
 use EnjoysCMS\Module\Catalog\ORM\Doctrine\Functions\ConvertPrice;
 use EnjoysCMS\Module\Catalog\Repository;
 use EnjoysCMS\Module\Catalog\Service\Filters\FilterFactory;
+use GuzzleHttp\Psr7\Uri;
 use Invoker\Exception\InvocationException;
 use Invoker\Exception\NotCallableException;
 use Invoker\Exception\NotEnoughParametersException;
@@ -186,11 +187,9 @@ $this->config->getGlobalExtraFields(); $this->config->getSearchOptionField();
             }
         }
 
-
         return [
             'meta' => $this->getMeta(),
             'category' => $this->category,
-            'categoryRepository' => $this->categoryRepository,
             'pagination' => $this->pagination,
             'products' => $result,
             'config' => $this->config,
