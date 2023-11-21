@@ -132,8 +132,8 @@ class OptionFilter implements FilterInterface
         if (in_array('max', array_keys($this->params->currentValues))
             || in_array('min', array_keys($this->params->currentValues))
         ) {
-            $min = (empty($this->params->currentValues['min'])) ? null : $this->params->currentValues['min'];
-            $max = (empty($this->params->currentValues['max'])) ? null : $this->params->currentValues['max'];
+            $min = (empty($this->params->currentValues['min'])) ? null : (int)$this->params->currentValues['min'];
+            $max = (empty($this->params->currentValues['max'])) ? null : (int)$this->params->currentValues['max'];
 
             $subSelect = $qb->getEntityManager()->createQueryBuilder()
                 ->select('v.id')
