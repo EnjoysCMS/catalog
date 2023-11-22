@@ -41,7 +41,7 @@ class OptionFilter implements FilterInterface
         if (in_array('max', array_keys($currentValues ?? []))
             || in_array('min', array_keys($currentValues ?? []))
         ) {
-            if (!empty($currentValues['max'] ?? null) || !empty($currentValues['min'] ?? null)) {
+            if (($currentValues['max'] ?? '') !== '' || ($currentValues['min'] ?? '') !== '') {
                 $this->activeFilter = true;
             }
         } elseif (!empty($currentValues)) {
@@ -68,13 +68,14 @@ class OptionFilter implements FilterInterface
         if (in_array('max', array_keys($values))
             || in_array('min', array_keys($values))
         ) {
-            $min = (empty($values['min'])) ? null : $values['min'];
-            $max = (empty($values['max'])) ? null : $values['max'];
+            $min = ($values['min'] === '') ? '' : $values['min'];
+            $max = ($values['max'] === '') ? '' : $values['max'];
+
             $badge = '';
-            if ($min) {
+            if ($min !== '') {
                 $badge .= sprintf(' от %s', $min);
             }
-            if ($max) {
+            if ($max !== '') {
                 $badge .= sprintf(' до %s', $max);
             }
             return $badge;
@@ -132,25 +133,24 @@ class OptionFilter implements FilterInterface
         if (in_array('max', array_keys($this->params->currentValues))
             || in_array('min', array_keys($this->params->currentValues))
         ) {
-            $min = (empty($this->params->currentValues['min'])) ? null : (int)$this->params->currentValues['min'];
-            $max = (empty($this->params->currentValues['max'])) ? null : (int)$this->params->currentValues['max'];
+            $min = ($this->params->currentValues['min'] === '') ? '' : (int)$this->params->currentValues['min'];
+            $max = ($this->params->currentValues['max'] === '') ? '' : (int)$this->params->currentValues['max'];
 
             $subSelect = $qb->getEntityManager()->createQueryBuilder()
                 ->select('v.id')
                 ->from(OptionValue::class, 'v')
                 ->where('v.optionKey = :optionKey')
                 ->setParameter('optionKey', $this->optionKey->getId());
-            if ($min) {
+            if ($min !== '') {
                 $subSelect->andWhere('v.value >=  :minValue')
                     ->setParameter('minValue', $min);
             }
-            if ($max) {
+            if ($max !== '') {
                 $subSelect->andWhere('v.value <=  :maxValue')
                     ->setParameter('maxValue', $max);
             }
 
-
-            if ($min || $max) {
+            if ($min !== '' || $max !== '') {
                 return $qb->andWhere(':values MEMBER OF p.options')
                     ->setParameter('values', $subSelect->getQuery()->getResult());
             }
