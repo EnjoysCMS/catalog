@@ -140,8 +140,8 @@ class PriceFilter implements FilterInterface
                             sprintf('от %s', $this->config->getCurrentCurrency()->format($min))
                         )
                     )
-                    ->setMin($min)
-                    ->setMax($max),
+                    ->setMin(0)
+                ,
                 (new Number('filter[price][max]'))
                     ->addClass('maxInput')
                     ->addAttribute(
@@ -150,8 +150,7 @@ class PriceFilter implements FilterInterface
                             sprintf('до %s', $this->config->getCurrentCurrency()->format($max))
                         )
                     )
-                    ->setMin($min)
-                    ->setMax($max)
+                    ->setMin(0)
                 ,
             ]);
 

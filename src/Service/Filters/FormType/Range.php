@@ -25,20 +25,18 @@ final class Range
 
 
         $this->form->group($this->filter->__toString())
-            ->addAttribute(AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false'))
+            ->addAttribute(
+                AttributeFactory::create('data-is-main', ($this->filter->getParams()->main ?? false) ? 'true' : 'false')
+            )
             ->addClasses(['filter-item'])
             ->add([
                 (new Number(sprintf('%s[min]', $this->filter->getFormName())))
                     ->addClass('minInput')
                     ->addAttribute(AttributeFactory::create('placeholder', sprintf('от %s', $min)))
-                    ->setMin($min)
-                    ->setMax($max)
                 ,
                 (new Number(sprintf('%s[max]', $this->filter->getFormName())))
                     ->addClass('maxInput')
                     ->addAttribute(AttributeFactory::create('placeholder', sprintf('до %s', $max)))
-                    ->setMin($min)
-                    ->setMax($max)
                 ,
             ]);
     }
