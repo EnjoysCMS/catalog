@@ -18,7 +18,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\QueryException;
-use Enjoys\Cookie\Exception;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
@@ -100,7 +99,6 @@ final class ProductController extends AdminController
      * @throws ExceptionRule
      * @throws ORMException
      * @throws RuntimeError
-     * @throws Exception
      * @throws LoaderError
      * @throws DependencyException
      * @throws OptimisticLockException
@@ -145,6 +143,20 @@ final class ProductController extends AdminController
     }
 
 
+    /**
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws QueryException
+     * @throws NonUniqueResultException
+     * @throws NotSupported
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/edit',
         name: 'edit',
@@ -205,6 +217,17 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws FilesystemException
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/delete',
         name: 'delete',
@@ -238,6 +261,17 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/tags',
         name: 'tags',
@@ -271,6 +305,16 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/quantity',
         name: 'quantity',
@@ -357,6 +401,12 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/urls',
         name: 'urls',
@@ -387,6 +437,16 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/urls/edit',
         name: 'urls_edit',
@@ -424,6 +484,16 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/urls/add',
         name: 'urls_add',
@@ -457,6 +527,16 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/urls/delete',
         name: 'urls_delete',
@@ -492,6 +572,11 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws NoResultException
+     * @throws ORMException
+     */
     #[Route(
         path: '/{product_id}/urls/makedefault',
         name: 'urls_make_default',
@@ -527,6 +612,13 @@ final class ProductController extends AdminController
         return $this->redirect->toRoute(...$routeData);
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws NotSupported
+     * @throws LoaderError
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/images',
         name: 'images',
@@ -556,6 +648,14 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/images/add',
         name: 'images_add',
@@ -754,6 +854,14 @@ final class ProductController extends AdminController
         return $this->jsonResponse($errorMessage ?? 'uploaded');
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws DependencyException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/{product_id}/files',
         name: "files",
@@ -786,6 +894,18 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws FilesystemException
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: "/{product_id}/files/upload",
         name: "files_upload",
@@ -827,6 +947,13 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws FilesystemException
+     * @throws NotSupported
+     * @throws NoResultException
+     */
     #[Route(
         path: "/{product_id}/files/delete",
         name: "files_delete",
@@ -902,6 +1029,12 @@ final class ProductController extends AdminController
         );
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     #[Route(
         path: '/options',
         name: 'options',
