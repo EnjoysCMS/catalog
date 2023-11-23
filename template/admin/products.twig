@@ -71,7 +71,7 @@
 
                             </div>
                             <div class="small">
-                                    ${data.productCode ? '<div  class="text-muted">Product code (articul): <b>' + data.productCode + '</b></div>' : ''}
+                                    ${data.sku ? '<div  class="text-muted">SKU: <b>' + data.sku + '</b></div>' : ''}
                                     ${data.category ? '<div class="text-muted"><a class="text-reset" href="/?_route=catalog/category&slug=' + data.category.slug + '">' + data.category.breadcrumbs.map(i => i.title).join(' &rarr; ') + '</a></div>' : ''}
 
                             </div>

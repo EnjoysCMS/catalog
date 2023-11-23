@@ -123,11 +123,16 @@ final class CreateUpdateProductForm
                 'Ошибка, SKU уже используется',
                 function () use ($product) {
                     /** @var Product $check */
+
                     $check = $this->productRepository->findOneBy(
                         ['sku' => $this->request->getParsedBody()['sku'] ?? '']
                     );
 
+
                     if ($product?->getSku() === $check?->getSku()) {
+                        return true;
+                    }
+                    if ($check === null) {
                         return true;
                     }
                     return false;
@@ -208,18 +213,19 @@ final class CreateUpdateProductForm
      */
     public function doAction(Product $product = null): Product
     {
-        $product = $product ?? new Product();
+        $productEntity = $product ?? new Product();
+
 
         /** @var Category|null $category */
         $category = $this->em->getRepository(Category::class)->find(
             $this->request->getParsedBody()['category'] ?? 0
         );
 
-        $product->setName($this->request->getParsedBody()['name'] ?? null);
+        $productEntity->setName($this->request->getParsedBody()['name'] ?? null);
 
-        if (!$this->config->get('disableEditSku', false)) {
+        if (!$this->config->get('admin->product->disableChangeSku', false)) {
             $sku = $this->request->getParsedBody()['sku'] ?? null;
-            $product->setProductCode(empty($sku) ? null : $sku);
+            $productEntity->setSku(empty($sku) ? null : $sku);
         }
 
         $vendorName = $this->request->getParsedBody()['vendor'] ?? '';
@@ -233,12 +239,12 @@ final class CreateUpdateProductForm
                 $vendor->setName($vendorName);
                 $this->em->persist($vendor);
             }
-            $product->setVendor($vendor);
+            $productEntity->setVendor($vendor);
         }
 
 
-        $product->setVendorCode($this->request->getParsedBody()['vendorCode'] ?? null);
-        $product->setBarCodes(
+        $productEntity->setVendorCode($this->request->getParsedBody()['vendorCode'] ?? null);
+        $productEntity->setBarCodes(
             $this->request->getParsedBody()['barcodes'] ? array_values(
                 array_filter(
                     explode(
@@ -248,7 +254,7 @@ final class CreateUpdateProductForm
                 )
             ) : null
         );
-        $product->setDescription($this->request->getParsedBody()['description'] ?? null);
+        $productEntity->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
         $unitValue = $this->request->getParsedBody()['unit'] ?? '';
@@ -259,19 +265,19 @@ final class CreateUpdateProductForm
             $this->em->persist($unit);
             $this->em->flush();
         }
-        $product->setUnit($unit);
+        $productEntity->setUnit($unit);
 
-        $product->setCategory($category);
-        $product->setActive((bool)($this->request->getParsedBody()['active'] ?? false));
-        $product->setHide((bool)($this->request->getParsedBody()['hide'] ?? false));
+        $productEntity->setCategory($category);
+        $productEntity->setActive((bool)($this->request->getParsedBody()['active'] ?? false));
+        $productEntity->setHide((bool)($this->request->getParsedBody()['hide'] ?? false));
 
-        $this->em->persist($product);
+        $this->em->persist($productEntity);
 
         $urlString = $this->request->getParsedBody()['url'] ?? '';
 
         /** @var Url $url */
         $urlSetFlag = false;
-        foreach ($product->getUrls() as $url) {
+        foreach ($productEntity->getUrls() as $url) {
             if ($url->getPath() === $urlString) {
                 $url->setDefault(true);
                 $urlSetFlag = true;
@@ -284,11 +290,11 @@ final class CreateUpdateProductForm
             $url = new Url();
             $url->setPath($urlString);
             $url->setDefault(true);
-            $url->setProduct($product);
+            $url->setProduct($productEntity);
             $this->em->persist($url);
-            $product->addUrl($url);
+            $productEntity->addUrl($url);
         }
         $this->em->flush();
-        return $product;
+        return $productEntity;
     }
 }
