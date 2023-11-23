@@ -95,16 +95,24 @@ final class CreateUpdateProductForm
             )
             ->fill([1 => 'Скрыт?']);
 
-        $form->select('category', 'Категория')
+        $elCategory = $form->select('category', 'Категория')
             ->addRule(Rules::REQUIRED)
             ->fill(
                 $this->categoryRepository->getFormFillArray()
             );
 
-        $form->text('name', 'Наименование')
+        if ($product !== null && $this->config->get('admin->product->disableChangeCategory', false)) {
+            $elCategory->setAttribute(AttributeFactory::create('disabled'));
+        }
+
+        $elName = $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
-        $skuCodeElem = $form->text('sku', 'SKU')
+        if ($product !== null && $this->config->get('admin->product->disableChangeName', false)) {
+            $elName->setAttribute(AttributeFactory::create('disabled'));
+        }
+
+        $elSku = $form->text('sku', 'SKU')
             ->setDescription(
                 'Не обязательно. Уникальный идентификатор продукта, уникальный артикул, внутренний код
             в системе учета или что-то подобное, используется для внутренних команд и запросов,
@@ -126,8 +134,8 @@ final class CreateUpdateProductForm
                 }
             );
 
-        if ($this->config->get('disableEditSku', false)) {
-            $skuCodeElem->setAttribute(AttributeFactory::create('disabled'));
+        if ($product !== null && $this->config->get('admin->product->disableChangeSku', false)) {
+            $elSku->setAttribute(AttributeFactory::create('disabled'));
         }
 
         $form->text('barcodes', 'Штрих-коды')
@@ -135,11 +143,14 @@ final class CreateUpdateProductForm
                 'Не обязательно. Штрих-коды, если их несколько можно указать через пробел.'
             );
 
-        $form->text('vendor', 'Бренд или производитель')
+        $elVendor = $form->text('vendor', 'Бренд или производитель')
             ->setDescription(
                 'Не обязательно.'
             );
 
+        if ($product !== null && $this->config->get('admin->product->disableChangeVendor', false)) {
+            $elVendor->setAttribute(AttributeFactory::create('disabled'));
+        }
 
         $form->text('vendorCode', 'Артикул')
             ->setDescription(
@@ -181,8 +192,10 @@ final class CreateUpdateProductForm
             );
         $form->textarea('description', 'Описание');
 
-        $form->text('unit', 'Единица измерения');
-
+        $elUnit = $form->text('unit', 'Единица измерения');
+        if ($product !== null && $this->config->get('admin->product->disableChangeUnit', false)) {
+            $elUnit->setAttribute(AttributeFactory::create('disabled'));
+        }
 
         $form->submit('add');
         return $form;

@@ -56,3 +56,9 @@ admin:
   searchFields:
     - p.name
     - p.productCode
+  product:
+    disableChangeCategory: false
+    disableChangeName: false
+    disableChangeSku: false
+    disableChangeVendor: false
+    disableChangeUnit: false
