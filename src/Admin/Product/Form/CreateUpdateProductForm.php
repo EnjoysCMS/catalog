@@ -58,6 +58,7 @@ final class CreateUpdateProductForm
      */
     public function getForm(Product $product = null): Form
     {
+
         $defaults = [
             'name' => $product?->getName(),
             'sku' => $product?->getSku(),
@@ -102,14 +103,15 @@ final class CreateUpdateProductForm
             );
 
         if ($product !== null && $this->config->get('admin->product->disableChangeCategory', false)) {
-            $elCategory->setAttribute(AttributeFactory::create('disabled'));
+            $elCategory->disableRules()->setAttribute(AttributeFactory::create('disabled'));
+
         }
 
         $elName = $form->text('name', 'Наименование')
             ->addRule(Rules::REQUIRED);
 
         if ($product !== null && $this->config->get('admin->product->disableChangeName', false)) {
-            $elName->setAttribute(AttributeFactory::create('disabled'));
+            $elName->disableRules()->setAttribute(AttributeFactory::create('disabled'));
         }
 
         $elSku = $form->text('sku', 'SKU')
@@ -140,7 +142,7 @@ final class CreateUpdateProductForm
             );
 
         if ($product !== null && $this->config->get('admin->product->disableChangeSku', false)) {
-            $elSku->setAttribute(AttributeFactory::create('disabled'));
+            $elSku->disableRules()->setAttribute(AttributeFactory::create('disabled'));
         }
 
         $form->text('barcodes', 'Штрих-коды')
@@ -215,35 +217,51 @@ final class CreateUpdateProductForm
     {
         $productEntity = $product ?? new Product();
 
-
         /** @var Category|null $category */
         $category = $this->em->getRepository(Category::class)->find(
             $this->request->getParsedBody()['category'] ?? 0
         );
 
-        $productEntity->setName($this->request->getParsedBody()['name'] ?? null);
-
-        if (!$this->config->get('admin->product->disableChangeSku', false)) {
-            $sku = $this->request->getParsedBody()['sku'] ?? null;
-            $productEntity->setSku(empty($sku) ? null : $sku);
+        // Product Name
+        $productName = $this->request->getParsedBody()['name'] ?? null;
+        if ($product === null) {
+            $productEntity->setName($productName);
+        } elseif (!$this->config->get('admin->product->disableChangeName', false)) {
+            $productEntity->setName($productName);
         }
 
-        $vendorName = $this->request->getParsedBody()['vendor'] ?? '';
-        if (!empty($vendorName)) {
+        // Product SKU
+        $productSku = $this->request->getParsedBody()['sku'] ?? null;
+        if ($product === null) {
+            $productEntity->setSku(empty($productSku) ? null : $productSku);
+        } elseif (!$this->config->get('admin->product->disableChangeSku', false)) {
+            $productEntity->setSku(empty($productSku) ? null : $productSku);
+        }
+
+        // Product Vendor Name
+        $productVendorName = $this->request->getParsedBody()['vendor'] ?? '';
+        $vendor = null;
+        if (!empty($productVendorName)) {
             $vendor = $this->em->getRepository(Vendor::class)->findOneBy(
-                ['name' => $vendorName]
+                ['name' => $productVendorName]
             );
             if ($vendor === null) {
                 $vendor = new Vendor();
                 $vendor->setId(Uuid::uuid7()->toString());
-                $vendor->setName($vendorName);
+                $vendor->setName($productVendorName);
                 $this->em->persist($vendor);
             }
+        }
+        if ($product === null) {
+            $productEntity->setVendor($vendor);
+        } elseif (!$this->config->get('admin->product->disableChangeVendor', false)) {
             $productEntity->setVendor($vendor);
         }
 
-
+        // Product Vendor Code
         $productEntity->setVendorCode($this->request->getParsedBody()['vendorCode'] ?? null);
+
+        // Product BarCodes
         $productEntity->setBarCodes(
             $this->request->getParsedBody()['barcodes'] ? array_values(
                 array_filter(
@@ -254,9 +272,12 @@ final class CreateUpdateProductForm
                 )
             ) : null
         );
+
+        // Product Description
         $productEntity->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
+        // Product Unit
         $unitValue = $this->request->getParsedBody()['unit'] ?? '';
         $unit = $this->em->getRepository(ProductUnit::class)->findOneBy(['name' => $unitValue]);
         if ($unit === null) {
@@ -265,16 +286,27 @@ final class CreateUpdateProductForm
             $this->em->persist($unit);
             $this->em->flush();
         }
-        $productEntity->setUnit($unit);
+        if ($product === null) {
+            $productEntity->setUnit($unit);
+        } elseif (!$this->config->get('admin->product->disableChangeUnit', false)) {
+            $productEntity->setUnit($unit);
+        }
 
-        $productEntity->setCategory($category);
+        // Product Category
+        if ($product === null) {
+            $productEntity->setCategory($category);
+        } elseif (!$this->config->get('admin->product->disableChangeCategory', false)) {
+            $productEntity->setCategory($category);
+        }
+
+        // Product Status
         $productEntity->setActive((bool)($this->request->getParsedBody()['active'] ?? false));
         $productEntity->setHide((bool)($this->request->getParsedBody()['hide'] ?? false));
 
         $this->em->persist($productEntity);
 
+        // Product Url
         $urlString = $this->request->getParsedBody()['url'] ?? '';
-
         /** @var Url $url */
         $urlSetFlag = false;
         foreach ($productEntity->getUrls() as $url) {
@@ -294,6 +326,8 @@ final class CreateUpdateProductForm
             $this->em->persist($url);
             $productEntity->addUrl($url);
         }
+
+        // flush
         $this->em->flush();
         return $productEntity;
     }
