@@ -6,9 +6,12 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Admin\Product\Options;
 
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Admin\Product\Options as ModelOptions;
@@ -16,9 +19,6 @@ use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\OptionValue;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 /**
  * @TODO need refactor
@@ -29,10 +29,10 @@ final class OptionsController extends AdminController
 
 
     /**
+     * @throws DependencyException
+     * @throws NoResultException
+     * @throws NotFoundException
      * @throws ORMException
-     * @throws LoaderError
-     * @throws RuntimeError
-     * @throws SyntaxError
      */
 
 
@@ -48,6 +48,12 @@ final class OptionsController extends AdminController
         $this->container->get(ModelOptions\FillFromProduct::class)();
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws ORMException
+     * @throws DependencyException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/fill-from-text',
         name: 'fill_from_text',
@@ -78,6 +84,10 @@ final class OptionsController extends AdminController
         );
     }
 
+
+    /**
+     * @throws NotSupported
+     */
     #[Route(
         path: '/find-option-values',
         name: 'find_option_values',
