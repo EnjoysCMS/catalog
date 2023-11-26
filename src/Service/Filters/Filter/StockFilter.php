@@ -10,7 +10,7 @@ class StockFilter implements FilterInterface
 {
     public function __toString(): string
     {
-        return '';
+        return 'Наличие';
     }
 
 
