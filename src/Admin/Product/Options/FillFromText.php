@@ -54,8 +54,8 @@ final class FillFromText
 
 
         $dataRaw = $this->request->getParsedBody()['text'] ?? null;
-
-        $options = $this->parse($dataRaw);
+        $template = $this->request->getParsedBody()['template'] ?? "/^(.+[^()])(\((.*[^()])\))?:(.+)/";
+        $options = $this->parse($dataRaw, $template);
 
         foreach ($options as $option) {
             if (empty($option['option']) || empty($option['value'])) {
@@ -80,7 +80,7 @@ final class FillFromText
      *
      * @psalm-return list<array{option: string, unit: string, value: string}>
      */
-    private function parse(string $dataRaw): array
+    private function parse(string $dataRaw, $template): array
     {
         $dataSanitize = array_filter(
             array_map('trim', explode("\n", str_replace(["\r\n", "\r"], "\n", trim($dataRaw)))),
@@ -88,7 +88,7 @@ final class FillFromText
                 return !empty($item);
             }
         );
-        $template = "/^(.+[^()])(\((.*[^()])\))?:(.+)/";
+
         $result = [];
         foreach ($dataSanitize as $item) {
             preg_match($template, $item, $matches);
@@ -104,8 +104,8 @@ final class FillFromText
     private function redirectToProductOptionsPage(Product $product): void
     {
         $this->redirect->toRoute(
-            '@a/catalog/product/options',
-            ['id' => $product->getId()],
+            '@catalog_product_options',
+            ['product_id' => $product->getId()],
             emit: true
         );
     }

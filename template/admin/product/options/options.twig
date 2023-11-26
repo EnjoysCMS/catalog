@@ -362,6 +362,7 @@
                 <div class="modal-body">
                     <form name="fillFromText" action="{{ path('@catalog_product_options_fill_from_text') }}" method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
+                        <input type="text" name="template"  class="form-control text-monospace"  value="/^(.+[^()])(\((.*[^()])\))?:(.+)/">
                         <textarea name="text" class="form-control" rows="10"></textarea>
                         <input type="submit" class="my-3 btn btn-primary form-control">
                     </form>
