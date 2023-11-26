@@ -62,8 +62,8 @@ final class FillFromProduct
     private function redirectToProductOptionsPage(Product $product): void
     {
         $this->redirect->toRoute(
-            '@a/catalog/product/options',
-            ['id' => $product->getId()],
+            '@catalog_product_options',
+            ['product_id' => $product->getId()],
             emit: true
         );
     }
