@@ -58,7 +58,7 @@ class GetAdminLinks
             'icon' => 'fa fa-tags'
         ],
         [
-            'route' => '@catalog_product_options_list',
+            'route' => '@catalog_product_options',
             'params' => [
                 'product_id'
             ],
@@ -113,22 +113,26 @@ class GetAdminLinks
         'product_id' => 'id',
     ];
 
-    public function __construct(private ServerRequestInterface $request, private ResponseInterface $response)
-    {
+    public function __construct(
+        private ServerRequestInterface $request,
+        private ResponseInterface $response
+    ) {
         $this->response = $this->response->withHeader('content-type', 'application/json');
     }
 
-    public function __invoke(UrlGeneratorInterface $urlGenerator,  RouteCollection $routeCollection): ResponseInterface
-    {
+    public function __invoke(
+        UrlGeneratorInterface $urlGenerator,
+        RouteCollection $routeCollection
+    ): ResponseInterface {
         $result = [];
         foreach (self::ROUTES as $route) {
             $aclInfo = $this->getAclActionAndCommentByRoute($route['route'], $routeCollection);
             if ($aclInfo === null) {
                 continue;
             }
-            if (!$ACL->access(...$aclInfo)) {
-                continue;
-            }
+//            if (!$ACL->access(...$aclInfo)) {
+//                continue;
+//            }
             $result[] = [
                 'link' => $urlGenerator->generate($route['route'], $this->buildParamsFroUrlGenerator($route['params'])),
                 'title' => $route['title'],
@@ -142,7 +146,7 @@ class GetAdminLinks
 
     public static function getRoutes(): array
     {
-        return array_map(function ($item){
+        return array_map(function ($item) {
             return $item['route'];
         }, self::ROUTES);
     }
