@@ -48,24 +48,6 @@ final class OptionsController extends AdminController
         $this->container->get(ModelOptions\FillFromProduct::class)();
     }
 
-    /**
-     * @throws NotFoundException
-     * @throws ORMException
-     * @throws DependencyException
-     * @throws NoResultException
-     */
-    #[Route(
-        path: '/fill-from-text',
-        name: 'fill_from_text',
-        options: [
-            'comment' => '[ADMIN] Заполнение опций из текста'
-        ]
-    )]
-    public function fillFromText(): void
-    {
-        $this->container->get(ModelOptions\FillFromText::class)();
-    }
-
 
     /**
      * @throws NotSupported
