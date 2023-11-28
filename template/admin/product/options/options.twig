@@ -262,7 +262,7 @@
             <div class="card-header">
                 <h2 class="card-title">{{ title ?? product.getName }}
                     <a class="small text-dark" href="{{ path('catalog/product', {"slug": product.getSlug}) }}"><i
-                                class="fas fa-external-link-alt"></i></a>
+                            class="fas fa-external-link-alt"></i></a>
                     <small class="d-block">{{ product.category.fullTitle(' → ') }}</small>
                     <small class="d-block">{{ subtitle }}</small>
                 </h2>
@@ -280,15 +280,12 @@
                     <div>
                         {% for group in form.getElements %}
                             {% if group is instanceof('\\Enjoys\\Forms\\Elements\\Group') %}
-                                <div class="form-row pb-1">
+                                <div class="form-row my-2 pt-3 bg-light">
                                     {% for element in group.getElements %}
                                         <div class="{{ element.getAttribute('grid').getValueString() }}">
                                             {{ element.baseHtml|raw }}
                                         </div>
                                     {% endfor %}
-                                    <div class="col-md-1">
-                                        &nbsp;&nbsp;&nbsp;<a href="#" class="remove "><i class="fa fa-trash"></i></a>
-                                    </div>
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -297,7 +294,7 @@
                     {{ form.getElement('submit').baseHtml|raw }}
                     <a href="#" class="add btn btn-outline-success "><i class="fa fa-plus"></i> Добавить опцию</a>
                     <a href="#" class="btn btn-outline-success" data-toggle="modal" data-target="#fill-by-modal"><i
-                                class="fa fa-fill"></i> Заполнить по &hellip;</a>
+                            class="fa fa-fill"></i> Заполнить по &hellip;</a>
                 </form>
             </div>
             <!-- /.card-body -->
@@ -307,7 +304,7 @@
     </section>
 
     <div id="template" class="d-none">
-        <div class="form-row pb-1">
+        <div class="form-row my-2 pt-3 bg-light">
             <div class="col-md-3">
                 <input type="text" name="options[~~i~~][option]" class="filter-option form-control" placeholder="Опция">
             </div>
@@ -319,7 +316,7 @@
                        placeholder="Значение">
             </div>
             <div class="col-md-1">
-                &nbsp;&nbsp;&nbsp;<a href="#" class="remove "><i class="fa fa-trash"></i></a>
+                <a href="#" class="remove "><i class="fa fa-trash"></i></a>
             </div>
         </div>
     </div>
@@ -335,9 +332,11 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="fillFromProduct" action="{{ path('@catalog_product_options_fill_from_product') }}" method="POST">
+                    <form name="fillFromProduct" action="{{ path('@catalog_product_options_fill_from_product') }}"
+                          method="POST">
                         <input type="hidden" name="id" value="{{ product.getId }}">
-                        <select name="fillFromProduct" class="fillby form-control" onchange="this.form.submit()"></select>
+                        <select name="fillFromProduct" class="fillby form-control"
+                                onchange="this.form.submit()"></select>
                     </form>
                 </div>
 

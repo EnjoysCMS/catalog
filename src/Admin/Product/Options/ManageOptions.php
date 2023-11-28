@@ -10,6 +10,7 @@ use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Api\ProductOptions;
@@ -22,6 +23,7 @@ use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 use EnjoysCMS\Module\Catalog\Repository\Product as ProductRepository;
 use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class ManageOptions
 {
@@ -39,6 +41,7 @@ final class ManageOptions
         private readonly ServerRequestInterface $request,
         private readonly Config $config,
         private readonly ProductOptions $productOptionsController,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
         $this->keyRepository = $this->em->getRepository(OptionKey::class);
         $this->valueRepository = $this->em->getRepository(OptionValue::class);
@@ -70,37 +73,51 @@ final class ManageOptions
 
         foreach ($options as $option) {
             $key = $option;
-            $form->group()->setAttribute(AttributeFactory::create('id', 'group'))->add([
-                (new Text(
-                    'options[' . $key->getId() . '][option]'
-                ))->setAttributes(
-                    AttributeFactory::createFromArray([
-                        'class' => 'filter-option form-control',
-                        'placeholder' => 'Опция',
-                        'grid' => 'col-md-3',
-                        'value' => $key->getName()
-                    ])
-                ),
-                (new Text(
-                    'options[' . $key->getId() . '][unit]'
-                ))->setAttributes(
-                    AttributeFactory::createFromArray([
-                        'class' => 'filter-unit form-control',
-                        'placeholder' => 'ед.изм.',
-                        'grid' => 'col-md-1',
-                        'value' => $key->getUnit()
-                    ])
-                ),
-                (new Text(
-                    'options[' . $key->getId() . '][value]'
-                ))->setAttributes(
-                    AttributeFactory::createFromArray([
-                        'class' => 'filter-value form-control',
-                        'placeholder' => 'Значение',
-                        'grid' => 'col-md-7'
-                    ])
-                ),
-            ]);
+            $form->group()
+                ->add([
+                    (new Text(
+                        'options[' . $key->getId() . '][option]'
+                    ))->setAttributes(
+                        AttributeFactory::createFromArray([
+                            'class' => 'filter-option form-control',
+                            'placeholder' => 'Опция',
+                            'grid' => 'col-md-3',
+                            'value' => $key->getName()
+                        ])
+                    ),
+                    (new Text(
+                        'options[' . $key->getId() . '][unit]'
+                    ))->setAttributes(
+                        AttributeFactory::createFromArray([
+                            'class' => 'filter-unit form-control',
+                            'placeholder' => 'ед.изм.',
+                            'grid' => 'col-md-1',
+                            'value' => $key->getUnit()
+                        ])
+                    ),
+                    (new Text(
+                        'options[' . $key->getId() . '][value]'
+                    ))->setAttributes(
+                        AttributeFactory::createFromArray([
+                            'class' => 'filter-value form-control',
+                            'placeholder' => 'Значение',
+                            'grid' => 'col-md-7'
+                        ])
+                    ),
+                    (new Html(
+                        sprintf(
+                            '<a href="%s"><i class="fa fa-edit"></i></a> <a href="#" class="remove "><i class="fa fa-trash"></i></a>',
+                            $this->urlGenerator->generate('@catalog_product_options_edit', [
+                                'key_id' => $key->getId()
+                            ])
+                        )
+                    ))->setAttributes(
+                        AttributeFactory::createFromArray([
+                            'class' => 'form-control',
+                                              'grid' => 'col-md-1'
+                        ])
+                    )
+                ]);
         }
         $form->submit('submit', 'Сохранить')->addClass('btn btn-outline-primary');
         return $form;
