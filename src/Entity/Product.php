@@ -301,7 +301,7 @@ class Product
         return array_filter(
             $this->options->toArray(),
             function ($item) use ($optionKey) {
-                return $item->getOptionKey() === $optionKey;
+                return $item->getOptionKey()->getId() === $optionKey->getId();
             }
         );
     }

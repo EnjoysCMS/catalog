@@ -21,6 +21,7 @@ use Doctrine\ORM\Query\QueryException;
 use Enjoys\Forms\Elements\File;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
+use Enjoys\Forms\Renderer\Bootstrap4\Bootstrap4Renderer;
 use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
@@ -1053,12 +1054,15 @@ final class ProductController extends AdminController
             sprintf('Характеристики: %s', $manageOptions->getProduct()->getName())
         );
 
+        /** @var Bootstrap4Renderer $renderer */
+        $renderer = $this->adminConfig->getRendererForm($form);
         return $this->response(
             $this->twig->render(
                 $this->templatePath . '/product/options/options.twig',
                 [
                     'product' => $manageOptions->getProduct(),
                     'form' => $form,
+                    'renderer' => $renderer,
                     'delimiterOptions' => $this->config->getDelimiterOptions(),
                     'subtitle' => 'Параметры'
                 ]
