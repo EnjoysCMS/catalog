@@ -94,6 +94,7 @@ final class ManageOptions
                             'class' => 'filter-unit form-control',
                             'placeholder' => 'ед.изм.',
                             'grid' => 'col-md-1',
+                            'autocomplete' => 'off',
                             'value' => $key->getUnit()
                         ])
                     )->addClass('col-md-1', Group::ATTRIBUTES_GROUP),
