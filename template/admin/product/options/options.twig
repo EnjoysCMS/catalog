@@ -9,7 +9,8 @@
         module.path ~ '/node_modules/select2/dist/js/i18n/ru.js',
     ]) %}
     {% do asset('css', [
-        module.path ~ '/node_modules/select2/dist/css/select2.min.css'
+        module.path ~ '/node_modules/select2/dist/css/select2.min.css',
+        module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css'
     ]) %}
 
 
@@ -133,7 +134,7 @@
         $(".filter-value").select2({
             matcher: matchCustom,
             allowClear: true,
-            theme: "classic",
+            theme: "bootstrap4",
             ajax: {
                 url: "{{ path('@catalog_product_options_find_option_values') }}",
                 dataType: 'json',
