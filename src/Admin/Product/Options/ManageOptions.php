@@ -58,10 +58,8 @@ final class ManageOptions
     {
         $serializer = SerializerBuilder::create()->build();
 
-//        $options = json_decode((string)$this->productOptionsController->getProductOptionsKeysByCategory($this->product->getCategory())->getBody());
-        //  dd($this->product->getOptions());
-//        $options = $this->product->getOptions();
-        $options = $serializer->deserialize(
+        /** @var OptionKey[] $optionKeys */
+        $optionKeys = $serializer->deserialize(
             (string)$this->productOptionsController->getProductOptionsKeysByCategory(
                 $this->product->getCategory()
             )->getBody(),
@@ -72,58 +70,63 @@ final class ManageOptions
         $form = new Form();
         $form->setDefaults($this->getDefaultsOptions($this->product->getOptions()));
 
-        foreach ($options as $option) {
-            $key = $option;
+        foreach ($optionKeys as $optionKey) {
+
+            $elValue = new Select(
+                'options[' . $optionKey->getId() . '][value][]'
+            );
+
+            if ($optionKey->isMultiple()){
+                $elValue->setMultiple();
+            }
+
+            $elValue->setAttributes(
+                AttributeFactory::createFromArray([
+                    'data-tags' => 'true'
+                ])
+            );
+            $elValue->addAttribute(AttributeFactory::create('data-placeholder', 'Введите значение, или оставьте пустым'))
+                ->addClasses(['filter-value', 'form-control'])
+                ->addClass('col-md-7', Group::ATTRIBUTES_GROUP)
+                ->fill(function () use ($optionKey) {
+                    $result = [];
+                    $values = $this->product->getValuesByOptionKey($optionKey);
+                    foreach ($values as $value) {
+                        $result[$value->getId()] = $value->getValue();
+                    }
+                    return $result;
+                }, true);
+
 
             $form->group()
                 ->add([
                     (new Text(
-                        'options[' . $key->getId() . '][option]'
+                        'options[' . $optionKey->getId() . '][option]'
                     ))->setAttributes(
                         AttributeFactory::createFromArray([
                             'class' => 'filter-option form-control',
                             'placeholder' => 'Опция',
                             'grid' => 'col-md-3',
-                            'value' => $key->getName()
+                            'value' => $optionKey->getName()
                         ])
                     )->addClass('col-md-3', Group::ATTRIBUTES_GROUP),
                     (new Text(
-                        'options[' . $key->getId() . '][unit]'
+                        'options[' . $optionKey->getId() . '][unit]'
                     ))->setAttributes(
                         AttributeFactory::createFromArray([
                             'class' => 'filter-unit form-control',
                             'placeholder' => 'ед.изм.',
                             'grid' => 'col-md-1',
                             'autocomplete' => 'off',
-                            'value' => $key->getUnit()
+                            'value' => $optionKey->getUnit()
                         ])
                     )->addClass('col-md-1', Group::ATTRIBUTES_GROUP),
-                    (new Select(
-                        'options[' . $key->getId() . '][value][]'
-                    ))
-                        ->setMultiple()
-                        ->setAttributes(
-                            AttributeFactory::createFromArray([
-                                'class' => 'filter-value form-control',
-                                'data-tags' => 'true',
-                                'placeholder' => 'Значение',
-                                'grid' => 'col-md-7'
-                            ])
-                        )
-                        ->addClass('col-md-7', Group::ATTRIBUTES_GROUP)
-                        ->fill(function () use ($key) {
-                            $result = [];
-                            $values = $this->product->getValuesByOptionKey($key);
-                            foreach ($values as $value) {
-                                $result[$value->getId()] = $value->getValue();
-                            }
-                            return $result;
-                        }, true),
+                    $elValue,
                     (new Html(
                         sprintf(
                             '<a href="%s"><i class="fa fa-edit"></i></a> <a href="#" class="remove "><i class="fa fa-trash"></i></a>',
                             $this->urlGenerator->generate('@catalog_product_options_edit', [
-                                'key_id' => $key->getId()
+                                'key_id' => $optionKey->getId()
                             ])
                         )
                     ))->setAttributes(

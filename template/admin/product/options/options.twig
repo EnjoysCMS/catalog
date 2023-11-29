@@ -99,7 +99,7 @@
         }
 
     </style>
-    
+
     <script>
         let searchByArticul = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
@@ -132,8 +132,8 @@
     <script>
         $(".filter-value").select2({
             matcher: matchCustom,
-            placeholder: "Select a state",
             allowClear: true,
+            theme: "classic",
             ajax: {
                 url: "{{ path('@catalog_product_options_find_option_values') }}",
                 dataType: 'json',
