@@ -122,7 +122,7 @@ final class ManageOptions
                     $elValue,
                     (new Html(
                         sprintf(
-                            '<a href="%s"><i class="fa fa-edit"></i></a> <a href="#" class="remove "><i class="fa fa-trash"></i></a>',
+                            '<a href="%s" class="btn btn-link"><i class="fa fa-edit"></i></a> <a role="button" class="remove-option btn btn-link"><i class="fa fa-trash"></i></a>',
                             $this->urlGenerator->generate('@catalog_product_options_edit', [
                                 'key_id' => $optionKey->getId()
                             ])

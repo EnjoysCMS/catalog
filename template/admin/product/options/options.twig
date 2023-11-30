@@ -99,6 +99,12 @@
             font-size: 14px;
         }
 
+        .select2-selection__clear, .select2-selection__clear {
+            color: #3f3f3f !important;
+            margin-right: 2em !important;
+            right: 0 !important;
+        }
+
     </style>
 
     <script>
@@ -143,39 +149,39 @@
 
         const select2init = function () {
             $(".filter-value").select2({
-                    matcher: matchCustom,
-                    allowClear: true,
-                    theme: "bootstrap4",
-                    ajax: {
-                        url: "{{ path('@catalog_product_options_find_option_values') }}",
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            let option = this.parents('.form-row').find('.filter-option').val();
-                            let unit = this.parents('.form-row').find('.filter-unit').val();
-                            return {
-                                query: params.term ?? '', // search term
-                                option: option,
-                                unit: unit,
-                                limit: 10,
-                                page: params.page
-                            };
-                        },
-                        processResults: function (response) {
+                matcher: matchCustom,
+                allowClear: true,
+                theme: "bootstrap4",
+                ajax: {
+                    url: "{{ path('@catalog_product_options_find_option_values') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        let option = this.parents('.form-row').find('.filter-option').val();
+                        let unit = this.parents('.form-row').find('.filter-unit').val();
+                        return {
+                            query: params.term ?? '', // search term
+                            option: option,
+                            unit: unit,
+                            limit: 10,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (response) {
 
 
-                            return {
-                                "results": response.map(item => ({id: item.value, text: item.value})),
-                                "pagination": {
-                                    "more": response.length > 0
-                                }
-                            };
-                        }
+                        return {
+                            "results": response.map(item => ({id: item.value, text: item.value})),
+                            "pagination": {
+                                "more": response.length > 0
+                            }
+                        };
                     }
-                });
+                }
+            });
         }
 
-       select2init()
+        select2init()
 
         function matchCustom(params, data) {
             // If there are no search terms, return all of the data
@@ -211,10 +217,25 @@
             let container = document.getElementById('options-container');
 
             select2destroy($(".filter-value"))
-            container.insertAdjacentHTML('afterend', template.innerHTML.split('~~i~~').join('new' + i++));
+            container.insertAdjacentHTML('beforeend', template.innerHTML.split('~~i~~').join('new' + i++));
             findOptionKey()
             select2init()
         });
+
+
+        $(document).ready(function () {
+            $('form').on('click', '.remove-option', function (e) {
+                e.target.closest('#options-container > div').remove();
+            });
+        })
+
+        // document.getElementById('options-container').addEventListener('click', function (event) {
+        // })
+        // document.querySelectorAll('.remove-option').forEach(el => {
+        //      el.addEventListener('click', function (e) {
+        //          el.closest('#options-container > div').remove();
+        //      })
+        //  })
 
 
     </script>
@@ -315,10 +336,12 @@
     <div id="template" class="d-none">
         <div class="form-row my-2 pt-3 bg-light">
             <div class="col-md-3">
-                <input autocomplete="off" type="text" name="options[~~i~~][option]" class="filter-option form-control" placeholder="Опция">
+                <input autocomplete="off" type="text" name="options[~~i~~][option]" class="filter-option form-control"
+                       placeholder="Опция">
             </div>
             <div class="col-md-1">
-                <input autocomplete="off" type="text" name="options[~~i~~][unit]" class="filter-unit  form-control " placeholder="ед. изм">
+                <input autocomplete="off" type="text" name="options[~~i~~][unit]" class="filter-unit  form-control "
+                       placeholder="ед. изм">
             </div>
             <div class="col-md-7">
                 <select name="options[~~i~~][value][]" class="filter-value form-control form-select"
@@ -326,7 +349,7 @@
                 </select>
             </div>
             <div class="col-md-1">
-                <a href="#" class="remove "><i class="fa fa-trash"></i></a>
+                <a role="button" class="remove-option btn btn-link"><i class="fa fa-trash"></i></a>
             </div>
         </div>
     </div>
