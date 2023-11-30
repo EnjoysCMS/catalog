@@ -111,57 +111,71 @@
             }
         });
 
+        const findOptionKey = function () {
+            $('.filter-option')
+                .typeahead('destroy')
+                .typeahead({
+                    hint: false
+                }, {
 
-        $('.filter-option')
-            .typeahead('destroy')
-            .typeahead({
-                hint: false
-            }, {
+                    display: 'name',
+                    source: searchByArticul,
+                    templates: {
+                        suggestion: Handlebars.compile('<div><strong>{{ '{{ name }}' }}</strong> {{ '{{ unit }}' }}</div>')
+                    }
+                })
+                .bind('typeahead:select', function (ev, suggestion) {
+                    let unit = $(this).parents('.form-row').find('.filter-unit');
+                    unit.val(suggestion.unit);
+                });
+        }
 
-                display: 'name',
-                source: searchByArticul,
-                templates: {
-                    suggestion: Handlebars.compile('<div><strong>{{ '{{ name }}' }}</strong> {{ '{{ unit }}' }}</div>')
-                }
-            })
-            .bind('typeahead:select', function (ev, suggestion) {
-                let unit = $(this).parents('.form-row').find('.filter-unit');
-                unit.val(suggestion.unit);
-            });
+        findOptionKey()
     </script>
 
     <script>
-        $(".filter-value").select2({
-            matcher: matchCustom,
-            allowClear: true,
-            theme: "bootstrap4",
-            ajax: {
-                url: "{{ path('@catalog_product_options_find_option_values') }}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    let option = this.parents('.form-row').find('.filter-option').val();
-                    let unit = this.parents('.form-row').find('.filter-unit').val();
-                    return {
-                        query: params.term ?? '', // search term
-                        option: option,
-                        unit: unit,
-                        limit: 10,
-                        page: params.page
-                    };
-                },
-                processResults: function (response) {
 
-
-                    return {
-                        "results": response.map(item => ({id: item.value, text: item.value})),
-                        "pagination": {
-                            "more": response.length > 0
-                        }
-                    };
-                }
+        const select2destroy = function (el) {
+            if (el.hasClass("select2-hidden-accessible")) {
+                el.select2("destroy");
             }
-        });
+        }
+
+        const select2init = function () {
+            $(".filter-value").select2({
+                    matcher: matchCustom,
+                    allowClear: true,
+                    theme: "bootstrap4",
+                    ajax: {
+                        url: "{{ path('@catalog_product_options_find_option_values') }}",
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            let option = this.parents('.form-row').find('.filter-option').val();
+                            let unit = this.parents('.form-row').find('.filter-unit').val();
+                            return {
+                                query: params.term ?? '', // search term
+                                option: option,
+                                unit: unit,
+                                limit: 10,
+                                page: params.page
+                            };
+                        },
+                        processResults: function (response) {
+
+
+                            return {
+                                "results": response.map(item => ({id: item.value, text: item.value})),
+                                "pagination": {
+                                    "more": response.length > 0
+                                }
+                            };
+                        }
+                    }
+                });
+        }
+
+       select2init()
 
         function matchCustom(params, data) {
             // If there are no search terms, return all of the data
@@ -189,93 +203,20 @@
             return null;
         }
 
-        {# let searchByArticul = new Bloodhound({ #}
-        {#    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'), #}
-        {#    queryTokenizer: Bloodhound.tokenizers.whitespace, #}
-        {#    remote: { #}
-        {#        url: "{{ path('@catalog_product_options_find_option_keys', {'query' : '_QUERY'}) }}", #}
-        {#        wildcard: '_QUERY' #}
-        {#    } #}
-        {# }); #}
+        let i = 0;
+        document.getElementById('add').addEventListener('click', function (e) {
+            e.preventDefault();
 
-        {# function initializeTypeHead() { #}
+            let template = document.getElementById('template');
+            let container = document.getElementById('options-container');
 
-        {#    $('.filter-option') #}
-        {#        .typeahead('destroy') #}
-        {#        .typeahead({ #}
-        {#            hint: false #}
-        {#        }, { #}
-
-        {#            display: 'name', #}
-        {#            source: searchByArticul, #}
-        {#            templates: { #}
-        {#                suggestion: Handlebars.compile('<div><strong>{{ '{{ name }}' }}</strong> {{ '{{ unit }}' }}</div>') #}
-        {#            } #}
-        {#        }) #}
-        {#        .bind('typeahead:select', function (ev, suggestion) { #}
-        {#            let unit = $(this).parents('.form-row').find('.filter-unit'); #}
-        {#            unit.val(suggestion.unit); #}
-        {#        }); #}
-        {# } #}
-
-        {# function initializeTagsInput() { #}
-        {#    $('.filter-value').tagsinput({ #}
-        {#        tagClass: 'badge bg-secondary', #}
-        {#        trimValue: true, #}
-        {#        delimiter: '{{ delimiterOptions }}', #}
-        {#        confirmKeys: [13], #}
-        {#        // itemText: this.val(), #}
-        {#        typeaheadjs: { #}
-        {#            display: 'value', #}
-        {#            source: function (query, syncResults, asyncResults) { #}
-
-        {#                let option = this.$el.parents('.form-row').find('.filter-option').val(); #}
-        {#                let unit = this.$el.parents('.form-row').find('.filter-unit').val(); #}
-
-        {#                $.ajax({ #}
-        {#                    url: "{{ path('@catalog_product_options_find_option_values') }}", #}
-        {#                    data: {query: query, option: option, unit: unit}, #}
-        {#                    type: "GET", #}
-        {#                    success: function (data) { #}
-        {#                        //   console.log(data) #}
-        {#                        return asyncResults(data); #}
-        {#                    } #}
-        {#                }) #}
-        {#            } #}
-        {#        }, #}
-        {#        //limit:10, #}
-        {#    }); #}
-        {# } #}
+            select2destroy($(".filter-value"))
+            container.insertAdjacentHTML('afterend', template.innerHTML.split('~~i~~').join('new' + i++));
+            findOptionKey()
+            select2init()
+        });
 
 
-        //
-        // let i = $('.form-row').length;
-        //
-        // $(document).ready(function () {
-        //     // initializeTypeHead();
-        //     // initializeTagsInput();
-        //     $('button').on('click', '.add', function () {
-        //         // $('.filter-option').typeahead('destroy');
-        //         // $('input.filter-value').tagsinput('destroy');
-        //
-        //
-        //         let added_html = $('#template').html();
-        //         $('form > div').append(added_html.split('~~i~~').join(i++));
-        //
-        //
-        //         // initializeTagsInput();
-        //         //
-        //         // initializeTypeHead();
-        //
-        //         return false;
-        //     }).on('click', '.remove', function () {
-        //         //dump($(this).parents('.form-row').html());
-        //         $(this).parents('.form-row').remove();
-        //         return false;
-        //     });
-        //
-        //
-        // });
     </script>
 
     <script>
@@ -289,24 +230,12 @@
                 delay: 250,
                 data: function (params) {
                     return {
-                        query: params.term, // search term
-                        //  page: params.page
+                        query: params.term
                     };
                 },
                 processResults: function (data, params) {
-//                dump(data);
-                    // dump(params);
-                    // parse the results into the format expected by Select2
-                    // since we are using custom formatting functions we do not need to
-                    // alter the remote JSON data, except to indicate that infinite
-                    // scrolling can be used
-                    // params.page = params.page || 1;
-
                     return {
                         results: data.items,
-                        // pagination: {
-                        //     more: (params.page * 10) < data.total_count
-                        // }
                     };
                 }
 
@@ -362,18 +291,12 @@
                     {{ form.getElement('_token_submit').baseHtml|raw }}
                     {{ form.getElement('_token_csrf').baseHtml|raw }}
 
-                    <div>
+                    <div id="options-container">
                         {% for group in form.getElements %}
                             {% if group is instanceof('\\Enjoys\\Forms\\Elements\\Group') %}
 
                                 <div class="my-2 pt-3 bg-light">
                                     {{ renderer.rendererElement(group.name)|raw }}
-                                    {#                                    {% for element in group.getElements %} #}
-
-                                    {#                                        <div class="{{ element.getAttribute('grid').getValueString() }}"> #}
-                                    {#                                            {{ element.baseHtml|raw }} #}
-                                    {#                                        </div> #}
-                                    {#                                    {% endfor %} #}
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -392,14 +315,15 @@
     <div id="template" class="d-none">
         <div class="form-row my-2 pt-3 bg-light">
             <div class="col-md-3">
-                <input type="text" name="options[~~i~~][option]" class="filter-option form-control" placeholder="Опция">
+                <input autocomplete="off" type="text" name="options[~~i~~][option]" class="filter-option form-control" placeholder="Опция">
             </div>
             <div class="col-md-1">
-                <input type="text" name="options[~~i~~][unit]" class="filter-unit  form-control " placeholder="ед. изм">
+                <input autocomplete="off" type="text" name="options[~~i~~][unit]" class="filter-unit  form-control " placeholder="ед. изм">
             </div>
             <div class="col-md-7">
-                <input type="text" name="options[~~i~~][value]" class="filter-value  form-control"
-                       placeholder="Значение">
+                <select name="options[~~i~~][value][]" class="filter-value form-control form-select"
+                        data-placeholder="Значение" data-tags="true" multiple>
+                </select>
             </div>
             <div class="col-md-1">
                 <a href="#" class="remove "><i class="fa fa-trash"></i></a>
