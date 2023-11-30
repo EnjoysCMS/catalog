@@ -145,16 +145,18 @@
                     return {
                         query: params.term ?? '', // search term
                         option: option,
-                        unit: unit
-                        //  page: params.page
+                        unit: unit,
+                        limit: 10,
+                        page: params.page
                     };
                 },
-                processResults: function (data) {
+                processResults: function (response) {
+
 
                     return {
-                        "results": data.map(item => ({id: item.value, text: item.value}), data),
+                        "results": response.map(item => ({id: item.value, text: item.value})),
                         "pagination": {
-                            "more": false
+                            "more": response.length > 0
                         }
                     };
                 }

@@ -135,18 +135,24 @@ final class OptionsController extends AdminController
     ): ResponseInterface {
         $option = $request->getQueryParams()['option'] ?? null;
         $unit = $request->getQueryParams()['unit'] ?? null;
+        $query = $request->getQueryParams()['query'] ?? null;
+        $limit = $request->getQueryParams()['limit'] ?? null;
+        $page = $request->getQueryParams()['page'] ?? null;
+
         $key = $entityManager->getRepository(OptionKey::class)->findOneBy(
             [
                 'name' => !empty($option) ? $option : null,
                 'unit' => !empty($unit) ? $unit : null
             ]
         );
-        $query = $request->getQueryParams()['query'] ?? null;
+
         return $this->jsonResponse(
             $entityManager->getRepository(OptionValue::class)->like(
                 'value',
                 !empty($query) ? $query : null,
-                $key
+                $key,
+                !empty($page) ? $page : 1,
+                !empty($limit) ? $limit : null
             )
         );
     }
