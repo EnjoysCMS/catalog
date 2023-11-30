@@ -23,8 +23,8 @@ final class ProductOptions extends AbstractController
             'comment' => '[JSON] Получение опций товара по категории'
         ]
     )]
-    public function getProductOptionsKeysByCategory(\EnjoysCMS\Module\Catalog\Entity\Category $category): ResponseInterface
-    {
+    public function getProductOptionsKeysByCategory(\EnjoysCMS\Module\Catalog\Entity\Category $category
+    ): ResponseInterface {
         $serializer = SerializerBuilder::create()->build();
 
         $em = $this->container->get(EntityManagerInterface::class);

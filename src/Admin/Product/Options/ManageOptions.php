@@ -71,12 +71,11 @@ final class ManageOptions
         $form->setDefaults($this->getDefaultsOptions($this->product->getOptions()));
 
         foreach ($optionKeys as $optionKey) {
-
             $elValue = new Select(
                 'options[' . $optionKey->getId() . '][value][]'
             );
 
-            if ($optionKey->isMultiple()){
+            if ($optionKey->isMultiple()) {
                 $elValue->setMultiple();
             }
 
@@ -85,16 +84,15 @@ final class ManageOptions
                     'data-tags' => 'true'
                 ])
             );
-            $elValue->addAttribute(AttributeFactory::create('data-placeholder', 'Введите значение, или оставьте пустым'))
+            $elValue->addAttribute(
+                AttributeFactory::create('data-placeholder', 'Введите значение, или оставьте пустым')
+            )
                 ->addClasses(['filter-value', 'form-control'])
                 ->addClass('col-md-7', Group::ATTRIBUTES_GROUP)
                 ->fill(function () use ($optionKey) {
-                    $result = [];
-                    $values = $this->product->getValuesByOptionKey($optionKey);
-                    foreach ($values as $value) {
-                        $result[$value->getId()] = $value->getValue();
-                    }
-                    return $result;
+                    return array_map(function (OptionValue $value) {
+                        return $value->getValue();
+                    }, $this->product->getValuesByOptionKey($optionKey));
                 }, true);
 
 

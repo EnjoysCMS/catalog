@@ -62,7 +62,7 @@ class OptionKey implements Stringable
 
     public function setUnit(?string $unit): void
     {
-        $this->unit = $unit;
+        $this->unit = (empty($unit)) ? null : $unit;
     }
 
     public function getName(): string
@@ -82,7 +82,7 @@ class OptionKey implements Stringable
 
     public function __toString(): string
     {
-        return $this->getName() . ($this->getUnit() ? ', ' . $this->getUnit() : '');
+        return $this->getName() .(($this->getUnit() !== null) ? ', ' . $this->getUnit() : '');
     }
 
     public function isMultiple(): bool

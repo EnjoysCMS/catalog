@@ -24,8 +24,9 @@ final class OptionKeyRepository extends EntityRepository
         ;
     }
 
-    public function getOptionKey(string $name, string $unit): OptionKey
+    public function getOptionKey(string $name, ?string $unit): OptionKey
     {
+        $unit = (empty($unit)) ? null : $unit;
         $optionKey = $this->findOneBy(
             [
                 'name' => $name,
