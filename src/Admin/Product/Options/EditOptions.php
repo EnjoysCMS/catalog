@@ -75,7 +75,7 @@ final class EditOptions
         $unit = $this->request->getParsedBody()['unit'] ?? null;
         $optionKey->setUnit($unit ?: null);
 
-        $note = $this->request->getParsedBody()['not'] ?? null;
+        $note = $this->request->getParsedBody()['note'] ?? null;
         $optionKey->setNote($note);
 
         $optionKey->setType($this->request->getParsedBody()['type']);
