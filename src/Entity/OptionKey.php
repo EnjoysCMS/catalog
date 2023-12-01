@@ -41,7 +41,7 @@ class OptionKey implements Stringable
     private string $type = 'ENUM';
 
     #[JMS\Type('array')]
-    #[ORM\Column(type: 'json', nullable: true, options: ['default' => null])]
+    #[ORM\Column(type: 'json', nullable: true)]
     private ?array $params = null;
 
     public function getWeight(): int

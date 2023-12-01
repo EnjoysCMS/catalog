@@ -35,7 +35,7 @@ final class EditOptions
             'note' => $optionKey->getNote(),
             'weight' => $optionKey->getWeight(),
             'type' => $optionKey->getType()->name,
-            'params' => json_encode($optionKey->getParams()),
+            'params' => $optionKey->getParams() === null ? null : json_encode($optionKey->getParams()),
             'multiple' => [$optionKey->isMultiple()],
         ]);
         $form->text('name', 'Наименование')
