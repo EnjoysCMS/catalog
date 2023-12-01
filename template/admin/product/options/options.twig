@@ -118,7 +118,7 @@
         });
 
         const findOptionKey = function () {
-            $('.filter-option')
+            $('.option-key')
                 .typeahead('destroy')
                 .typeahead({
                     hint: false
@@ -131,7 +131,7 @@
                     }
                 })
                 .bind('typeahead:select', function (ev, suggestion) {
-                    let unit = $(this).parents('.form-row').find('.filter-unit');
+                    let unit = $(this).parents('.form-row').find('.option-unit');
                     unit.val(suggestion.unit);
                 });
         }
@@ -148,7 +148,7 @@
         }
 
         const select2init = function () {
-            $(".filter-value").select2({
+            $(".__value-type-select").select2({
                 matcher: matchCustom,
                 allowClear: true,
                 theme: "bootstrap4",
@@ -157,8 +157,8 @@
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        let option = this.parents('.form-row').find('.filter-option').val();
-                        let unit = this.parents('.form-row').find('.filter-unit').val();
+                        let option = this.parents('.form-row').find('.option-key').val();
+                        let unit = this.parents('.form-row').find('.option-unit').val();
                         return {
                             query: params.term ?? '', // search term
                             option: option,
@@ -216,7 +216,7 @@
             let template = document.getElementById('template');
             let container = document.getElementById('options-container');
 
-            select2destroy($(".filter-value"))
+            select2destroy($(".__value-type-select"))
             container.insertAdjacentHTML('beforeend', template.innerHTML.split('~~i~~').join('new' + i++));
             findOptionKey()
             select2init()
@@ -336,15 +336,15 @@
     <div id="template" class="d-none">
         <div class="form-row my-2 pt-3 bg-light">
             <div class="col-md-3">
-                <input autocomplete="off" type="text" name="options[~~i~~][option]" class="filter-option form-control"
+                <input autocomplete="off" type="text" name="options[~~i~~][option]" class="option-key form-control"
                        placeholder="Опция">
             </div>
             <div class="col-md-1">
-                <input autocomplete="off" type="text" name="options[~~i~~][unit]" class="filter-unit  form-control "
+                <input autocomplete="off" type="text" name="options[~~i~~][unit]" class="option-unit  form-control "
                        placeholder="ед. изм">
             </div>
             <div class="col-md-7">
-                <select name="options[~~i~~][value][]" class="filter-value form-control form-select"
+                <select name="options[~~i~~][value][]" class="option-value __value-type-select form-control form-select"
                         data-placeholder="Значение" data-tags="true" multiple>
                 </select>
             </div>

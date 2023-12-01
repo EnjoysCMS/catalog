@@ -14,6 +14,7 @@ use Enjoys\Forms\Elements\Html;
 use Enjoys\Forms\Elements\Select;
 use Enjoys\Forms\Elements\Text;
 use Enjoys\Forms\Form;
+use Enjoys\Forms\Interfaces\ElementInterface;
 use Enjoys\Forms\Renderer\Bootstrap4\Group;
 use EnjoysCMS\Module\Catalog\Api\ProductOptions;
 use EnjoysCMS\Module\Catalog\Config;
@@ -71,38 +72,13 @@ final class ManageOptions
         $form->setDefaults($this->getDefaultsOptions($this->product->getOptions()));
 
         foreach ($optionKeys as $optionKey) {
-            $elValue = new Select(
-                'options[' . $optionKey->getId() . '][value][]'
-            );
-
-            if ($optionKey->isMultiple()) {
-                $elValue->setMultiple();
-            }
-
-            $elValue->setAttributes(
-                AttributeFactory::createFromArray([
-                    'data-tags' => 'true'
-                ])
-            );
-            $elValue->addAttribute(
-                AttributeFactory::create('data-placeholder', 'Введите значение, или оставьте пустым')
-            )
-                ->addClasses(['filter-value', 'form-control'])
-                ->addClass('col-md-7', Group::ATTRIBUTES_GROUP)
-                ->fill(function () use ($optionKey) {
-                    return array_map(function (OptionValue $value) {
-                        return $value->getValue();
-                    }, $this->product->getValuesByOptionKey($optionKey));
-                }, true);
-
-
             $form->group()
                 ->add([
                     (new Text(
                         'options[' . $optionKey->getId() . '][option]'
                     ))->setAttributes(
                         AttributeFactory::createFromArray([
-                            'class' => 'filter-option form-control',
+                            'class' => 'option-key form-control',
                             'placeholder' => 'Опция',
                             'grid' => 'col-md-3',
                             'value' => $optionKey->getName()
@@ -112,14 +88,14 @@ final class ManageOptions
                         'options[' . $optionKey->getId() . '][unit]'
                     ))->setAttributes(
                         AttributeFactory::createFromArray([
-                            'class' => 'filter-unit form-control',
+                            'class' => 'option-unit form-control',
                             'placeholder' => 'ед.изм.',
                             'grid' => 'col-md-1',
                             'autocomplete' => 'off',
                             'value' => $optionKey->getUnit()
                         ])
                     )->addClass('col-md-1', Group::ATTRIBUTES_GROUP),
-                    $elValue,
+                    $this->getValueInputElement($optionKey),
                     (new Html(
                         sprintf(
                             '<a href="%s" class="btn btn-link"><i class="fa fa-edit"></i></a> <a role="button" class="remove-option btn btn-link"><i class="fa fa-trash"></i></a>',
@@ -193,6 +169,40 @@ final class ManageOptions
     public function getProduct(): Product
     {
         return $this->product;
+    }
+
+    private function getValueInputElement(OptionKey $optionKey): ElementInterface
+    {
+        return $this->getSelectValue($optionKey);
+    }
+
+    private function getSelectValue(OptionKey $optionKey): Select
+    {
+        $element = new Select(
+            'options[' . $optionKey->getId() . '][value][]'
+        );
+
+        if ($optionKey->isMultiple()) {
+            $element->setMultiple();
+        }
+
+        $element->setAttributes(
+            AttributeFactory::createFromArray([
+                'data-tags' => 'true'
+            ])
+        );
+        $element->addAttribute(
+            AttributeFactory::create('data-placeholder', 'Введите значение, или оставьте пустым')
+        )
+            ->addClasses(['option-value', '__value-type-select', 'form-control'])
+            ->addClass('col-md-7', Group::ATTRIBUTES_GROUP)
+            ->fill(function () use ($optionKey) {
+                return array_map(function (OptionValue $value) {
+                    return $value->getValue();
+                }, $this->product->getValuesByOptionKey($optionKey));
+            }, true);
+
+        return $element;
     }
 
 }
