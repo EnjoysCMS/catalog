@@ -80,7 +80,9 @@ final class ManageOptions
                 ->add([
                     (new Text(
                         'options[' . $optionKey->getId() . '][option]'
-                    ))->setAttributes(
+                    ))
+                        ->setDescription($optionKey->getNote())
+                        ->setAttributes(
                         AttributeFactory::createFromArray([
                             'class' => 'option-key form-control',
                             'placeholder' => 'Опция',
