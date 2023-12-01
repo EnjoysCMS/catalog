@@ -31,7 +31,8 @@ class OptionValue
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'options')]
     private Collection $products;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->products = new ArrayCollection();
     }
 
@@ -48,15 +49,17 @@ class OptionValue
      */
     public function getValue(): string
     {
-        return match ($this->optionKey->getType()){
-            OptionType::BOOL => ($this->value === '0') ? 'Нет' : 'Да',
+        return match ($this->optionKey->getType()) {
+            OptionType::BOOL => ($this->value === '0')
+                ? $this->optionKey->getParams()[0] ?? 'Нет'
+                : $this->optionKey->getParams()[1] ?? 'Да',
             default => $this->value
         };
     }
 
     public function getRawValue(): string
     {
-        return  $this->value;
+        return $this->value;
     }
 
     public function setValue(string $value): void

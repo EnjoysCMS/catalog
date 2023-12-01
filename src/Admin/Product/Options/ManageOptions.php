@@ -57,10 +57,12 @@ final class ManageOptions
     }
 
 
+    /**
+     * @throws \ReflectionException
+     */
     public function getForm(): Form
     {
         $serializer = SerializerBuilder::create()->build();
-
         /** @var OptionKey[] $optionKeys */
         $optionKeys = $serializer->deserialize(
             (string)$this->productOptionsController->getProductOptionsKeysByCategory(
@@ -69,7 +71,7 @@ final class ManageOptions
             'array<EnjoysCMS\Module\Catalog\Entity\OptionKey>',
             'json'
         );
-//        dd($options);
+
         $form = new Form();
         $form->setDefaults($this->getDefaultsOptions($this->product->getOptions()));
 
@@ -214,14 +216,15 @@ final class ManageOptions
         return $element;
     }
 
-    private function getSwitchValue(OptionKey $optionKey)
+    private function getSwitchValue(OptionKey $optionKey): Radio
     {
         $element = new Radio('options[' . $optionKey->getId() . '][value][]');
-        $element->fill([1=> 'Да', 0 => 'Нет']);
+
+        $element->fill([1 =>  $optionKey->getParams()[1] ?? 'Да', 0 => $optionKey->getParams()[0] ?? 'Нет']);
         return $element;
     }
 
-    private function getTextValue(OptionKey $optionKey)
+    private function getTextValue(OptionKey $optionKey): Textarea
     {
         $element = new Textarea('options[' . $optionKey->getId() . '][value][]');
         return $element;

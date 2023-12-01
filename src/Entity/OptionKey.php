@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 use EnjoysCMS\Module\Catalog\Admin\Product\Options\OptionType;
 use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 use Stringable;
@@ -38,6 +39,10 @@ class OptionKey implements Stringable
 
     #[ORM\Column(type: 'string', options: ['default' => 'ENUM'])]
     private string $type = 'ENUM';
+
+    #[JMS\Type('array')]
+    #[ORM\Column(type: 'json', nullable: true, options: ['default' => null])]
+    private ?array $params = null;
 
     public function getWeight(): int
     {
@@ -86,7 +91,7 @@ class OptionKey implements Stringable
 
     public function __toString(): string
     {
-        return $this->getName() .(($this->getUnit() !== null) ? ', ' . $this->getUnit() : '');
+        return $this->getName() . (($this->getUnit() !== null) ? ', ' . $this->getUnit() : '');
     }
 
     public function isMultiple(): bool
@@ -112,9 +117,19 @@ class OptionKey implements Stringable
      */
     public function setType(string|OptionType $optionType): void
     {
-        if (is_string($optionType)){
+        if (is_string($optionType)) {
             $optionType = OptionType::from($optionType);
         }
         $this->type = $optionType->name;
+    }
+
+    public function getParams(): ?array
+    {
+        return $this->params;
+    }
+
+    public function setParams(?array $params): void
+    {
+        $this->params = $params;
     }
 }

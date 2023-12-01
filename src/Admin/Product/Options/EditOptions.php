@@ -35,6 +35,7 @@ final class EditOptions
             'note' => $optionKey->getNote(),
             'weight' => $optionKey->getWeight(),
             'type' => $optionKey->getType()->name,
+            'params' => json_encode($optionKey->getParams()),
             'multiple' => [$optionKey->isMultiple()],
         ]);
         $form->text('name', 'Наименование')
@@ -55,6 +56,9 @@ final class EditOptions
             ->setDescription('Можно ли передать сразу несколько значений.')
             ->fill([1 => 'Да', 0 => 'Нет']);
 
+        $form->textarea('params', 'Параметры')
+            ->setDescription('Параметры в виде JSON строки, используются разные, при разных OptionType');
+
         $form->submit();
         return $form;
     }
@@ -67,12 +71,20 @@ final class EditOptions
     public function doSave(OptionKey $optionKey): OptionKey
     {
         $optionKey->setName($this->request->getParsedBody()['name'] ?? '');
+
         $unit = $this->request->getParsedBody()['unit'] ?? null;
         $optionKey->setUnit($unit ?: null);
+
         $note = $this->request->getParsedBody()['not'] ?? null;
         $optionKey->setNote($note);
+
         $optionKey->setType($this->request->getParsedBody()['type']);
+
         $optionKey->setMultiple((bool)($this->request->getParsedBody()['multiple'] ?? false));
+
+        $params = (($this->request->getParsedBody()['params'] ?? '') === '') ? null : json_decode($this->request->getParsedBody()['params'] ?? '', true);
+        $optionKey->setParams($params);
+
         $this->em->flush();
         return $optionKey;
     }
