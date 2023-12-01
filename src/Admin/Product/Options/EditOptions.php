@@ -24,6 +24,7 @@ final class EditOptions
 
     /**
      * @throws ExceptionRule
+     * @throws \ReflectionException
      */
     public function getForm(OptionKey $optionKey): Form
     {
@@ -33,7 +34,7 @@ final class EditOptions
             'unit' => $optionKey->getUnit(),
             'note' => $optionKey->getNote(),
             'weight' => $optionKey->getWeight(),
-            'type' => $optionKey->getWeight(),
+            'type' => $optionKey->getType()->name,
             'multiple' => [$optionKey->isMultiple()],
         ]);
         $form->text('name', 'Наименование')
@@ -48,11 +49,7 @@ final class EditOptions
 
         $form->select('type', 'Тип')
             ->setDescription('Тип данных.')
-            ->fill([
-                'ENUM',
-                'TEXT',
-                'BOOL',
-            ], true);
+            ->fill(OptionType::toArray(), true);
 
         $form->radio('multiple', 'Мультизначения')
             ->setDescription('Можно ли передать сразу несколько значений.')
@@ -65,14 +62,16 @@ final class EditOptions
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws \ReflectionException
      */
-    public function doSave(OptionKey $optionKey)
+    public function doSave(OptionKey $optionKey): OptionKey
     {
         $optionKey->setName($this->request->getParsedBody()['name'] ?? '');
         $unit = $this->request->getParsedBody()['unit'] ?? null;
         $optionKey->setUnit($unit ?: null);
         $note = $this->request->getParsedBody()['not'] ?? null;
         $optionKey->setNote($note);
+        $optionKey->setType($this->request->getParsedBody()['type']);
         $optionKey->setMultiple((bool)($this->request->getParsedBody()['multiple'] ?? false));
         $this->em->flush();
         return $optionKey;

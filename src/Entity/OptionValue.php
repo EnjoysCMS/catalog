@@ -6,7 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Admin\Product\Options\OptionType;
 use EnjoysCMS\Module\Catalog\Repository\OptionValueRepository;
 
 #[ORM\Table(name: 'catalog_product_option_values')]
@@ -24,24 +26,37 @@ class OptionValue
 
     #[ORM\ManyToOne(targetEntity: OptionKey::class)]
     #[ORM\JoinColumn(name: 'key_id', referencedColumnName: 'id')]
-    private $optionKey;
+    private OptionKey $optionKey;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'options')]
-    private $products;
+    private Collection $products;
 
     public function __construct() {
         $this->products = new ArrayCollection();
-        $this->optionKey = new ArrayCollection();
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function __toString(): string
     {
         return $this->getValue();
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function getValue(): string
     {
-        return $this->value;
+        return match ($this->optionKey->getType()){
+            OptionType::BOOL => ($this->value === '0') ? 'Нет' : 'Да',
+            default => $this->value
+        };
+    }
+
+    public function getRawValue(): string
+    {
+        return  $this->value;
     }
 
     public function setValue(string $value): void
@@ -54,10 +69,7 @@ class OptionValue
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getOptionKey()
+    public function getOptionKey(): OptionKey
     {
         return $this->optionKey;
     }
@@ -67,10 +79,7 @@ class OptionValue
         $this->optionKey = $optionKey;
     }
 
-    /**
-     * @return ArrayCollection
-     */
-    public function getProducts()
+    public function getProducts(): Collection
     {
         return $this->products;
     }

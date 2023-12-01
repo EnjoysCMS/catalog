@@ -11,8 +11,10 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Elements\Html;
+use Enjoys\Forms\Elements\Radio;
 use Enjoys\Forms\Elements\Select;
 use Enjoys\Forms\Elements\Text;
+use Enjoys\Forms\Elements\Textarea;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Interfaces\ElementInterface;
 use Enjoys\Forms\Renderer\Bootstrap4\Group;
@@ -138,8 +140,8 @@ final class ManageOptions
         $defaults = [];
 
         foreach ($options as $option) {
-            $defaults['options'][$option['key']->getId()]['value'] = array_map(function ($item) {
-                return $item->getValue();
+            $defaults['options'][$option['key']->getId()]['value'] = array_map(function (OptionValue $item) {
+                return $item->getRawValue();
             }, $option['values']);
         }
         return $defaults;
@@ -171,9 +173,16 @@ final class ManageOptions
         return $this->product;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     private function getValueInputElement(OptionKey $optionKey): ElementInterface
     {
-        return $this->getSelectValue($optionKey);
+        return match ($optionKey->getType()){
+            OptionType::ENUM, OptionType::NUMERIC => $this->getSelectValue($optionKey),
+            OptionType::BOOL => $this->getSwitchValue($optionKey),
+            OptionType::TEXT => $this->getTextValue($optionKey),
+        };
     }
 
     private function getSelectValue(OptionKey $optionKey): Select
@@ -202,6 +211,19 @@ final class ManageOptions
                 }, $this->product->getValuesByOptionKey($optionKey));
             }, true);
 
+        return $element;
+    }
+
+    private function getSwitchValue(OptionKey $optionKey)
+    {
+        $element = new Radio('options[' . $optionKey->getId() . '][value][]');
+        $element->fill([1=> 'Да', 0 => 'Нет']);
+        return $element;
+    }
+
+    private function getTextValue(OptionKey $optionKey)
+    {
+        $element = new Textarea('options[' . $optionKey->getId() . '][value][]');
         return $element;
     }
 

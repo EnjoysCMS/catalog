@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Admin\Product\Options\OptionType;
 use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
 use Stringable;
 
@@ -34,6 +35,9 @@ class OptionKey implements Stringable
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $multiple = true;
+
+    #[ORM\Column(type: 'string', options: ['default' => 'ENUM'])]
+    private string $type = 'ENUM';
 
     public function getWeight(): int
     {
@@ -93,5 +97,24 @@ class OptionKey implements Stringable
     public function setMultiple(bool $multiple): void
     {
         $this->multiple = $multiple;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function getType(): OptionType
+    {
+        return OptionType::from($this->type);
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function setType(string|OptionType $optionType): void
+    {
+        if (is_string($optionType)){
+            $optionType = OptionType::from($optionType);
+        }
+        $this->type = $optionType->name;
     }
 }
