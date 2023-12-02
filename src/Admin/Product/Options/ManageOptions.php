@@ -164,6 +164,9 @@ final class ManageOptions
             }
             $optionKey = $this->keyRepository->getOptionKey($option['option'], $option['unit']);
             foreach ($option['value'] as $value) {
+                if ($value === '' || is_null($value)){
+                    continue;
+                }
                 $optionValue = $this->valueRepository->getOptionValue($value, $optionKey);
                 $this->em->persist($optionValue);
                 $this->product->addOption($optionValue);
@@ -228,8 +231,7 @@ final class ManageOptions
 
     private function getTextValue(OptionKey $optionKey): Textarea
     {
-        $element = new Textarea('options[' . $optionKey->getId() . '][value][]');
-        return $element;
+        return new Textarea('options[' . $optionKey->getId() . '][value][]');
     }
 
 }

@@ -40,7 +40,7 @@ class Product
     private ?array $barCodes = null;
 
     #[ORM\ManyToOne(targetEntity: Vendor::class)]
-    private ?Vendor $vendor= null;
+    private ?Vendor $vendor = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $vendorCode = null;
