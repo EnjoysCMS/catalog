@@ -6,9 +6,9 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as JMS;
 use EnjoysCMS\Module\Catalog\Admin\Product\Options\OptionType;
 use EnjoysCMS\Module\Catalog\Repository\OptionKeyRepository;
+use JMS\Serializer\Annotation as JMS;
 use Stringable;
 
 
@@ -34,8 +34,8 @@ class OptionKey implements Stringable
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $weight = 0;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    private bool $multiple = true;
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $multiple = false;
 
     #[ORM\Column(type: 'string', options: ['default' => 'ENUM'])]
     private string $type = 'ENUM';
