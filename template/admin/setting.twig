@@ -71,6 +71,19 @@
             <!-- /.card-header -->
             <div class="card-body">
                 {{ form|raw }}
+
+                <div>
+                    <hr>
+                    <div class="h3">Дополнительно</div>
+                    <ul>
+                        <li>
+                            <a href="{{ path('@catalog_product_options_remove-orphaned-values') }}"
+                               class="btn btn-link">
+                                Удалить неиспользуемые значения характеристик
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <!-- /.card-body -->
         </div>

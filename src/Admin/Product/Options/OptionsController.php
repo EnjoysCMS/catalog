@@ -156,4 +156,17 @@ final class OptionsController extends AdminController
             )
         );
     }
+
+    #[Route(
+        path: '/remove-orphaned-values',
+        name: 'remove-orphaned-values',
+        options: [
+            'comment' => 'Удаление неиспользуемых в товарах значений опций'
+        ]
+    )]
+    public function removeOrphansOptionValue(OptionsTools $optionsTools): ResponseInterface
+    {
+        $optionsTools->removeOrphanedValues();
+        return $this->redirect->toRoute('catalog/admin/setting');
+    }
 }

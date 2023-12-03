@@ -73,5 +73,24 @@ final class OptionValueRepository extends EntityRepository
         return $optionValue;
     }
 
+    /**
+     * @return OptionValue[]
+     */
+    public function getOrphans(): array
+    {
+        $activeIds = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT v.id')
+            ->from(\EnjoysCMS\Module\Catalog\Entity\Product::class, 'p')
+            ->leftJoin('p.options', 'v')
+            ->getQuery()->getSingleColumnResult();
+
+        return $this->createQueryBuilder('v')
+            ->select('v')
+            ->where('v.id NOT IN (:ids)')
+            ->setParameter('ids', array_filter($activeIds))
+            ->getQuery()
+            ->getResult();
+    }
+
 
 }
