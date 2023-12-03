@@ -54,9 +54,6 @@ class Product
     #[ORM\ManyToOne(targetEntity: Category::class)]
     private ?Category $category = null;
 
-    #[ORM\ManyToOne(targetEntity: ProductGroup::class)]
-    private $group = null;
-
 
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: Image::class)]
     private Collection $images;
@@ -86,7 +83,7 @@ class Product
     private Collection $prices;
 
     #[ORM\OneToOne(mappedBy: 'product', targetEntity: Quantity::class, cascade: ['persist'])]
-    private $quantity;
+    private ?Quantity $quantity;
 
     #[ORM\Column(name: 'max_discount', type: 'integer', nullable: true)]
     private ?int $maxDiscount = null;
@@ -286,7 +283,7 @@ class Product
     {
         $result = [];
         /** @var OptionValue $option */
-        foreach ($this->options as $i => $option) {
+        foreach ($this->options as $option) {
             /** @var OptionKey $key */
             $key = $option->getOptionKey();
             $result[$key->getId()]['key'] = $key;
@@ -356,10 +353,7 @@ class Product
         $this->currentUrl = $currentUrl;
     }
 
-    /**
-     * @return void
-     */
-    public function addUrl(Url $url)
+    public function addUrl(Url $url): void
     {
         if ($this->urls->contains($url)) {
             return;
@@ -438,18 +432,6 @@ class Product
     public function setQuantity(Quantity $quantity): void
     {
         $this->quantity = $quantity;
-    }
-
-
-    public function getGroup(): ?ProductGroup
-    {
-        return $this->group;
-    }
-
-
-    public function setGroup(?ProductGroup $group): void
-    {
-        $this->group = $group;
     }
 
 
