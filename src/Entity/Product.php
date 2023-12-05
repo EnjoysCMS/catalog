@@ -83,7 +83,7 @@ class Product
     private Collection $prices;
 
     #[ORM\OneToOne(mappedBy: 'product', targetEntity: Quantity::class, cascade: ['persist'])]
-    private ?Quantity $quantity;
+    private ?Quantity $quantity = null;
 
     #[ORM\Column(name: 'max_discount', type: 'integer', nullable: true)]
     private ?int $maxDiscount = null;
