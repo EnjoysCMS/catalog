@@ -153,7 +153,12 @@ final class CreateUpdateProductForm
         $elVendor = $form->text('vendor', 'Бренд или производитель')
             ->setDescription(
                 'Не обязательно.'
-            );
+            )
+            ->setAttributes(AttributeFactory::createFromArray([
+                'autocomplete' => 'off',
+                'placeholder' => 'Введите название бренда или производителя...'
+            ]))
+        ;
 
         if ($product !== null && $this->config->get('admin->product->disableChangeVendor', false)) {
             $elVendor->setAttribute(AttributeFactory::create('disabled'));

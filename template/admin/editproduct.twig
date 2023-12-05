@@ -2,6 +2,115 @@
 
 {% block additional %}
 
+    {% do asset('js', [
+        module.path ~ '/node_modules/@tarekraafat/autocomplete.js/dist/autoComplete.js',
+    ]) %}
+
+    <style>
+        .autoComplete_wrapper mark {
+            padding: 0;
+        }
+
+        .autoComplete_wrapper {
+            display: block;
+            position: relative;
+        }
+
+
+        .autoComplete_wrapper > ul {
+            position: absolute;
+            max-height: 226px;
+            overflow-y: scroll;
+            top: 100%;
+            left: 0;
+            right: 0;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+            border-radius: 4px;
+            background-color: #fff;
+            border: 1px solid rgba(33, 33, 33, 0.1);
+            z-index: 1000;
+            outline: none;
+        }
+
+        .autoComplete_wrapper > ul > li {
+            padding: 10px 20px;
+            list-style: none;
+            text-align: left;
+            font-size: 16px;
+            color: #212121;
+            transition: all 0.1s ease-in-out;
+            border-radius: 3px;
+            background-color: rgba(255, 255, 255, 1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
+        }
+
+        .autoComplete_wrapper > ul > li::selection {
+            color: rgba(255, 255, 255, 0);
+            background-color: rgba(255, 255, 255, 0);
+        }
+
+        .autoComplete_wrapper > ul > li:hover {
+            cursor: pointer;
+            background-color: rgba(123, 123, 123, 0.1);
+        }
+
+        .autoComplete_wrapper > ul > li mark {
+            background-color: transparent;
+            color: rgba(255, 122, 122, 1);
+            font-weight: bold;
+        }
+
+        .autoComplete_wrapper > ul > li mark::selection {
+            color: rgba(#255, 255, 255, 0);
+            background-color: rgba(255, 255, 255, 0);
+        }
+
+        .autoComplete_wrapper > ul > li[aria-selected="true"] {
+            background-color: rgba(123, 123, 123, 0.1);
+        }
+
+    </style>
+
+    <script>
+        const autoCompleteJS = new autoComplete({
+            selector: "#vendor",
+            data: {
+                src: async (query) => {
+                    try {
+                        // Fetch Data from external Source
+                        const source = await fetch(`{{ path('@catalog_api_vendor_find') }}?q=${query}`);
+                        // Data should be an array of `Objects` or `Strings`
+                        return await source.json();
+                    } catch (error) {
+                        return error;
+                    }
+                },
+                keys: ["name"],
+                cache: false
+            },
+            resultItem: {
+                highlight: true,
+            },
+            events: {
+                input: {
+                    selection: function selection(event) {
+                        let selection = event.detail.selection.value;
+                        console.warn(selection)
+                        autoCompleteJS.input.value = selection.name;
+                    },
+                    focus: () => {
+                        if (autoCompleteJS.input.value.length) autoCompleteJS.start();
+                    }
+                }
+            }
+        });
+
+    </script>
+
     {% if auto_urlify ?? true %}
         {% do asset('js', [
             'modules/catalog/node_modules/urlify/dist/urlify.js'

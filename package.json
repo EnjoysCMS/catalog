@@ -1,6 +1,7 @@
 {
     "license": "MIT",
     "dependencies": {
+        "@tarekraafat/autocomplete.js": "^10.2.7",
         "@ttskch/select2-bootstrap4-theme": "^1.5.2",
         "dropzone": "^6.0.0-beta.2",
         "select2": "^4.1.0-rc.0",
