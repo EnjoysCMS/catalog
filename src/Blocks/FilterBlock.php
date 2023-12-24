@@ -96,6 +96,9 @@ class FilterBlock extends AbstractBlock
 
 
         $form = new Form('get');
+
+        $form->setDefaults(['filter' => $this->request->getQueryParams()['filter'] ?? []]);
+
         $hasFilters = false;
 
         foreach ($allowedFilters as $filterMetaData) {
