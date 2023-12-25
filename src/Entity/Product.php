@@ -293,12 +293,19 @@ class Product
         return $result;
     }
 
-    public function getValuesByOptionKey($optionKey): array
+    /**
+     * @param int|string|OptionKey $optionKey
+     * @return array
+     */
+    public function getValuesByOptionKey(int|string|OptionKey $optionKey): array
     {
         return array_filter(
             $this->options->toArray(),
             function ($item) use ($optionKey) {
-                return $item->getOptionKey()->getId() === $optionKey->getId();
+                if ($optionKey instanceof OptionKey) {
+                    return $item->getOptionKey()->getId() === $optionKey->getId();
+                }
+                return $item->getOptionKey()->getId() === $optionKey;
             }
         );
     }
