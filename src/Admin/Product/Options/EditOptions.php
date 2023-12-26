@@ -37,6 +37,7 @@ final class EditOptions
             'type' => $optionKey->getType()->name,
             'params' => $optionKey->getParams() === null ? null : json_encode($optionKey->getParams()),
             'multiple' => [$optionKey->isMultiple()],
+            'comparable' => [$optionKey->isComparable()],
         ]);
         $form->text('name', 'Наименование')
             ->setDescription('Название характеристики.')
@@ -54,6 +55,10 @@ final class EditOptions
 
         $form->radio('multiple', 'Мультизначения')
             ->setDescription('Можно ли передать сразу несколько значений.')
+            ->fill([1 => 'Да', 0 => 'Нет']);
+
+        $form->radio('comparable', 'Сравниваемый')
+            ->setDescription('Показывать параметр при сравнении товаров')
             ->fill([1 => 'Да', 0 => 'Нет']);
 
         $form->textarea('params', 'Параметры')
@@ -81,6 +86,8 @@ final class EditOptions
         $optionKey->setType($this->request->getParsedBody()['type']);
 
         $optionKey->setMultiple((bool)($this->request->getParsedBody()['multiple'] ?? false));
+
+        $optionKey->setComparable((bool)($this->request->getParsedBody()['comparable'] ?? false));
 
         $params = (($this->request->getParsedBody()['params'] ?? '') === '') ? null : json_decode($this->request->getParsedBody()['params'] ?? '', true);
         $optionKey->setParams($params);

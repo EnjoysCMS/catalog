@@ -37,6 +37,9 @@ class OptionKey implements Stringable
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $multiple = false;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $comparable = true;
+
     #[ORM\Column(type: 'string', options: ['default' => 'ENUM'])]
     private string $type = 'ENUM';
 
@@ -131,5 +134,15 @@ class OptionKey implements Stringable
     public function setParams(?array $params): void
     {
         $this->params = $params;
+    }
+
+    public function isComparable(): bool
+    {
+        return $this->comparable;
+    }
+
+    public function setComparable(bool $comparable): void
+    {
+        $this->comparable = $comparable;
     }
 }

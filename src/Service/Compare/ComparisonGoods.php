@@ -41,6 +41,9 @@ final class ComparisonGoods
         foreach ($products as $product) {
             $this->addProduct($product);
             foreach ($product->getOptions() as $options) {
+                if (!$options['key']->isComparable()){
+                    continue;
+                }
                 if (!in_array($options['key'], $this->comparisonKeys, true)) {
                     $this->comparisonKeys[] = $options['key'];
                 }
