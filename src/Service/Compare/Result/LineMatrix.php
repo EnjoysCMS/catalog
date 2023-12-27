@@ -23,7 +23,7 @@ final class LineMatrix
         $mappedGoods = $this->goodsComparator->getComparisonValues();
 
         $data = [];
-        foreach (array_keys(current($mappedGoods)) as $key) {
+        foreach (array_keys((current($mappedGoods) ?: [])) as $key) {
             $values = \array_column($mappedGoods, $key);
 
             if ($this->countComparisonGoods > 1) {
