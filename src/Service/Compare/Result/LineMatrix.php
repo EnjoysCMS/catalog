@@ -4,37 +4,42 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Service\Compare\Result;
 
-use EnjoysCMS\Module\Catalog\Service\Compare\ComparisonGoods;
+use EnjoysCMS\Module\Catalog\Service\Compare\GoodsComparator;
 
 final class LineMatrix
 {
 
     private bool $removeRepeat = false;
     private bool $removeNull = true;
+    private int $countComparisonGoods;
 
-    public function __construct(private readonly ComparisonGoods $comparisonGoods)
+    public function __construct(private readonly GoodsComparator $goodsComparator)
     {
+        $this->countComparisonGoods = $this->goodsComparator->count();
     }
 
     public function getData(): array
     {
-        $mappedGoods = $this->comparisonGoods->getComparisonValues();
+        $mappedGoods = $this->goodsComparator->getComparisonValues();
 
         $data = [];
         foreach (array_keys(current($mappedGoods)) as $key) {
             $values = \array_column($mappedGoods, $key);
 
-            if ($this->isRemoveRepeat()) {
-                if (\count(\array_unique($values, SORT_REGULAR)) === 1) {
-                    continue;
+            if ($this->countComparisonGoods > 1) {
+                if ($this->isRemoveRepeat()) {
+                    if (\count(\array_unique($values, SORT_REGULAR)) === 1) {
+                        continue;
+                    }
+                }
+
+                if ($this->isRemoveNull()) {
+                    if (\array_filter($values) === []) {
+                        continue;
+                    }
                 }
             }
 
-            if ($this->isRemoveNull()) {
-                if (\array_filter($values) === []) {
-                    continue;
-                }
-            }
 
             $data = \array_merge($data, [$key => $values]);
         }

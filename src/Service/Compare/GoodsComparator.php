@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 
-final class ComparisonGoods
+final class GoodsComparator
 {
     private Collection $goods;
 
@@ -84,5 +84,18 @@ final class ComparisonGoods
     public function getComparisonKeys(): array
     {
         return $this->comparisonKeys;
+    }
+
+    public function count(): int
+    {
+        return count($this->goods);
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getGoods(): Collection
+    {
+        return $this->goods;
     }
 }
