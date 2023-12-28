@@ -66,6 +66,9 @@ class Product
     #[ORM\OneToOne(mappedBy: 'product', targetEntity: ProductMeta::class, cascade: ['persist', 'remove'])]
     private ?ProductMeta $meta = null;
 
+    #[ORM\OneToOne(mappedBy: 'product', targetEntity: ProductDimensions::class, cascade: ['persist', 'remove'])]
+    private ?ProductDimensions $dimensions = null;
+
     #[ORM\JoinTable(name: 'catalog_products_tags')]
     #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id')]
