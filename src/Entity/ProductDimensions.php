@@ -54,7 +54,7 @@ final class ProductDimensions
 
     public function setWeight(?int $weight): void
     {
-        $this->weight = $weight;
+        $this->weight = empty($weight) ? null : $weight;
     }
 
     public function getLength(): ?int
@@ -64,7 +64,7 @@ final class ProductDimensions
 
     public function setLength(?int $length): void
     {
-        $this->length = $length;
+        $this->length = empty($length) ? null : $length;
     }
 
     public function getWidth(): ?int
@@ -74,7 +74,7 @@ final class ProductDimensions
 
     public function setWidth(?int $width): void
     {
-        $this->width = $width;
+        $this->width = empty($width) ? null : $width;
     }
 
     public function getHeight(): ?int
@@ -84,6 +84,6 @@ final class ProductDimensions
 
     public function setHeight(?int $height): void
     {
-        $this->height = $height;
+        $this->height = empty($height) ? null : $height;
     }
 }

@@ -495,5 +495,9 @@ class Product
         $this->vendor = $vendor;
     }
 
+    public function getDimensions(): ?ProductDimensions
+    {
+        return $this->dimensions;
+    }
 
 }

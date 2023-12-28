@@ -16,12 +16,14 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\QueryException;
 use Enjoys\Cookie\Cookie;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Elements\Number;
 use Enjoys\Forms\Exception\ExceptionRule;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Rules;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\Category;
 use EnjoysCMS\Module\Catalog\Entity\Product;
+use EnjoysCMS\Module\Catalog\Entity\ProductDimensions;
 use EnjoysCMS\Module\Catalog\Entity\ProductUnit;
 use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Entity\Vendor;
@@ -58,7 +60,6 @@ final class CreateUpdateProductForm
      */
     public function getForm(Product $product = null): Form
     {
-
         $defaults = [
             'name' => $product?->getName(),
             'sku' => $product?->getSku(),
@@ -74,6 +75,12 @@ final class CreateUpdateProductForm
             'category' => $product?->getCategory()?->getId()
                 ?? $this->request->getQueryParams()['category_id']
                     ?? $this->cookie->get('__catalog__last_category_when_add_product'),
+            'dimensions' => [
+                'weight' => $product?->getDimensions()?->getWeight(),
+                'length' => $product?->getDimensions()?->getLength(),
+                'width' => $product?->getDimensions()?->getWidth(),
+                'height' => $product?->getDimensions()?->getHeight(),
+            ]
         ];
 
         $form = new Form();
@@ -104,7 +111,6 @@ final class CreateUpdateProductForm
 
         if ($product !== null && $this->config->get('admin->product->disableChangeCategory', false)) {
             $elCategory->disableRules()->setAttribute(AttributeFactory::create('disabled'));
-
         }
 
         $elName = $form->text('name', 'Наименование')
@@ -154,11 +160,12 @@ final class CreateUpdateProductForm
             ->setDescription(
                 'Не обязательно.'
             )
-            ->setAttributes(AttributeFactory::createFromArray([
-                'autocomplete' => 'off',
-                'placeholder' => 'Введите название бренда или производителя...'
-            ]))
-        ;
+            ->setAttributes(
+                AttributeFactory::createFromArray([
+                    'autocomplete' => 'off',
+                    'placeholder' => 'Введите название бренда или производителя...'
+                ])
+            );
 
         if ($product !== null && $this->config->get('admin->product->disableChangeVendor', false)) {
             $elVendor->setAttribute(AttributeFactory::create('disabled'));
@@ -208,6 +215,15 @@ final class CreateUpdateProductForm
         if ($product !== null && $this->config->get('admin->product->disableChangeUnit', false)) {
             $elUnit->setAttribute(AttributeFactory::create('disabled'));
         }
+
+
+        $form->group('Габариты упаковки и вес товара')
+            ->add([
+                (new Number('dimensions[weight]'))->setDescription('Вес товара в граммах с учетом упаковки (брутто).'),
+                (new Number('dimensions[length]'))->setDescription('Длина упаковки в мм.'),
+                (new Number('dimensions[width]'))->setDescription('Ширина  упаковки в мм.'),
+                (new Number('dimensions[height]'))->setDescription('Высота упаковки в мм.'),
+            ]);
 
         $form->submit('add');
         return $form;
@@ -331,6 +347,18 @@ final class CreateUpdateProductForm
             $this->em->persist($url);
             $productEntity->addUrl($url);
         }
+
+        if (null === $dimensions = $this->em->getRepository(ProductDimensions::class)->findOneBy(['product' => $product]
+            )) {
+            $dimensions = new ProductDimensions();
+            $dimensions->setProduct($productEntity);
+            $this->em->persist($dimensions);
+        }
+
+        $dimensions->setWeight((int)($this->request->getParsedBody()['dimensions']['weight'] ?? null));
+        $dimensions->setLength((int)($this->request->getParsedBody()['dimensions']['length'] ?? null));
+        $dimensions->setWidth((int)($this->request->getParsedBody()['dimensions']['width'] ?? null));
+        $dimensions->setHeight((int)($this->request->getParsedBody()['dimensions']['height'] ?? null));
 
         // flush
         $this->em->flush();
