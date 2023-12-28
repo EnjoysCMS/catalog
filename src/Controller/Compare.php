@@ -42,6 +42,35 @@ final class Compare extends AbstractController
     }
 
     /**
+     * @throws \Exception
+     */
+    #[Route('catalog/compare/remove', 'catalog_compare_remove', priority: 3)]
+    public function remove(EntityManagerInterface $em, Identity $identity): ResponseInterface
+    {
+        $parsedBody = json_decode($this->request->getBody()->getContents());
+        $product = $this->getProduct($em, $parsedBody->productId ?? null);
+        if ($product === null) {
+            return $this->json(null);
+        }
+
+        $user = $identity->getUser();
+        $compareList = $this->getCompareList($user);
+
+        if ($compareList === null) {
+            return $this->json(null);
+        }
+
+        $goodsIds = $compareList->getGoodsIds();
+        $key = array_search($product->getId(), $goodsIds, true);
+        if ($key !== false) {
+            unset($goodsIds[$key]);
+            $compareList->setGoodsIds($goodsIds);
+        }
+        $em->flush();
+        return $this->json('OK');
+    }
+
+    /**
      * @throws Exception
      * @throws \Exception
      */
