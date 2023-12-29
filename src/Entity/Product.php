@@ -94,6 +94,9 @@ class Product
     #[ORM\ManyToOne(targetEntity: ProductUnit::class)]
     private ?ProductUnit $unit = null;
 
+    #[ORM\ManyToOne(targetEntity: ProductGroup::class, cascade: ['persist'], inversedBy: 'products')]
+    private ?ProductGroup $group = null;
+
     public function __construct(string $id = null)
     {
         $this->id = $id ?? Uuid::uuid7()->toString();
@@ -498,6 +501,16 @@ class Product
     public function getDimensions(): ?ProductDimensions
     {
         return $this->dimensions;
+    }
+
+    public function getGroup(): ?ProductGroup
+    {
+        return $this->group;
+    }
+
+    public function isGrouped(): bool
+    {
+        return !is_null($this->group);
     }
 
 }

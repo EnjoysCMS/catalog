@@ -8,7 +8,6 @@ namespace EnjoysCMS\Module\Catalog\Admin\ProductGroup;
 
 use DI\Container;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Config;
@@ -38,7 +37,7 @@ final class Controller extends AdminController
     public function list(): ResponseInterface
     {
         $repository = $this->em->getRepository(ProductGroup::class);
-        dd($repository->findAll());
+        dd($repository->find('389a33b7-b0b0-4faa-b7b6-c0b634fe38c8')->getProducts()->toArray());
         return $this->response('');
     }
 
