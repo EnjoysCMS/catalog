@@ -31,8 +31,13 @@ class ProductGroup
     #[ORM\ManyToMany(targetEntity: Product::class)]
     private Collection $products;
 
+    #[ORM\ManyToMany(targetEntity: OptionKey::class)]
+    #[ORM\JoinTable(name: 'catalog_group_products_optionkey')]
+    private Collection $options;
+
     public function __construct()
     {
+        $this->options = new ArrayCollection();
         $this->products = new ArrayCollection();
     }
 
@@ -70,6 +75,24 @@ class ProductGroup
             $id = Uuid::fromString($id);
         }
         $this->id = $id->toString();
+    }
+
+    public function getOptions(): Collection
+    {
+        return $this->options;
+    }
+
+    public function removeOptions(): void
+    {
+        $this->options = new ArrayCollection();
+    }
+
+    public function addOption(OptionKey $optionKey): void
+    {
+        if ($this->options->contains($optionKey)){
+            return;
+        }
+        $this->options->add($optionKey);
     }
 
 
