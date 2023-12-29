@@ -142,4 +142,11 @@ class ProductModel implements ModelInterface
         $this->breadcrumbs->add(null, $this->product->getName());
         return $this->breadcrumbs->getBreadcrumbs();
     }
+
+    public function getProductEntity(): Product
+    {
+        return $this->product;
+    }
+
+
 }
