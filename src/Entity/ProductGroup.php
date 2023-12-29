@@ -28,7 +28,7 @@ class ProductGroup
     #[ORM\JoinTable(name: 'catalog_group_products')]
     #[ORM\JoinColumn(name: 'group_id', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'product_id', referencedColumnName: 'id', unique: true)]
-    #[ORM\ManyToMany(targetEntity: Product::class)]
+    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'group')]
     private Collection $products;
 
     #[ORM\ManyToMany(targetEntity: OptionKey::class)]

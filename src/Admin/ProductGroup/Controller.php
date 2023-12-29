@@ -6,8 +6,13 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Admin\ProductGroup;
 
 
+use DI\Container;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
+use EnjoysCMS\Module\Catalog\Config;
+use EnjoysCMS\Module\Catalog\Entity\ProductGroup;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -16,6 +21,15 @@ use Psr\Http\Message\ResponseInterface;
 #[Route('admin/catalog/product_group', '@catalog_product_group_')]
 final class Controller extends AdminController
 {
+    public function __construct(
+        Container $container,
+        Config $config,
+        \EnjoysCMS\Module\Admin\Config $adminConfig,
+        private readonly EntityManagerInterface $em
+    ) {
+        parent::__construct($container, $config, $adminConfig);
+    }
+
     #[Route(
         path: 's',
         name: 'list',
@@ -23,6 +37,8 @@ final class Controller extends AdminController
     )]
     public function list(): ResponseInterface
     {
+        $repository = $this->em->getRepository(ProductGroup::class);
+        dd($repository->findAll());
         return $this->response('');
     }
 
