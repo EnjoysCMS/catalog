@@ -508,6 +508,11 @@ class Product
         return $this->group;
     }
 
+    public function getGroupOptionValue()
+    {
+        return $this->group->getOptions();
+    }
+
     public function isGrouped(): bool
     {
         return !is_null($this->group);
