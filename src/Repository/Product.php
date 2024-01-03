@@ -13,13 +13,14 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use EnjoysCMS\Module\Catalog\Entity\Category;
+use EnjoysCMS\Module\Catalog\Entity\ProductGroup;
 
 final class Product extends EntityRepository
 {
 
     public function find($id, $lockMode = null, $lockVersion = null)
     {
-        if (empty($id)){
+        if (empty($id)) {
             return null;
         }
         return parent::find($id, $lockMode, $lockVersion);
@@ -35,8 +36,7 @@ final class Product extends EntityRepository
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.quantity', 'q')
             ->leftJoin('p.prices', 'pr')
-            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id')
-        ;
+            ->leftJoin('p.images', 'i', Join::WITH, 'i.product = p.id');
     }
 
 
@@ -94,8 +94,7 @@ final class Product extends EntityRepository
             ->andWhere('p.name LIKE :query')
             ->setParameter('query', '%' . $query . '%')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     public function findByCategory(Category $category)
@@ -115,8 +114,7 @@ final class Product extends EntityRepository
         }
         return $this->getFindAllBuilder()
             ->where('p.category = :category')
-            ->setParameter('category', $category)
-        ;
+            ->setParameter('category', $category);
     }
 
     public function getFindByCategorysIdsDQL($categoryIds): QueryBuilder
@@ -124,8 +122,7 @@ final class Product extends EntityRepository
         $qb = $this->getFindAllBuilder();
 
         $qb->where('p.category IN (:category)')
-            ->setParameter('category', $categoryIds)
-        ;
+            ->setParameter('category', $categoryIds);
 
         if (false !== $null_key = array_search(null, $categoryIds)) {
             $qb->orWhere('p.category IS NULL');
@@ -148,8 +145,7 @@ final class Product extends EntityRepository
     {
         return $this->getFindAllBuilder()
             ->where('p.id IN (:ids)')
-            ->setParameter('ids', $productIds)
-        ;
+            ->setParameter('ids', $productIds);
     }
 
     public function getFindByIdsQuery($productIds): Query
@@ -170,20 +166,39 @@ final class Product extends EntityRepository
             ->leftJoin('c.parent', 't')
             ->leftJoin('p.images', 'i')
             ->leftJoin('p.files', 'f')
-            ->orderBy('i.general', 'desc')
-        ;
+            ->orderBy('i.general', 'desc');
         if ($category === null) {
             $dql->where('p.category IS NULL');
         } else {
             $dql->where('p.category = :category')
-                ->setParameter('category', $category)
-            ;
+                ->setParameter('category', $category);
         }
         $dql->leftJoin('p.urls', 'u')
             ->andWhere('u.path = :url')
-            ->setParameter('url', $url)
-        ;
+            ->setParameter('url', $url);
 
         return $dql;
+    }
+
+    public function findOneByGroupAndOptions(string|ProductGroup $group, array $optionIds)
+    {
+//        $criteria = new Criteria();
+//        $criteria->andWhere(Criteria::expr()->memberOf('o.id', 146));
+////        $criteria->andWhere(Criteria::expr()->eq('o.id', 142));
+        $qb = $this->createQueryBuilder('p') //$this->getFindAllBuilder()
+            ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
+            ->leftJoin('p.options', 'o');
+
+        return $qb
+            ->andWhere('p.group = :group')
+            ->setParameter('group', $group)
+            ->andWhere($qb->expr()->in('o.id', $optionIds))
+            ->groupBy('p.id')
+            ->having('total_options = ' . count($optionIds))
+            ->getQuery()
+            ->getOneOrNullResult()
+            //->getSQL()
+            //
+            ;
     }
 }

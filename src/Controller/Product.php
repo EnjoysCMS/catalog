@@ -6,10 +6,11 @@ declare(strict_types=1);
 namespace EnjoysCMS\Module\Catalog\Controller;
 
 
+use DI\Container;
+use Doctrine\ORM\EntityManagerInterface;
 use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,7 +36,7 @@ final class Product extends PublicController
      * @throws \Exception
      */
 
-    public function __invoke(ContainerInterface $container, ProductModel $productModel): ResponseInterface
+    public function __invoke(Container $container, ProductModel $productModel): ResponseInterface
     {
         $template_path = '@m/catalog/product.twig';
 
@@ -45,7 +46,18 @@ final class Product extends PublicController
             $template_path = __DIR__ . '/../../template/product.twig';
         }
 
-//dd($productModel->getProductEntity()->isGrouped());
+//        dd($productModel->getProductEntity()->getOptionsCollection()->toArray());
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $repo */
+        $repo = $container->get(EntityManagerInterface::class)->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class);
+//        $criteria = new Criteria();
+//        $criteria->where(Criteria::expr()->eq('p.group', 'dac2fe6f-637f-46ee-b57c-1583afce1776'));
+        dd($repo->findOneByGroupAndOptions('dac2fe6f-637f-46ee-b57c-1583afce1776', [129, 133]));
+//        dd(iterator_to_array($productModel->getProductEntity()->getGroup()?->getProductsWithOptions()->getIterator()));
+//        foreach ($productModel->getProductEntity()->getGroup()?->getProductsWithOptions() ?? [] as $i=>$optionsValue) {
+//            foreach ($optionsValue as $key => $item) {
+//                dd($i, $key, $item);
+//            }
+//        }
         return $this->responseText(
             $this->twig->render(
                 $template_path,

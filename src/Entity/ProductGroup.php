@@ -8,10 +8,11 @@ namespace EnjoysCMS\Module\Catalog\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use EnjoysCMS\Module\Catalog\Repository\ProductGroupRepository;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductGroupRepository::class)]
 #[ORM\Table(name: 'catalog_products_group')]
 class ProductGroup
 {
@@ -49,6 +50,9 @@ class ProductGroup
         $this->title = $title;
     }
 
+    /**
+     * @return Collection<Product>
+     */
     public function getProducts(): Collection
     {
         return $this->products;
@@ -87,11 +91,40 @@ class ProductGroup
 
     public function addOption(OptionKey $optionKey): void
     {
-        if ($this->options->contains($optionKey)){
+        if ($this->options->contains($optionKey)) {
             return;
         }
         $this->options->add($optionKey);
     }
 
+    public function getOptionsValues(): \WeakMap
+    {
+        $values = new \WeakMap();
+        foreach ($this->getOptions() as $option) {
+            $values[$option] = [];
+            foreach ($this->getProducts() as $product) {
+                $values[$option] = array_merge($values[$option], $product->getValuesByOptionKey($option));
+            }
+            $values[$option] = array_unique($values[$option], SORT_REGULAR);
+        }
+        return $values;
+    }
+
+    public function getProductsWithOptions(): \WeakMap
+    {
+        $products = new \WeakMap();
+
+        foreach ($this->getProducts() as $product) {
+            $products[$product] = new \WeakMap();
+            foreach ($this->getOptions() as $option) {
+                $products[$product][$option] = array_merge(
+                    $products[$product][$option] ?? [],
+                    $product->getValuesByOptionKey($option)
+                );
+            }
+        }
+
+        return $products;
+    }
 
 }
