@@ -47,17 +47,18 @@ final class Product extends PublicController
         }
 
 //        dd($productModel->getProductEntity()->getOptionsCollection()->toArray());
-        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $repo */
-        $repo = $container->get(EntityManagerInterface::class)->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class);
+//        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $repo */
+//        $repo = $container->get(EntityManagerInterface::class)->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class);
 //        $criteria = new Criteria();
 //        $criteria->where(Criteria::expr()->eq('p.group', 'dac2fe6f-637f-46ee-b57c-1583afce1776'));
-        dd($repo->findOneByGroupAndOptions('dac2fe6f-637f-46ee-b57c-1583afce1776', [129, 133]));
+        //dd($repo->findOneByGroupAndOptions('dac2fe6f-637f-46ee-b57c-1583afce1776', [152, 111]));
 //        dd(iterator_to_array($productModel->getProductEntity()->getGroup()?->getProductsWithOptions()->getIterator()));
 //        foreach ($productModel->getProductEntity()->getGroup()?->getProductsWithOptions() ?? [] as $i=>$optionsValue) {
 //            foreach ($optionsValue as $key => $item) {
 //                dd($i, $key, $item);
 //            }
 //        }
+//        dd($productModel->getProductEntity()->getGroup()?->getOptionsValues()->count);
         return $this->responseText(
             $this->twig->render(
                 $template_path,
