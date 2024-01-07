@@ -7,7 +7,6 @@ namespace EnjoysCMS\Module\Catalog\Controller;
 
 
 use DI\Container;
-use Doctrine\ORM\EntityManagerInterface;
 use Enjoys\Functions\TwigExtension\ConvertSize;
 use EnjoysCMS\Module\Catalog\Models\ProductModel;
 use Psr\Container\ContainerExceptionInterface;
@@ -46,12 +45,13 @@ final class Product extends PublicController
             $template_path = __DIR__ . '/../../template/product.twig';
         }
 
-//        dd($productModel->getProductEntity()->getOptionsCollection()->toArray());
+//        $matrix = $productModel->getProductEntity()->getGroup()?->getOptionsMatrix();
+//        dd($productModel->getProductEntity()->getGroup()?->getDefaultOptionsByProduct($productModel->getProductEntity()));
 //        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $repo */
 //        $repo = $container->get(EntityManagerInterface::class)->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class);
 //        $criteria = new Criteria();
 //        $criteria->where(Criteria::expr()->eq('p.group', 'dac2fe6f-637f-46ee-b57c-1583afce1776'));
-        //dd($repo->findOneByGroupAndOptions('dac2fe6f-637f-46ee-b57c-1583afce1776', [152, 111]));
+//        dd($repo->findOneByGroupAndOptions('dac2fe6f-637f-46ee-b57c-1583afce1776', [142, 133]));
 //        dd(iterator_to_array($productModel->getProductEntity()->getGroup()?->getProductsWithOptions()->getIterator()));
 //        foreach ($productModel->getProductEntity()->getGroup()?->getProductsWithOptions() ?? [] as $i=>$optionsValue) {
 //            foreach ($optionsValue as $key => $item) {

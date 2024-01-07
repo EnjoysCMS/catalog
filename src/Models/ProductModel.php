@@ -109,6 +109,7 @@ class ProductModel implements ModelInterface
                 ),
             ],
             'product' => $this->product,
+            'productRepository' => $this->productRepository,
             'optionKeyRepository' => $this->em->getRepository(OptionKey::class),
             'optionValueRepository' => $this->em->getRepository(OptionValue::class),
             'priceGroups' => $this->em->getRepository(PriceGroup::class)->findAll(),

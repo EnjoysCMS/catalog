@@ -26,10 +26,16 @@ class ProductGroup
     #[ORM\Column(type: 'string', length: 50)]
     private string $title;
 
+    /**
+     * @var Collection<Product> $products
+     */
     #[ORM\JoinTable(name: 'catalog_group_products')]
     #[ORM\OneToMany(mappedBy: 'group', targetEntity: Product::class)]
     private Collection $products;
 
+    /**
+     * @var Collection<OptionKey> $options
+     */
     #[ORM\ManyToMany(targetEntity: OptionKey::class)]
     #[ORM\JoinTable(name: 'catalog_group_products_optionkey')]
     private Collection $options;
@@ -79,6 +85,9 @@ class ProductGroup
         $this->id = $id->toString();
     }
 
+    /**
+     * @return Collection<OptionKey>
+     */
     public function getOptions(): Collection
     {
         return $this->options;
@@ -125,6 +134,34 @@ class ProductGroup
         }
 
         return $products;
+    }
+
+    public function getDefaultOptionsByProduct(Product $product)
+    {
+        $defaultOptions = [];
+
+        foreach ($this->options as $option) {
+            $defaultOptions[$option->getId()] = $product->getOptionsCollection()->findFirst(function ($key, $item) use ($option) {
+                return $item->getOptionKey() === $option;
+            });
+        }
+        return $defaultOptions;
+    }
+
+    public function getOptionsMatrix()
+    {
+        $matrix = [];
+
+        foreach ($this->getProducts() as $product) {
+            foreach ($this->getOptions() as $option) {
+                $value = current($product->getValuesByOptionKey($option));
+                if ($value instanceof OptionValue) {
+                    $matrix[$product->getId()][$option->getId()] = $value->getId();
+                }
+            }
+        }
+
+        return $matrix;
     }
 
 }

@@ -182,23 +182,25 @@ final class Product extends EntityRepository
 
     public function findOneByGroupAndOptions(string|ProductGroup $group, array $optionIds)
     {
-//        $criteria = new Criteria();
-//        $criteria->andWhere(Criteria::expr()->memberOf('o.id', 146));
-////        $criteria->andWhere(Criteria::expr()->eq('o.id', 142));
+//dump($optionIds);
         $qb = $this->createQueryBuilder('p') //$this->getFindAllBuilder()
             ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
             ->leftJoin('p.options', 'o');
 
-        return $qb
+        $result = $qb
             ->andWhere('p.group = :group')
             ->setParameter('group', $group)
             ->andWhere($qb->expr()->in('o.id', $optionIds))
             ->groupBy('p.id')
             ->having('total_options = ' . count($optionIds))
             ->getQuery()
-            ->getOneOrNullResult()
-            //->getSQL()
-            //
-            ;
+            ->getResult()
+        ;
+
+        if ($result === [] || count($result) > 1){
+            return null;
+        }
+
+        return $result[0];
     }
 }
