@@ -119,6 +119,9 @@ class ProductGroup
         return $values;
     }
 
+    /**
+     * ?!
+     */
     public function getProductsWithOptions(): \WeakMap
     {
         $products = new \WeakMap();
@@ -136,7 +139,7 @@ class ProductGroup
         return $products;
     }
 
-    public function getDefaultOptionsByProduct(Product $product)
+    public function getDefaultOptionsByProduct(Product $product): array
     {
         $defaultOptions = [];
 
@@ -148,20 +151,6 @@ class ProductGroup
         return $defaultOptions;
     }
 
-    public function getOptionsMatrix()
-    {
-        $matrix = [];
 
-        foreach ($this->getProducts() as $product) {
-            foreach ($this->getOptions() as $option) {
-                $value = current($product->getValuesByOptionKey($option));
-                if ($value instanceof OptionValue) {
-                    $matrix[$product->getId()][$option->getId()] = $value->getId();
-                }
-            }
-        }
-
-        return $matrix;
-    }
 
 }

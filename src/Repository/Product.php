@@ -180,9 +180,14 @@ final class Product extends EntityRepository
         return $dql;
     }
 
-    public function findOneByGroupAndOptions(string|ProductGroup $group, array $optionIds)
+    public function findOneByGroupAndOptions(string|ProductGroup $group, array $optionIds): ?\EnjoysCMS\Module\Catalog\Entity\Product
     {
-//dump($optionIds);
+        $optionIds = array_filter($optionIds);
+
+        if ($optionIds === []) {
+            return null;
+        }
+
         $qb = $this->createQueryBuilder('p') //$this->getFindAllBuilder()
             ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
             ->leftJoin('p.options', 'o');
@@ -196,6 +201,8 @@ final class Product extends EntityRepository
             ->getQuery()
             ->getResult()
         ;
+
+        // TODO rewrite to catch the exception
 
         if ($result === [] || count($result) > 1){
             return null;
