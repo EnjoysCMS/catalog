@@ -180,8 +180,10 @@ final class Product extends EntityRepository
         return $dql;
     }
 
-    public function findOneByGroupAndOptions(string|ProductGroup $group, array $optionIds): ?\EnjoysCMS\Module\Catalog\Entity\Product
-    {
+    public function findOneByGroupAndOptions(
+        string|ProductGroup $group,
+        array $optionIds
+    ): ?\EnjoysCMS\Module\Catalog\Entity\Product {
         $optionIds = array_filter($optionIds);
 
         if ($optionIds === []) {
@@ -189,25 +191,20 @@ final class Product extends EntityRepository
         }
 
         $qb = $this->createQueryBuilder('p') //$this->getFindAllBuilder()
-            ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
+        ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
             ->leftJoin('p.options', 'o');
 
-        $result = $qb
-            ->andWhere('p.group = :group')
-            ->setParameter('group', $group)
-            ->andWhere($qb->expr()->in('o.id', $optionIds))
-            ->groupBy('p.id')
-            ->having('total_options = ' . count($optionIds))
-            ->getQuery()
-            ->getResult()
-        ;
-
-        // TODO rewrite to catch the exception
-
-        if ($result === [] || count($result) > 1){
+        try {
+            return $qb
+                ->andWhere('p.group = :group')
+                ->setParameter('group', $group)
+                ->andWhere($qb->expr()->in('o.id', $optionIds))
+                ->groupBy('p.id')
+                ->having('total_options = ' . count($optionIds))
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (NonUniqueResultException) {
             return null;
         }
-
-        return $result[0];
     }
 }

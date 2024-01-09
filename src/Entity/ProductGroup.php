@@ -119,25 +119,6 @@ class ProductGroup
         return $values;
     }
 
-    /**
-     * ?!
-     */
-    public function getProductsWithOptions(): \WeakMap
-    {
-        $products = new \WeakMap();
-
-        foreach ($this->getProducts() as $product) {
-            $products[$product] = new \WeakMap();
-            foreach ($this->getOptions() as $option) {
-                $products[$product][$option] = array_merge(
-                    $products[$product][$option] ?? [],
-                    $product->getValuesByOptionKey($option)
-                );
-            }
-        }
-
-        return $products;
-    }
 
     public function getDefaultOptionsByProduct(Product $product): array
     {
