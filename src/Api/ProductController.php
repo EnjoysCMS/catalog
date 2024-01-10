@@ -17,6 +17,7 @@ use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductPrice;
 use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Service\ProductService;
+use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -72,7 +73,10 @@ class ProductController extends AbstractController
                 return [
                     'id' => $item->getId(),
                     'title' => $item->getName(),
-                    'category' => $item->getCategory()->getFullTitle()
+                    'category' => $item->getCategory()->getFullTitle(),
+                    'sku' => $item->getSku(),
+                    'vendor' => $item->getVendor()->getName(),
+                    'vendorCode' => $item->getVendorCode(),
                 ];
             }, $matched),
             'total_count' => count($matched)

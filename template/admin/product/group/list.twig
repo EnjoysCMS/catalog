@@ -40,7 +40,7 @@
 
                                 {% if products|length > 0 %}
                                     <div>
-                                        <strong>Продукты</strong>
+                                        <strong>Продукты ({{ products|length }})</strong>
                                         <ul class="list-unstyled">
                                             {% for product in products %}
                                                 {% set hasProblem = false %}

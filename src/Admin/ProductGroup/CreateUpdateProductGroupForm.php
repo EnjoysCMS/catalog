@@ -88,10 +88,15 @@ final class CreateUpdateProductGroupForm
             $productGroup->addOption($option);
         }
 
-        $products= $this->em->getRepository(Product::class)->findBy([
+        $products = $this->em->getRepository(Product::class)->findBy([
             'id' => $this->request->getParsedBody()['products'] ?? []
         ]);
-        $productGroup->removeProducts();
+
+        $productGroup->removeProducts(
+            array_udiff($productGroup->getProducts()->toArray(), $products, function ($a, $b) {
+                return $a->getId() <=> $b->getId();
+            })
+        );
         foreach ($products as $product) {
             $productGroup->addProduct($product);
         }

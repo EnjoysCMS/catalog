@@ -1,14 +1,49 @@
 {% extends '@a/layout.twig' %}
 {% block content %}
     {% do asset('css', [
-        {0: module.path ~ '/node_modules/select2/dist/css/select2.css','minify': false},
-        {0: module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css','minify': false},
+        module.path ~ '/node_modules/select2/dist/css/select2.min.css',
+        module.path ~ '/node_modules/@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min.css'
     ]) %}
 
     {% do asset('js', [
         {0: module.path ~ '/node_modules/select2/dist/js/select2.full.js','minify': false },
         'modules/admin/node_modules/bs-custom-file-input/dist/bs-custom-file-input.min.js'
     ]) %}
+
+    <style>
+
+        .select2-selection__rendered {
+            display: block !important;
+            width: calc(100% - 50px) !important;
+        }
+
+        .select2-selection__clear, .select2-selection__clear {
+            color: #1c1c1c !important;
+            margin-right: 2em !important;
+            right: 0 !important;
+        }
+
+        .select2-selection__choice {
+            float: left !important;
+            padding: 0 0 0 0.75rem !important;
+            margin: calc(0.375rem - 2px) 0 0 0.375rem !important;
+            background: #efefef !important;
+            border-radius: 0.5rem !important;
+        }
+
+        .select2-selection__choice__remove {
+            float: right !important;
+            border: 0 !important;
+            padding: 0 3px !important;
+            margin: 0 3px !important;
+        }
+
+        .select2-selection__choice{
+            float: none !important;
+            display: inline-block !important;
+        }
+
+    </style>
     <script>
         $(document).ready(function () {
             bsCustomFileInput.init()
@@ -91,12 +126,12 @@
                         "</div>"
                     );
 
-                    $container.find(".select2-result---name").text(result.title);
+                    $container.find(".select2-result---name").text('[SKU: '+ result.sku +'] ' + result.title);
 
                     return $container;
                 },
                 templateSelection: function (result) {
-                    return result.text || result.title;
+                    return result.text || '[SKU: '+ result.sku +'] ' + result.title;
                 }
             });
         });

@@ -64,9 +64,26 @@ class ProductGroup
         return $this->products;
     }
 
-    public function removeProducts(): void
+    public function removeProducts(?array $products = null): void
     {
-        $this->products = new ArrayCollection();
+        if ($products === null) {
+            foreach ($this->products as $product) {
+                $this->removeProduct($product);
+            }
+            $this->products = new ArrayCollection();
+            return;
+        }
+
+        foreach ($products as $product) {
+            $this->removeProduct($product);
+            $this->products->removeElement($product);
+        }
+    }
+
+    public function removeProduct(Product $product): void
+    {
+        $this->products->removeElement($product);
+        $product->setGroup(null);
     }
 
     public function addProduct(Product $product): void
@@ -103,6 +120,7 @@ class ProductGroup
     {
         if ($options === null) {
             $this->options = new ArrayCollection();
+            return;
         }
 
         foreach ($options as $option) {
