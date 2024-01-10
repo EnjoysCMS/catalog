@@ -316,6 +316,19 @@ class Product
         );
     }
 
+    public function hasOption(int|string|OptionKey $optionKey): bool
+    {
+        return count(array_filter(
+            $this->options->toArray(),
+            function ($item) use ($optionKey) {
+                if ($optionKey instanceof OptionKey) {
+                    return $item->getOptionKey()->getId() === $optionKey->getId();
+                }
+                return $item->getOptionKey()->getId() === $optionKey;
+            }
+        )) > 0;
+    }
+
     public function clearOptions(): void
     {
         $this->options = new ArrayCollection();
@@ -516,6 +529,11 @@ class Product
     public function isGrouped(): bool
     {
         return !is_null($this->group);
+    }
+
+    public function setGroup(?ProductGroup $group): void
+    {
+        $this->group = $group;
     }
 
 }

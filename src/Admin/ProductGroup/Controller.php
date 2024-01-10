@@ -8,11 +8,16 @@ namespace EnjoysCMS\Module\Catalog\Admin\ProductGroup;
 
 use DI\Container;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NoResultException;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Config;
 use EnjoysCMS\Module\Catalog\Entity\ProductGroup;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Routing\Requirement\Requirement;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 /**
  * TODO
@@ -29,6 +34,11 @@ final class Controller extends AdminController
         parent::__construct($container, $config, $adminConfig);
     }
 
+    /**
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws LoaderError
+     */
     #[Route(
         path: 's',
         name: 'list',
@@ -37,8 +47,14 @@ final class Controller extends AdminController
     public function list(): ResponseInterface
     {
         $repository = $this->em->getRepository(ProductGroup::class);
-        dd($repository->find('389a33b7-b0b0-4faa-b7b6-c0b634fe38c8')->getProducts()->toArray());
-        return $this->response('');
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/group/list.twig',
+                [
+                    'productGroups' => $repository->findAll(),
+                ]
+            )
+        );
     }
 
     #[Route(
@@ -54,5 +70,45 @@ final class Controller extends AdminController
          * Добавление товаров, если характеристик нет, не добавлять
          */
         return $this->response('');
+    }
+
+    /**
+     * @throws NoResultException
+     */
+    #[Route(
+        path: '/edit/{group_id}',
+        name: 'edit',
+        requirements: [
+            'group_id' => Requirement::UUID
+        ],
+        comment: 'Редактировать группу товаров (объединение карточек)'
+    )]
+    public function edit(CreateUpdateProductGroupForm $createUpdateProductGroupForm): ResponseInterface
+    {
+        $repository = $this->em->getRepository(ProductGroup::class);
+        $productGroup = $repository->find(
+            $this->request->getAttribute('group_id')
+            ?? throw new \InvalidArgumentException(
+            '`group_id` param is invalid or not exists'
+            )
+        ) ?? throw new NoResultException();
+
+        $form = $createUpdateProductGroupForm->getForm($productGroup);
+
+        if ($form->isSubmitted()) {
+            $createUpdateProductGroupForm->doAction($productGroup);
+            return $this->redirect->toRoute('@catalog_product_group_list');
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/group/form.twig', [
+                    'form' => $rendererForm,
+                    'title' => sprintf("Редактирование группы товаров: %s", $productGroup->getTitle())
+                ]
+            )
+        );
     }
 }

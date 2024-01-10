@@ -64,12 +64,18 @@ class ProductGroup
         return $this->products;
     }
 
+    public function removeProducts(): void
+    {
+        $this->products = new ArrayCollection();
+    }
+
     public function addProduct(Product $product): void
     {
         if ($this->products->contains($product)) {
             return;
         }
         $this->products->add($product);
+        $product->setGroup($this);
     }
 
     public function getId(): string
@@ -93,9 +99,15 @@ class ProductGroup
         return $this->options;
     }
 
-    public function removeOptions(): void
+    public function removeOptions(?array $options = null): void
     {
-        $this->options = new ArrayCollection();
+        if ($options === null) {
+            $this->options = new ArrayCollection();
+        }
+
+        foreach ($options as $option) {
+            $this->options->removeElement($option);
+        }
     }
 
     public function addOption(OptionKey $optionKey): void
@@ -125,13 +137,14 @@ class ProductGroup
         $defaultOptions = [];
 
         foreach ($this->options as $option) {
-            $defaultOptions[$option->getId()] = $product->getOptionsCollection()->findFirst(function ($key, $item) use ($option) {
-                return $item->getOptionKey() === $option;
-            });
+            $defaultOptions[$option->getId()] = $product->getOptionsCollection()->findFirst(
+                function ($key, $item) use ($option) {
+                    return $item->getOptionKey() === $option;
+                }
+            );
         }
         return $defaultOptions;
     }
-
 
 
 }

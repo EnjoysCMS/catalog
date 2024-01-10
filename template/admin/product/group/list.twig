@@ -1,0 +1,89 @@
+{% extends '@a/layout.twig' %}
+{% block content %}
+
+    <section class="content">
+
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Группы товаров
+                </h2>
+
+
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div>
+                    <a class="btn btn-sm btn-primary" href="{{ path('@catalog_product_group_add') }}">Добавить новую
+                        группу товаров</a>
+                </div>
+                <hr>
+                <table class="table table-bordered table-hover">
+                    {% for group in productGroups %}
+                        {% set products = group.products %}
+                        <tr>
+                            <td>{{ group.title }} <small
+                                    class="text-muted">{{ group.id }}</small> {% if products|length > 0 %}
+                                    <a class="small text-dark"
+                                       href="{{ path('catalog/product', {"slug": products|first.slug}) }}"><i
+                                            class="fas fa-external-link-alt"></i></a>
+                                {% endif %}
+
+
+                                <div>
+                                    {% for option in group.options %}
+                                        <span class="badge bg-secondary">{{ option }}</span>
+                                    {% endfor %}
+                                </div>
+
+
+                                {% if products|length > 0 %}
+                                    <div>
+                                        <strong>Продукты</strong>
+                                        <ul class="list-unstyled">
+                                            {% for product in products %}
+                                                {% set hasProblem = false %}
+                                                {% set problems = [] %}
+                                                {% for option in group.options %}
+                                                    {% if not product.hasOption(option) %}
+                                                        {% set hasProblem = true %}
+                                                        {% set problems = problems|merge([option]) %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <li class="pl-3 small">
+                                                    <a class="text-reset"
+                                                       href="{{ path('@catalog_product_options', {"product_id": product.getId}) }}"><span
+                                                            class="font-weight-bold">{{ product.sku }}</span></a>:
+                                                    {{ product.name }}
+                                                    {% if hasProblem %}
+                                                        <span class="text-danger" style="cursor: pointer"
+                                                              title="{{ problems|join(' - не установлен, ') }} - не установлен">
+                                                            <i class="fa fa-exclamation-triangle"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            <td>
+                                <a class="btn btn-sm btn-secondary"
+                                   href="{{ path('@catalog_product_group_edit', {group_id: group.id}) }}">Редактировать</a>
+                                <a class="btn btn-sm btn-danger"
+                                   href="">Удалить</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+    </section>
+
+    {% block additional %}
+    {% endblock %}
+
+{% endblock %}
