@@ -144,6 +144,7 @@ class ProductGroup
             foreach ($this->getProducts() as $product) {
                 $values[$option] = array_merge($values[$option], $product->getValuesByOptionKey($option));
             }
+            sort($values[$option], SORT_NATURAL);
             $values[$option] = array_unique($values[$option], SORT_REGULAR);
         }
         return $values;
