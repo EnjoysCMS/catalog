@@ -13,12 +13,14 @@ use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductGroup;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class CreateUpdateProductGroupForm
 {
     public function __construct(
         private readonly EntityManager $em,
         private readonly ServerRequestInterface $request,
+        private readonly UrlGeneratorInterface $urlGenerator
     ) {
     }
 
@@ -38,7 +40,18 @@ final class CreateUpdateProductGroupForm
         ]);
 
         $form->text('title', 'Наименование');
+
+
         $form->select('options', 'Параметры')
+            ->setDescription(
+                $productGroup ? sprintf(
+                    '<a href="%s">Расширенная настройка параметров</a>',
+                    $this->urlGenerator->generate(
+                        '@catalog_product_group_advanced_options',
+                        ['group_id' => $productGroup->getId()]
+                    )
+                ) : null
+            )
             ->setMultiple()
             ->fill(function () use ($productGroup) {
                 $optionKeys = $productGroup?->getOptions() ?? [];
@@ -52,6 +65,8 @@ final class CreateUpdateProductGroupForm
                 }
                 return $result;
             });
+
+
         $form->select('products', 'Товары (продукты)')
             ->setMultiple()
             ->fill(function () use ($productGroup) {

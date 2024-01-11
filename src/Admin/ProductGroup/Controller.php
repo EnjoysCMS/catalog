@@ -64,17 +64,9 @@ final class Controller extends AdminController
     )]
     public function add(): ResponseInterface
     {
-        /**
-         * Наименование группы
-         * Выбор характеристик товара, различные для вариантов
-         * Добавление товаров, если характеристик нет, не добавлять
-         */
         return $this->response('');
     }
 
-    /**
-     * @throws NoResultException
-     */
     #[Route(
         path: '/edit/{group_id}',
         name: 'edit',
@@ -110,5 +102,18 @@ final class Controller extends AdminController
                 ]
             )
         );
+    }
+
+    #[Route(
+        path: '/advanced_options/edit/{group_id}',
+        name: 'advanced_options',
+        requirements: [
+            'group_id' => Requirement::UUID
+        ],
+        comment: 'Расширенное редактирование опций (объединение карточек)'
+    )]
+    public function advancedOptionsEdit(): ResponseInterface
+    {
+        return $this->response('');
     }
 }
