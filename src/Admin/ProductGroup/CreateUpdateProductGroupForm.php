@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EnjoysCMS\Module\Catalog\Admin\ProductGroup;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -12,6 +13,7 @@ use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entity\OptionKey;
 use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductGroup;
+use EnjoysCMS\Module\Catalog\Entity\ProductGroupOption;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -30,10 +32,9 @@ final class CreateUpdateProductGroupForm
     public function getForm(ProductGroup $productGroup = null): Form
     {
         $form = new Form();
-
         $form->setDefaults([
             'title' => $productGroup?->getTitle(),
-            'options' => array_map(fn($key) => $key->getId(),
+            'options' => array_map(fn($key) => $key->getOptionKey()->getId(),
                 $productGroup?->getOptions()->toArray() ?? []),
             'products' => array_map(fn($product) => $product->getId(),
                 $productGroup?->getProducts()->toArray() ?? [])
@@ -58,8 +59,9 @@ final class CreateUpdateProductGroupForm
 
                 $result = [];
                 foreach ($optionKeys as $key) {
-                    $result[$key->getId()] = [
-                        $key->getName() . (($key->getUnit()) ? ' (' . $key->getUnit() . ')' : ''),
+                    $result[$key->getOptionKey()->getId()] = [
+                        $key->getOptionKey()->getName() . (($key->getOptionKey()->getUnit(
+                        )) ? ' (' . $key->getOptionKey()->getUnit() . ')' : ''),
                         ['id' => uniqid()]
                     ];
                 }
@@ -90,6 +92,10 @@ final class CreateUpdateProductGroupForm
      */
     public function doAction(ProductGroup $productGroup = null): void
     {
+
+        $relationRepository = $this->em->getRepository(ProductGroupOption::class);
+
+
         $productGroup = $productGroup ?? new ProductGroup();
         $productGroup->setTitle($this->request->getParsedBody()['title'] ?? null);
 
@@ -98,10 +104,35 @@ final class CreateUpdateProductGroupForm
             'id' => $this->request->getParsedBody()['options'] ?? []
         ]);
 
-        $productGroup->removeOptions(array_diff($productGroup->getOptions()->toArray(), $options));
-        foreach ($options as $option) {
-            $productGroup->addOption($option);
+//        $productGroup->removeOptions(
+//            array_diff(
+//                array_map(fn(ProductGroupOption $relation) => $relation->getOptionKey(),
+//                    $productGroup->getOptions()->toArray()),
+//                $options
+//            )
+//        );
+
+        $removeOptions = array_diff(
+            array_map(fn(ProductGroupOption $relation) => $relation->getOptionKey(),
+                $productGroup->getOptions()->toArray()),
+            $options
+        );
+
+
+
+        foreach ($removeOptions as $removeOption) {
+            if (null !== $relation = $relationRepository->find(['productGroup' => $productGroup, 'optionKey' => $removeOption])){
+                $productGroup->removeOptions([$relation]);
+                $this->em->remove($relation);
+            }
         }
+
+        foreach ($options as $option) {
+            if ($relationRepository->find(['productGroup' => $productGroup, 'optionKey' => $option]) === null){
+                $productGroup->addOption(new ProductGroupOption($productGroup, $option));
+            }
+        }
+
 
         $products = $this->em->getRepository(Product::class)->findBy([
             'id' => $this->request->getParsedBody()['products'] ?? []

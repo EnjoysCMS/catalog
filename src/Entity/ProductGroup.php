@@ -34,10 +34,9 @@ class ProductGroup
     private Collection $products;
 
     /**
-     * @var Collection<OptionKey> $options
+     * @var Collection<ProductGroupOption> $options
      */
-    #[ORM\ManyToMany(targetEntity: OptionKey::class)]
-    #[ORM\JoinTable(name: 'catalog_group_products_optionkey')]
+    #[ORM\OneToMany(mappedBy: 'productGroup', targetEntity: ProductGroupOption::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
     private Collection $options;
 
     public function __construct()
@@ -109,7 +108,7 @@ class ProductGroup
     }
 
     /**
-     * @return Collection<OptionKey>
+     * @return Collection<ProductGroupOption>
      */
     public function getOptions(): Collection
     {
@@ -128,12 +127,12 @@ class ProductGroup
         }
     }
 
-    public function addOption(OptionKey $optionKey): void
+    public function addOption(ProductGroupOption $option): void
     {
-        if ($this->options->contains($optionKey)) {
+        if ($this->options->contains($option)) {
             return;
         }
-        $this->options->add($optionKey);
+        $this->options->add($option);
     }
 
     public function getOptionsValues(): \WeakMap
@@ -164,6 +163,8 @@ class ProductGroup
         }
         return $defaultOptions;
     }
+
+
 
 
 }
