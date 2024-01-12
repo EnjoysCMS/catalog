@@ -24,6 +24,12 @@ class ProductGroupOption
     #[ORM\Column(name: '`order`', type: 'integer', options: ['default' => 0])]
     private int $order = 0;
 
+    /**
+     * button - по умолчанию
+     * thumbs - показ миниатюр продуктов, корректно работает только при одной опции
+     * image - показ миниатюр, но эти миниатюры настраиваются на каждое значение
+     * color - показ выбор цвета, настраиваются на каждое значение, сопоставляются цвета HTML строковые и hex
+     */
     #[ORM\Column(type: 'string', options: ['default' => 'button'])]
     private string $type = 'button';
 
