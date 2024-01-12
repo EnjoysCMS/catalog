@@ -21,14 +21,14 @@ class ProductGroupOption
     #[ORM\JoinColumn(referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private OptionKey $optionKey;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: '`order`', type: 'integer', options: ['default' => 0])]
     private int $order = 0;
 
     #[ORM\Column(type: 'string', options: ['default' => 'button'])]
     private string $type = 'button';
 
-    #[ORM\Column(type: 'json')]
-    private ?array $extra = [];
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $extra = null;
 
     public function __construct(
         ProductGroup $productGroup,
