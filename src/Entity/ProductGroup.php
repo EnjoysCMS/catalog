@@ -139,18 +139,19 @@ class ProductGroup
 
     public function getOptionsValues(): \WeakMap
     {
-        $values = new \WeakMap();
+        $result = new \WeakMap();
          foreach ($this->getOptions() as $relationProductGroupOption) {
             $option = $relationProductGroupOption->getOptionKey();
-            $values[$option] = [];
+            $values = [];
             foreach ($this->getProducts() as $product) {
-                $values[$option] = array_merge($values[$option], $product->getValuesByOptionKey($option));
+                $values = array_merge($values, $product->getValuesByOptionKey($option));
             }
-            sort($values[$option], SORT_NATURAL);
-            $values[$option] = array_unique($values[$option], SORT_REGULAR);
+            sort($values, SORT_NATURAL);
+            $values = array_unique($values, SORT_REGULAR);
+            $result[$relationProductGroupOption] = $values;
         }
 
-        return $values;
+        return $result;
     }
 
 
