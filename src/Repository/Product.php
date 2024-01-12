@@ -190,21 +190,22 @@ final class Product extends EntityRepository
             return null;
         }
 
+
         $qb = $this->createQueryBuilder('p') //$this->getFindAllBuilder()
         ->addSelect('COUNT(DISTINCT  o.id) AS HIDDEN total_options')
             ->leftJoin('p.options', 'o');
 
+        $qb = $qb
+            ->andWhere('p.group = :group')
+            ->setParameter('group', $group)
+            ->andWhere($qb->expr()->in('o.id', $optionIds))
+            ->groupBy('p.id')
+            ->having('total_options = ' . count($optionIds))
+            ->getQuery();
         try {
-            return $qb
-                ->andWhere('p.group = :group')
-                ->setParameter('group', $group)
-                ->andWhere($qb->expr()->in('o.id', $optionIds))
-                ->groupBy('p.id')
-                ->having('total_options = ' . count($optionIds))
-                ->getQuery()
-                ->getOneOrNullResult();
+            return $qb->getOneOrNullResult();
         } catch (NonUniqueResultException) {
-            return null;
+            return $qb->getResult()[0] ?? null;
         }
     }
 }
