@@ -7,6 +7,7 @@ namespace EnjoysCMS\Module\Catalog\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use EnjoysCMS\Module\Catalog\Repository\ProductGroupRepository;
 use Ramsey\Uuid\Uuid;
@@ -36,7 +37,8 @@ class ProductGroup
     /**
      * @var Collection<ProductGroupOption> $options
      */
-    #[ORM\OneToMany(mappedBy: 'productGroup', targetEntity: ProductGroupOption::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[ORM\OneToMany(mappedBy: 'productGroup', targetEntity: ProductGroupOption::class, cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['order' => 'ASC'])]
     private Collection $options;
 
     public function __construct()

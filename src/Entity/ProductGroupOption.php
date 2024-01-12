@@ -19,7 +19,16 @@ class ProductGroupOption
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: OptionKey::class)]
     #[ORM\JoinColumn(referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private readonly OptionKey $optionKey;
+    private OptionKey $optionKey;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $order = 0;
+
+    #[ORM\Column(type: 'string', options: ['default' => 'button'])]
+    private string $type = 'button';
+
+    #[ORM\Column(type: 'json')]
+    private ?array $extra = [];
 
     public function __construct(
         ProductGroup $productGroup,
@@ -42,6 +51,36 @@ class ProductGroupOption
     public function getProductGroup(): ProductGroup
     {
         return $this->productGroup;
+    }
+
+    public function getOrder(): int
+    {
+        return $this->order;
+    }
+
+    public function setOrder(int $order): void
+    {
+        $this->order = $order;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): void
+    {
+        $this->type = $type;
+    }
+
+    public function getExtra(): ?array
+    {
+        return $this->extra;
+    }
+
+    public function setExtra(array $extra): void
+    {
+        $this->extra = $extra;
     }
 
 }
