@@ -46,9 +46,9 @@
                                                 {% set hasProblem = false %}
                                                 {% set problems = [] %}
                                                 {% for option in group.options %}
-                                                    {% if not product.hasOption(option) %}
+                                                    {% if not product.hasOption(option.optionKey) %}
                                                         {% set hasProblem = true %}
-                                                        {% set problems = problems|merge([option]) %}
+                                                        {% set problems = problems|merge([option.optionKey]) %}
                                                     {% endif %}
                                                 {% endfor %}
                                                 <li class="pl-3 small">

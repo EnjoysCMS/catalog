@@ -115,30 +115,31 @@ class ProductGroup
         return $this->options;
     }
 
-    public function removeOptions(?array $options = null): void
+    public function removeOptions(?array $relationsProductGroupOption = null): void
     {
-        if ($options === null) {
+        if ($relationsProductGroupOption === null) {
             $this->options = new ArrayCollection();
             return;
         }
 
-        foreach ($options as $option) {
-            $this->options->removeElement($option);
+        foreach ($relationsProductGroupOption as $relationProductGroupOption) {
+            $this->options->removeElement($relationProductGroupOption);
         }
     }
 
-    public function addOption(ProductGroupOption $option): void
+    public function addOption(ProductGroupOption $relationProductGroupOption): void
     {
-        if ($this->options->contains($option)) {
+        if ($this->options->contains($relationProductGroupOption)) {
             return;
         }
-        $this->options->add($option);
+        $this->options->add($relationProductGroupOption);
     }
 
     public function getOptionsValues(): \WeakMap
     {
         $values = new \WeakMap();
-        foreach ($this->getOptions() as $option) {
+         foreach ($this->getOptions() as $relationProductGroupOption) {
+            $option = $relationProductGroupOption->getOptionKey();
             $values[$option] = [];
             foreach ($this->getProducts() as $product) {
                 $values[$option] = array_merge($values[$option], $product->getValuesByOptionKey($option));
@@ -146,6 +147,7 @@ class ProductGroup
             sort($values[$option], SORT_NATURAL);
             $values[$option] = array_unique($values[$option], SORT_REGULAR);
         }
+
         return $values;
     }
 
@@ -154,7 +156,8 @@ class ProductGroup
     {
         $defaultOptions = [];
 
-        foreach ($this->options as $option) {
+        foreach ($this->getOptions() as $relationProductGroupOption) {
+            $option = $relationProductGroupOption->getOptionKey();
             $defaultOptions[$option->getId()] = $product->getOptionsCollection()->findFirst(
                 function ($key, $item) use ($option) {
                     return $item->getOptionKey() === $option;
