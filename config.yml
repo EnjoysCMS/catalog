@@ -66,7 +66,7 @@ admin:
           mode: yaml # (string)
   searchFields:
     - p.name
-    - p.productCode
+    - p.sku
   product:
     disableChangeCategory: false
     disableChangeName: false

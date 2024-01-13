@@ -7,7 +7,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Core\Exception\NotFoundException;
 use EnjoysCMS\Module\Catalog\Config;
@@ -17,7 +19,6 @@ use EnjoysCMS\Module\Catalog\Entity\Product;
 use EnjoysCMS\Module\Catalog\Entity\ProductPrice;
 use EnjoysCMS\Module\Catalog\Entity\Url;
 use EnjoysCMS\Module\Catalog\Service\ProductService;
-use JMS\Serializer\SerializerBuilder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -52,6 +53,10 @@ class ProductController extends AbstractController
     }
 
 
+    /**
+     * @throws QueryException
+     * @throws NotSupported
+     */
     #[Route(
         path: 'admin/catalog/tools/find-products',
         name: '@a/catalog/tools/find-products',
@@ -60,28 +65,39 @@ class ProductController extends AbstractController
         ]
     )]
     public function findProductsByLike(
-        EntityManager $entityManager,
+        EntityManager $em,
         ServerRequestInterface $request
     ): ResponseInterface {
-        $matched = $entityManager->getRepository(\EnjoysCMS\Module\Catalog\Entity\Product::class)->like(
-            $request->getQueryParams()['query'] ?? null
-        );
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $productRepository */
+        $productRepository = $em->getRepository(Product::class);
 
-        $result = [
-            'items' => array_map(function ($item) {
-                /** @var \EnjoysCMS\Module\Catalog\Entity\Product $item */
+        $searchCriteria = Criteria::create();
+        foreach ($this->config->get('admin->searchFields', []) as $field) {
+            $searchCriteria->orWhere(Criteria::expr()->contains($field, $request->getQueryParams()['query'] ?? null));
+        }
+
+        $qb = $productRepository->getFindAllBuilder();
+        $qb->addCriteria($searchCriteria);
+
+        $query = $qb->getQuery()
+            ->setFirstResult(0)
+            ->setMaxResults(20);
+
+        $result = new Paginator($query);
+
+        return $this->json([
+            'items' => array_map(function (Product $item) {
                 return [
                     'id' => $item->getId(),
                     'title' => $item->getName(),
                     'category' => $item->getCategory()->getFullTitle(),
                     'sku' => $item->getSku(),
-                    'vendor' => $item->getVendor()->getName(),
+                    'vendor' => $item->getVendor()?->getName(),
                     'vendorCode' => $item->getVendorCode(),
                 ];
-            }, $matched),
-            'total_count' => count($matched)
-        ];
-        return $this->json($result);
+            }, iterator_to_array($result)),
+            'total_count' => $result->count()
+        ]);
     }
 
 
