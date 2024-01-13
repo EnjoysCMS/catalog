@@ -84,7 +84,7 @@ class ProductGroupOption
         return $this->extra;
     }
 
-    public function setExtra(array $extra): void
+    public function setExtra(?array $extra): void
     {
         $this->extra = $extra;
     }

@@ -53,6 +53,17 @@ admin:
     productDescription: null
     categoryShortDescription: null
     categoryDescription: null
+    advancedGroupOptionEdit:
+      \EnjoysCMS\ContentEditor\AceEditor\Ace:
+        template: ~ # (string|null) default `null`
+        options:
+          showLineNumbers: 'true' # (string<bool>)
+          showPrintMargin: 'true' # (string<bool>)
+          fontSize: 20 # (number)
+          enableBasicAutocompletion: 'true' # (string<bool>)
+          enableLiveAutocompletion: 'false' # (string<bool>)
+          theme: ~ # (string|null)
+          mode: yaml # (string)
   searchFields:
     - p.name
     - p.productCode

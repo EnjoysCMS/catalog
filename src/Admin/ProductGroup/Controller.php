@@ -7,8 +7,14 @@ namespace EnjoysCMS\Module\Catalog\Admin\ProductGroup;
 
 
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Enjoys\Forms\Exception\ExceptionRule;
+use EnjoysCMS\Core\ContentEditor\ContentEditor;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Module\Catalog\Admin\AdminController;
 use EnjoysCMS\Module\Catalog\Config;
@@ -82,7 +88,7 @@ final class Controller extends AdminController
             $this->request->getAttribute('group_id')
             ?? throw new \InvalidArgumentException(
             '`group_id` param is invalid or not exists'
-            )
+        )
         ) ?? throw new NoResultException();
 
         $form = $createUpdateProductGroupForm->getForm($productGroup);
@@ -98,12 +104,24 @@ final class Controller extends AdminController
             $this->twig->render(
                 $this->templatePath . '/product/group/form.twig', [
                     'form' => $rendererForm,
+                    'productGroup' => $productGroup,
                     'title' => sprintf("Редактирование группы товаров: %s", $productGroup->getTitle())
                 ]
             )
         );
     }
 
+    /**
+     * @throws ExceptionRule
+     * @throws ORMException
+     * @throws RuntimeError
+     * @throws DependencyException
+     * @throws LoaderError
+     * @throws OptimisticLockException
+     * @throws SyntaxError
+     * @throws NotFoundException
+     * @throws NoResultException
+     */
     #[Route(
         path: '/advanced_options/edit/{group_id}',
         name: 'advanced_options',
@@ -112,8 +130,47 @@ final class Controller extends AdminController
         ],
         comment: 'Расширенное редактирование опций (объединение карточек)'
     )]
-    public function advancedOptionsEdit(): ResponseInterface
-    {
-        return $this->response('');
+    public function advancedOptionsEdit(
+        AdvancedGroupOptionForm $advancedGroupOptionForm,
+        ContentEditor $contentEditor
+    ): ResponseInterface {
+        $repository = $this->em->getRepository(ProductGroup::class);
+        $productGroup = $repository->find(
+            $this->request->getAttribute('group_id')
+            ?? throw new \InvalidArgumentException(
+            '`group_id` param is invalid or not exists'
+        )
+        ) ?? throw new NoResultException();
+
+        $productGroupOptions = $productGroup->getOptions()->toArray();
+        $form = $advancedGroupOptionForm->getForm($productGroupOptions);
+
+        if ($form->isSubmitted()) {
+            $advancedGroupOptionForm->doAction($productGroupOptions);
+            return $this->redirect->toRoute('@catalog_product_group_edit', ['group_id' => $productGroup->getId()]);
+        }
+
+        $rendererForm = $this->adminConfig->getRendererForm($form);
+
+        return $this->response(
+            $this->twig->render(
+                $this->templatePath . '/product/group/form.twig', [
+                    'form' => $rendererForm,
+                    'title' => sprintf(
+                        "Расширенная настройка параметров для группы товаров: %s",
+                        $productGroup->getTitle()
+                    ),
+                    'productGroup' => $productGroup,
+                    'editorEmbedCode' => implode(
+                        "\n",
+                        array_map(function ($i) use ($contentEditor) {
+                            return $contentEditor->withConfig(
+                                $this->config->getEditorConfigAdvancedGroupOptionEdit()
+                            )->setSelector("extra[$i]")->getEmbedCode();
+                        }, array_keys($productGroupOptions))
+                    )
+                ]
+            )
+        );
     }
 }

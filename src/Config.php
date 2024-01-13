@@ -252,4 +252,9 @@ final class Config extends AbstractModuleConfig
         return $this->dbConfig['globalExtraFields'] ?? '';
     }
 
+    public function getEditorConfigAdvancedGroupOptionEdit(): array|string|null|EditorConfig
+    {
+        return $this->get('admin->editor->advancedGroupOptionEdit');
+    }
+
 }
