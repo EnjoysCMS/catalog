@@ -161,14 +161,9 @@ final class Controller extends AdminController
                         $productGroup->getTitle()
                     ),
                     'productGroup' => $productGroup,
-                    'editorEmbedCode' => implode(
-                        "\n",
-                        array_map(function ($i) use ($contentEditor) {
-                            return $contentEditor->withConfig(
-                                $this->config->getEditorConfigAdvancedGroupOptionEdit()
-                            )->setSelector("extra[$i]")->getEmbedCode();
-                        }, array_keys($productGroupOptions))
-                    )
+                    'editorEmbedCode' => $contentEditor->withConfig(
+                        $this->config->getEditorConfigAdvancedGroupOptionEdit()
+                    )->setSelector(".extra-textarea")->getEmbedCode()
                 ]
             )
         );
