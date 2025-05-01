@@ -1,0 +1,12 @@
+{
+    "cmd": {
+        "Assets install": [
+            "yarn",
+            "install"
+        ]
+    },
+    "symlink": {
+        "node_modules": "/modules/catalog/node_modules",
+        "template": "/modules/catalog/template"
+    }
+}
