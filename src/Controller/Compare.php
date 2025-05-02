@@ -13,7 +13,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\NotSupported;
 use Enjoys\Cookie\Cookie;
 use Enjoys\Cookie\Exception;
-use EnjoysCMS\Core\AbstractController;
 use EnjoysCMS\Core\Auth\Identity;
 use EnjoysCMS\Core\Routing\Annotation\Route;
 use EnjoysCMS\Core\Users\Entity\User;
@@ -35,10 +34,12 @@ final class Compare extends PublicController
      * @throws \Exception
      */
     #[Route('catalog/compare/count', 'catalog_compare_count', priority: 3)]
-    public function getCountGoodsInCompareList(Identity $identity): ResponseInterface
+    public function getCountGoodsInAllCompareLists(Identity $identity): ResponseInterface
     {
-        $compareList = $this->getCompareList($identity->getUser());
-        return $this->json(\count($compareList?->getGoodsIds() ?? []));
+        $compareLists = $this->getAllCompareLists($identity->getUser());
+        return $this->json(\count(\array_merge(...\array_map(function (CompareList $compareList) {
+            return $compareList->getGoodsIds();
+        }, $compareLists))));
     }
 
     /**
@@ -87,11 +88,12 @@ final class Compare extends PublicController
 
         $user = $identity->getUser();
 
-        $compareList = $this->getCompareList($user);
+        $compareList = $this->getCompareList($user, $product->getCategory());
 
         if ($compareList === null) {
             $compareList = new CompareList();
             $compareList->setId(Uuid::uuid4()->toString());
+            $compareList->setCategory($product->getCategory());
             if (!$user->isGuest()) {
                 $compareList->setUser($user);
             }
@@ -131,16 +133,18 @@ final class Compare extends PublicController
 
         $this->breadcrumbs->add('catalog/index', 'Каталог')->add(title: 'Сравнение товаров');
 
-        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $repo */
-        $repo = $this->container->get(EntityManager::class)->getRepository(
+        /** @var \EnjoysCMS\Module\Catalog\Repository\Product $productRepository */
+        $productRepository = $this->container->get(EntityManager::class)->getRepository(
             \EnjoysCMS\Module\Catalog\Entity\Product::class
         );
 
 
-        $compareList = $this->getCompareList($identity->getUser());
+        $compareLists = $this->getAllCompareLists($identity->getUser());
+
+        $compareList = $this->getCompareList($identity->getUser(), $this->request->getQueryParams()['category'] ?? null);
 
         /** @var \EnjoysCMS\Module\Catalog\Entity\Product[] $products */
-        $products = $repo->findByIds($compareList?->getGoodsIds() ?? []);
+        $products = $productRepository->findByIds($compareList?->getGoodsIds() ?? []);
 
         $goodsComparator->addProducts($products);
 
@@ -148,6 +152,7 @@ final class Compare extends PublicController
         return $this->response($this->twig->render('@m/catalog/compare.twig', [
             'breadcrumbs' => $this->breadcrumbs,
             'comparator' => $goodsComparator,
+            'compareLists' => $compareLists,
             'comparisonGoods' => (new LineMatrix($goodsComparator))->setRemoveRepeat(
                 (bool)$this->request->getQueryParams()['remove_repeat_values'] ?? false
             ),
@@ -156,8 +161,10 @@ final class Compare extends PublicController
     }
 
 
-    private function getCompareList(User $user): ?CompareList
-    {
+    private function getCompareList(
+        User $user,
+        \EnjoysCMS\Module\Catalog\Entity\Category|string|null $category = null
+    ): ?CompareList {
         try {
             $compareListId = $this->request->getCookieParams()['compare-list-id'] ?? '';
             $em = $this->container->get(EntityManagerInterface::class);
@@ -175,9 +182,38 @@ final class Compare extends PublicController
                 }
                 return $compareList;
             }
-            return $repository->findOneBy(['user' => $user]);
+            $criteria = ['user' => $user];
+            if ($category !== null) {
+                $criteria['category'] = $category;
+            }
+            return $repository->findOneBy($criteria);
         } catch (ConversionException) {
             return null;
+        }
+    }
+
+    private function getAllCompareLists(User $user): array
+    {
+        try {
+            $compareListId = $this->request->getCookieParams()['compare-list-id'] ?? '';
+            $repository = $this->container->get(EntityManagerInterface::class)->getRepository(CompareList::class);
+            if ($user->isGuest()) {
+                // todo
+//                /** @var null|CompareList $compareList */
+//                $compareList = $repository->find($compareListId);
+//                if ($compareList === null) {
+//                    return null;
+//                }
+//                if (new \DateTimeImmutable('-7 days') > $compareList->getCreatedAt()) {
+//                    $em->remove($compareList);
+//                    $em->flush();
+//                    return null;
+//                }
+//                return $compareList;
+            }
+            return $repository->findBy(['user' => $user]);
+        } catch (ConversionException) {
+            return [];
         }
     }
 

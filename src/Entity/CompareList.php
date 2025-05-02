@@ -22,6 +22,9 @@ class CompareList
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\ManyToOne(targetEntity: Category::class)]
+    private Category $category;
+
     #[ORM\Column(name: 'goods_ids', type: 'json')]
     private array $goodsIds = [];
 
@@ -63,6 +66,16 @@ class CompareList
     public function setUser(User $user): void
     {
         $this->user = $user;
+    }
+
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(Category $category): void
+    {
+        $this->category = $category;
     }
 
 
