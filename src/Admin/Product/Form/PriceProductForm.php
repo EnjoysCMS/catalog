@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Enjoys\Forms\AttributeFactory;
+use Enjoys\Forms\Elements\Number;
+use Enjoys\Forms\Elements\Select;
 use Enjoys\Forms\Form;
 use EnjoysCMS\Module\Catalog\Entity\Currency\Currency;
 use EnjoysCMS\Module\Catalog\Entity\PriceGroup;
@@ -32,29 +34,34 @@ final class PriceProductForm
         $priceDefaults = [];
 
         foreach ($priceGroups as $priceGroup) {
-            $priceDefaults[$priceGroup->getCode()] = $product->getPrice($priceGroup->getCode())?->getPrice() ?? 0;
+            $price = $product->getPrice($priceGroup->getCode());
+            $priceDefaults[$priceGroup->getCode()] = [
+                'value' => $price?->getPrice() ?? 0,
+                'currency' => $price?->getCurrency()->getCode(),
+            ];
         }
 
         $form = new Form();
         $form->setDefaults([
-            'price' => $priceDefaults,
-            'currency' => $product->getPrices()->get(0)?->getCurrency()->getId(),
+            'price' => $priceDefaults
         ]);
 
-        $form->select('currency', 'Валюта')->fill(function () {
-            $ret = [];
-            foreach ($this->em->getRepository(Currency::class)->findAll() as $item) {
-                $ret[$item->getId()] = $item->getName();
-            }
-            return $ret;
-        });
 
         $form->header(sprintf('Единица измерения: %s', $product->getUnit()?->getName() ?? '-'));
 
         foreach ($priceGroups as $priceGroup) {
-            $form->number(sprintf('price[%s]', $priceGroup->getCode()), $priceGroup->getTitle())
-                ->setAttribute(AttributeFactory::create('step', '0.01'))
-                ->setDescription($priceGroup->getCode());
+            $form->group()->add([
+                (new Number(sprintf('price[%s][value]', $priceGroup->getCode()), $priceGroup->getTitle()))
+                    ->setAttribute(AttributeFactory::create('step', '0.01'))
+                    ->setDescription($priceGroup->getCode()),
+                (new Select(sprintf('price[%s][currency]', $priceGroup->getCode()), 'Валюта'))->fill(function () {
+                    $ret = [];
+                    foreach ($this->em->getRepository(Currency::class)->findAll() as $item) {
+                        $ret[$item->getId()] = $item->getName();
+                    }
+                    return $ret;
+                }),
+            ]);
         }
         $form->submit('set', 'Установить');
         return $form;
@@ -67,17 +74,19 @@ final class PriceProductForm
     public function doAction(Product $product): void
     {
         $priceGroups = $this->em->getRepository(PriceGroup::class)->findAll();
-        $currency = $this->em->getRepository(Currency::class)->find(
-            $this->request->getParsedBody()['currency'] ?? null
-        );
-
-        if ($currency === null) {
-            throw new InvalidArgumentException('Currency not found');
-        }
-
+        $currencyRepository = $this->em->getRepository(Currency::class);
 
         foreach ($priceGroups as $priceGroup) {
-            foreach (($this->request->getParsedBody()['price'] ?? []) as $code => $price) {
+            foreach (($this->request->getParsedBody()['price'] ?? []) as $code => $data) {
+                $price = $data['value'];
+                $currency = $currencyRepository->find(
+                    $data['currency'] ?? null
+                );
+
+                if ($currency === null) {
+                    continue;
+                }
+
                 if ($priceGroup->getCode() !== $code) {
                     continue;
                 }
@@ -85,7 +94,6 @@ final class PriceProductForm
                 if (!is_numeric($price)) {
                     continue;
                 }
-
 
                 $priceEntity = $product->getPrices()->findFirst(
                     fn($key, $el) => $code === $el->getPriceGroup()->getCode()
