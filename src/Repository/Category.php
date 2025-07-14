@@ -25,7 +25,7 @@ use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 class Category extends ClosureTreeRepository
 {
 
-    public function find($id, $lockMode = null, $lockVersion = null)
+    public function find($id, $lockMode = null, $lockVersion = null): ?object
     {
         if (empty($id)) {
             return null;
