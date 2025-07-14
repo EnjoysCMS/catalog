@@ -10,6 +10,7 @@
         "enjoyscms/sitemap": "^6.0@dev",
         "enjoyscms/elfinder": "^6.0@dev",
         "psr/event-dispatcher": "^1.0",
+        "doctrine/orm": "^2.8",
         "gedmo/doctrine-extensions": "^3.0",
         "jbroadway/urlify": "^1.2",
         "intervention/image": "^2.5",
