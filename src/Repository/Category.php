@@ -123,7 +123,7 @@ class Category extends ClosureTreeRepository
             ->getSingleScalarResult();
 
         $meta = $this->getClassMetadata();
-        $config = $this->listener->getConfiguration($this->_em, $meta->name);
+        $config = $this->listener->getConfiguration($this->getEntityManager(), $meta->name);
 
         $dql = $this->getQueryBuilder();
         if ($node === null) {
