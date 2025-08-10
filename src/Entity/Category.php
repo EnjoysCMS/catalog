@@ -75,6 +75,10 @@ class Category implements \Stringable
     #[Groups(['admin'])]
     private ?string $customTemplatePath = null;
 
+    #[ORM\Column(type: 'string', nullable: true, options: ['default' => null])]
+    #[Groups(['admin'])]
+    private ?string $customProductsTemplatePath = null;
+
     #[ORM\OneToOne(mappedBy: 'category', targetEntity: CategoryMeta::class, cascade: ['persist', 'remove'])]
     private ?CategoryMeta $meta = null;
 
@@ -307,6 +311,16 @@ class Category implements \Stringable
     {
         $meta->setCategory($this);
         $this->meta = $meta;
+    }
+
+    public function getCustomProductsTemplatePath(): ?string
+    {
+        return $this->customProductsTemplatePath;
+    }
+
+    public function setCustomProductsTemplatePath(?string $customProductsTemplatePath): void
+    {
+        $this->customProductsTemplatePath = $customProductsTemplatePath;
     }
 
 

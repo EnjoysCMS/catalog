@@ -47,7 +47,7 @@ final class Product extends PublicController
 
         return $this->response(
             $this->twig->render(
-                $template_path,
+                $productModel->getProductEntity()->getCategory()->getCustomProductsTemplatePath() ?: $template_path,
                 $productModel->getContext(),
             )
         );

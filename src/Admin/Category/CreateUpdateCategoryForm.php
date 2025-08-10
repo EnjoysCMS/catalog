@@ -63,6 +63,7 @@ final class CreateUpdateCategoryForm
                     $category?->getExtraFields()->toArray() ?? []
                 ),
                 'customTemplatePath' => $category?->getCustomTemplatePath(),
+                'customProductsTemplatePath' => $category?->getCustomProductsTemplatePath(),
                 'meta-title' => $category?->getMeta()->getTitle(),
                 'meta-description' => $category?->getMeta()->getDescription(),
                 'meta-keywords' => $category?->getMeta()->getKeyword(),
@@ -176,7 +177,12 @@ HTML
 
         $form->text('customTemplatePath', 'Пользовательский шаблон отображения категории')
             ->setDescription(
-                '(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в группе'
+                '(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в категории'
+            );
+
+        $form->text('customProductsTemplatePath', 'Пользовательский шаблон отображения для продуктов из этой категории')
+            ->setDescription(
+                '(Не обязательно) Путь к шаблону или другая информация, способная поменять отображение товаров в категории'
             );
 
 
@@ -205,6 +211,7 @@ HTML
         $category->setStatus((bool)($this->request->getParsedBody()['status'] ?? false));
         $category->setImg($this->request->getParsedBody()['img'] ?? null);
         $category->setCustomTemplatePath($this->request->getParsedBody()['customTemplatePath'] ?? null);
+        $category->setCustomProductsTemplatePath($this->request->getParsedBody()['customProductsTemplatePath'] ?? null);
 
         $meta = $category->getMeta();
         $meta->setTitle($this->request->getParsedBody()['meta-title'] ?? null);
