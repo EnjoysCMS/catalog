@@ -250,6 +250,11 @@ final class Config extends AbstractModuleConfig
         return $realpath;
     }
 
+    public function getEditorConfigProductShortDescription(): array|string|null|EditorConfig
+    {
+        return $this->get('admin->editor->productShortDescription');
+    }
+
     public function getEditorConfigProductDescription(): array|string|null|EditorConfig
     {
         return $this->get('admin->editor->productDescription');

@@ -44,7 +44,7 @@ class Category implements \Stringable
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $shortDescription = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]

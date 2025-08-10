@@ -28,6 +28,9 @@ class Product
     private string $name;
 
     #[ORM\Column(type: 'text')]
+    private string $shortDescription;
+
+    #[ORM\Column(type: 'text')]
     private string $description;
 
     #[ORM\Column(type: 'string', length: 64, unique: true, nullable: true, options: ['default' => null])]
@@ -564,6 +567,16 @@ class Product
     public function isWishlistNotEmpty(): bool
     {
         return $this->wishlist instanceof Wishlist;
+    }
+
+    public function getShortDescription(): string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(string $shortDescription): void
+    {
+        $this->shortDescription = $shortDescription;
     }
 
 }

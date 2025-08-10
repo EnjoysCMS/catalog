@@ -70,7 +70,7 @@ final class ProductController extends AdminController
         parent::__construct($container, $config, $adminConfig);
 
         $this->product = $container->get(EntityManager::class)->getRepository(Product::class)->find(
-            $this->request->getAttribute('product_id') ?? $this->request->getQueryParams()['product_id'] ?? 0
+            $this->request->getAttribute('product_id') ?? $this->request->getQueryParams()['product_id'] ?? 0,
         );
 
         $this->breadcrumbs->add('@catalog_product_list', 'Список товаров (продуктов)');
@@ -91,8 +91,8 @@ final class ProductController extends AdminController
         $this->breadcrumbs->remove('@catalog_product_list')->setLastBreadcrumb('Список товаров (продуктов)');
         return $this->response(
             $this->twig->render(
-                $this->templatePath . '/products.twig'
-            )
+                $this->templatePath . '/products.twig',
+            ),
         );
     }
 
@@ -136,9 +136,9 @@ final class ProductController extends AdminController
                     'editorEmbedCode' => $contentEditor
                         ->withConfig($this->config->getEditorConfigProductDescription())
                         ->setSelector('#description')
-                        ->getEmbedCode()
-                ]
-            )
+                        ->getEmbedCode(),
+                ],
+            ),
         );
     }
 
@@ -161,7 +161,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/edit',
         name: 'edit',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Редактирование товара'
     )]
@@ -179,13 +179,13 @@ final class ProductController extends AdminController
             $copier = new DeepCopy();
             $copier->addFilter(
                 new DoctrineCollectionFilter(),
-                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection')
+                new PropertyTypeMatcher('Doctrine\Common\Collections\Collection'),
             );
             /** @var Product $oldProduct */
             $oldProduct = $copier->copy($product);
 
             $this->dispatcher->dispatch(
-                new PreEditProductEvent($oldProduct)
+                new PreEditProductEvent($oldProduct),
             );
 
             $edit->doAction($product);
@@ -197,7 +197,7 @@ final class ProductController extends AdminController
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
         $rendererForm->setOptions([
-            'custom-switch' => true
+            'custom-switch' => true,
         ]);
 
         return $this->response(
@@ -209,11 +209,15 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'subtitle' => 'Редактирование',
                     'editorEmbedCode' => $contentEditor
-                        ->withConfig($this->config->getEditorConfigProductDescription())
-                        ->setSelector('#description')
-                        ->getEmbedCode(),
-                ]
-            )
+                            ->withConfig($this->config->getEditorConfigProductDescription())
+                            ->setSelector('#description')
+                            ->getEmbedCode()
+                        . $contentEditor
+                            ->withConfig($this->config->getEditorConfigProductShortDescription())
+                            ->setSelector('#shortDescription')
+                            ->getEmbedCode(),
+                ],
+            ),
         );
     }
 
@@ -231,7 +235,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/delete',
         name: 'delete',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Удаление товара'
     )]
@@ -255,8 +259,8 @@ final class ProductController extends AdminController
                 [
                     'product' => $product,
                     'form' => $rendererForm,
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -274,7 +278,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/tags',
         name: 'tags',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Теги товара'
     )]
@@ -298,8 +302,8 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'subtitle' => 'Управление тегами',
                     'form' => $rendererForm->output(),
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -316,7 +320,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/quantity',
         name: 'quantity',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Установка количества на товар'
     )]
@@ -325,7 +329,7 @@ final class ProductController extends AdminController
         $product = $this->product ?? throw new NoResultException();
         $form = $quantityProductForm->getForm($product);
         $this->breadcrumbs->setLastBreadcrumb(
-            sprintf('Настройка количества: `%s`', $product->getName())
+            sprintf('Настройка количества: `%s`', $product->getName()),
         );
 
         if ($form->isSubmitted()) {
@@ -344,8 +348,8 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'form' => $rendererForm,
                     'subtitle' => 'Установка количества',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -362,7 +366,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/meta',
         name: 'meta',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Управление Meta-tags (продукт)'
     )]
@@ -382,7 +386,7 @@ final class ProductController extends AdminController
         $this->breadcrumbs
             ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
             ->setLastBreadcrumb(
-                sprintf('META-данные: %s', $product->getName())
+                sprintf('META-данные: %s', $product->getName()),
             );
 
         return $this->response(
@@ -392,8 +396,8 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'subtitle' => 'Установка META данных HTML',
                     'form' => $rendererForm,
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -407,7 +411,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls',
         name: 'urls',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Просмотр URLs товара'
     )]
@@ -418,7 +422,7 @@ final class ProductController extends AdminController
         $this->breadcrumbs
             ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
             ->setLastBreadcrumb(
-                sprintf('Менеджер ссылок: %s', $product->getName())
+                sprintf('Менеджер ссылок: %s', $product->getName()),
             );
 
 
@@ -428,8 +432,8 @@ final class ProductController extends AdminController
                 [
                     'product' => $product,
                     'subtitle' => 'URLs',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -448,7 +452,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/edit',
         name: 'urls_edit',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Редактирование URL'
     )]
@@ -466,7 +470,8 @@ final class ProductController extends AdminController
 
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
-        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+        $this->breadcrumbs
+            ->add($routeData, 'Менеджер ссылок')
             ->setLastBreadcrumb('Редактирование ссылки');
 
         return $this->response(
@@ -476,8 +481,8 @@ final class ProductController extends AdminController
                     'product' => $this->product,
                     'form' => $rendererForm,
                     'subtitle' => 'Редактирование URL',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -496,7 +501,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/add',
         name: 'urls_add',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Добавление URL'
     )]
@@ -511,7 +516,8 @@ final class ProductController extends AdminController
             return $this->redirect->toRoute(...$routeData);
         }
         $rendererForm = $this->adminConfig->getRendererForm($form);
-        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+        $this->breadcrumbs
+            ->add($routeData, 'Менеджер ссылок')
             ->setLastBreadcrumb('Добавление ссылки');
         return $this->response(
             $this->twig->render(
@@ -520,8 +526,8 @@ final class ProductController extends AdminController
                     'product' => $this->product,
                     'form' => $rendererForm,
                     'subtitle' => 'Добавление URL',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -538,7 +544,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/delete',
         name: 'urls_delete',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Удаление URL'
     )]
@@ -555,7 +561,8 @@ final class ProductController extends AdminController
             return $this->redirect->toRoute(...$routeData);
         }
         $rendererForm = $this->adminConfig->getRendererForm($form);
-        $this->breadcrumbs->add($routeData, 'Менеджер ссылок')
+        $this->breadcrumbs
+            ->add($routeData, 'Менеджер ссылок')
             ->setLastBreadcrumb('Удаление ссылки');
         return $this->response(
             $this->twig->render(
@@ -564,8 +571,8 @@ final class ProductController extends AdminController
                     'product' => $this->product,
                     'form' => $rendererForm->output(),
                     'subtitle' => 'Удаление URL',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -578,7 +585,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/urls/makedefault',
         name: 'urls_make_default',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Сделать URL основным'
     )]
@@ -620,7 +627,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/images',
         name: 'images',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Управление изображениями товара'
     )]
@@ -631,7 +638,7 @@ final class ProductController extends AdminController
         $this->breadcrumbs
             ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
             ->setLastBreadcrumb(
-                sprintf('Менеджер изображений: `%s`', $product->getName())
+                sprintf('Менеджер изображений: `%s`', $product->getName()),
             );
 
         return $this->response(
@@ -639,9 +646,9 @@ final class ProductController extends AdminController
                 $this->templatePath . '/product/images/manage.twig',
                 [
                     'product' => $product,
-                    'images' => $em->getRepository(Image::class)->findBy(['product' => $this->product])
-                ]
-            )
+                    'images' => $em->getRepository(Image::class)->findBy(['product' => $this->product]),
+                ],
+            ),
         );
     }
 
@@ -657,7 +664,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/images/add',
         name: 'images_add',
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Загрузка изображения к товару'
     )]
@@ -669,7 +676,7 @@ final class ProductController extends AdminController
         $this->breadcrumbs
             ->add(['@catalog_product_edit', ['product_id' => $product->getId()]], $product->getName())
             ->setLastBreadcrumb(
-                sprintf('Добавление нового изображения: `%s`', $product->getName())
+                sprintf('Добавление нового изображения: `%s`', $product->getName()),
             );
 
         if (!in_array($method, ['upload', 'download'], true)) {
@@ -691,13 +698,13 @@ final class ProductController extends AdminController
                     $manageImage = new ManageImage($product, $em, $this->config);
                     $manageImage->addToDB(
                         $item->getName(),
-                        $item->getExtension()
+                        $item->getExtension(),
                     );
                 }
 
                 return $this->redirect->toRoute(
                     '@catalog_product_images',
-                    ['product_id' => $product->getId()]
+                    ['product_id' => $product->getId()],
                 );
             } catch (Throwable $e) {
                 /** @var File $image */
@@ -713,8 +720,8 @@ final class ProductController extends AdminController
                     'form' => $rendererForm,
                     'product' => $product,
                     'subtitle' => 'Загрузка изображения для продукта',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -728,15 +735,15 @@ final class ProductController extends AdminController
         path: '/images/make_general',
         name: 'images_make_general',
         options: [
-            'comment' => 'Переключение основного изображения'
+            'comment' => 'Переключение основного изображения',
         ]
     )]
     public function imagesMakeGeneral(
-        EntityManager $em
+        EntityManager $em,
     ): ResponseInterface {
         $repository = $em->getRepository(Image::class);
         $image = $repository->find($this->request->getQueryParams()['id'] ?? null) ?? throw new NotFoundException(
-            sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null)
+            sprintf('Not found by id: %s', $this->request->getQueryParams()['id'] ?? null),
         );
 
         $images = $repository->findBy(['product' => $image->getProduct()]);
@@ -748,7 +755,7 @@ final class ProductController extends AdminController
 
         return $this->redirect->toRoute(
             '@catalog_product_images',
-            ['product_id' => $image->getProduct()->getId()]
+            ['product_id' => $image->getProduct()->getId()],
         );
     }
 
@@ -768,13 +775,13 @@ final class ProductController extends AdminController
         path: '/images/delete',
         name: 'images_delete',
         options: [
-            'comment' => 'Удаление изображения к товару'
+            'comment' => 'Удаление изображения к товару',
         ]
     )]
     public function imagesDelete(EntityManager $em): ResponseInterface
     {
         $image = $em->getRepository(Image::class)->find(
-            $this->request->getQueryParams()['id'] ?? 0
+            $this->request->getQueryParams()['id'] ?? 0,
         ) ?? throw new NoResultException();
 
         $this->breadcrumbs
@@ -808,7 +815,8 @@ final class ProductController extends AdminController
             }
 
             return $this->redirect->toRoute(
-                '@catalog_product_images', ['product_id' => $product->getId()]
+                '@catalog_product_images',
+                ['product_id' => $product->getId()],
             );
         }
 
@@ -818,9 +826,9 @@ final class ProductController extends AdminController
             $this->twig->render(
                 $this->templatePath . '/form.twig',
                 [
-                    'form' => $rendererForm
-                ]
-            )
+                    'form' => $rendererForm,
+                ],
+            ),
         );
     }
 
@@ -828,12 +836,12 @@ final class ProductController extends AdminController
         path: '/images/upload-dropzone',
         name: 'images_upload_dropzone',
         options: [
-            'comment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js'
+            'comment' => '[Admin][Simple Gallery] Загрузка изображений с помощью dropzone.js',
         ]
     )]
     public function imagesUploadDropzone(
         EntityManager $em,
-        UploadHandler $uploadHandler
+        UploadHandler $uploadHandler,
     ): ResponseInterface {
         try {
             $product = $this->product ?? throw new NoResultException();
@@ -842,7 +850,7 @@ final class ProductController extends AdminController
             $manageImage = new ManageImage($product, $em, $this->config);
             $manageImage->addToDB(
                 str_replace($file->getFileInfo()->getExtensionWithDot(), '', $file->getTargetPath()),
-                $file->getFileInfo()->getExtension()
+                $file->getFileInfo()->getExtension(),
             );
         } catch (Throwable $e) {
             $this->response = $this->response->withStatus(500);
@@ -863,7 +871,7 @@ final class ProductController extends AdminController
         path: '/{product_id}/files',
         name: "files",
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Менеджер файлов (продукт)'
     )]
@@ -876,7 +884,7 @@ final class ProductController extends AdminController
         $this->breadcrumbs
             ->add(['@catalog_product_files', ['product_id' => $product->getId()]], 'Менеджер файлов')
             ->setLastBreadcrumb(
-                sprintf('Менеджер файлов: %s', $product->getName())
+                sprintf('Менеджер файлов: %s', $product->getName()),
             );
 
         return $this->response(
@@ -885,9 +893,9 @@ final class ProductController extends AdminController
                 [
                     'product' => $product,
                     'config' => $this->config,
-                    'subtitle' => 'Управление файлами'
-                ]
-            )
+                    'subtitle' => 'Управление файлами',
+                ],
+            ),
         );
     }
 
@@ -906,7 +914,7 @@ final class ProductController extends AdminController
         path: "/{product_id}/files/upload",
         name: "files_upload",
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Загрузка файла (продукт)'
     )]
@@ -921,7 +929,7 @@ final class ProductController extends AdminController
             $this->dispatcher->dispatch(new PostUploadFile($file));
             return $this->redirect->toRoute(
                 '@catalog_product_files',
-                ['product_id' => $this->product->getId()]
+                ['product_id' => $this->product->getId()],
             );
         }
 
@@ -938,8 +946,8 @@ final class ProductController extends AdminController
                     'product' => $product,
                     'form' => $rendererForm,
                     'subtitle' => 'Загрузка файла',
-                ]
-            )
+                ],
+            ),
         );
     }
 
@@ -954,7 +962,7 @@ final class ProductController extends AdminController
         path: "/{product_id}/files/delete",
         name: "files_delete",
         requirements: [
-            'product_id' => Requirement::UUID
+            'product_id' => Requirement::UUID,
         ],
         comment: 'Удалить загруженный файл (продукт)'
     )]
@@ -975,7 +983,7 @@ final class ProductController extends AdminController
         $filesystem->delete($file->getFilePath());
 
         return $this->redirect->toRoute('@catalog_product_files', [
-            'product_id' => $product->getId()
+            'product_id' => $product->getId(),
         ]);
     }
 
@@ -1009,7 +1017,7 @@ final class ProductController extends AdminController
         $rendererForm = $this->adminConfig->getRendererForm($form);
 
         $this->breadcrumbs->setLastBreadcrumb(
-            sprintf('Менеджер цен: %s', $this->product->getName())
+            sprintf('Менеджер цен: %s', $this->product->getName()),
         );
 
 
@@ -1019,9 +1027,9 @@ final class ProductController extends AdminController
                 [
                     'product' => $this->product,
                     'form' => $rendererForm->output(),
-                    'subtitle' => 'Установка цен'
-                ]
-            )
+                    'subtitle' => 'Установка цен',
+                ],
+            ),
         );
     }
 
@@ -1049,7 +1057,7 @@ final class ProductController extends AdminController
         }
 
         $this->breadcrumbs->setLastBreadcrumb(
-            sprintf('Характеристики: %s', $manageOptions->getProduct()->getName())
+            sprintf('Характеристики: %s', $manageOptions->getProduct()->getName()),
         );
 
         /** @var Bootstrap4Renderer $renderer */
@@ -1062,9 +1070,9 @@ final class ProductController extends AdminController
                     'form' => $form,
                     'renderer' => $renderer,
                     'delimiterOptions' => $this->config->getDelimiterOptions(),
-                    'subtitle' => 'Параметры'
-                ]
-            )
+                    'subtitle' => 'Параметры',
+                ],
+            ),
         );
     }
 

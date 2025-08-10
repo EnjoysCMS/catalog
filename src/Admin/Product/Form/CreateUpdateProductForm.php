@@ -62,6 +62,7 @@ final class CreateUpdateProductForm
             'vendorCode' => $product?->getVendorCode(),
             'productCode' => $product?->getProductCode(),
             'url' => $product?->getUrl()->getPath(),
+            'shortDescription' => $product?->getShortDescription(),
             'description' => $product?->getDescription(),
             'unit' => $product?->getUnit()?->getName(),
             'active' => [(int)($product?->isActive() ?? 1)],
@@ -203,6 +204,9 @@ final class CreateUpdateProductForm
                     return false;
                 }
             );
+
+        $form->textarea('shortDescription', 'Короткое описание');
+
         $form->textarea('description', 'Описание');
 
         $elUnit = $form->text('unit', 'Единица измерения');
@@ -284,6 +288,7 @@ final class CreateUpdateProductForm
         );
 
         // Product Description
+        $productEntity->setShortDescription($this->request->getParsedBody()['shortDescription'] ?? null);
         $productEntity->setDescription($this->request->getParsedBody()['description'] ?? null);
 
 
