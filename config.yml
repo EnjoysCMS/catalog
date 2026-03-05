@@ -43,7 +43,7 @@ storageUploads:
 productImageStorage: image_default
 productFileStorage: file_default
 allocatedMemoryDynamically: true
-thumbnailCreationService: \EnjoysCMS\Module\Catalog\Crud\Images\ThumbnailService\DefaultThumbnailCreationService
+thumbnailCreationService: \EnjoysCMS\Module\Catalog\Admin\Product\Images\ThumbnailService\DefaultThumbnailCreationService
 
 currency:
   default: RUB
