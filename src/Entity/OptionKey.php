@@ -21,13 +21,13 @@ class OptionKey implements \Stringable
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(type: 'string', length: 255)]
     private string $name;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $unit = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $note = null;
 
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
