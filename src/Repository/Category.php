@@ -68,6 +68,9 @@ class Category extends ClosureTreeRepository
 
         $dql->setParameters($parameters);
 
+        $dql->addSelect('m');
+        $dql->leftJoin("$alias.meta", 'm', Expr\Join::WITH, "m.category = $alias.id");
+
         $query = $dql->getQuery();
 
         return $query->getOneOrNullResult();
