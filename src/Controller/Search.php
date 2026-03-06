@@ -263,6 +263,9 @@ final class Search extends PublicController
             $data = ['Все категории'];
             /** @var Category $category */
             foreach ($categoryRepository->getChildNodes() as $category) {
+                if ($category->isStatus() === false) {
+                    continue;
+                }
                 $data[$category->getId()] = $category->getTitle();
             }
             return $data;

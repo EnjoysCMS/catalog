@@ -67,6 +67,7 @@ final class DefaultSearch implements SearchInterface
             ->leftJoin('p.meta', 'm')
             ->leftJoin('p.urls', 'u')
             ->leftJoin('p.category', 'c')
+            ->leftJoin(\EnjoysCMS\Module\Catalog\Entity\Category::class, 'pc', Join::WITH, 'pc.id = c.parent')
             ->leftJoin('p.options', 'ov', Join::WITH, 'ov.optionKey IN (:key) ')
             ->where('p.name LIKE :option')
             ->orWhere('p.description LIKE :option')
@@ -74,6 +75,7 @@ final class DefaultSearch implements SearchInterface
             ->orWhere('ov.value LIKE :option')
             ->andWhere('p.active = true')
             ->andWhere('c.status = true OR c IS null')
+            ->andWhere('pc.status = true OR c IS null')
             ->setParameters([
                 'key' => $optionKeys,
                 'option' => '%' . $searchQuery . '%'
