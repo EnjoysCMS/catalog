@@ -93,7 +93,7 @@ final class DefaultThumbnailCreationService implements ThumbnailService
             ($imageInfo[0] * $imageInfo[1] * ($imageInfo['bits'] ?? 1) * ($imageInfo['channels'] ?? 1) / 8 + Pow(
                     2,
                     16
-                )) * 1.65
+                )) * $this->config->get('memoryNeededCoefficient', 1.65)
         );
         if (function_exists('memory_get_usage') && memory_get_usage() + $memoryNeeded > $memoryLimit) {
             if (!$this->config->get('allocatedMemoryDynamically')) {
