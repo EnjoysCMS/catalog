@@ -260,9 +260,7 @@ final class CreateUpdateProductForm
                 ['name' => $productVendorName]
             );
             if ($vendor === null) {
-                $vendor = new Vendor();
-                $vendor->setId(Uuid::uuid7()->toString());
-                $vendor->setName($productVendorName);
+                $vendor = new Vendor(Uuid::uuid4()->toString(), $productVendorName);
                 $this->em->persist($vendor);
             }
         }
