@@ -167,10 +167,10 @@ class Category implements \Stringable
         return $this->parent;
     }
 
-    public function addClosure(CategoryClosure $closure): void
-    {
-        $this->closures[] = $closure;
-    }
+//    public function addClosure(CategoryClosure $closure): void
+//    {
+//        $this->closures[] = $closure;
+//    }
 
     public function setLevel($level): void
     {
@@ -261,14 +261,7 @@ class Category implements \Stringable
      */
     public function getChildren(): Collection
     {
-        $iterator = $this->children->getIterator();
-
-        /** @var ArrayCollection $c */
-        $iterator->uasort(function ($first, $second) {
-            return $first->getSort() <=> $second->getSort();
-        });
-
-        return new ArrayCollection(iterator_to_array($iterator));
+        return $this->children;
     }
 
 
