@@ -1,0 +1,51 @@
+{% extends '@catalog_admin/form.twig' %}
+
+{% block additional %}
+
+    <script>
+        $(document).ready(function () {
+            $("#inputImage").on('click', function () {
+                let width = 950;
+                let height = 420;
+                let params = [];
+                params.push('height=' + height);
+                params.push('width=' + width);
+                params.push('left=' + (screen.width - width) / 2);
+                params.push('top=' + ((screen.height - height) / 2) - 50);
+
+                window.open('{{ path('@elfinder_popup') }}', 'FileBrowser', params.join(','));
+            });
+        });
+
+        function processFile(file) {
+            $("#logo").val(file.url);
+        }
+
+    </script>
+
+    <script>
+
+
+
+
+        $(document).ready(function () {
+            $("#fill-from-parent").on('click', function () {
+                $.ajax({
+                    method: "POST",
+                    url: "{{ path('@catalog_admin_api~category_get_extra_fields') }}",
+                    data: {id: $(this).data('id')}
+                }).done(function (result) {
+                    Object.keys(result).forEach(function (key) {
+                        let value = result[key];
+                        if (!$("#extraFields option[value='" + key + "']").length) {
+                            $('#extraFields').append(new Option(value, key, false, true));
+                        }
+                    });
+                    $('#extraFields').trigger('change');
+                }).fail(function () {
+                    console.log('An error occurred');
+                });
+            });
+        });
+    </script>
+{% endblock %}

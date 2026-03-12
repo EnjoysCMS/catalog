@@ -19,7 +19,7 @@
             <div class="card-body">
                 <ul>
                 {% for brand in brands %}
-                    <li>{{ brand.name }} {% if brand.logo %}<img style="height: 50px" src="{{ brand.logo }}" />{% endif %}</li>
+                    <li>[<a href="{{ path('@catalog_brand_edit', {"vendor_id": brand.id}) }}">редактировать</a> ]{{ brand.name }} {% if brand.logo %}<img style="height: 50px" src="{{ brand.logo }}" />{% endif %}</li>
                 {% endfor %}
                 </ul>
             </div>
