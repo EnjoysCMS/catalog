@@ -14,6 +14,7 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
+use EnjoysCMS\Module\Catalog\Entity\CategoryClosure;
 use Gedmo\Exception\InvalidArgumentException;
 use Gedmo\Tree\Entity\Repository\ClosureTreeRepository;
 
@@ -35,9 +36,8 @@ class Category extends ClosureTreeRepository
 
     /**
      * @throws NonUniqueResultException
-     * @throws NoResultException
      */
-    public function findByPath(?string $path)
+    public function findByPath(?string $path): ?\EnjoysCMS\Module\Catalog\Entity\Category
     {
         $slugs = explode('/', $path);
         $first = array_shift($slugs);
@@ -56,7 +56,7 @@ class Category extends ClosureTreeRepository
                 \EnjoysCMS\Module\Catalog\Entity\Category::class,
                 $alias,
                 Expr\Join::WITH,
-                "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k} AND {$alias}.status = true"
+                "{$alias}.parent = $parentJoin AND {$alias}.url = :url{$k} AND {$alias}.status = true",
             );
 
             $parameters['url' . $k] = $slug;
@@ -77,16 +77,110 @@ class Category extends ClosureTreeRepository
     }
 
     /**
+     * @return list<\EnjoysCMS\Module\Catalog\Entity\Category>
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     * *@throws \Exception
+     * @throws QueryException
+     */
+    public function getChildNodesWithCountProducts(
+        $node = null,
+        array $criteria = [],
+        string $orderBy = 'sort',
+        string $direction = 'asc',
+    ): array {
+        $qb = $this->getChildNodesQueryBuilder($node, $criteria, $orderBy, $direction);
+        // Подзапрос для подсчета продуктов через closure
+        $subQuery = $this
+            ->getEntityManager()->createQueryBuilder()
+            ->select('COUNT(p2.id)')
+            ->from(CategoryClosure::class, 'cl2')
+            ->join(\EnjoysCMS\Module\Catalog\Entity\Product::class, 'p2', 'WITH', 'p2.category = cl2.descendant')
+            ->where('cl2.ancestor = node.id');
+
+        // Добавляем подзапрос как скалярное поле
+        $qb->addSelect('(' . $subQuery->getDQL() . ') as products_count');
+
+        $result = $qb
+            ->getQuery()
+            ->getResult();
+
+
+        $categories = $this->hydrateCategoriesWithCounts($result);
+
+        foreach ($categories as $category) {
+            $this->addCountsToChildren($category);
+        }
+
+        return $categories;
+    }
+
+    private function hydrateCategoriesWithCounts(array $result): array
+    {
+        $categories = [];
+
+        foreach ($result as $item) {
+            if (is_array($item) && isset($item[0]) && $item[0] instanceof \EnjoysCMS\Module\Catalog\Entity\Category) {
+                $category = $item[0];
+                $category->setProductsCount((int)($item['products_count'] ?? 0));
+                $categories[] = $category;
+            }
+        }
+
+        return $categories;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function addCountsToChildren(\EnjoysCMS\Module\Catalog\Entity\Category $category): void
+    {
+        $childrenIds = [];
+        foreach ($category->getChildren() as $child) {
+            $childrenIds[] = $child->getId();
+        }
+
+        if (empty($childrenIds)) {
+            return;
+        }
+
+
+        $counts = $this
+            ->getEntityManager()->createQueryBuilder()
+            ->select('IDENTITY(cl.ancestor) as category_id, COUNT(p.id) as products_count')
+            ->from(\EnjoysCMS\Module\Catalog\Entity\CategoryClosure::class, 'cl')
+            ->join(\EnjoysCMS\Module\Catalog\Entity\Product::class, 'p', 'WITH', 'p.category = cl.descendant')
+            ->where('cl.ancestor IN (:ids)')
+            ->setParameter('ids', $childrenIds)
+            ->groupBy('cl.ancestor')
+            ->getQuery()
+            ->getResult();
+
+
+        $countMap = [];
+        foreach ($counts as $count) {
+            $countMap[$count['category_id']] = (int)$count['products_count'];
+        }
+
+        /** @var \EnjoysCMS\Module\Catalog\Entity\Category $child */
+        foreach ($category->getChildren() as $child) {
+            $child->setProductsCount($countMap[$child->getId()] ?? 0);
+            $this->addCountsToChildren($child);
+        }
+    }
+
+    /**
      * @throws QueryException
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @return list<\EnjoysCMS\Module\Catalog\Entity\Category>
      */
     public function getChildNodes(
         $node = null,
         array $criteria = [],
         string $orderBy = 'sort',
-        string $direction = 'asc'
-    ) {
+        string $direction = 'asc',
+    ): array {
         return $this
             ->getChildNodesQuery($node, $criteria, $orderBy, $direction)
 //            ->setFetchMode(Category::class, 'children', ClassMetadata::FETCH_EAGER)
@@ -102,7 +196,7 @@ class Category extends ClosureTreeRepository
         $node = null,
         array $criteria = [],
         string $orderBy = 'sort',
-        string $direction = 'asc'
+        string $direction = 'asc',
     ): Query {
         return $this->getChildNodesQueryBuilder($node, $criteria, $orderBy, $direction)->getQuery();
     }
@@ -116,11 +210,12 @@ class Category extends ClosureTreeRepository
         $node = null,
         array $criteria = [],
         string $orderBy = 'sort',
-        string $direction = 'asc'
+        string $direction = 'asc',
     ): QueryBuilder {
         $currentLevel = 0;
 
-        $maxLevel = $this->createQueryBuilder('c')
+        $maxLevel = $this
+            ->createQueryBuilder('c')
             ->select('max(c.level)')
             ->getQuery()
             ->getSingleScalarResult();
@@ -130,18 +225,21 @@ class Category extends ClosureTreeRepository
 
         $dql = $this->getQueryBuilder();
         if ($node === null) {
-            $dql->select('node')
+            $dql
+                ->select('node')
                 ->from($config['useObjectClass'], 'node')
                 ->where('node.' . $config['parent'] . ' IS NULL');
         } else {
-            $currentLevel = $this->createQueryBuilder('c')
+            $currentLevel = $this
+                ->createQueryBuilder('c')
                 ->select('c.level')
                 ->where('c.id = :node')
                 ->setParameter('node', $node)
                 ->getQuery()
                 ->getSingleScalarResult();
 
-            $dql->select('node')
+            $dql
+                ->select('node')
                 ->from($config['useObjectClass'], 'node')
                 ->where('node.' . $config['parent'] . ' = :node')
                 ->setParameter('node', $node);
@@ -151,7 +249,7 @@ class Category extends ClosureTreeRepository
             $dql->orderBy('node.' . $orderBy, $direction);
         } else {
             throw new InvalidArgumentException(
-                "Invalid sort options specified: field - {$orderBy}, direction - {$direction}"
+                "Invalid sort options specified: field - {$orderBy}, direction - {$direction}",
             );
         }
 
@@ -171,13 +269,13 @@ class Category extends ClosureTreeRepository
                 if ($value instanceof Criteria) {
                     /** @var Comparison $expr */
                     $expr = $value->getWhereExpression()->visit(
-                        new Query\QueryExpressionVisitor(["c{$i}"])
+                        new Query\QueryExpressionVisitor(["c{$i}"]),
                     );
                     $condition .= sprintf(
                         ' AND %s %s %s',
                         $expr->getLeftExpr(),
                         $expr->getOperator(),
-                        $expr->getRightExpr()
+                        $expr->getRightExpr(),
                     );
                     continue;
                 }
@@ -192,14 +290,14 @@ class Category extends ClosureTreeRepository
                 "{$parentAlias}.children",
                 "c{$i}",
                 Expr\Join::WITH,
-                $condition
+                $condition,
             );
             $dql->addSelect("c{$i}");
 
             // join category_meta (\EnjoysCMS\Module\Catalog\Entities\CategoryMeta)
             $dql->leftJoin(
                 "{$parentAlias}.meta",
-                "m{$i}"
+                "m{$i}",
             );
             $dql->addSelect("m{$i}");
 
@@ -218,7 +316,7 @@ class Category extends ClosureTreeRepository
         $node = null,
         array $criteria = [],
         string $orderBy = 'sort',
-        string $direction = 'asc'
+        string $direction = 'asc',
     ): array {
         return $this->_build($this->getChildNodes($node, $criteria, $orderBy, $direction));
     }
@@ -248,8 +346,8 @@ class Category extends ClosureTreeRepository
                     }
                     return $node?->getId();
                 },
-                $nodes
-            )
+                $nodes,
+            ),
         );
         $ids[] = $node?->getId();
         return $ids;
@@ -258,7 +356,8 @@ class Category extends ClosureTreeRepository
     public function getCountProducts($node = null)
     {
         $nodes = $this->getAllIds($node);
-        return $this->getEntityManager()->createQueryBuilder()
+        return $this
+            ->getEntityManager()->createQueryBuilder()
             ->select('count(p.id)')
             ->from(\EnjoysCMS\Module\Catalog\Entity\Product::class, 'p')
             ->where('p.category IN (:ids)')

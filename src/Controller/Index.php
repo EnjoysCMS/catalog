@@ -55,7 +55,8 @@ final class Index extends PublicController
             $template_path = __DIR__ . '/../../template/category_index.twig';
         }
 
-        $categories = $categoryRepository->getChildNodes(null, ['status' => true]);
+        $categories = $categoryRepository->getChildNodesWithCountProducts(null, ['status' => true]);
+
 
         return $this->response(
             $this->twig->render(

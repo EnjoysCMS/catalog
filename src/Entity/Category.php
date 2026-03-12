@@ -82,6 +82,8 @@ class Category implements \Stringable
     #[ORM\OneToOne(mappedBy: 'category', targetEntity: CategoryMeta::class, cascade: ['persist', 'remove'])]
     private ?CategoryMeta $meta = null;
 
+    private int $productsCount = 0;
+
     public function __construct(string $id = null)
     {
         $this->id = $id ?? Uuid::uuid7()->toString();
@@ -314,6 +316,16 @@ class Category implements \Stringable
     public function setCustomProductsTemplatePath(?string $customProductsTemplatePath): void
     {
         $this->customProductsTemplatePath = $customProductsTemplatePath;
+    }
+
+    public function getProductsCount(): int
+    {
+        return $this->productsCount;
+    }
+
+    public function setProductsCount(int $productsCount): void
+    {
+        $this->productsCount = $productsCount;
     }
 
 
